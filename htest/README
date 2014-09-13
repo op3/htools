@@ -1,0 +1,89 @@
+htest - C unit testing framework
+--------------------------------
+
+A small unit testing framework for ansi C, which compiles with very strict
+flags in gcc.
+
+My personal preferences for a testing framework follow my usual philosophy of
+life:
+ "The easier it is to fully understand every bit of a subject, the better.
+  If the subject turns out to be easy to handle, bonus!"
+This framework provides auto-registration of tests, verbose output on failed
+expressions, and support for testing signals. Anything else is kept to a
+minimum.
+
+Below follows the typical layout of a test:
+---
+
+#include <htest/htest.h>
+
+HTEST(SomeSuitableTestName)
+{
+  HTRY_...(expr);
+}
+
+HTEST_SUITE(SomeAppropriateSuiteName)
+{
+  /* Fixture setup. */
+  HTEST_ADD(SomeSuitableTestName);
+  /* Fixture tear down. */
+}
+
+---
+
+A test consists of a small set of expressions and conditions encapsulated by
+at least one HTRY_...() macro, a suite consists of a small set of tests that
+belong together. That's all.
+
+The default behavior is to run every test in every suite in a separate process
+by forking, in order to let all tests run. To make debugging easier, forking
+can be suppressed with:
+ ./test -f
+
+Another default behaviour is to provide bw output, so if you prefer colors:
+ ./test -c
+
+
+Good things to know
+-------------------
+
+There's no need to write a main() or list all suites to be included for
+testing. The htest.mk makefile snippet will analyze the test source code after
+preprocessing and detect all suites, and libhtest.a will run all tests.
+
+The tests are static functions and are therefore safe from name collisions
+between different files. A properly configured compiler should also complain
+about unused tests.
+
+The suites run one test on each invocation, so fixtures can be implemented at
+the entry and exit of a suite.
+
+
+Test trials
+-----------
+
+HTRY(type, format, a, op, b)
+ Binary comparison.
+  type   - type of "a" and "b".
+  format - printf format of "a" and "b".
+  a      - first operand.
+  op     - operator.
+  b      - second operand.
+  e.g. HTRY(int, d, 0, !=, 1);
+
+HTRY_I(a, op, b)
+ Wrapper for HTRY(int, d, a, op, b).
+
+HTRY_STR(a, op, b)
+ String comparison.
+  a  - first operand.
+  op - operator.
+  b  - second operand.
+
+HTEST_VOID(expr)
+ expr - expression that should run without signals. Note that this performs a
+        fork and the result from this test is lost for subsequent tests.
+
+HTEST_SIGNAL(expr)
+ expr - expression that should signal one of the six ANSI signals. Also
+        performs a fork.
