@@ -49,24 +49,16 @@ extern struct HTestSuite htest_suite_list_[];
 void (*htest_dtor_)(void);
 
 void
-htest_dtor_nop_(void)
-{
-}
-
-void
-htest_sighandler_(int a_signum)
-{
-	(void)a_signum;
-	htest_dtor_();
-	_exit(EXIT_FAILURE);
-}
-
-void
 handler(int a_signum)
 {
 	fprintf(stderr, "  Fail: Caught signal = %s, next suite...\n",
 	    strsignal(a_signum));
 	_exit(EXIT_FAILURE);
+}
+
+void
+htest_dtor_nop_(void)
+{
 }
 
 void
@@ -77,6 +69,7 @@ htest_output_restore_()
 	}
 
 	assert(NULL != g_nul);
+	assert(NULL != g_new_stderr);
 
 	fflush(stdout);
 	DUP2(g_old_stdout, STDOUT_FILENO);
@@ -86,9 +79,10 @@ htest_output_restore_()
 	DUP2(g_old_stderr, STDERR_FILENO);
 	close(g_old_stderr);
 
-	fclose(g_new_stderr);
 	fclose(g_nul);
 	g_nul = NULL;
+	fclose(g_new_stderr);
+	g_new_stderr = NULL;
 }
 
 void
@@ -99,6 +93,7 @@ htest_output_suppress_()
 	}
 
 	assert(NULL == g_nul);
+	assert(NULL == g_new_stderr);
 
 	g_nul = fopen(nul_path, "w");
 
@@ -119,8 +114,16 @@ htest_print_(char const *a_fmt, ...)
 	va_list args;
 
 	va_start(args, a_fmt);
-	vfprintf(g_new_stderr, a_fmt, args);
+	vfprintf(NULL != g_new_stderr ? g_new_stderr : stderr, a_fmt, args);
 	va_end(args);
+}
+
+void
+htest_sighandler_(int a_signum)
+{
+	(void)a_signum;
+	htest_dtor_();
+	_exit(EXIT_FAILURE);
 }
 
 void
