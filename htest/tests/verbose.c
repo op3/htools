@@ -16,16 +16,14 @@
 
 #include <htest/htest.h>
 
-static int const c_zero = 0;
-static int const c_one = 1;
-
-HTEST(ThisShouldFail)
+HTEST(PrintoutsSuppressed)
 {
-	HTRY_I(c_zero + 1, ==, c_zero);
-	HTRY_I(c_zero, !=, c_one - 1);
+	fprintf(stdout, "Let's pollute stdout!\n");
+	fprintf(stderr, "Let's pollute stderr!\n");
+	HTRY_VOID((void)0);
 }
 
-HTEST_SUITE(Fail)
+HTEST_SUITE(Verbose)
 {
-	HTEST_ADD(ThisShouldFail);
+	HTEST_ADD(PrintoutsSuppressed);
 }

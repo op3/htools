@@ -35,13 +35,13 @@ A test consists of a small set of expressions and conditions encapsulated by
 at least one HTRY_...() macro, a suite consists of a small set of tests that
 belong together. That's all.
 
-The default behavior is to run every test in every suite in a separate process
-by forking, in order to let all tests run. To make debugging easier, forking
-can be suppressed with:
- ./test -f
-
-Another default behaviour is to provide bw output, so if you prefer colors:
- ./test -c
+The command line arguments are:
+ -c Enable colored output.
+ -f Suppress forking. Each test in every suite is forked to make sure broken
+    code does not stop remaining tests. Makes debugging easier.
+ -h Prints usage and quits.
+ -v Does not suppress printouts to stdout and stderr from test code. Again
+    makes debugging easier.
 
 
 Good things to know
@@ -73,6 +73,7 @@ HTRY(type, format, a, op, b)
 
 HTRY_I(a, op, b)
  Wrapper for HTRY(int, d, a, op, b).
+And similarly for many other primitive types.
 
 HTRY_STR(a, op, b)
  String comparison.

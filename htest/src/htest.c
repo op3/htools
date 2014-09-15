@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -16,10 +16,23 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <assert.h>
+#include <stdarg.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <htest/htest.h>
 #include <string.h>
+#include <htest/htest.h>
+
+#ifdef _WIN32
+# include <io.h>
+# define DUP(fd) _dup(fd)
+# define DUP2(fd, newfd) _dup2(fd, newfd)
+char const *const nul_path = "NUL";
+#else
+# include <unistd.h>
+# define DUP(fd) dup(fd)
+# define DUP2(fd, newfd) dup2(fd, newfd)
+char const *const nul_path = "/dev/null";
+#endif
 
 #define BLUE "\033[1;34m"
 #define GREEN "\033[1;32m"
@@ -27,7 +40,11 @@
 #define RESET "\033[0m"
 
 static void handler(int);
+static void usage(FILE *, char const *, int);
 
+static FILE *g_nul, *g_new_stderr;
+static int g_old_stderr, g_old_stdout;
+static int g_do_verbose;
 extern struct HTestSuite htest_suite_list_[];
 void (*htest_dtor_)(void);
 
@@ -52,6 +69,67 @@ handler(int a_signum)
 	_exit(EXIT_FAILURE);
 }
 
+void
+htest_output_restore_()
+{
+	if (0 == g_do_verbose) {
+		return;
+	}
+
+	assert(NULL != g_nul);
+
+	fflush(stdout);
+	DUP2(g_old_stdout, STDOUT_FILENO);
+	close(g_old_stdout);
+
+	fflush(stderr);
+	DUP2(g_old_stderr, STDERR_FILENO);
+	close(g_old_stderr);
+
+	fclose(g_new_stderr);
+	fclose(g_nul);
+	g_nul = NULL;
+}
+
+void
+htest_output_suppress_()
+{
+	if (0 == g_do_verbose) {
+		return;
+	}
+
+	assert(NULL == g_nul);
+
+	g_nul = fopen(nul_path, "w");
+
+	g_old_stdout = DUP(STDOUT_FILENO);
+	fflush(stdout);
+	DUP2(fileno(g_nul), STDOUT_FILENO);
+
+	g_old_stderr = DUP(STDERR_FILENO);
+	fflush(stderr);
+	DUP2(fileno(g_nul), STDERR_FILENO);
+
+	g_new_stderr = fdopen(g_old_stderr, "w");
+}
+
+void
+htest_print_(char const *a_fmt, ...)
+{
+	va_list args;
+
+	va_start(args, a_fmt);
+	vfprintf(g_new_stderr, a_fmt, args);
+	va_end(args);
+}
+
+void
+usage(FILE *a_out, char const *a_argv0, int a_exit_code)
+{
+	fprintf(a_out, "Usage: %s [-c] [-f] [-h] [-v]\n", a_argv0);
+	exit(a_exit_code);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -66,7 +144,8 @@ main(int argc, char **argv)
 
 	do_colors = 1;
 	do_fork = 0;
-	while (-1 != (opt = getopt(argc, argv, "cf"))) {
+	g_do_verbose = 1;
+	while (-1 != (opt = getopt(argc, argv, "cfhv"))) {
 		switch (opt) {
 			case 'c':
 				do_colors = 0;
@@ -74,10 +153,13 @@ main(int argc, char **argv)
 			case 'f':
 				do_fork = 1;
 				break;
+			case 'v':
+				g_do_verbose = 0;
+				break;
+			case 'h':
+				usage(stdout, argv[0], EXIT_SUCCESS);
 			default:
-				fprintf(stderr, "Usage: %s [-c] [-f]\n",
-				    argv[0]);
-				exit(EXIT_FAILURE);
+				usage(stderr, argv[0], EXIT_FAILURE);
 		}
 	}
 

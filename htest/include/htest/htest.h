@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -61,12 +61,13 @@ void \
 htest_suite_##name##_(char const *a_color_header, char const *a_color_fail, \
     char const *a_reset, int a_test_index, int *const a_test_enumerator, int \
     *const a_result)
-#define HTEST_ADD(name) \
-do {\
+#define HTEST_ADD(name) do {\
 	++*a_test_enumerator;\
 	if (*a_test_enumerator == a_test_index) {\
 		htest_test_header_##name##_(a_color_header, a_reset);\
+		htest_output_suppress_();\
 		htest_test_##name##_(a_color_fail, a_reset, a_result);\
+		htest_output_restore_();\
 	}\
 } while (0)
 
@@ -86,24 +87,24 @@ struct HTestSuite htest_suite_list_[] = {
 #define HTRY_FAIL_FMT_ "  %sFail:%s%s:%d: "
 #define HTRY_FAIL_ARG_ a_color, a_reset, __FILE__, __LINE__
 
-#define HTRY(Type, fmt, a, op, b) \
-do {\
+#define HTRY(Type, fmt, a, op, b) do {\
 	Type aa = a;\
 	Type bb = b;\
 	if (!(aa op bb)) {\
-		fprintf(stderr, HTRY_FAIL_FMT_"'"#a"'=%"#fmt" "#op" '"#b\
+		htest_print_(HTRY_FAIL_FMT_"'"#a"'=%"#fmt" "#op" '"#b\
 		    "'=%"#fmt"\n", HTRY_FAIL_ARG_, aa, bb);\
 		HTRY_FAIL_;\
 	}\
 } while (0)
+#define HTRY_F(a, op, b) HTRY(float, e, a, op, b)
 #define HTRY_I(a, op, b) HTRY(int, d, a, op, b)
+#define HTRY_P(a, op, b) HTRY(void const *, p, a, op, b)
 
-#define HTRY_STR(a, op, b) \
-do {\
+#define HTRY_STR(a, op, b) do {\
 	char const *aa = a;\
 	char const *bb = b;\
 	if (!(strcmp(aa, bb) op 0)) {\
-		fprintf(stderr, HTRY_FAIL_FMT_"'"#a"'=\"%s\" "#op" '"#b\
+		htest_print_(HTRY_FAIL_FMT_"'"#a"'=\"%s\" "#op" '"#b\
 		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa, bb);\
 		HTRY_FAIL_;\
 	}\
@@ -131,22 +132,20 @@ if (0 == pid) {\
 }\
 waitpid(pid, &status, 0)
 
-#define HTRY_VOID_DTOR(expr, dtor) \
-do {\
+#define HTRY_VOID_DTOR(expr, dtor) do {\
 	HTRY_FORK_(expr, dtor);\
 	if (0 != status) {\
-		fprintf(stderr, HTRY_FAIL_FMT_"Caught signal.\n",\
+		htest_print_(HTRY_FAIL_FMT_"Caught signal.\n",\
 		    HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
 } while (0)
 #define HTRY_VOID(expr) HTRY_VOID_DTOR(expr, htest_dtor_nop_)
 
-#define HTRY_SIGNAL_DTOR(expr, dtor) \
-do {\
+#define HTRY_SIGNAL_DTOR(expr, dtor) do {\
 	HTRY_FORK_(expr, dtor);\
 	if (0 == status) {\
-		fprintf(stderr, HTRY_FAIL_FMT_"Missed signal.\n",\
+		htest_print_(HTRY_FAIL_FMT_"Missed signal.\n",\
 		    HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
@@ -154,6 +153,9 @@ do {\
 #define HTRY_SIGNAL(expr) HTRY_SIGNAL_DTOR(expr, htest_dtor_nop_)
 
 void htest_dtor_nop_(void);
+void htest_output_restore_(void);
+void htest_output_suppress_(void);
+void htest_print_(char const *, ...);
 void htest_sighandler_(int);
 
 extern void (*htest_dtor_)(void);

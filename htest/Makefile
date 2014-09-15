@@ -1,9 +1,9 @@
 # Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
-# 
+#
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -51,7 +51,7 @@ LIB_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(LIB_SRC))
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 ALL_DEP:=$(patsubst %.o,%.d,$(LIB_OBJ) $(TEST_OBJ))
 
-all: $(BUILD_DIR)/tests/test
+all: $(BUILD_DIR)/test
 	./$<
 
 include htest.mk
@@ -59,7 +59,7 @@ include htest.mk
 $(BUILD_DIR)/libhtest.a: $(LIB_OBJ)
 	$(AR_A_V)
 
-$(BUILD_DIR)/tests/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
+$(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
 	$(CC_EXE_V)
 
 $(BUILD_DIR)/%.o: %.c Makefile htest.mk
