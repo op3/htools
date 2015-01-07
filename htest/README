@@ -8,9 +8,8 @@ My personal preferences for a testing framework follow my usual philosophy of
 life:
  "The easier it is to fully understand every bit of a subject, the better.
   If the subject turns out to be easy to handle, bonus!"
-This framework provides auto-registration of tests, verbose output on failed
-expressions, and support for testing signals. Anything else is kept to a
-minimum.
+This framework provides auto-registration of tests, descriptive output from
+failed expressions, and signal testing. Everything else is kept to a minimum.
 
 Below follows the typical layout of a test:
 ---
@@ -31,16 +30,18 @@ HTEST_SUITE(SomeAppropriateSuiteName)
 
 ---
 
-A test consists of a small set of expressions and conditions encapsulated by
-at least one HTRY_...() macro, a suite consists of a small set of tests that
-belong together. That's all.
+A test consists of a (preferrably) small set of expressions and conditions
+encapsulated by at least one HTRY_...() macro, and a suite consists of a set
+of tests that belong together in some subjective sense. A suite is invoked for
+every test, so the entry and exit of the suite can be used as fixture setup
+and tear down for each test. That's all.
 
-The command line arguments are:
+Command line arguments:
  -c Enable colored output.
  -f Suppress forking. Each test in every suite is forked to make sure broken
-    code does not stop remaining tests. Makes debugging easier.
+    code does not stop remaining tests. This option makes debugging easier.
  -h Prints usage and quits.
- -v Does not suppress printouts to stdout and stderr from test code. Again
+ -v Stops suppression of printing to stdout and stderr from tested code. Again
     makes debugging easier.
 
 
@@ -49,14 +50,13 @@ Good things to know
 
 There's no need to write a main() or list all suites to be included for
 testing. The htest.mk makefile snippet will analyze the test source code after
-preprocessing and detect all suites, and libhtest.a will run all tests.
+the preprocessing stop and detect all suites, and libhtest.a will run all
+suites.
 
 The tests are static functions and are therefore safe from name collisions
 between different files. A properly configured compiler should also complain
-about unused tests.
-
-The suites run one test on each invocation, so fixtures can be implemented at
-the entry and exit of a suite.
+about unused tests. Tests are not auto-registered to minimize the complexity
+of the framework.
 
 
 Test trials
@@ -65,7 +65,7 @@ Test trials
 HTRY(type, format, a, op, b)
  Binary comparison.
   type   - type of "a" and "b".
-  format - printf format of "a" and "b".
+  format - printf directive for "a" and "b".
   a      - first operand.
   op     - operator.
   b      - second operand.
@@ -73,18 +73,19 @@ HTRY(type, format, a, op, b)
 
 HTRY_I(a, op, b)
  Wrapper for HTRY(int, d, a, op, b).
-And similarly for many other primitive types.
+Several other common primitive types are wrapped too.
 
 HTRY_STR(a, op, b)
- String comparison.
+ String lexical comparison.
   a  - first operand.
   op - operator.
   b  - second operand.
 
 HTEST_VOID(expr)
- expr - expression that should run without signals. Note that this performs a
-        fork and the result from this test is lost for subsequent tests.
+ expr - expression that should run without signals. This only touches test
+        function arguments to avoid compiler errors.
 
 HTEST_SIGNAL(expr)
- expr - expression that should signal one of the six ANSI signals. Also
-        performs a fork.
+ expr - expression that should signal one of the six ANSI signals. Note that
+        this performs a fork and the result from this test is lost for
+        subsequent tests.

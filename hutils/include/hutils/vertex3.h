@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef VERTEX3_H
-#define VERTEX3_H
+#ifndef HUTILS_VERTEX3_H
+#define HUTILS_VERTEX3_H
 
 struct Vertex3 {
 	float	x;
@@ -23,12 +23,16 @@ struct Vertex3 {
 	float	z;
 };
 
-struct Vertex3 *vertex3_cross(struct Vertex3 *, struct Vertex3 const *, struct
+struct Vertex3	*vertex3_add(struct Vertex3 *, struct Vertex3 const *, struct
     Vertex3 const *);
-float vertex3_get_magnitude(struct Vertex3 const *);
-struct Vertex3 *vertex3_scale(struct Vertex3 *, struct Vertex3 const *,
+struct Vertex3	*vertex3_cross(struct Vertex3 *, struct Vertex3 const *,
+    struct Vertex3 const *);
+float		vertex3_dot(struct Vertex3 const *, struct Vertex3 const *);
+float		vertex3_get_magnitude(struct Vertex3 const *);
+struct Vertex3	*vertex3_normalize(struct Vertex3 *, struct Vertex3 const *);
+struct Vertex3	*vertex3_scale(struct Vertex3 *, struct Vertex3 const *,
     float);
-struct Vertex3 *vertex3_sub(struct Vertex3 *, struct Vertex3 const *, struct
+struct Vertex3	*vertex3_sub(struct Vertex3 *, struct Vertex3 const *, struct
     Vertex3 const *);
 
 #endif

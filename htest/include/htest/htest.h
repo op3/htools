@@ -26,41 +26,41 @@
 
 struct HTestSuite {
 	void	(*header)(char const *, char const *);
-	void	(*suite)(char const *, char const *, char const *, int, int
-	    *const, int *const);
+	void	(*suite)(char const *, char const *, char const *, int, int *,
+	    int *);
 };
 
 /* Test. */
 
-#define HTEST(name) \
+#define HTEST(name)\
 static void \
-htest_test_header_##name##_(char const *a_color, char const *a_reset)\
+htest_test_header_##name##_(char const *a_color_header, char const *a_reset)\
 {\
-	printf(" %sTest("__FILE__":%d:"#name")%s\n", a_color, __LINE__,\
-	    a_reset);\
+	printf(" %sTest("__FILE__":%d:"#name")%s\n", a_color_header, \
+	    __LINE__, a_reset);\
 }\
 static void \
-htest_test_##name##_(char const *a_color, char const *a_reset, int *const \
-    a_result)
+htest_test_##name##_(char const *a_color_fail, char const *a_reset, int \
+    *a_result)
 
 /* Suite. */
 
-#define HTEST_SUITE_PROTO(name) \
+#define HTEST_SUITE_PROTO(name)\
 void htest_suite_header_##name##_(char const *, char const *);\
 void htest_suite_##name##_(char const *, char const *, char const *, int, \
-    int *const, int *const)
-#define HTEST_SUITE(name) \
+    int *, int *)
+#define HTEST_SUITE(name)\
 HTEST_SUITE_PROTO(name);\
 void \
-htest_suite_header_##name##_(char const *a_color, char const *a_reset) \
+htest_suite_header_##name##_(char const *a_color_header, char const *a_reset)\
 {\
-	printf("%sSuite("__FILE__":%d:"#name")%s\n", a_color, __LINE__,\
-	    a_reset);\
+	printf("%sSuite("__FILE__":%d:"#name")%s\n", a_color_header, \
+	    __LINE__, a_reset);\
 }\
 void \
 htest_suite_##name##_(char const *a_color_header, char const *a_color_fail, \
-    char const *a_reset, int a_test_index, int *const a_test_enumerator, int \
-    *const a_result)
+    char const *a_reset, int a_test_index, int *a_test_enumerator, int \
+    *a_result)
 #define HTEST_ADD(name) do {\
 	++*a_test_enumerator;\
 	if (*a_test_enumerator == a_test_index) {\
@@ -85,7 +85,7 @@ struct HTestSuite htest_suite_list_[] = {
 
 #define HTRY_FAIL_ *a_result = 1
 #define HTRY_FAIL_FMT_ "  %sFail:%s%s:%d: "
-#define HTRY_FAIL_ARG_ a_color, a_reset, __FILE__, __LINE__
+#define HTRY_FAIL_ARG_ a_color_fail, a_reset, __FILE__, __LINE__
 
 #define HTRY(Type, fmt, a, op, b) do {\
 	Type aa = a;\
@@ -110,49 +110,44 @@ struct HTestSuite htest_suite_list_[] = {
 	}\
 } while (0)
 
-#define HTRY_FORK_(expr, dtor) \
-pid_t pid;\
-int status;\
-pid = fork();\
-if (0 > pid) {\
-	perror(NULL);\
-	abort();\
-}\
-if (0 == pid) {\
-	htest_dtor_ = dtor;\
-	signal(SIGABRT, htest_sighandler_);\
-	signal(SIGFPE, htest_sighandler_);\
-	signal(SIGILL, htest_sighandler_);\
-	signal(SIGINT, htest_sighandler_);\
-	signal(SIGSEGV, htest_sighandler_);\
-	signal(SIGTERM, htest_sighandler_);\
+#define HTRY_VOID(expr) do {\
 	expr;\
-	htest_dtor_();\
-	_exit(0);\
-}\
-waitpid(pid, &status, 0)
-
-#define HTRY_VOID_DTOR(expr, dtor) do {\
-	HTRY_FORK_(expr, dtor);\
-	if (0 != status) {\
-		htest_print_(HTRY_FAIL_FMT_"Caught signal.\n",\
-		    HTRY_FAIL_ARG_);\
+	if (0) {\
 		HTRY_FAIL_;\
 	}\
 } while (0)
-#define HTRY_VOID(expr) HTRY_VOID_DTOR(expr, htest_dtor_nop_)
 
 #define HTRY_SIGNAL_DTOR(expr, dtor) do {\
-	HTRY_FORK_(expr, dtor);\
+	pid_t pid;\
+	int status;\
+	pid = fork();\
+	if (0 > pid) {\
+		perror(NULL);\
+		exit(EXIT_FAILURE);\
+	}\
+	if (0 == pid) {\
+		htest_dtor_ = dtor;\
+		signal(SIGABRT, htest_sighandler_);\
+		signal(SIGFPE, htest_sighandler_);\
+		signal(SIGILL, htest_sighandler_);\
+		signal(SIGINT, htest_sighandler_);\
+		signal(SIGSEGV, htest_sighandler_);\
+		signal(SIGTERM, htest_sighandler_);\
+		expr;\
+		htest_output_restore_();\
+		htest_dtor_();\
+		_exit(0);\
+	}\
+	waitpid(pid, &status, 0);\
 	if (0 == status) {\
 		htest_print_(HTRY_FAIL_FMT_"Missed signal.\n",\
 		    HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
 } while (0)
-#define HTRY_SIGNAL(expr) HTRY_SIGNAL_DTOR(expr, htest_dtor_nop_)
+#define HTRY_SIGNAL(expr) HTRY_SIGNAL_DTOR(expr, htest_dtor_noop_)
 
-void htest_dtor_nop_(void);
+void htest_dtor_noop_(void);
 void htest_output_restore_(void);
 void htest_output_suppress_(void);
 void htest_print_(char const *, ...);

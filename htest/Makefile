@@ -52,7 +52,7 @@ TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 ALL_DEP:=$(patsubst %.o,%.d,$(LIB_OBJ) $(TEST_OBJ))
 
 all: $(BUILD_DIR)/test
-	./$<
+	@./$< -c
 
 include htest.mk
 

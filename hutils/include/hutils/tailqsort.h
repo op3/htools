@@ -17,12 +17,12 @@
 #ifndef HUTILS_TAILQSORT_H
 #define HUTILS_TAILQSORT_H
 
-#define TAILQ_SORT_DECLARE(List, Node) \
-static void tailq_sort_##List(struct List *, size_t)
+#define TAILQ_SORT_PROTOTYPE(List, name) \
+static void name(struct List *, size_t)
 
-#define TAILQ_SORT_DEFINE(List, Node, field, cmp) \
+#define TAILQ_SORT_DEFINE(List, name, Node, field, cmp) \
 static void \
-tailq_sort_##List(struct List *a_list, size_t a_size)\
+name(struct List *a_list, size_t a_size)\
 {\
 	struct List left, right;\
 	struct Node *cur, *prev;\
@@ -56,8 +56,8 @@ tailq_sort_##List(struct List *a_list, size_t a_size)\
 	cur->field.tqe_prev = &right.tqh_first;\
 \
 	/* Recurse. */\
-	tailq_sort_##List(&left, middle);\
-	tailq_sort_##List(&right, a_size - middle);\
+	name(&left, middle);\
+	name(&right, a_size - middle);\
 \
 	/* Merge. */\
 	TAILQ_INIT(a_list);\
@@ -89,6 +89,6 @@ tailq_sort_##List(struct List *a_list, size_t a_size)\
 		TAILQ_INSERT_TAIL(a_list, cur, field);\
 	}\
 }\
-TAILQ_SORT_DECLARE(List, Node)
+TAILQ_SORT_PROTOTYPE(List, name)
 
 #endif

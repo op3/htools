@@ -45,19 +45,23 @@ static void usage(FILE *, char const *, int);
 static FILE *g_nul, *g_new_stderr;
 static int g_old_stderr, g_old_stdout;
 static int g_do_verbose;
+static char const *g_color_suite;
+static char const *g_color_test;
+static char const *g_color_fail;
+static char const *g_color_reset;
 extern struct HTestSuite htest_suite_list_[];
 void (*htest_dtor_)(void);
 
 void
 handler(int a_signum)
 {
-	fprintf(stderr, "  Fail: Caught signal = %s, next suite...\n",
-	    strsignal(a_signum));
+	htest_print_("  %sFail:%sCaught signal = %s, next suite...\n",
+	    g_color_fail, g_color_reset, strsignal(a_signum));
 	_exit(EXIT_FAILURE);
 }
 
 void
-htest_dtor_nop_(void)
+htest_dtor_noop_(void)
 {
 }
 
@@ -122,6 +126,7 @@ void
 htest_sighandler_(int a_signum)
 {
 	(void)a_signum;
+	htest_output_restore_();
 	htest_dtor_();
 	_exit(EXIT_FAILURE);
 }
@@ -137,10 +142,6 @@ int
 main(int argc, char **argv)
 {
 	struct HTestSuite *suite;
-	char const *suite_color;
-	char const *test_color;
-	char const *fail_color;
-	char const *reset_color;
 	int test_num, test_pass_num;
 	int do_colors, do_fork;
 	int opt;
@@ -167,15 +168,15 @@ main(int argc, char **argv)
 	}
 
 	if (0 == do_colors) {
-		suite_color = GREEN;
-		test_color = BLUE;
-		fail_color = RED;
-		reset_color = RESET;
+		g_color_suite = GREEN;
+		g_color_test = BLUE;
+		g_color_fail = RED;
+		g_color_reset = RESET;
 	} else {
-		suite_color = "";
-		test_color = "";
-		fail_color = "";
-		reset_color = "";
+		g_color_suite = "";
+		g_color_test = "";
+		g_color_fail = "";
+		g_color_reset = "";
 	}
 
 	test_num = 0;
@@ -184,7 +185,7 @@ main(int argc, char **argv)
 		int test_enumerator;
 		int test_index;
 
-		suite->header(suite_color, reset_color);
+		suite->header(g_color_suite, g_color_reset);
 
 		test_enumerator = 0;
 		suite->suite("", "", "", 0, &test_enumerator, NULL);
@@ -214,9 +215,10 @@ main(int argc, char **argv)
 					signal(SIGTERM, handler);
 					test_enumerator = 0;
 					result = EXIT_SUCCESS;
-					suite->suite(test_color, fail_color,
-					    reset_color, test_index,
-					    &test_enumerator, &result);
+					suite->suite(g_color_test,
+					    g_color_fail, g_color_reset,
+					    test_index, &test_enumerator,
+					    &result);
 					_exit(0 == result ? EXIT_SUCCESS :
 					    EXIT_FAILURE);
 				} else {
@@ -232,9 +234,9 @@ main(int argc, char **argv)
 
 				test_enumerator = 0;
 				result = 0;
-				suite->suite(test_color, fail_color,
-				    reset_color, test_index, &test_enumerator,
-				    &result);
+				suite->suite(g_color_test, g_color_fail,
+				    g_color_reset, test_index,
+				    &test_enumerator, &result);
 				if (0 == result) {
 					++test_pass_num;
 				}

@@ -14,45 +14,37 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_MEMORY_H
-#define HUTILS_MEMORY_H
+#include <hutils/pool.h>
+#include <math.h>
+#include <htest/htest.h>
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+struct Int {
+	int	i;
+};
 
-#define MALLOC(var, num) do {\
-	size_t size;\
-\
-	size = (num) * sizeof *var;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
-		abort();\
-	}\
-} while (0)
-#define MALLOC_BYTES(var, num) do {\
-	size_t size;\
-\
-	size = num;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
-		abort();\
-	}\
-} while (0)
-#define FREE(var) do {\
-	free(var);\
-	var = NULL;\
-} while (0)
-#define STRDUP(dst, src) do {\
-	dst = hutils_strdup_(src);\
-	if (NULL == dst) {\
-		fprintf(stderr, "Could not strdup (%s).\n", src);\
-		abort();\
-	}\
-} while (0)
+POOL_HEAD(PoolInt, Int);
 
-char *hutils_strdup_(char const *);
+POOL_PROTOTYPE_STATIC(PoolInt, Int);
+POOL_GENERATE(PoolInt, Int, 10);
 
-#endif
+HTEST(AllocAndFree100)
+{
+	struct PoolInt pool_int;
+	struct Int *p[100];
+	size_t i;
+
+	POOL_INIT(PoolInt, &pool_int);
+	for (i = 0; 100 > i; ++i) {
+		p[i] = POOL_GET(PoolInt, &pool_int);
+		p[i]->i = i;
+	}
+	for (i = 0; 100 > i; ++i) {
+		HTRY_I(p[i]->i, ==, i);
+	}
+	POOL_FREE(PoolInt, &pool_int);
+}
+
+HTEST_SUITE(Pool)
+{
+	HTEST_ADD(AllocAndFree100);
+}

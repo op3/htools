@@ -14,45 +14,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_MEMORY_H
-#define HUTILS_MEMORY_H
+#include <hutils/memory.h>
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+char *
+hutils_strdup_(char const *a_src)
+{
+	char *dst;
 
-#define MALLOC(var, num) do {\
-	size_t size;\
-\
-	size = (num) * sizeof *var;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
-		abort();\
-	}\
-} while (0)
-#define MALLOC_BYTES(var, num) do {\
-	size_t size;\
-\
-	size = num;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
-		abort();\
-	}\
-} while (0)
-#define FREE(var) do {\
-	free(var);\
-	var = NULL;\
-} while (0)
-#define STRDUP(dst, src) do {\
-	dst = hutils_strdup_(src);\
-	if (NULL == dst) {\
-		fprintf(stderr, "Could not strdup (%s).\n", src);\
-		abort();\
-	}\
-} while (0)
-
-char *hutils_strdup_(char const *);
-
-#endif
+	dst = malloc(strlen(a_src) + 1);
+	if (dst) {
+		strcpy(dst, a_src);
+	}
+	return dst;
+}

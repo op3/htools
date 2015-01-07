@@ -14,45 +14,32 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_MEMORY_H
-#define HUTILS_MEMORY_H
+#include <hutils/memory.h>
+#include <htest/htest.h>
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+HTEST(FreeDoesNullify)
+{
+	char *p;
 
-#define MALLOC(var, num) do {\
-	size_t size;\
-\
-	size = (num) * sizeof *var;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
-		abort();\
-	}\
-} while (0)
-#define MALLOC_BYTES(var, num) do {\
-	size_t size;\
-\
-	size = num;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
-		abort();\
-	}\
-} while (0)
-#define FREE(var) do {\
-	free(var);\
-	var = NULL;\
-} while (0)
-#define STRDUP(dst, src) do {\
-	dst = hutils_strdup_(src);\
-	if (NULL == dst) {\
-		fprintf(stderr, "Could not strdup (%s).\n", src);\
-		abort();\
-	}\
-} while (0)
+	MALLOC_BYTES(p, 1);
+	HTRY_P(NULL, !=, p);
+	FREE(p);
+	HTRY_P(NULL, ==, p);
+}
 
-char *hutils_strdup_(char const *);
+HTEST(Strdup)
+{
+	char const str[] = "SomeFunnyPhrase";
+	char *p;
 
-#endif
+	STRDUP(p, str);
+	HTRY_P(NULL, !=, p);
+	HTRY_STR(str, ==, p);
+	FREE(p);
+}
+
+HTEST_SUITE(Memory)
+{
+	HTEST_ADD(FreeDoesNullify);
+	HTEST_ADD(Strdup);
+}

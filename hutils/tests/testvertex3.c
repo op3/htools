@@ -14,10 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
 #include <hutils/vertex3.h>
+#include <math.h>
+#include <htest/htest.h>
 
-HTEST(Cross)
+HTEST(CrossAxes)
 {
 	struct Vertex3 const c_x = {1.0f, 0.0f, 0.0f};
 	struct Vertex3 const c_y = {0.0f, 1.0f, 0.0f};
@@ -25,22 +26,52 @@ HTEST(Cross)
 	struct Vertex3 v;
 
 	HTRY_P(&v, ==, vertex3_cross(&v, &c_x, &c_y));
-	HTRY_F(v.x, ==, c_z.x);
-	HTRY_F(v.y, ==, c_z.y);
-	HTRY_F(v.z, ==, c_z.z);
+	HTRY_F(c_z.x, ==, v.x);
+	HTRY_F(c_z.y, ==, v.y);
+	HTRY_F(c_z.z, ==, v.z);
 
 	HTRY_P(&v, ==, vertex3_cross(&v, &c_x, &c_z));
-	HTRY_F(v.x, ==, -c_y.x);
-	HTRY_F(v.y, ==, -c_y.y);
-	HTRY_F(v.z, ==, -c_y.z);
+	HTRY_F(-c_y.x, ==, v.x);
+	HTRY_F(-c_y.y, ==, v.y);
+	HTRY_F(-c_y.z, ==, v.z);
 
 	HTRY_P(&v, ==, vertex3_cross(&v, &c_y, &c_z));
-	HTRY_F(v.x, ==, c_x.x);
-	HTRY_F(v.y, ==, c_x.y);
-	HTRY_F(v.z, ==, c_x.z);
+	HTRY_F(c_x.x, ==, v.x);
+	HTRY_F(c_x.y, ==, v.y);
+	HTRY_F(c_x.z, ==, v.z);
+}
 
-	HTRY_SIGNAL(vertex3_cross(&v, &v, &c_x));
-	HTRY_SIGNAL(vertex3_cross(&v, &c_x, &v));
+HTEST(CrossQuadArea)
+{
+	struct Vertex3 const c_v1 = {1.0f, 0.0f, 1.0f};
+	struct Vertex3 const c_v2 = {2.0f, 2.0f, 0.0f};
+	struct Vertex3 v;
+
+	vertex3_cross(&v, &c_v1, &c_v2);
+	HTRY_F(1e-3f, >, abs(sqrt(12) - vertex3_get_magnitude(&v)));
+}
+
+HTEST(CrossPointers)
+{
+	struct Vertex3 u, v, w;
+
+	HTRY_SIGNAL(vertex3_cross(&u, &u, &v));
+	HTRY_SIGNAL(vertex3_cross(&u, &v, &u));
+	HTRY_VOID(vertex3_cross(&u, &v, &w));
+}
+
+HTEST(DotAxes)
+{
+	struct Vertex3 const c_x = {1.0f, 0.0f, 0.0f};
+	struct Vertex3 const c_y = {0.0f, 1.0f, 0.0f};
+	struct Vertex3 const c_z = {0.0f, 0.0f, 1.0f};
+
+	HTRY_F(1.0f, ==, vertex3_dot(&c_x, &c_x));
+	HTRY_F(0.0f, ==, vertex3_dot(&c_x, &c_y));
+	HTRY_F(0.0f, ==, vertex3_dot(&c_x, &c_z));
+	HTRY_F(1.0f, ==, vertex3_dot(&c_y, &c_y));
+	HTRY_F(0.0f, ==, vertex3_dot(&c_y, &c_z));
+	HTRY_F(1.0f, ==, vertex3_dot(&c_z, &c_z));
 }
 
 HTEST(Magnitude)
@@ -75,7 +106,10 @@ HTEST(Sub)
 
 HTEST_SUITE(Vertex3)
 {
-	HTEST_ADD(Cross);
+	HTEST_ADD(CrossAxes);
+	HTEST_ADD(CrossQuadArea);
+	HTEST_ADD(CrossPointers);
+	HTEST_ADD(DotAxes);
 	HTEST_ADD(Magnitude);
 	HTEST_ADD(Scale);
 	HTEST_ADD(Sub);

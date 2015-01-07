@@ -28,7 +28,7 @@ struct Integer {
 
 static int	cmp(struct Integer const *, struct Integer const *);
 
-TAILQ_SORT_DEFINE(IntegerList, Integer, next, cmp);
+TAILQ_SORT_DEFINE(IntegerList, sort_ascending, Integer, next, cmp);
 
 int
 cmp(struct Integer const *a_l, struct Integer const *a_r)
@@ -48,7 +48,7 @@ HTEST(InOrder)
 		i[idx].i = idx;
 		TAILQ_INSERT_TAIL(&list, &i[idx], next);
 	}
-	tailq_sort_IntegerList(&list, N);
+	sort_ascending(&list, N);
 
 	idx = 0;
 	TAILQ_FOREACH(p, &list, next) {
@@ -69,7 +69,7 @@ HTEST(Reversed)
 		i[idx].i = N - idx;
 		TAILQ_INSERT_TAIL(&list, &i[idx], next);
 	}
-	tailq_sort_IntegerList(&list, N);
+	sort_ascending(&list, N);
 
 	idx = 1;
 	TAILQ_FOREACH(p, &list, next) {
@@ -90,7 +90,7 @@ HTEST(PseudoRandom)
 		i[idx].i = 15 & rand();
 		TAILQ_INSERT_TAIL(&list, &i[idx], next);
 	}
-	tailq_sort_IntegerList(&list, N);
+	sort_ascending(&list, N);
 
 	prev = 0;
 	TAILQ_FOREACH(p, &list, next) {

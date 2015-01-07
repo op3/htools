@@ -19,6 +19,16 @@
 #include <math.h>
 
 struct Vertex3 *
+vertex3_add(struct Vertex3 *a_vo, struct Vertex3 const *a_v1, struct Vertex3
+    const *a_v2)
+{
+	a_vo->x = a_v1->x + a_v2->x;
+	a_vo->y = a_v1->y + a_v2->y;
+	a_vo->z = a_v1->z + a_v2->z;
+	return a_vo;
+}
+
+struct Vertex3 *
 vertex3_cross(struct Vertex3 *a_vo, struct Vertex3 const *a_v1, struct Vertex3
     const *a_v2)
 {
@@ -31,9 +41,21 @@ vertex3_cross(struct Vertex3 *a_vo, struct Vertex3 const *a_v1, struct Vertex3
 }
 
 float
+vertex3_dot(struct Vertex3 const *a_v1, struct Vertex3 const *a_v2)
+{
+	return a_v1->x * a_v2->x + a_v1->y * a_v2->y + a_v1->z * a_v2->z;
+}
+
+float
 vertex3_get_magnitude(struct Vertex3 const *a_v)
 {
-	return sqrt(a_v->x * a_v->x + a_v->y * a_v->y + a_v->z * a_v->z);
+	return sqrt(vertex3_dot(a_v, a_v));
+}
+
+struct Vertex3 *
+vertex3_normalize(struct Vertex3 *a_vo, struct Vertex3 const *a_v)
+{
+	return vertex3_scale(a_vo, a_v, 1.0f / vertex3_get_magnitude(a_v));
 }
 
 struct Vertex3 *

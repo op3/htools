@@ -32,8 +32,8 @@ endif
 SUFFIX:=$(shell uname -s)_$(shell uname -m)
 BUILD_DIR:=build_$(SUFFIX)
 
-CPPFLAGS:=-Iinclude -I$(HTEST_PATH)/include
-CFLAGS:=-ansi -ggdb -MMD -pedantic-errors -Wall -Werror -Wextra -Wshadow
+CPPFLAGS:=-Iinclude -I../htest/include
+CFLAGS:=-ansi -ggdb -MMD -pedantic-errors -Wall -Werror -Wextra -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 LDFLAGS:=-lhtest -lm
 
 TARGET:=$(BUILD_DIR)/libhutils.a
