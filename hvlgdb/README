@@ -1,0 +1,31 @@
+
+  Vim Lua GDB thingy
+ ====================
+
+Small Lua script to toggle GDB breakpoints using the 'sign' feature in Vim to
+be used externally. To install, put the vlgdb.vim file anywhere and put
+something like the following in your vimrc:
+
+    source /path/to/vlgdb.vim
+    map tc :call VLGDB_clear()<CR>
+    map tf :call VLGDB_set_filenames()<CR>
+    map tl :call VLGDB_load()<CR>
+    map tn :call VLGDB_next_breakpoint()<CR>
+    map ts :call VLGDB_save()<CR>
+    map tt :call VLGDB_toggle_breakpoint()<CR>
+    map tw :call VLGDB_write_breakpoints()<CR>
+
+clear............: Clears all breakpoints in the current file.
+set_filenames....: Sets filenames for saving sessions and the GDB breakpoint
+                 list.
+load.............: Loads breakpoints from previous session.
+next_breakpoint..: Jumps to the next breakpoint in the file.
+save.............: Saves breakpoints for future session.
+toggle_breakpoint: Toggles breakpoint on the current line in the file.
+write_breakpoints: Writes breakpoints in a GDB friendly format.
+
+To start GDB with the list of breakpoints written to the default filename:
+
+    gdb -x .vlgdb.breakpoints ./buggy_crap
+
+This will never integrate GDB inside of Vim as that is a messy minefield.
