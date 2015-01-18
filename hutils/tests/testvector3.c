@@ -14,28 +14,28 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/vertex3.h>
+#include <hutils/vector3.h>
 #include <math.h>
 #include <htest/htest.h>
 
 HTEST(CrossAxes)
 {
-	struct Vertex3 const c_x = {1.0f, 0.0f, 0.0f};
-	struct Vertex3 const c_y = {0.0f, 1.0f, 0.0f};
-	struct Vertex3 const c_z = {0.0f, 0.0f, 1.0f};
-	struct Vertex3 v;
+	struct Vector3f const c_x = {1.0f, 0.0f, 0.0f};
+	struct Vector3f const c_y = {0.0f, 1.0f, 0.0f};
+	struct Vector3f const c_z = {0.0f, 0.0f, 1.0f};
+	struct Vector3f v;
 
-	HTRY_P(&v, ==, vertex3_cross(&v, &c_x, &c_y));
+	HTRY_P(&v, ==, vector3f_cross(&v, &c_x, &c_y));
 	HTRY_F(c_z.x, ==, v.x);
 	HTRY_F(c_z.y, ==, v.y);
 	HTRY_F(c_z.z, ==, v.z);
 
-	HTRY_P(&v, ==, vertex3_cross(&v, &c_x, &c_z));
+	HTRY_P(&v, ==, vector3f_cross(&v, &c_x, &c_z));
 	HTRY_F(-c_y.x, ==, v.x);
 	HTRY_F(-c_y.y, ==, v.y);
 	HTRY_F(-c_y.z, ==, v.z);
 
-	HTRY_P(&v, ==, vertex3_cross(&v, &c_y, &c_z));
+	HTRY_P(&v, ==, vector3f_cross(&v, &c_y, &c_z));
 	HTRY_F(c_x.x, ==, v.x);
 	HTRY_F(c_x.y, ==, v.y);
 	HTRY_F(c_x.z, ==, v.z);
@@ -43,50 +43,50 @@ HTEST(CrossAxes)
 
 HTEST(CrossQuadArea)
 {
-	struct Vertex3 const c_v1 = {1.0f, 0.0f, 1.0f};
-	struct Vertex3 const c_v2 = {2.0f, 2.0f, 0.0f};
-	struct Vertex3 v;
+	struct Vector3f const c_v1 = {1.0f, 0.0f, 1.0f};
+	struct Vector3f const c_v2 = {2.0f, 2.0f, 0.0f};
+	struct Vector3f v;
 
-	vertex3_cross(&v, &c_v1, &c_v2);
-	HTRY_F(1e-3f, >, abs(sqrt(12) - vertex3_get_magnitude(&v)));
+	vector3f_cross(&v, &c_v1, &c_v2);
+	HTRY_F(1e-3f, >, abs(sqrt(12) - vector3f_get_magnitude(&v)));
 }
 
 HTEST(CrossPointers)
 {
-	struct Vertex3 u, v, w;
+	struct Vector3f u, v, w;
 
-	HTRY_SIGNAL(vertex3_cross(&u, &u, &v));
-	HTRY_SIGNAL(vertex3_cross(&u, &v, &u));
-	HTRY_VOID(vertex3_cross(&u, &v, &w));
+	HTRY_SIGNAL(vector3f_cross(&u, &u, &v));
+	HTRY_SIGNAL(vector3f_cross(&u, &v, &u));
+	HTRY_VOID(vector3f_cross(&u, &v, &w));
 }
 
 HTEST(DotAxes)
 {
-	struct Vertex3 const c_x = {1.0f, 0.0f, 0.0f};
-	struct Vertex3 const c_y = {0.0f, 1.0f, 0.0f};
-	struct Vertex3 const c_z = {0.0f, 0.0f, 1.0f};
+	struct Vector3f const c_x = {1.0f, 0.0f, 0.0f};
+	struct Vector3f const c_y = {0.0f, 1.0f, 0.0f};
+	struct Vector3f const c_z = {0.0f, 0.0f, 1.0f};
 
-	HTRY_F(1.0f, ==, vertex3_dot(&c_x, &c_x));
-	HTRY_F(0.0f, ==, vertex3_dot(&c_x, &c_y));
-	HTRY_F(0.0f, ==, vertex3_dot(&c_x, &c_z));
-	HTRY_F(1.0f, ==, vertex3_dot(&c_y, &c_y));
-	HTRY_F(0.0f, ==, vertex3_dot(&c_y, &c_z));
-	HTRY_F(1.0f, ==, vertex3_dot(&c_z, &c_z));
+	HTRY_F(1.0f, ==, vector3f_dot(&c_x, &c_x));
+	HTRY_F(0.0f, ==, vector3f_dot(&c_x, &c_y));
+	HTRY_F(0.0f, ==, vector3f_dot(&c_x, &c_z));
+	HTRY_F(1.0f, ==, vector3f_dot(&c_y, &c_y));
+	HTRY_F(0.0f, ==, vector3f_dot(&c_y, &c_z));
+	HTRY_F(1.0f, ==, vector3f_dot(&c_z, &c_z));
 }
 
 HTEST(Magnitude)
 {
-	struct Vertex3 const c_v = {1.0f, 4.0f, 8.0f};
+	struct Vector3f const c_v = {1.0f, 4.0f, 8.0f};
 
-	HTRY_F(9.0f, ==, vertex3_get_magnitude(&c_v));
+	HTRY_F(9.0f, ==, vector3f_get_magnitude(&c_v));
 }
 
 HTEST(Scale)
 {
-	struct Vertex3 const c_v = {1.0f, 2.0f, 3.0f};
-	struct Vertex3 v;
+	struct Vector3f const c_v = {1.0f, 2.0f, 3.0f};
+	struct Vector3f v;
 
-	HTRY_P(&v, ==, vertex3_scale(&v, &c_v, 2.0f));
+	HTRY_P(&v, ==, vector3f_scale(&v, &c_v, 2.0f));
 	HTRY_F(2.0f, ==, v.x);
 	HTRY_F(4.0f, ==, v.y);
 	HTRY_F(6.0f, ==, v.z);
@@ -94,17 +94,17 @@ HTEST(Scale)
 
 HTEST(Sub)
 {
-	struct Vertex3 const c_v1 = {5.0f, 9.0f, 11.0f};
-	struct Vertex3 const c_v2 = {1.0f, 2.0f, 3.0f};
-	struct Vertex3 v;
+	struct Vector3f const c_v1 = {5.0f, 9.0f, 11.0f};
+	struct Vector3f const c_v2 = {1.0f, 2.0f, 3.0f};
+	struct Vector3f v;
 
-	HTRY_P(&v, ==, vertex3_sub(&v, &c_v1, &c_v2));
+	HTRY_P(&v, ==, vector3f_sub(&v, &c_v1, &c_v2));
 	HTRY_F(4.0f, ==, v.x);
 	HTRY_F(7.0f, ==, v.y);
 	HTRY_F(8.0f, ==, v.z);
 }
 
-HTEST_SUITE(Vertex3)
+HTEST_SUITE(Vector3f)
 {
 	HTEST_ADD(CrossAxes);
 	HTEST_ADD(CrossQuadArea);

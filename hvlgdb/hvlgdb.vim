@@ -157,6 +157,6 @@ lua << EOF
 		file:write('break '..v[1]..':'..v[2]..'\n')
 	end
 	file:close()
-	print('VLDGB_write_breakpoints(): Breakpoints written!')
+	print('HVLDGB_write_breakpoints(): Breakpoints written!')
 EOF
 endfunction

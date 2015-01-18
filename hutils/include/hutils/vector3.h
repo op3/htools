@@ -14,25 +14,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_VERTEX3_H
-#define HUTILS_VERTEX3_H
+#ifndef HUTILS_VECTOR3_H
+#define HUTILS_VECTOR3_H
 
-struct Vertex3 {
+struct Vector3f {
 	float	x;
 	float	y;
 	float	z;
 };
 
-struct Vertex3	*vertex3_add(struct Vertex3 *, struct Vertex3 const *, struct
-    Vertex3 const *);
-struct Vertex3	*vertex3_cross(struct Vertex3 *, struct Vertex3 const *,
-    struct Vertex3 const *);
-float		vertex3_dot(struct Vertex3 const *, struct Vertex3 const *);
-float		vertex3_get_magnitude(struct Vertex3 const *);
-struct Vertex3	*vertex3_normalize(struct Vertex3 *, struct Vertex3 const *);
-struct Vertex3	*vertex3_scale(struct Vertex3 *, struct Vertex3 const *,
+struct Vector3f	*vector3f_add(struct Vector3f *, struct Vector3f const *,
+    struct Vector3f const *);
+struct Vector3f	*vector3f_cross(struct Vector3f *, struct Vector3f const *,
+    struct Vector3f const *);
+float		vector3f_dot(struct Vector3f const *, struct Vector3f const
+    *);
+float		vector3f_get_magnitude(struct Vector3f const *);
+struct Vector3f	*vector3f_normalize(struct Vector3f *, struct Vector3f const
+    *);
+struct Vector3f	*vector3f_scale(struct Vector3f *, struct Vector3f const *,
     float);
-struct Vertex3	*vertex3_sub(struct Vertex3 *, struct Vertex3 const *, struct
-    Vertex3 const *);
+struct Vector3f	*vector3f_sub(struct Vector3f *, struct Vector3f const *,
+    struct Vector3f const *);
 
 #endif
