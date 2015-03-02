@@ -14,10 +14,16 @@
 
 AR=ar
 CC=gcc
-CPPFLAGS=-Iinclude -D_GNU_SOURCE
-CFLAGS=-ansi -ggdb -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes -Wswitch-enum
+ifeq (release,$(BUILD_TYPE))
+CFLAGS:=$(CFLAGS) -O3
+else
+BUILD_TYPE=debug
+CFLAGS:=$(CFLAGS) -ggdb
+endif
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -D_GNU_SOURCE
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes -Wswitch-enum
 
-SUFFIX:=$(shell uname -s)_$(shell uname -m)
+SUFFIX:=$(shell uname -s)_$(shell uname -m)_$(BUILD_TYPE)
 BUILD_DIR:=build_$(SUFFIX)
 
 AR_A=$(AR) rcs $@ $^
@@ -51,8 +57,10 @@ LIB_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(LIB_SRC))
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 ALL_DEP:=$(patsubst %.o,%.d,$(LIB_OBJ) $(TEST_OBJ))
 
+.PHONY: all
 all: $(BUILD_DIR)/test
 	@./$< -c
+	@echo "The result should be 7/11!"
 
 include htest.mk
 
@@ -72,6 +80,7 @@ $(BUILD_DIR)/%.o: %.c Makefile htest.mk
 	$(CC_O_V)
 	$(MV_D_V)
 
+.PHONY: clean
 clean: clean_htest
 	rm -rf $(BUILD_DIR)
 

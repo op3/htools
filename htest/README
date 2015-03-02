@@ -1,3 +1,18 @@
+ Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ 
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
 htest - C unit testing framework
 --------------------------------
 
@@ -50,13 +65,13 @@ Good things to know
 
 There's no need to write a main() or list all suites to be included for
 testing. The htest.mk makefile snippet will analyze the test source code after
-the preprocessing stop and detect all suites, and libhtest.a will run all
-suites.
+the preprocessing stop and detect all suites, and libhtest.a contains main()
+which will run all suites and their tests.
 
 The tests are static functions and are therefore safe from name collisions
 between different files. A properly configured compiler should also complain
-about unused tests. Tests are not auto-registered to minimize the complexity
-of the framework.
+about unused tests. Tests are not auto-registered, again to keep this
+framework as simple as possible.
 
 
 Test trials
@@ -73,19 +88,22 @@ HTRY(type, format, a, op, b)
 
 HTRY_I(a, op, b)
  Wrapper for HTRY(int, d, a, op, b).
-Several other common primitive types are wrapped too.
+Several other common primitive types are wrapped too, check htest.h for the
+most up-to-date list.
 
 HTRY_STR(a, op, b)
  String lexical comparison.
   a  - first operand.
   op - operator.
   b  - second operand.
+ This will also check for NULL strings.
 
 HTEST_VOID(expr)
  expr - expression that should run without signals. This only touches test
-        function arguments to avoid compiler errors.
+        function arguments to avoid compiler errors if no other trials are
+        issued.
 
 HTEST_SIGNAL(expr)
- expr - expression that should signal one of the six ANSI signals. Note that
-        this performs a fork and the result from this test is lost for
-        subsequent tests.
+ expr - expression that is expected to signal one of the six ANSI signals.
+	Note that this performs a fork and the result from this trial is lost
+        for subsequent trials.

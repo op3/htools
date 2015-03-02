@@ -34,14 +34,15 @@ struct HTestSuite {
 
 #define HTEST(name)\
 static void \
-htest_test_header_##name##_(char const *a_color_header, char const *a_reset)\
+htest_test_header_##name##_(char const *const a_color_header_, char const \
+    *const a_color_reset_)\
 {\
-	printf(" %sTest("__FILE__":%d:"#name")%s\n", a_color_header, \
-	    __LINE__, a_reset);\
+	printf(" %sTest("__FILE__":%d:"#name")%s\n", a_color_header_,\
+	    __LINE__, a_color_reset_);\
 }\
 static void \
-htest_test_##name##_(char const *a_color_fail, char const *a_reset, int \
-    *a_result)
+htest_test_##name##_(char const *const a_color_fail_, char const *const \
+    a_color_reset_, int *const a_result_)
 
 /* Suite. */
 
@@ -52,21 +53,23 @@ void htest_suite_##name##_(char const *, char const *, char const *, int, \
 #define HTEST_SUITE(name)\
 HTEST_SUITE_PROTO(name);\
 void \
-htest_suite_header_##name##_(char const *a_color_header, char const *a_reset)\
+htest_suite_header_##name##_(char const *const a_color_header_, char const \
+    *const a_color_reset_)\
 {\
-	printf("%sSuite("__FILE__":%d:"#name")%s\n", a_color_header, \
-	    __LINE__, a_reset);\
+	printf("%sSuite("__FILE__":%d:"#name")%s\n", a_color_header_,\
+	    __LINE__, a_color_reset_);\
 }\
 void \
-htest_suite_##name##_(char const *a_color_header, char const *a_color_fail, \
-    char const *a_reset, int a_test_index, int *a_test_enumerator, int \
-    *a_result)
+htest_suite_##name##_(char const *const a_color_header_, char const *const \
+    a_color_fail_, char const *const a_color_reset_, int const a_test_index_,\
+    int *const a_test_enumerator_, int *const a_result_)
 #define HTEST_ADD(name) do {\
-	++*a_test_enumerator;\
-	if (*a_test_enumerator == a_test_index) {\
-		htest_test_header_##name##_(a_color_header, a_reset);\
+	++*a_test_enumerator_;\
+	if (*a_test_enumerator_ == a_test_index_) {\
+		htest_test_header_##name##_(a_color_header_, a_color_reset_);\
 		htest_output_suppress_();\
-		htest_test_##name##_(a_color_fail, a_reset, a_result);\
+		htest_test_##name##_(a_color_fail_, a_color_reset_,\
+		    a_result_);\
 		htest_output_restore_();\
 	}\
 } while (0)
@@ -74,7 +77,7 @@ htest_suite_##name##_(char const *a_color_header, char const *a_color_fail, \
 /* Generated suite list. */
 
 #define HTEST_SUITE_LIST_BEGIN \
-struct HTestSuite htest_suite_list_[] = {
+struct HTestSuite g_htest_suite_list_[] = {
 #define HTEST_SUITE_LIST_ADD(name) \
 	{htest_suite_header_##name##_, htest_suite_##name##_},
 #define HTEST_SUITE_LIST_END \
@@ -83,34 +86,53 @@ struct HTestSuite htest_suite_list_[] = {
 
 /* Tests. */
 
-#define HTRY_FAIL_ *a_result = 1
+#define HTRY_FAIL_ *a_result_ = 0
 #define HTRY_FAIL_FMT_ "  %sFail:%s%s:%d: "
-#define HTRY_FAIL_ARG_ a_color_fail, a_reset, __FILE__, __LINE__
+#define HTRY_FAIL_ARG_ a_color_fail_, a_color_reset_, __FILE__, __LINE__
 
 #define HTRY(Type, fmt, a, op, b) do {\
-	Type aa = a;\
-	Type bb = b;\
-	if (!(aa op bb)) {\
+	Type const aa_ = a;\
+	Type const bb_ = b;\
+	if (!(aa_ op bb_)) {\
 		htest_print_(HTRY_FAIL_FMT_"'"#a"'=%"#fmt" "#op" '"#b\
-		    "'=%"#fmt"\n", HTRY_FAIL_ARG_, aa, bb);\
+		    "'=%"#fmt"\n", HTRY_FAIL_ARG_, aa_, bb_);\
 		HTRY_FAIL_;\
 	}\
 } while (0)
-#define HTRY_F(a, op, b) HTRY(float, e, a, op, b)
+#define HTRY_DBL(a, op, b) HTRY(double, e, a, op, b)
+#define HTRY_FLT(a, op, b) HTRY(float, e, a, op, b)
 #define HTRY_I(a, op, b) HTRY(int, d, a, op, b)
-#define HTRY_P(a, op, b) HTRY(void const *, p, a, op, b)
+#define HTRY_PTR(a, op, b) HTRY(void const *, p, a, op, b)
+#define HTRY_U(a, op, b) HTRY(unsigned int, u, a, op, b)
+
+#define HTRY_BOOL(expr) do {\
+	if (!(expr)) {\
+		htest_print_(HTRY_FAIL_FMT_"'"#expr"'\n", HTRY_FAIL_ARG_);\
+		HTRY_FAIL_;\
+	}\
+} while (0)
 
 #define HTRY_STR(a, op, b) do {\
-	char const *aa = a;\
-	char const *bb = b;\
-	if (!(strcmp(aa, bb) op 0)) {\
+	char const *aa_ = a;\
+	char const *bb_ = b;\
+	if (NULL == aa_) {\
 		htest_print_(HTRY_FAIL_FMT_"'"#a"'=\"%s\" "#op" '"#b\
-		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa, bb);\
+		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa_, bb_);\
+		HTRY_FAIL_;\
+	} else if (NULL == bb_) {\
+		htest_print_(HTRY_FAIL_FMT_"'"#a"'=\"%s\" "#op" '"#b\
+		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa_, bb_);\
+		HTRY_FAIL_;\
+	} else if (!(strcmp(aa_, bb_) op 0)) {\
+		htest_print_(HTRY_FAIL_FMT_"'"#a"'=\"%s\" "#op" '"#b\
+		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa_, bb_);\
 		HTRY_FAIL_;\
 	}\
 } while (0)
 
 #define HTRY_VOID(expr) do {\
+	(void)a_color_fail_;\
+	(void)a_color_reset_;\
 	expr;\
 	if (0) {\
 		HTRY_FAIL_;\
@@ -118,15 +140,14 @@ struct HTestSuite htest_suite_list_[] = {
 } while (0)
 
 #define HTRY_SIGNAL_DTOR(expr, dtor) do {\
-	pid_t pid;\
-	int status;\
-	pid = fork();\
-	if (0 > pid) {\
+	pid_t pid_;\
+	int status_;\
+	pid_ = fork();\
+	if (0 > pid_) {\
 		perror(NULL);\
 		exit(EXIT_FAILURE);\
-	}\
-	if (0 == pid) {\
-		htest_dtor_ = dtor;\
+	} else if (0 == pid_) {\
+		g_htest_dtor_ = dtor;\
 		signal(SIGABRT, htest_sighandler_);\
 		signal(SIGFPE, htest_sighandler_);\
 		signal(SIGILL, htest_sighandler_);\
@@ -135,12 +156,12 @@ struct HTestSuite htest_suite_list_[] = {
 		signal(SIGTERM, htest_sighandler_);\
 		expr;\
 		htest_output_restore_();\
-		htest_dtor_();\
+		g_htest_dtor_();\
 		_exit(0);\
 	}\
-	waitpid(pid, &status, 0);\
-	if (0 == status) {\
-		htest_print_(HTRY_FAIL_FMT_"Missed signal.\n",\
+	waitpid(pid_, &status_, 0);\
+	if (0 == status_) {\
+		htest_print_(HTRY_FAIL_FMT_"Expected signal.\n",\
 		    HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
@@ -153,6 +174,6 @@ void htest_output_suppress_(void);
 void htest_print_(char const *, ...);
 void htest_sighandler_(int);
 
-extern void (*htest_dtor_)(void);
+extern void (*g_htest_dtor_)(void);
 
 #endif

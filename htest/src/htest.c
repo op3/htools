@@ -49,11 +49,12 @@ static char const *g_color_suite;
 static char const *g_color_test;
 static char const *g_color_fail;
 static char const *g_color_reset;
-extern struct HTestSuite htest_suite_list_[];
-void (*htest_dtor_)(void);
+
+extern struct HTestSuite g_htest_suite_list_[];
+void (*g_htest_dtor_)(void);
 
 void
-handler(int a_signum)
+handler(int const a_signum)
 {
 	htest_print_("  %sFail:%sCaught signal = %s, next suite...\n",
 	    g_color_fail, g_color_reset, strsignal(a_signum));
@@ -61,14 +62,14 @@ handler(int a_signum)
 }
 
 void
-htest_dtor_noop_(void)
+htest_dtor_noop_()
 {
 }
 
 void
 htest_output_restore_()
 {
-	if (0 == g_do_verbose) {
+	if (g_do_verbose) {
 		return;
 	}
 
@@ -92,7 +93,7 @@ htest_output_restore_()
 void
 htest_output_suppress_()
 {
-	if (0 == g_do_verbose) {
+	if (g_do_verbose) {
 		return;
 	}
 
@@ -113,7 +114,7 @@ htest_output_suppress_()
 }
 
 void
-htest_print_(char const *a_fmt, ...)
+htest_print_(char const *const a_fmt, ...)
 {
 	va_list args;
 
@@ -123,42 +124,47 @@ htest_print_(char const *a_fmt, ...)
 }
 
 void
-htest_sighandler_(int a_signum)
+htest_sighandler_(int const a_signum)
 {
 	(void)a_signum;
 	htest_output_restore_();
-	htest_dtor_();
+	g_htest_dtor_();
 	_exit(EXIT_FAILURE);
 }
 
 void
-usage(FILE *a_out, char const *a_argv0, int a_exit_code)
+usage(FILE *const a_out, char const *const a_argv0, int const a_exit_code)
 {
 	fprintf(a_out, "Usage: %s [-c] [-f] [-h] [-v]\n", a_argv0);
+	fprintf(a_out, " -c  Enable colored output.\n");
+	fprintf(a_out, " -f  Disable forking of tests, nice with gdb.\n");
+	fprintf(a_out, " -h  Show this.\n");
+	fprintf(a_out, " -v  Show what tested code prints to "
+	    "stdout/stderr.\n");
 	exit(a_exit_code);
 }
 
 int
-main(int argc, char **argv)
+main(int const argc, char **const argv)
 {
 	struct HTestSuite *suite;
 	int test_num, test_pass_num;
 	int do_colors, do_fork;
 	int opt;
 
-	do_colors = 1;
-	do_fork = 0;
-	g_do_verbose = 1;
+	do_colors = 0;
+	do_fork = 1;
+	g_do_verbose = 0;
 	while (-1 != (opt = getopt(argc, argv, "cfhv"))) {
 		switch (opt) {
 			case 'c':
-				do_colors = 0;
+				do_colors = 1;
 				break;
 			case 'f':
-				do_fork = 1;
+				do_fork = 0;
 				break;
 			case 'v':
-				g_do_verbose = 0;
+				g_do_verbose = 1;
 				break;
 			case 'h':
 				usage(stdout, argv[0], EXIT_SUCCESS);
@@ -167,7 +173,7 @@ main(int argc, char **argv)
 		}
 	}
 
-	if (0 == do_colors) {
+	if (do_colors) {
 		g_color_suite = GREEN;
 		g_color_test = BLUE;
 		g_color_fail = RED;
@@ -181,7 +187,7 @@ main(int argc, char **argv)
 
 	test_num = 0;
 	test_pass_num = 0;
-	for (suite = htest_suite_list_; NULL != suite->header; ++suite) {
+	for (suite = g_htest_suite_list_; NULL != suite->header; ++suite) {
 		int test_enumerator;
 		int test_index;
 
@@ -196,7 +202,7 @@ main(int argc, char **argv)
 
 		for (test_index = 1; test_enumerator >= test_index;
 		    ++test_index) {
-			if (0 == do_fork) {
+			if (do_fork) {
 				pid_t pid;
 
 				pid = fork();
@@ -214,18 +220,18 @@ main(int argc, char **argv)
 					signal(SIGSEGV, handler);
 					signal(SIGTERM, handler);
 					test_enumerator = 0;
-					result = EXIT_SUCCESS;
+					result = 1;
 					suite->suite(g_color_test,
 					    g_color_fail, g_color_reset,
 					    test_index, &test_enumerator,
 					    &result);
-					_exit(0 == result ? EXIT_SUCCESS :
+					_exit(result ? EXIT_SUCCESS :
 					    EXIT_FAILURE);
 				} else {
 					int status;
 
 					waitpid(pid, &status, 0);
-					if (0 == status) {
+					if (EXIT_SUCCESS == status) {
 						++test_pass_num;
 					}
 				}
@@ -233,11 +239,11 @@ main(int argc, char **argv)
 				int result;
 
 				test_enumerator = 0;
-				result = 0;
+				result = 1;
 				suite->suite(g_color_test, g_color_fail,
 				    g_color_reset, test_index,
 				    &test_enumerator, &result);
-				if (0 == result) {
+				if (result) {
 					++test_pass_num;
 				}
 			}

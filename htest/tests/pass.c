@@ -21,6 +21,8 @@ static int const c_one = 1;
 
 HTEST(ThisShouldPass)
 {
+	HTRY_BOOL(0 == 0);
+	HTRY_BOOL(0 != 1);
 	HTRY_I(c_zero, ==, c_zero);
 	HTRY_I(c_zero, !=, c_one);
 	HTRY_I(c_zero + 1, ==, c_one);

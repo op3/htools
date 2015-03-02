@@ -25,7 +25,15 @@ HTEST(SimpleStrings)
 	HTRY_STR("def", >, "abc");
 }
 
+HTEST(NullStrings)
+{
+	HTRY_STR(NULL, ==, "a");
+	HTRY_STR("a", ==, NULL);
+	HTRY_STR(NULL, ==, NULL);
+}
+
 HTEST_SUITE(String)
 {
 	HTEST_ADD(SimpleStrings);
+	HTEST_ADD(NullStrings);
 }

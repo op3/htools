@@ -20,14 +20,14 @@ static int *g_mojo;
 
 HTEST(SimpleFixture1)
 {
-	HTRY_I(*g_mojo, ==, 0x12345678);
+	HTRY_U(*g_mojo, ==, 0x12345678);
 	++(*g_mojo);
-	HTRY_I(*g_mojo, ==, 0x12345679);
+	HTRY_U(*g_mojo, ==, 0x12345679);
 }
 
 HTEST(SimpleFixture2)
 {
-	HTRY_I(*g_mojo, ==, 0x12345678);
+	HTRY_U(*g_mojo, ==, 0x12345678);
 }
 
 HTEST_SUITE(SimpleFixture)
