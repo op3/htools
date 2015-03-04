@@ -56,8 +56,13 @@ void (*g_htest_dtor_)(void);
 void
 handler(int const a_signum)
 {
+#if defined(__linux__)
 	htest_print_("  %sFail:%sCaught signal = %s, next suite...\n",
 	    g_color_fail, g_color_reset, strsignal(a_signum));
+#else
+	htest_print_("  %sFail:%sCaught signal = %d, next suite...\n",
+	    g_color_fail, g_color_reset, a_signum);
+#endif
 	_exit(EXIT_FAILURE);
 }
 

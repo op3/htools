@@ -20,10 +20,15 @@ else
 BUILD_TYPE=debug
 CFLAGS:=$(CFLAGS) -ggdb
 endif
+UNAME_M:=$(shell uname -m)
+UNAME_S:=$(shell uname -s)
 CPPFLAGS:=$(CPPFLAGS) -Iinclude -D_GNU_SOURCE
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes -Wswitch-enum
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
+ifeq (Linux,$(UNAME_S))
+ CFLAGS:=$(CFLAGS) -Wswitch-enum
+endif
 
-SUFFIX:=$(shell uname -s)_$(shell uname -m)_$(BUILD_TYPE)
+SUFFIX:=$(UNAME_S)_$(UNAME_M)_$(BUILD_TYPE)
 BUILD_DIR:=build_$(SUFFIX)
 
 AR_A=$(AR) rcs $@ $^

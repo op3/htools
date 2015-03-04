@@ -19,6 +19,9 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#if !defined(__linux__)
+# include <signal.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
