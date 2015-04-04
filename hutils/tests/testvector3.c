@@ -25,20 +25,20 @@ HTEST(CrossAxes)
 	struct Vector3f const c_z = {0.0f, 0.0f, 1.0f};
 	struct Vector3f v;
 
-	HTRY_P(&v, ==, vector3f_cross(&v, &c_x, &c_y));
-	HTRY_F(c_z.x, ==, v.x);
-	HTRY_F(c_z.y, ==, v.y);
-	HTRY_F(c_z.z, ==, v.z);
+	HTRY_PTR(&v, ==, vector3f_cross(&v, &c_x, &c_y));
+	HTRY_FLT(c_z.x, ==, v.x);
+	HTRY_FLT(c_z.y, ==, v.y);
+	HTRY_FLT(c_z.z, ==, v.z);
 
-	HTRY_P(&v, ==, vector3f_cross(&v, &c_x, &c_z));
-	HTRY_F(-c_y.x, ==, v.x);
-	HTRY_F(-c_y.y, ==, v.y);
-	HTRY_F(-c_y.z, ==, v.z);
+	HTRY_PTR(&v, ==, vector3f_cross(&v, &c_x, &c_z));
+	HTRY_FLT(-c_y.x, ==, v.x);
+	HTRY_FLT(-c_y.y, ==, v.y);
+	HTRY_FLT(-c_y.z, ==, v.z);
 
-	HTRY_P(&v, ==, vector3f_cross(&v, &c_y, &c_z));
-	HTRY_F(c_x.x, ==, v.x);
-	HTRY_F(c_x.y, ==, v.y);
-	HTRY_F(c_x.z, ==, v.z);
+	HTRY_PTR(&v, ==, vector3f_cross(&v, &c_y, &c_z));
+	HTRY_FLT(c_x.x, ==, v.x);
+	HTRY_FLT(c_x.y, ==, v.y);
+	HTRY_FLT(c_x.z, ==, v.z);
 }
 
 HTEST(CrossQuadArea)
@@ -48,7 +48,7 @@ HTEST(CrossQuadArea)
 	struct Vector3f v;
 
 	vector3f_cross(&v, &c_v1, &c_v2);
-	HTRY_F(1e-3f, >, abs(sqrt(12) - vector3f_get_magnitude(&v)));
+	HTRY_FLT(1e-3f, >, abs(sqrt(12) - vector3f_get_magnitude(&v)));
 }
 
 HTEST(CrossPointers)
@@ -66,19 +66,19 @@ HTEST(DotAxes)
 	struct Vector3f const c_y = {0.0f, 1.0f, 0.0f};
 	struct Vector3f const c_z = {0.0f, 0.0f, 1.0f};
 
-	HTRY_F(1.0f, ==, vector3f_dot(&c_x, &c_x));
-	HTRY_F(0.0f, ==, vector3f_dot(&c_x, &c_y));
-	HTRY_F(0.0f, ==, vector3f_dot(&c_x, &c_z));
-	HTRY_F(1.0f, ==, vector3f_dot(&c_y, &c_y));
-	HTRY_F(0.0f, ==, vector3f_dot(&c_y, &c_z));
-	HTRY_F(1.0f, ==, vector3f_dot(&c_z, &c_z));
+	HTRY_FLT(1.0f, ==, vector3f_dot(&c_x, &c_x));
+	HTRY_FLT(0.0f, ==, vector3f_dot(&c_x, &c_y));
+	HTRY_FLT(0.0f, ==, vector3f_dot(&c_x, &c_z));
+	HTRY_FLT(1.0f, ==, vector3f_dot(&c_y, &c_y));
+	HTRY_FLT(0.0f, ==, vector3f_dot(&c_y, &c_z));
+	HTRY_FLT(1.0f, ==, vector3f_dot(&c_z, &c_z));
 }
 
 HTEST(Magnitude)
 {
 	struct Vector3f const c_v = {1.0f, 4.0f, 8.0f};
 
-	HTRY_F(9.0f, ==, vector3f_get_magnitude(&c_v));
+	HTRY_FLT(9.0f, ==, vector3f_get_magnitude(&c_v));
 }
 
 HTEST(Scale)
@@ -86,10 +86,10 @@ HTEST(Scale)
 	struct Vector3f const c_v = {1.0f, 2.0f, 3.0f};
 	struct Vector3f v;
 
-	HTRY_P(&v, ==, vector3f_scale(&v, &c_v, 2.0f));
-	HTRY_F(2.0f, ==, v.x);
-	HTRY_F(4.0f, ==, v.y);
-	HTRY_F(6.0f, ==, v.z);
+	HTRY_PTR(&v, ==, vector3f_scale(&v, &c_v, 2.0f));
+	HTRY_FLT(2.0f, ==, v.x);
+	HTRY_FLT(4.0f, ==, v.y);
+	HTRY_FLT(6.0f, ==, v.z);
 }
 
 HTEST(Sub)
@@ -98,10 +98,10 @@ HTEST(Sub)
 	struct Vector3f const c_v2 = {1.0f, 2.0f, 3.0f};
 	struct Vector3f v;
 
-	HTRY_P(&v, ==, vector3f_sub(&v, &c_v1, &c_v2));
-	HTRY_F(4.0f, ==, v.x);
-	HTRY_F(7.0f, ==, v.y);
-	HTRY_F(8.0f, ==, v.z);
+	HTRY_PTR(&v, ==, vector3f_sub(&v, &c_v1, &c_v2));
+	HTRY_FLT(4.0f, ==, v.x);
+	HTRY_FLT(7.0f, ==, v.y);
+	HTRY_FLT(8.0f, ==, v.z);
 }
 
 HTEST_SUITE(Vector3f)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,16 +14,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/memory.h>
+#ifndef HUTILS_VECTOR2_H
+#define HUTILS_VECTOR2_H
 
-char *
-hutils_strdup_(char const *a_src)
-{
-	char *dst;
+struct Vector2f {
+	float	x;
+	float	y;
+};
 
-	dst = malloc(strlen(a_src) + 1);
-	if (NULL != dst) {
-		strcpy(dst, a_src);
-	}
-	return dst;
-}
+struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
+    struct Vector2f const *);
+float		vector2f_dot(struct Vector2f const *, struct Vector2f const
+    *);
+float		vector2f_get_magnitude(struct Vector2f const *);
+struct Vector2f	*vector2f_normalize(struct Vector2f *, struct Vector2f const
+    *);
+struct Vector2f	*vector2f_scale(struct Vector2f *, struct Vector2f const *,
+    float);
+struct Vector2f	*vector2f_sub(struct Vector2f *, struct Vector2f const *,
+    struct Vector2f const *);
+
+#endif

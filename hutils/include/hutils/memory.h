@@ -17,38 +17,43 @@
 #ifndef HUTILS_MEMORY_H
 #define HUTILS_MEMORY_H
 
-#include <assert.h>
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define MALLOC(var, num) do {\
-	size_t size;\
+#define CALLOC(ptr, num) do {\
+	size_t n;\
 \
-	size = (num) * sizeof *var;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
+	n = num;\
+	ptr = calloc(n, sizeof *ptr);\
+	if (NULL == ptr) {\
+		fprintf(stderr, "%s:%d: Could not calloc(%d#,%dB): %s.\n", \
+		    __FILE__, __LINE__, (int)n, (int)sizeof *var, \
+		    strerror(errno));\
 		abort();\
 	}\
 } while (0)
-#define MALLOC_BYTES(var, num) do {\
-	size_t size;\
+#define MALLOC(ptr, size) do {\
+	size_t s;\
 \
-	size = num;\
-	var = malloc(size);\
-	if (NULL == var) {\
-		fprintf(stderr, "Could not malloc (%d B).\n", (int)size);\
+	s = size;\
+	ptr = malloc(s);\
+	if (NULL == ptr) {\
+		fprintf(stderr, "%s:%d: Could not malloc(%dB): %s.\n", \
+		    __FILE__, __LINE__, (int)s, strerror(errno));\
 		abort();\
 	}\
 } while (0)
-#define FREE(var) do {\
-	free(var);\
-	var = NULL;\
+#define FREE(ptr) do {\
+	free(ptr);\
+	ptr = NULL;\
 } while (0)
 #define STRDUP(dst, src) do {\
 	dst = hutils_strdup_(src);\
 	if (NULL == dst) {\
-		fprintf(stderr, "Could not strdup (%s).\n", src);\
+		fprintf(stderr, "%s:%d: Could not strdup(\"%s\"): %s.\n", \
+		    __FILE__, __LINE__, src, strerror(errno));\
 		abort();\
 	}\
 } while (0)

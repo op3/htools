@@ -56,8 +56,7 @@ Name##_get(struct Name *a_name)\
 	page = TAILQ_LAST(&a_name->page_list, Pool##Type##PageList);\
 	if (TAILQ_END(&a_name->page_list) == page ||\
 	    (struct Type *)(page + 1) + page_size == page->p) {\
-		MALLOC_BYTES(page, sizeof *page + sizeof *page->p *\
-		    page_size);\
+		MALLOC(page, sizeof *page + sizeof *page->p * page_size);\
 		page->p = (struct Type *)(page + 1);\
 		TAILQ_INSERT_TAIL(&a_name->page_list, page, page_list);\
 	}\

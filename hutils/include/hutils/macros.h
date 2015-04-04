@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,16 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/memory.h>
+#ifndef HUTILS_COMMON_H
+#define HUTILS_COMMON_H
 
-char *
-hutils_strdup_(char const *a_src)
-{
-	char *dst;
+#define LENGTH(x) (sizeof x / sizeof *x)
 
-	dst = malloc(strlen(a_src) + 1);
-	if (NULL != dst) {
-		strcpy(dst, a_src);
-	}
-	return dst;
-}
+#endif

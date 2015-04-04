@@ -13,28 +13,45 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 AR=ar
-CC=gcc
 LD=gcc
+CC=gcc
+ifeq (release,$(BUILD_TYPE))
+CFLAGS:=$(CFLAGS) -O3
+else
+BUILD_TYPE=debug
+CFLAGS:=$(CFLAGS) -ggdb
+endif
+GCC_MACHINE:=$(shell gcc -dumpmachine)
+GCC_VERSION:=$(shell gcc -dumpversion)
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -D_GNU_SOURCE
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
+ifneq (,$(findstring inux,$(GCC_MACHINE)))
+ CFLAGS:=$(CFLAGS) -Wswitch-enum
+endif
+
+SUFFIX:=$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
+BUILD_DIR:=build_$(SUFFIX)
+
+AR_A=$(AR) rcs $@ $^
+LD_E=$(LD) -o $@ $^ $(LDFLAGS)
+CC_O=$(CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
 MKDIR=test -d $(@D) || mkdir -p $(@D)
 
 ifeq (1,$(V))
-AR_V=$(AR)
-CC_V=$(CC)
-LD_V=$(LD)
+AR_A_V=$(AR_A)
+LD_E_V=$(LD_E)
+CC_O_V=$(CC_O)
 MKDIR_V=$(MKDIR)
 else
-AR_V=@echo "AR   " $@ && $(AR)
-CC_V=@echo "CC   " $@ && $(CC)
-LD_V=@echo "LD   " $@ && $(LD)
+AR_A_V=@echo "AR    " $@ && $(AR_A)
+LD_E_V=@echo "LD    " $@ && $(LD_E)
+CC_O_V=@echo "CC    " $@ && $(CC_O)
 MKDIR_V=@$(MKDIR)
 endif
 
-SUFFIX:=$(shell uname -s)_$(shell uname -m)
-BUILD_DIR:=build_$(SUFFIX)
-
 CPPFLAGS:=-Iinclude -I../htest/include
 CFLAGS:=-ansi -ggdb -MMD -pedantic-errors -Wall -Werror -Wextra -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wstrict-prototypes
-LDFLAGS:=-lhtest -lm
+LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm
 
 TARGET:=$(BUILD_DIR)/libhutils.a
 SRC:=$(wildcard src/*.c)
@@ -54,22 +71,24 @@ test: $(TEST)
 
 $(TARGET): $(OBJ)
 	$(MKDIR_V)
-	$(AR_V) rcs $@ $^
+	$(AR_A_V)
 
 $(TEST): $(OBJ) $(TEST_OBJ)
 	$(MKDIR_V)
-	$(LD_V) -o $@ $^ -L$(HTEST_PATH)/build_$(SUFFIX) $(LDFLAGS)
+	$(LD_E_V)
 
 $(BUILD_DIR)/%.o: %.c Makefile
 	$(MKDIR_V)
-	$(CC_V) -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
+	$(CC_O_V)
 
 %.o: %.c Makefile
 	$(MKDIR_V)
-	$(CC_V) -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
-
-clean:
-	rm -rf $(BUILD_DIR)
+	$(CC_O_V)
 
 include $(HTEST_PATH)/htest.mk
+
+.PHONY: clean
+clean: clean_htest
+	rm -rf $(BUILD_DIR)
+
 -include $(OBJ:.o=.d) $(TEST_OBJ:.o=.d)

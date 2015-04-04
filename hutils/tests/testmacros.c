@@ -14,16 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/memory.h>
+#include <hutils/macros.h>
+#include <htest/htest.h>
 
-char *
-hutils_strdup_(char const *a_src)
+HTEST(Length)
 {
-	char *dst;
+	int8_t p8[2];
+	int32_t p32[3];
 
-	dst = malloc(strlen(a_src) + 1);
-	if (NULL != dst) {
-		strcpy(dst, a_src);
-	}
-	return dst;
+	HTRY_I(2, ==, LENGTH(p8));
+	HTRY_I(3, ==, LENGTH(p32));
+}
+
+HTEST_SUITE(Macros)
+{
+	HTEST_ADD(Length);
 }

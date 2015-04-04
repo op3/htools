@@ -13,6 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 AR=ar
+LD=gcc
 CC=gcc
 ifeq (release,$(BUILD_TYPE))
 CFLAGS:=$(CFLAGS) -O3
@@ -32,7 +33,7 @@ SUFFIX:=$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 BUILD_DIR:=build_$(SUFFIX)
 
 AR_A=$(AR) rcs $@ $^
-CC_EXE=$(CC) -o $@ $^ $(LDFLAGS)
+LD_E=$(LD) -o $@ $^ $(LDFLAGS)
 CC_O=$(CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
 MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
 	echo -n $(@D)/ | cat - $$file > $(@:.o=.d);\
@@ -42,14 +43,14 @@ MKDIR=test -d $(@D) || mkdir -p $(@D)
 
 ifeq ($(V),1)
 AR_A_V=$(AR_A)
-CC_EXE_V=$(CC_EXE)
+LD_E_V=$(LD_E)
 CC_O_V=$(CC_O)
 MV_D_V=$(MV_D)
 MKDIR_V=$(MKDIR)
 else
-AR_A_V=@echo "AR $@" && $(AR_A)
-CC_EXE_V=@echo "LD $@" && $(CC_EXE)
-CC_O_V=@echo "CC $@" && $(CC_O)
+AR_A_V=@echo "AR    $@" && $(AR_A)
+LD_E_V=@echo "LD    $@" && $(LD_E)
+CC_O_V=@echo "CC    $@" && $(CC_O)
 MV_D_V=@$(MV_D)
 MKDIR_V=@$(MKDIR)
 endif
@@ -70,10 +71,12 @@ all: $(BUILD_DIR)/test
 include htest.mk
 
 $(BUILD_DIR)/libhtest.a: $(LIB_OBJ)
+	$(MKDIR_V)
 	$(AR_A_V)
 
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
-	$(CC_EXE_V)
+	$(MKDIR_V)
+	$(LD_E_V)
 
 $(BUILD_DIR)/%.o: %.c Makefile htest.mk
 	$(MKDIR_V)

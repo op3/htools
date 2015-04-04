@@ -21,10 +21,10 @@ HTEST(FreeDoesNullify)
 {
 	char *p;
 
-	MALLOC_BYTES(p, 1);
-	HTRY_P(NULL, !=, p);
+	MALLOC(p, 1);
+	HTRY_PTR(NULL, !=, p);
 	FREE(p);
-	HTRY_P(NULL, ==, p);
+	HTRY_PTR(NULL, ==, p);
 }
 
 HTEST(Strdup)
@@ -33,7 +33,7 @@ HTEST(Strdup)
 	char *p;
 
 	STRDUP(p, str);
-	HTRY_P(NULL, !=, p);
+	HTRY_PTR(NULL, !=, p);
 	HTRY_STR(str, ==, p);
 	FREE(p);
 }
