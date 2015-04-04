@@ -29,7 +29,7 @@
 	ptr = calloc(n, sizeof *ptr);\
 	if (NULL == ptr) {\
 		fprintf(stderr, "%s:%d: Could not calloc(%d#,%dB): %s.\n", \
-		    __FILE__, __LINE__, (int)n, (int)sizeof *var, \
+		    __FILE__, __LINE__, (int)n, (int)sizeof *ptr, \
 		    strerror(errno));\
 		abort();\
 	}\

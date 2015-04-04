@@ -14,12 +14,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_COMMON_H
-#define HUTILS_COMMON_H
+#include <hutils/random.h>
 
-#define LENGTH(x) (sizeof x / sizeof *x)
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define TRUNC(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
+/* By George Marsaglia. */
+uint32_t
+random_get(struct RandomSeed *a_seed)
+{
+	uint32_t *seed;
+	uint32_t t;
+	int i;
 
-#endif
+	seed = a_seed->seed;
+	t = seed[0] ^ (seed[0] >> 7);
+	for (i = 0; 4 > i; ++i) {
+		seed[i] = seed[i + 1];
+	}
+	seed[4] = (seed[4] ^ (seed[4] << 6)) ^ (t ^ (t << 13));
+	return (seed[1] + seed[1] + 1) * seed[4];
+}

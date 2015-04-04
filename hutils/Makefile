@@ -29,8 +29,7 @@ ifneq (,$(findstring inux,$(GCC_MACHINE)))
  CFLAGS:=$(CFLAGS) -Wswitch-enum
 endif
 
-SUFFIX:=$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
-BUILD_DIR:=build_$(SUFFIX)
+BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
