@@ -81,6 +81,17 @@ HTEST(Magnitude)
 	HTRY_FLT(9.0f, ==, vector3f_get_magnitude(&c_v));
 }
 
+HTEST(Negate)
+{
+	struct Vector3f const c_v = {1.0f, 2.0f, 3.0f};
+	struct Vector3f v;
+
+	HTRY_PTR(&v, ==, vector3f_negate(&v, &c_v));
+	HTRY_FLT(-1.0f, ==, v.x);
+	HTRY_FLT(-2.0f, ==, v.y);
+	HTRY_FLT(-3.0f, ==, v.z);
+}
+
 HTEST(Scale)
 {
 	struct Vector3f const c_v = {1.0f, 2.0f, 3.0f};
@@ -111,6 +122,7 @@ HTEST_SUITE(Vector3f)
 	HTEST_ADD(CrossPointers);
 	HTEST_ADD(DotAxes);
 	HTEST_ADD(Magnitude);
+	HTEST_ADD(Negate);
 	HTEST_ADD(Scale);
 	HTEST_ADD(Sub);
 }

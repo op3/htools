@@ -35,6 +35,16 @@ HTEST(Magnitude)
 	HTRY_FLT(5.0f, ==, vector2f_get_magnitude(&c_v));
 }
 
+HTEST(Negate)
+{
+	struct Vector2f const c_v = {1.0f, 2.0f};
+	struct Vector2f v;
+
+	HTRY_PTR(&v, ==, vector2f_negate(&v, &c_v));
+	HTRY_FLT(-1.0f, ==, v.x);
+	HTRY_FLT(-2.0f, ==, v.y);
+}
+
 HTEST(Scale)
 {
 	struct Vector2f const c_v = {1.0f, 2.0f};
@@ -60,6 +70,7 @@ HTEST_SUITE(Vector2f)
 {
 	HTEST_ADD(DotAxes);
 	HTEST_ADD(Magnitude);
+	HTEST_ADD(Negate);
 	HTEST_ADD(Scale);
 	HTEST_ADD(Sub);
 }

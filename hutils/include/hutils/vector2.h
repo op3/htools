@@ -27,6 +27,7 @@ struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
 float		vector2f_dot(struct Vector2f const *, struct Vector2f const
     *);
 float		vector2f_get_magnitude(struct Vector2f const *);
+struct Vector2f	*vector2f_negate(struct Vector2f *, struct Vector2f const *);
 struct Vector2f	*vector2f_normalize(struct Vector2f *, struct Vector2f const
     *);
 struct Vector2f	*vector2f_scale(struct Vector2f *, struct Vector2f const *,

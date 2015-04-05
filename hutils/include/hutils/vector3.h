@@ -30,6 +30,7 @@ struct Vector3f	*vector3f_cross(struct Vector3f *, struct Vector3f const *,
 float		vector3f_dot(struct Vector3f const *, struct Vector3f const
     *);
 float		vector3f_get_magnitude(struct Vector3f const *);
+struct Vector3f	*vector3f_negate(struct Vector3f *, struct Vector3f const *);
 struct Vector3f	*vector3f_normalize(struct Vector3f *, struct Vector3f const
     *);
 struct Vector3f	*vector3f_scale(struct Vector3f *, struct Vector3f const *,

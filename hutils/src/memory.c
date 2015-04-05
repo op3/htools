@@ -17,7 +17,7 @@
 #include <hutils/memory.h>
 
 char *
-hutils_strdup_(char const *a_src)
+hutils_strdup_(char const *const a_src)
 {
 	char *dst;
 

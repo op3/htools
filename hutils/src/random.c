@@ -18,7 +18,7 @@
 
 /* By George Marsaglia. */
 uint32_t
-random_get(struct RandomSeed *a_seed)
+random_get(struct RandomSeed *const a_seed)
 {
 	uint32_t *seed;
 	uint32_t t;

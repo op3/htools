@@ -19,8 +19,8 @@
 #include <math.h>
 
 struct Vector2f *
-vector2f_add(struct Vector2f *a_vo, struct Vector2f const *a_v1, struct
-    Vector2f const *a_v2)
+vector2f_add(struct Vector2f *const a_vo, struct Vector2f const *const a_v1,
+    struct Vector2f const *const a_v2)
 {
 	a_vo->x = a_v1->x + a_v2->x;
 	a_vo->y = a_v1->y + a_v2->y;
@@ -28,25 +28,36 @@ vector2f_add(struct Vector2f *a_vo, struct Vector2f const *a_v1, struct
 }
 
 float
-vector2f_dot(struct Vector2f const *a_v1, struct Vector2f const *a_v2)
+vector2f_dot(struct Vector2f const *const a_v1, struct Vector2f const *const
+    a_v2)
 {
 	return a_v1->x * a_v2->x + a_v1->y * a_v2->y;
 }
 
 float
-vector2f_get_magnitude(struct Vector2f const *a_v)
+vector2f_get_magnitude(struct Vector2f const *const a_v)
 {
 	return sqrt(vector2f_dot(a_v, a_v));
 }
 
+struct Vector2f	*
+vector2f_negate(struct Vector2f *const a_vo, struct Vector2f const *const a_v)
+{
+	a_vo->x = -a_v->x;
+	a_vo->y = -a_v->y;
+	return a_vo;
+}
+
 struct Vector2f *
-vector2f_normalize(struct Vector2f *a_vo, struct Vector2f const *a_v)
+vector2f_normalize(struct Vector2f *const a_vo, struct Vector2f const *const
+    a_v)
 {
 	return vector2f_scale(a_vo, a_v, 1.0f / vector2f_get_magnitude(a_v));
 }
 
 struct Vector2f *
-vector2f_scale(struct Vector2f *a_vo, struct Vector2f const *a_v, float a_f)
+vector2f_scale(struct Vector2f *const a_vo, struct Vector2f const *const a_v,
+    float const a_f)
 {
 	a_vo->x = a_v->x * a_f;
 	a_vo->y = a_v->y * a_f;
@@ -54,8 +65,8 @@ vector2f_scale(struct Vector2f *a_vo, struct Vector2f const *a_v, float a_f)
 }
 
 struct Vector2f *
-vector2f_sub(struct Vector2f *a_vo, struct Vector2f const *a_v1, struct
-    Vector2f const *a_v2)
+vector2f_sub(struct Vector2f *const a_vo, struct Vector2f const *const a_v1,
+    struct Vector2f const *const a_v2)
 {
 	a_vo->x = a_v1->x - a_v2->x;
 	a_vo->y = a_v1->y - a_v2->y;
