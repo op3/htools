@@ -47,6 +47,17 @@ HTEST(MaxMin)
 	HTRY_I(-1, ==, MIN(-1, 2));
 }
 
+HTEST(Swap)
+{
+	int a, b;
+
+	a = 1;
+	b = 3;
+	SWAP(a, b);
+	HTRY_I(3, ==, a);
+	HTRY_I(1, ==, b);
+}
+
 HTEST(Trunc)
 {
 	HTRY_I(-1, ==, TRUNC(-2, -1, 1));
@@ -61,5 +72,6 @@ HTEST_SUITE(Macros)
 	HTEST_ADD(IsPow2);
 	HTEST_ADD(Length);
 	HTEST_ADD(MaxMin);
+	HTEST_ADD(Swap);
 	HTEST_ADD(Trunc);
 }

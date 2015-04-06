@@ -17,10 +17,20 @@
 #ifndef HUTILS_COMMON_H
 #define HUTILS_COMMON_H
 
+#include <stdint.h>
+#include <string.h>
+
 #define IS_POW2(x) (0 == ((x) & ((x) - 1)))
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+/* This swap gets optimized very efficiently for primitive types. */
+#define SWAP(a, b) do {\
+	uint8_t tmp_[sizeof(a) == sizeof(b) ? (signed)sizeof(a) : -1];\
+	memmove(tmp_, &a, sizeof a);\
+	memmove(&a, &b, sizeof a);\
+	memmove(&b, tmp_, sizeof a);\
+} while (0)
 #define TRUNC(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
 
 #endif
