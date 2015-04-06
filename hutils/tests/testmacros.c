@@ -17,6 +17,19 @@
 #include <hutils/macros.h>
 #include <htest/htest.h>
 
+HTEST(IsPow2)
+{
+	HTRY_I(1, ==, IS_POW2(1));
+	HTRY_I(1, ==, IS_POW2(2));
+	HTRY_I(0, ==, IS_POW2(3));
+	HTRY_I(1, ==, IS_POW2(4));
+	HTRY_I(0, ==, IS_POW2(5));
+	HTRY_I(0, ==, IS_POW2(6));
+	HTRY_I(0, ==, IS_POW2(7));
+	HTRY_I(1, ==, IS_POW2(8));
+	HTRY_I(0, ==, IS_POW2(9));
+}
+
 HTEST(Length)
 {
 	int8_t p8[2];
@@ -26,7 +39,27 @@ HTEST(Length)
 	HTRY_I(3, ==, LENGTH(p32));
 }
 
+HTEST(MaxMin)
+{
+	HTRY_I(1, ==, MAX(0, 1));
+	HTRY_I(2, ==, MAX(-1, 2));
+	HTRY_I(0, ==, MIN(0, 1));
+	HTRY_I(-1, ==, MIN(-1, 2));
+}
+
+HTEST(Trunc)
+{
+	HTRY_I(-1, ==, TRUNC(-2, -1, 1));
+	HTRY_I(-1, ==, TRUNC(-1, -1, 1));
+	HTRY_I(0, ==, TRUNC(0, -1, 1));
+	HTRY_I(1, ==, TRUNC(1, -1, 1));
+	HTRY_I(1, ==, TRUNC(2, -1, 1));
+}
+
 HTEST_SUITE(Macros)
 {
+	HTEST_ADD(IsPow2);
 	HTEST_ADD(Length);
+	HTEST_ADD(MaxMin);
+	HTEST_ADD(Trunc);
 }

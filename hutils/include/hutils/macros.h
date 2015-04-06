@@ -17,6 +17,7 @@
 #ifndef HUTILS_COMMON_H
 #define HUTILS_COMMON_H
 
+#define IS_POW2(x) (0 == ((x) & ((x) - 1)))
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
