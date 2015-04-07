@@ -25,7 +25,7 @@ struct Int {
 POOL_HEAD(PoolInt, Int);
 
 POOL_PROTOTYPE_STATIC(PoolInt, Int);
-POOL_GENERATE(PoolInt, Int, 10);
+POOL_IMPLEMENT(PoolInt, Int, 10);
 
 HTEST(AllocAndFree100)
 {
@@ -36,10 +36,10 @@ HTEST(AllocAndFree100)
 	POOL_INIT(PoolInt, &pool_int);
 	for (i = 0; 100 > i; ++i) {
 		p[i] = POOL_GET(PoolInt, &pool_int);
-		p[i]->i = i;
+		p[i]->i = 100 - i;
 	}
 	for (i = 0; 100 > i; ++i) {
-		HTRY_I(p[i]->i, ==, i);
+		HTRY_I(p[i]->i, ==, 100 - i);
 	}
 	POOL_FREE(PoolInt, &pool_int);
 }

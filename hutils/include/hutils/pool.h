@@ -21,14 +21,14 @@
 #include <hutils/memory.h>
 
 #define POOL_HEAD(Name, Type) \
-TAILQ_HEAD(Pool##Type##List, Type);\
-TAILQ_HEAD(Pool##Type##PageList, Pool##Type##Page);\
-struct Pool##Type##Page {\
+TAILQ_HEAD(Pool##Type##List_, Type);\
+TAILQ_HEAD(Pool##Type##PageList_, Pool##Type##Page_);\
+struct Pool##Type##Page_ {\
 	struct	Type *p;\
-	TAILQ_ENTRY(Pool##Type##Page)	page_list;\
+	TAILQ_ENTRY(Pool##Type##Page_)	page_list;\
 };\
 struct Name {\
-	struct	Pool##Type##PageList page_list;\
+	struct	Pool##Type##PageList_ page_list;\
 }
 
 #define POOL_PROTOTYPE_STATIC(Name, Type) \
@@ -36,12 +36,12 @@ static void		Name##_free(struct Name *);\
 static struct Type	*Name##_get(struct Name *);\
 static void		Name##_init(struct Name *)
 
-#define POOL_GENERATE(Name, Type, page_size) \
+#define POOL_IMPLEMENT(Name, Type, page_size) \
 void \
 Name##_free(struct Name *a_name)\
 {\
 	while (!TAILQ_EMPTY(&a_name->page_list)) {\
-		struct Pool##Type##Page *page;\
+		struct Pool##Type##Page_ *page;\
 \
 		page = TAILQ_FIRST(&a_name->page_list);\
 		TAILQ_REMOVE(&a_name->page_list, page, page_list);\
@@ -51,9 +51,9 @@ Name##_free(struct Name *a_name)\
 struct Type *\
 Name##_get(struct Name *a_name)\
 {\
-	struct Pool##Type##Page *page;\
+	struct Pool##Type##Page_ *page;\
 \
-	page = TAILQ_LAST(&a_name->page_list, Pool##Type##PageList);\
+	page = TAILQ_LAST(&a_name->page_list, Pool##Type##PageList_);\
 	if (TAILQ_END(&a_name->page_list) == page ||\
 	    (struct Type *)(page + 1) + page_size == page->p) {\
 		MALLOC(page, sizeof *page + sizeof *page->p * page_size);\

@@ -17,6 +17,30 @@
 #include <hutils/macros.h>
 #include <htest/htest.h>
 
+HTEST(Copy)
+{
+	int *ap, *bp;
+	int a, b;
+	short c;
+
+	a = 0;
+	b = 1;
+	COPY(a, b);
+	HTRY_I(1, ==, a);
+	HTRY_I(1, ==, b);
+
+	c = 2;
+	HTRY_SIGNAL(COPY(a, c));
+
+	a = 0;
+	b = 1;
+	ap = &a;
+	bp = &b;
+	COPY(*ap, *bp);
+	HTRY_I(1, ==, a);
+	HTRY_I(1, ==, b);
+}
+
 HTEST(IsPow2)
 {
 	HTRY_I(1, ==, IS_POW2(1));
@@ -49,6 +73,7 @@ HTEST(MaxMin)
 
 HTEST(Swap)
 {
+	int *ap, *bp;
 	int a, b;
 
 	a = 1;
@@ -56,6 +81,12 @@ HTEST(Swap)
 	SWAP(a, b);
 	HTRY_I(3, ==, a);
 	HTRY_I(1, ==, b);
+
+	ap = &a;
+	bp = &b;
+	SWAP(*ap, *bp);
+	HTRY_I(1, ==, a);
+	HTRY_I(3, ==, b);
 }
 
 HTEST(Trunc)
@@ -69,6 +100,7 @@ HTEST(Trunc)
 
 HTEST_SUITE(Macros)
 {
+	HTEST_ADD(Copy);
 	HTEST_ADD(IsPow2);
 	HTEST_ADD(Length);
 	HTEST_ADD(MaxMin);
