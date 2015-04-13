@@ -14,29 +14,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_COMMON_H
-#define HUTILS_COMMON_H
+#ifndef HUTILS_ARRAY_H
+#define HUTILS_ARRAY_H
 
-#include <assert.h>
-#include <stdint.h>
-#include <string.h>
-
-#define COPY(dst, src) do {\
-	assert(sizeof dst == sizeof src);\
-	memmove(&dst, &src, sizeof dst);\
+#define ARRAY_HEAD(Name, Type) struct Name {\
+	int	size;\
+	Type	*p;\
+}
+#define ARRAY_CALLOC(name, siz) do {\
+	ARRAY_TEST(name, ==);\
+	(name).size = siz;\
+	CALLOC((name).p, siz);\
 } while (0)
-#define IS_POW2(x) (0 == ((x) & ((x) - 1)))
-#define LENGTH(x) (sizeof x / sizeof *x)
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define SQR(x) ((x) * (x))
-/* This swap gets optimized very efficiently for primitive types. */
-#define SWAP(a, b) do {\
-	uint8_t tmp_[sizeof a == sizeof b ? (signed)sizeof a : -1];\
-	memmove(tmp_, &a, sizeof a);\
-	memmove(&a, &b, sizeof a);\
-	memmove(&b, tmp_, sizeof a);\
+#define ARRAY_FREE(name) do {\
+	ARRAY_TEST(name, !=);\
+	(name).size = -1;\
+	FREE((name).p);\
 } while (0)
-#define TRUNC(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
+#define ARRAY_INIT(name) do {\
+	(name).size = -1;\
+	(name).p = NULL;\
+} while (0)
+#define ARRAY_TEST(name, op) do {\
+	assert(-1 op (name).size);\
+	assert(NULL op (name).p);\
+} while (0)
+#define ARRAY_ZERO(name) do {\
+	ARRAY_TEST(name, !=);\
+	memset((name).p, 0, (name).size * sizeof *(name).p);\
+} while (0)
 
 #endif
