@@ -117,4 +117,109 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 	LeaveCriticalSection(&a_mutex->cs);
 }
 
+#elif defined(__linux__)
+
+# include <pthread.h>
+
+struct Mutex {
+	pthread_mutex_t	mutex;
+};
+struct Starter {
+	void	(*func)(void *);
+	void	*data;
+};
+struct Thread {
+	pthread_t	thread;
+};
+
+static void	*run(void *);
+
+void *
+run(void *a_data)
+{
+	struct Starter starter;
+
+	memcpy(&starter, a_data, sizeof starter);
+	FREE(a_data);
+	starter.func(starter.data);
+	return NULL;
+}
+
+struct Thread *
+thread_create(void (*const a_func)(void *), void *const a_data)
+{
+	struct Starter *starter;
+	struct Thread *thread;
+	int ret;
+
+	CALLOC(starter, 1);
+	starter->func = a_func;
+	starter->data = a_data;
+
+	CALLOC(thread, 1);
+	ret = pthread_create(&thread->thread, NULL, run, starter);
+	if (0 != ret) {
+		FREE(thread);
+		return NULL;
+	}
+	return thread;
+}
+
+void
+thread_free(struct Thread **const a_thread)
+{
+	struct Thread *thread;
+
+	thread = *a_thread;
+	if (NULL == thread) {
+		return;
+	}
+	pthread_join(thread->thread, NULL);
+	FREE(*a_thread);
+}
+
+struct Mutex *
+thread_mutex_create()
+{
+	struct Mutex *mutex;
+	int ret;
+
+	CALLOC(mutex, 1);
+	ret = pthread_mutex_init(&mutex->mutex, NULL);
+	if (0 != ret) {
+		FREE(mutex);
+		return NULL;
+	}
+	return mutex;
+}
+
+void
+thread_mutex_free(struct Mutex **const a_mutex)
+{
+	struct Mutex *mutex;
+	int ret;
+
+	mutex = *a_mutex;
+	if (NULL == mutex) {
+		return;
+	}
+	ret = pthread_mutex_destroy(&mutex->mutex);
+	if (0 != ret) {
+		fprintf(stderr, "Could not destroy mutex.\n");
+	}
+	FREE(*a_mutex);
+}
+
+void 
+thread_mutex_lock(struct Mutex *const a_mutex)
+{
+	pthread_mutex_lock(&a_mutex->mutex);
+}
+
+void
+thread_mutex_unlock(struct Mutex *const a_mutex)
+{
+	pthread_mutex_unlock(&a_mutex->mutex);
+}
+
 #endif

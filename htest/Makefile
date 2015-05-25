@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2014-15 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@ CFLAGS:=$(CFLAGS) -ggdb
 endif
 GCC_MACHINE:=$(shell gcc -dumpmachine)
 GCC_VERSION:=$(shell gcc -dumpversion)
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -D_GNU_SOURCE
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -I../hutils/include -D_GNU_SOURCE
 CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 ifneq (,$(findstring inux,$(GCC_MACHINE)))
  CFLAGS:=$(CFLAGS) -Wswitch-enum

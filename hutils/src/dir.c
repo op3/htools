@@ -21,7 +21,8 @@
 
 struct Dir {
 	HANDLE	handle;
-	char	*first;
+	int	is_first;
+	char	*name;
 };
 
 struct Dir *
@@ -45,7 +46,8 @@ dir_open(char const *const a_path)
 
 	CALLOC(dir, 1);
 	dir->handle = handle;
-	STRDUP(dir->first, find_data.cFileName);
+	dir->is_first = 1;
+	STRDUP(dir->name, find_data.cFileName);
 	return dir;
 }
 
@@ -58,8 +60,8 @@ dir_close(struct Dir **const a_dir)
 	if (NULL == dir) {
 		return;
 	}
-	if (NULL != dir->first) {
-		FREE(dir->first);
+	if (NULL != dir->name) {
+		FREE(dir->name);
 	}
 	FindClose(dir->handle);
 	FREE(*a_dir);
@@ -70,18 +72,83 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 {
 	WIN32_FIND_DATA find_data;
 
-	if (NULL != a_dir->first) {
-		strcpy(a_entry->name, a_dir->first);
-		FREE(a_dir->first);
+	if (a_dir->is_first) {
+		a_dir->is_first = 0;
+		a_entry->name = a_dir->name;
 		return 1;
 	}
+	FREE(a_dir->name);
 	if (!FindNextFile(a_dir->handle, &find_data)) {
 		if (ERROR_NO_MORE_FILES != GetLastError()) {
 			return -1;
 		}
 		return 0;
 	}
-	strcpy(a_entry->name, find_data.cFileName);
+	STRDUP(a_dir->name, find_data);
+	a_entry->name = a_dir->name;
+	return 1;
+}
+
+#elif defined(__linux__)
+
+#include <dirent.h>
+#include <stddef.h>
+#include <unistd.h>
+
+struct Dir {
+	DIR	*dir;
+	struct	dirent *entry;
+};
+
+struct Dir *
+dir_open(char const *const a_path)
+{
+	DIR *d;
+	struct Dir *dir;
+	size_t len;
+	long name_max;
+
+	d = opendir(a_path);
+	if (NULL == d) {
+		return NULL;
+	}
+	CALLOC(dir, 1);
+	dir->dir = d;
+	name_max = pathconf(a_path, _PC_NAME_MAX);
+	if (-1 == name_max) {
+		name_max = 255;
+	}
+	len = offsetof(struct dirent, d_name) + name_max + 1;
+	MALLOC(dir->entry, len);
+	return dir;
+}
+
+void
+dir_close(struct Dir **const a_dir)
+{
+	struct Dir *dir;
+
+	dir = *a_dir;
+	if (NULL == dir) {
+		return;
+	}
+	FREE(dir->entry);
+	closedir(dir->dir);
+	FREE(*a_dir);
+}
+
+int
+dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
+{
+	struct dirent *result;
+
+	if (0 != readdir_r(a_dir->dir, a_dir->entry, &result)) {
+		return -1;
+	}
+	if (NULL == result) {
+		return 0;
+	}
+	a_entry->name = a_dir->entry->d_name;
 	return 1;
 }
 

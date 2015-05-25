@@ -14,36 +14,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_ARRAY_H
-#define HUTILS_ARRAY_H
+#include <hutils/dir.h>
+#include <htest/htest.h>
 
-#include <hutils/memory.h>
+HTEST(InvalidDir)
+{
+	struct Dir *dir;
 
-#define ARRAY_HEAD(Name, Type) struct Name {\
-	int	size;\
-	Type	*p;\
+	dir = dir_open("patatos");
+	HTRY_PTR(NULL, ==, dir);
 }
-#define ARRAY_CALLOC(name, siz) do {\
-	ARRAY_TEST(name, ==);\
-	(name).size = siz;\
-	CALLOC((name).p, siz);\
-} HUTILS_COND(while, 0)
-#define ARRAY_FREE(name) do {\
-	ARRAY_TEST(name, !=);\
-	(name).size = -1;\
-	FREE((name).p);\
-} HUTILS_COND(while, 0)
-#define ARRAY_INIT(name) do {\
-	(name).size = -1;\
-	(name).p = NULL;\
-} HUTILS_COND(while, 0)
-#define ARRAY_TEST(name, op) do {\
-	assert(-1 op (name).size);\
-	assert(NULL op (name).p);\
-} HUTILS_COND(while, 0)
-#define ARRAY_ZERO(name) do {\
-	ARRAY_TEST(name, !=);\
-	memset((name).p, 0, (name).size * sizeof *(name).p);\
-} HUTILS_COND(while, 0)
 
-#endif
+HTEST(ListTests)
+{
+	struct DirEntry entry;
+	struct Dir *dir;
+	int ret;
+
+	dir = dir_open("tests");
+	HTRY_PTR(NULL, !=, dir);
+	ret = dir_get(dir, &entry);
+	HTRY_I(1, ==, ret);
+	dir_close(&dir);
+	HTRY_PTR(NULL, ==, dir);
+}
+
+HTEST_SUITE(Dir)
+{
+	HTEST_ADD(InvalidDir);
+	HTEST_ADD(ListTests);
+}

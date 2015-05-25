@@ -26,8 +26,7 @@ int optind = 1;
 int optopt = 0;
 
 int
-getopt(int const a_argc, char *const *a_argv, char const *const
-       a_optstring)
+getopt(int const a_argc, char *const *a_argv, char const *const a_optstring)
 {
 	optarg = NULL;
 	optopt = 0;

@@ -23,13 +23,14 @@ CFLAGS:=$(CFLAGS) -ggdb
 endif
 GCC_MACHINE:=$(shell gcc -dumpmachine)
 GCC_VERSION:=$(shell gcc -dumpversion)
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -D_GNU_SOURCE
+BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
+
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HTEST_PATH)/include -D_GNU_SOURCE
 CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 ifneq (,$(findstring inux,$(GCC_MACHINE)))
  CFLAGS:=$(CFLAGS) -Wswitch-enum
 endif
-
-BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
+LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
@@ -48,12 +49,8 @@ CC_O_V=@echo "CC    " $@ && $(CC_O)
 MKDIR_V=@$(MKDIR)
 endif
 
-CPPFLAGS:=-Iinclude -I../htest/include
-CFLAGS:=-ansi -ggdb -MMD -pedantic-errors -Wall -Werror -Wextra -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wstrict-prototypes
-LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm
-
 TARGET:=$(BUILD_DIR)/libhutils.a
-SRC:=$(wildcard src/*.c)
+SRC:=$(filter-out %getopt.c,$(wildcard src/*.c))
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 TEST:=$(BUILD_DIR)/test

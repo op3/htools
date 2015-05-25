@@ -14,36 +14,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_ARRAY_H
-#define HUTILS_ARRAY_H
+#include <hutils/array.h>
+#include <htest/htest.h>
 
-#include <hutils/memory.h>
+ARRAY_HEAD(IntArray, int);
 
-#define ARRAY_HEAD(Name, Type) struct Name {\
-	int	size;\
-	Type	*p;\
+HTEST(MustBeInitedRight)
+{
+	struct IntArray ia = {0, NULL};
+
+	HTRY_SIGNAL(ARRAY_CALLOC(ia, 1));
+	ARRAY_INIT(ia);
+	HTRY_SIGNAL(ARRAY_FREE(ia));
+	HTRY_VOID(ARRAY_CALLOC(ia, 1));
+	HTRY_VOID(ARRAY_FREE(ia));
 }
-#define ARRAY_CALLOC(name, siz) do {\
-	ARRAY_TEST(name, ==);\
-	(name).size = siz;\
-	CALLOC((name).p, siz);\
-} HUTILS_COND(while, 0)
-#define ARRAY_FREE(name) do {\
-	ARRAY_TEST(name, !=);\
-	(name).size = -1;\
-	FREE((name).p);\
-} HUTILS_COND(while, 0)
-#define ARRAY_INIT(name) do {\
-	(name).size = -1;\
-	(name).p = NULL;\
-} HUTILS_COND(while, 0)
-#define ARRAY_TEST(name, op) do {\
-	assert(-1 op (name).size);\
-	assert(NULL op (name).p);\
-} HUTILS_COND(while, 0)
-#define ARRAY_ZERO(name) do {\
-	ARRAY_TEST(name, !=);\
-	memset((name).p, 0, (name).size * sizeof *(name).p);\
-} HUTILS_COND(while, 0)
 
-#endif
+HTEST_SUITE(Array)
+{
+	HTEST_ADD(MustBeInitedRight);
+}

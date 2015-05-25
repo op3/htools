@@ -23,7 +23,7 @@
 
 struct Dir;
 struct DirEntry {
-	char	name[MAX_PATH];
+	char	const *name;
 };
 
 struct Dir *dir_open(char const *);
