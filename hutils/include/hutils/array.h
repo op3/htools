@@ -25,23 +25,23 @@
 	ARRAY_TEST(name, ==);\
 	(name).size = siz;\
 	CALLOC((name).p, siz);\
-} while (0)
+} HUTILS_COND(while, 0)
 #define ARRAY_FREE(name) do {\
 	ARRAY_TEST(name, !=);\
 	(name).size = -1;\
 	FREE((name).p);\
-} while (0)
+} HUTILS_COND(while, 0)
 #define ARRAY_INIT(name) do {\
 	(name).size = -1;\
 	(name).p = NULL;\
-} while (0)
+} HUTILS_COND(while, 0)
 #define ARRAY_TEST(name, op) do {\
 	assert(-1 op (name).size);\
 	assert(NULL op (name).p);\
-} while (0)
+} HUTILS_COND(while, 0)
 #define ARRAY_ZERO(name) do {\
 	ARRAY_TEST(name, !=);\
 	memset((name).p, 0, (name).size * sizeof *(name).p);\
-} while (0)
+} HUTILS_COND(while, 0)
 
 #endif

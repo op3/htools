@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-15 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <hutils/macros.h>
 
 #define CALLOC(ptr, num) do {\
 	size_t n;\
@@ -33,7 +34,7 @@
 		    strerror(errno));\
 		abort();\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 #define MALLOC(ptr, size) do {\
 	size_t s;\
 \
@@ -44,11 +45,11 @@
 		    __FILE__, __LINE__, (int)s, strerror(errno));\
 		abort();\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 #define FREE(ptr) do {\
 	free(ptr);\
 	ptr = NULL;\
-} while (0)
+} HUTILS_COND(while, 0)
 #define STRDUP(dst, src) do {\
 	dst = hutils_strdup_(src);\
 	if (NULL == dst) {\
@@ -56,7 +57,7 @@
 		    __FILE__, __LINE__, src, strerror(errno));\
 		abort();\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 
 char *hutils_strdup_(char const *);
 

@@ -1,2 +1,7 @@
 syntax: regexp
 /build_
+Debug$
+vcxproj.user
+htools.opensdf
+htools.sdf
+htools.v12.suo

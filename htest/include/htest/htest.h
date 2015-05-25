@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-15 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,19 +18,22 @@
 #define HTEST_HTEST_H
 
 #include <sys/types.h>
-#include <sys/wait.h>
-#if !defined(__linux__)
+#if defined(__linux__)
+# include <sys/wait.h>
+# include <unistd.h>
+#elif defined(_WIN32)
+#else
 # include <signal.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <hutils/macros.h>
 
 struct HTestSuite {
 	void	(*header)(char const *, char const *);
-	void	(*suite)(char const *, char const *, char const *, int, int *,
-	    int *);
+        void	(*suite)(char const *, char const *, char const *, int, int *,
+            int *);
 };
 
 /* Test. */
@@ -75,7 +78,7 @@ htest_suite_##name##_(char const *const a_color_header_, char const *const \
 		    a_result_);\
 		htest_output_restore_();\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 
 /* Generated suite list. */
 
@@ -96,12 +99,12 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY(Type, fmt, a, op, b) do {\
 	Type const aa_ = a;\
 	Type const bb_ = b;\
-	if (!(aa_ op bb_)) {\
+	HUTILS_COND(if, !(aa_ op bb_)) {\
 		htest_print_(HTRY_FAIL_FMT_"'"#a"'=%"#fmt" "#op" '"#b\
 		    "'=%"#fmt"\n", HTRY_FAIL_ARG_, aa_, bb_);\
 		HTRY_FAIL_;\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 #define HTRY_DBL(a, op, b) HTRY(double, e, a, op, b)
 #define HTRY_FLT(a, op, b) HTRY(float, e, a, op, b)
 #define HTRY_I(a, op, b) HTRY(int, d, a, op, b)
@@ -109,11 +112,11 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY_U(a, op, b) HTRY(unsigned int, u, a, op, b)
 
 #define HTRY_BOOL(expr) do {\
-	if (!(expr)) {\
+	HUTILS_COND(if, !(expr)) {\
 		htest_print_(HTRY_FAIL_FMT_"'"#expr"'\n", HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 
 #define HTRY_STR(a, op, b) do {\
 	char const *aa_ = a;\
@@ -131,18 +134,24 @@ struct HTestSuite g_htest_suite_list_[] = {
 		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa_, bb_);\
 		HTRY_FAIL_;\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
 
 #define HTRY_VOID(expr) do {\
 	(void)a_color_fail_;\
 	(void)a_color_reset_;\
+	(void)a_result_;\
 	expr;\
-	if (0) {\
-		HTRY_FAIL_;\
-	}\
-} while (0)
+} HUTILS_COND(while, 0)
 
-#define HTRY_SIGNAL_DTOR(expr, dtor) do {\
+#if defined(_MSC_VER)
+# define HTRY_SIGNAL_DTOR(expr, dtor) do {\
+	(void)a_color_fail_;\
+	(void)a_color_reset_;\
+	(void)a_result_;\
+	expr;\
+} HUTILS_COND(while, 0)
+#else
+# define HTRY_SIGNAL_DTOR(expr, dtor) do {\
 	pid_t pid_;\
 	int status_;\
 	pid_ = fork();\
@@ -168,7 +177,8 @@ struct HTestSuite g_htest_suite_list_[] = {
 		    HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
-} while (0)
+} HUTILS_COND(while, 0)
+#endif
 #define HTRY_SIGNAL(expr) HTRY_SIGNAL_DTOR(expr, htest_dtor_noop_)
 
 void htest_dtor_noop_(void);

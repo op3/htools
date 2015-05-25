@@ -24,7 +24,7 @@
 #define COPY(dst, src) do {\
 	assert(sizeof dst == sizeof src);\
 	memmove(&dst, &src, sizeof dst);\
-} while (0)
+} HUTILS_COND(while, 0)
 #define IS_POW2(x) (0 == ((x) & ((x) - 1)))
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -36,7 +36,32 @@
 	memmove(tmp_, &a, sizeof a);\
 	memmove(&a, &b, sizeof a);\
 	memmove(&b, tmp_, sizeof a);\
-} while (0)
+} HUTILS_COND(while, 0)
 #define TRUNC(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
+
+#if defined(_MSC_VER)
+# include <windows.h>
+# define HUTILS_COND(stmt, cond)\
+	__pragma(warning(push))\
+	__pragma(warning(disable:4127))\
+	stmt (cond)\
+	__pragma(warning(pop))
+# define err(code, str) do {\
+	LPTSTR str_;\
+	DWORD err_;\
+	err_ = GetLastError();\
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | \
+		      FORMAT_MESSAGE_FROM_SYSTEM | \
+		      FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_,\
+		      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),\
+		      (LPTSTR)&str_, 0, NULL);\
+	MessageBox(NULL, str_, NULL, MB_OK);\
+	LocalFree(str_);\
+	exit(code);\
+} HUTILS_COND(while, 0)
+#else
+# include <err.h>
+# define HUTILS_COND(stmt, cond) stmt (cond)
+#endif
 
 #endif

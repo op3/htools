@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-15 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,22 +15,22 @@
  */
 
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <htest/htest.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 # include <io.h>
-# define DUP(fd) _dup(fd)
-# define DUP2(fd, newfd) _dup2(fd, newfd)
+# include <signal.h>
+# include <hutils/getopt.h>
+# define STDIN_FILENO 0
+# define STDOUT_FILENO 1
+# define STDERR_FILENO 2
 char const *const nul_path = "NUL";
 #else
 # include <unistd.h>
-# define DUP(fd) dup(fd)
-# define DUP2(fd, newfd) dup2(fd, newfd)
 char const *const nul_path = "/dev/null";
 #endif
 
@@ -82,11 +82,11 @@ htest_output_restore_()
 	assert(NULL != g_new_stderr);
 
 	fflush(stdout);
-	DUP2(g_old_stdout, STDOUT_FILENO);
+	dup2(g_old_stdout, STDOUT_FILENO);
 	close(g_old_stdout);
 
 	fflush(stderr);
-	DUP2(g_old_stderr, STDERR_FILENO);
+	dup2(g_old_stderr, STDERR_FILENO);
 	close(g_old_stderr);
 
 	fclose(g_nul);
@@ -107,13 +107,13 @@ htest_output_suppress_()
 
 	g_nul = fopen(nul_path, "w");
 
-	g_old_stdout = DUP(STDOUT_FILENO);
+	g_old_stdout = dup(STDOUT_FILENO);
 	fflush(stdout);
-	DUP2(fileno(g_nul), STDOUT_FILENO);
+	dup2(fileno(g_nul), STDOUT_FILENO);
 
-	g_old_stderr = DUP(STDERR_FILENO);
+	g_old_stderr = dup(STDERR_FILENO);
 	fflush(stderr);
-	DUP2(fileno(g_nul), STDERR_FILENO);
+	dup2(fileno(g_nul), STDERR_FILENO);
 
 	g_new_stderr = fdopen(g_old_stderr, "w");
 }
@@ -207,6 +207,7 @@ main(int const argc, char **const argv)
 
 		for (test_index = 1; test_enumerator >= test_index;
 		    ++test_index) {
+#if !defined(_MSC_VER)
 			if (do_fork) {
 				pid_t pid;
 
@@ -240,7 +241,9 @@ main(int const argc, char **const argv)
 						++test_pass_num;
 					}
 				}
-			} else {
+			} else
+#endif
+      {
 				int result;
 
 				test_enumerator = 0;
