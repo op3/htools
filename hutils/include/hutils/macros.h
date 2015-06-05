@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_COMMON_H
-#define HUTILS_COMMON_H
+#ifndef HUTILS_MACROS_H
+#define HUTILS_MACROS_H
 
 #include <assert.h>
 #include <stdint.h>
@@ -29,6 +29,11 @@
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#if __GNUC_PREREQ(3, 4)
+# define RETURN_UNUSED __attribute__((warn_unused_result))
+#else
+# define RETURN_UNUSED
+#endif
 #define SQR(x) ((x) * (x))
 /* This swap gets optimized very efficiently for primitive types. */
 #define SWAP(a, b) do {\
