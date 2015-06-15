@@ -4,15 +4,16 @@
 #include <hutils/macros.h>
 
 struct HWT;
+struct HWTRect;
 struct HWTWidget;
 
 struct MockWidgetCallback {
-	void	(*func)(void *);
+	void	(*func)(struct HWTRect const *, void *);
 	void	*data;
 };
 
 struct HWTWidget *mockwidget_create(struct MockWidgetCallback *)
-	RETURN_UNUSED;
+	FUNC_RETURNS;
 void mockwidget_setup(struct HWT *);
 
 #endif

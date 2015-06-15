@@ -20,13 +20,14 @@
 #include <mockwidget.h>
 #include <widget.h>
 
-static void	touch_child(void *);
+static void	touch_child(struct HWTRect const *, void *);
 
 static struct HWT *g_hwt;
 
 void
-touch_child(void *const a_data)
+touch_child(struct HWTRect const *const a_size, void *const a_data)
 {
+	(void)a_size;
 	*((int *)a_data) = 1;
 }
 
@@ -40,6 +41,7 @@ HTEST(CreateAndFree)
 
 HTEST(Child)
 {
+	struct HWTRect c_size = {10, 10};
 	struct MockWidgetCallback cb;
 	struct HWTWidget *panel, *mock;
 	struct HWTHolder *holder;
@@ -55,12 +57,12 @@ HTEST(Child)
 
 	touched = 0;
 	hwt_holder_set_child(holder, mock);
-	hwt_update(g_hwt);
+	hwt_update(g_hwt, &c_size);
 	HTRY_BOOL(touched);
 
 	touched = 0;
 	hwt_holder_set_child(holder, NULL);
-	hwt_update(g_hwt);
+	hwt_update(g_hwt, &c_size);
 	HTRY_BOOL(!touched);
 
 	hwt_widget_free(g_hwt, &mock);

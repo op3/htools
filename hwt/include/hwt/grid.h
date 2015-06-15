@@ -19,8 +19,8 @@
 
 #include <hutils/macros.h>
 
-struct HWTWidget *hwt_grid_create(int, int) RETURN_UNUSED;
+struct HWTWidget *hwt_grid_create(int, int) FUNC_RETURNS;
 struct HWTHolder *hwt_grid_get_holder(struct HWTWidget *, int, int)
-	RETURN_UNUSED;
+	FUNC_RETURNS;
 
 #endif

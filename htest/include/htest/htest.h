@@ -23,7 +23,9 @@
 # include <unistd.h>
 #elif defined(_WIN32)
 #else
+# include <sys/wait.h>
 # include <signal.h>
+# include <unistd.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>

@@ -29,7 +29,10 @@ struct Panel {
 
 static void	panel_destroy(struct HWT *, struct HWTWidget *);
 static void	panel_draw(struct HWT *, struct HWTWidget *);
-static void	panel_update(struct HWT *, struct HWTWidget *);
+static void	panel_propagate_min(struct HWT *, struct HWTWidget *, struct
+    HWTRect *);
+static void	panel_propagate_size(struct HWT *, struct HWTWidget *, struct
+    HWTRect const *);
 
 static struct HWTWidgetType const *g_type;
 
@@ -78,10 +81,21 @@ panel_draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-panel_update(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+panel_propagate_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect *const a_min)
 {
 	struct Panel *panel;
 
 	HWT_CAST(g_type, panel, a_widget);
-	widget_update(a_hwt, panel->holder.child);
+	widget_propagate_min(a_hwt, panel->holder.child, a_min);
+}
+
+void
+panel_propagate_size(struct HWT *const a_hwt, struct HWTWidget *const
+    a_widget, struct HWTRect const *const a_size)
+{
+	struct Panel *panel;
+
+	HWT_CAST(g_type, panel, a_widget);
+	widget_propagate_size(a_hwt, panel->holder.child, a_size);
 }

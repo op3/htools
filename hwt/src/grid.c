@@ -26,12 +26,18 @@ struct HWTGrid {
 	struct	HWTWidget widget;
 	int	row_num;
 	int	col_num;
+	float	*row_min;
+	float	*col_min;
+	struct	HWTRect min;
 	struct	HWTHolder *holder_array;
 };
 
 static void	grid_destroy(struct HWT *, struct HWTWidget *);
 static void	grid_draw(struct HWT *, struct HWTWidget *);
-static void	grid_update(struct HWT *, struct HWTWidget *);
+static void	grid_propagate_min(struct HWT *, struct HWTWidget *, struct
+    HWTRect *);
+static void	grid_propagate_size(struct HWT *, struct HWTWidget *, struct
+    HWTRect const *);
 
 static struct HWTWidgetType const *g_type;
 
@@ -45,6 +51,8 @@ grid_destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 	for (i = 0; grid->row_num * grid->col_num > i; ++i) {
 		widget_free(a_hwt, &grid->holder_array[i].child);
 	}
+	FREE(grid->row_min);
+	FREE(grid->col_min);
 	FREE(grid->holder_array);
 }
 
@@ -56,17 +64,60 @@ grid_draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-grid_update(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+grid_propagate_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect *const a_min)
 {
 	struct HWTGrid *grid;
 	struct HWTHolder *p;
-	int row, col;
+	int col, row;
 
 	HWT_CAST(g_type, grid, a_widget);
+	memset(grid->row_min, 0, sizeof *grid->row_min * grid->row_num);
+	memset(grid->col_min, 0, sizeof *grid->col_min * grid->col_num);
 	p = grid->holder_array;
 	for (row = 0; grid->row_num > row; ++row) {
 		for (col = 0; grid->col_num > col; ++col) {
-			widget_update(a_hwt, p->child);
+			struct HWTRect min;
+
+			widget_propagate_min(a_hwt, p->child, &min);
+			grid->row_min[row] = MAX(grid->row_min[row],
+			    min.height);
+			grid->col_min[col] = MAX(grid->col_min[col],
+			    min.width);
+			++p;
+		}
+	}
+	for (col = 0; grid->col_num > col; ++col) {
+		a_min->width += grid->col_min[col];
+	}
+	grid->min.width = a_min->width;
+	for (row = 0; grid->row_num > row; ++row) {
+		a_min->height += grid->row_min[row];
+	}
+	grid->min.height = a_min->height;
+}
+
+void
+grid_propagate_size(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect const *const a_size)
+{
+	struct HWTRect fill;
+	struct HWTGrid *grid;
+	struct HWTHolder *p;
+	int row;
+
+	HWT_CAST(g_type, grid, a_widget);
+	fill.width = (a_size->width - grid->min.width) / grid->col_num;
+	fill.height = (a_size->height - grid->min.height) / grid->row_num;
+	p = grid->holder_array;
+	for (row = 0; grid->row_num > row; ++row) {
+		struct HWTRect rect;
+		int col;
+
+		rect.height = grid->row_min[row] + fill.height;
+		for (col = 0; grid->col_num > col; ++col) {
+			rect.width = grid->col_min[col] + fill.width;
+			widget_propagate_size(a_hwt, p->child, &rect);
 			++p;
 		}
 	}
@@ -85,6 +136,8 @@ hwt_grid_create(int const a_row_num, int const a_col_num)
 	widget_setup(&grid->widget, g_type);
 	grid->row_num = a_row_num;
 	grid->col_num = a_col_num;
+	CALLOC(grid->row_min, a_row_num);
+	CALLOC(grid->col_min, a_col_num);
 	CALLOC(grid->holder_array, a_row_num * a_col_num);
 	return &grid->widget;
 }

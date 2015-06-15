@@ -22,7 +22,8 @@
 #define HWT_CALLBACK_SETUP(callback, prefix) do {\
 	callback.destroy = prefix##_destroy;\
 	callback.draw = prefix##_draw;\
-	callback.update = prefix##_update;\
+	callback.propagate_min = prefix##_propagate_min;\
+	callback.propagate_size = prefix##_propagate_size;\
 } HUTILS_COND(while, 0)
 
 struct HWT;
@@ -31,19 +32,26 @@ struct HWTRenderer;
 struct HWTWidget;
 struct HWTWidgetType;
 
+struct HWTRect {
+	float	width;
+	float	height;
+};
 struct HWTWidgetCallback {
 	void	(*destroy)(struct HWT *, struct HWTWidget *);
 	void	(*draw)(struct HWT *, struct HWTWidget *);
-	void	(*update)(struct HWT *, struct HWTWidget *);
+	void	(*propagate_min)(struct HWT *, struct HWTWidget *, struct
+	    HWTRect *);
+	void	(*propagate_size)(struct HWT *, struct HWTWidget *, struct
+	    HWTRect const *);
 };
 
-struct HWT *hwt_create(struct HWTRenderer *) RETURN_UNUSED;
+struct HWT *hwt_create(struct HWTRenderer *) FUNC_RETURNS;
 void hwt_free(struct HWT **);
 void hwt_holder_set_child(struct HWTHolder *, struct HWTWidget *);
 void hwt_set_root(struct HWT *, struct HWTWidget *);
-void hwt_update(struct HWT *);
+void hwt_update(struct HWT *, struct HWTRect const *);
 struct HWTWidgetType const *hwt_widget_register(struct HWT *, char const *,
-    struct HWTWidgetCallback const *) RETURN_UNUSED;
+    struct HWTWidgetCallback const *) FUNC_RETURNS;
 void hwt_widget_free(struct HWT *, struct HWTWidget **);
 
 #endif

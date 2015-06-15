@@ -47,9 +47,21 @@ widget_setup(struct HWTWidget *const a_widget, struct HWTWidgetType const
 }
 
 void
-widget_update(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+widget_propagate_min(struct HWT *const a_hwt, struct HWTWidget *const
+    a_widget, struct HWTRect *const a_min)
 {
 	if (NULL != a_widget) {
-		hwt_get_callback(a_widget)->update(a_hwt, a_widget);
+		hwt_get_callback(a_widget)->propagate_min(a_hwt, a_widget,
+		    a_min);
+	}
+}
+
+void
+widget_propagate_size(struct HWT *const a_hwt, struct HWTWidget *const
+    a_widget, struct HWTRect const *const a_size)
+{
+	if (NULL != a_widget) {
+		hwt_get_callback(a_widget)->propagate_size(a_hwt, a_widget,
+		    a_size);
 	}
 }

@@ -21,28 +21,51 @@
 #include <stdint.h>
 #include <string.h>
 
+#define ABS(x) (0 > x ? -x : x)
+#define CLAMP(x, a, b) (x < a ? a : x > b ? b : x)
 #define COPY(dst, src) do {\
 	assert(sizeof dst == sizeof src);\
 	memmove(&dst, &src, sizeof dst);\
 } HUTILS_COND(while, 0)
-#define IS_POW2(x) (0 == ((x) & ((x) - 1)))
+#define IS_POW2(x) (0 == (x & (x - 1)))
 #define LENGTH(x) (sizeof x / sizeof *x)
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#if __GNUC_PREREQ(3, 4)
-# define RETURN_UNUSED __attribute__((warn_unused_result))
-#else
-# define RETURN_UNUSED
+#define MAX(a, b) (a > b ? a : b)
+#define MIN(a, b) (a < b ? a : b)
+#define FUNC_NORETURN
+#define FUNC_PRINTF(fmt, args)
+#define FUNC_PURE
+#define FUNC_RETURNS
+#if defined(__GNUC_PREREQ)
+# if __GNUC_PREREQ(2, 5)
+#  undef FUNC_NORETURN
+#  define FUNC_NORETURN __attribute__((noreturn))
+# endif
+# if __GNUC_PREREQ(2, 96)
+#  undef FUNC_PURE
+#  define FUNC_PURE __attribute__((pure))
+# endif
+# if __GNUC_PREREQ(3, 0)
+#  undef FUNC_PRINTF
+#  define FUNC_PRINTF(fmt, args) __attribute__((format(printf, fmt, args)))
+# endif
+# if __GNUC_PREREQ(3, 4)
+#  undef FUNC_RETURNS
+#  define FUNC_RETURNS __attribute__((warn_unused_result))
+# endif
 #endif
-#define SQR(x) ((x) * (x))
-/* This swap gets optimized very efficiently for primitive types. */
+#define SQR(x) (x * x)
+#define STRINGIFY(x) #x
+#define STRINGIFY_VALUE(x) STRINGIFY(x)
 #define SWAP(a, b) do {\
 	uint8_t tmp_[sizeof a == sizeof b ? (signed)sizeof a : -1];\
 	memmove(tmp_, &a, sizeof a);\
 	memmove(&a, &b, sizeof a);\
 	memmove(&b, tmp_, sizeof a);\
 } HUTILS_COND(while, 0)
-#define TRUNC(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
+#if !defined(TRUE)
+# define TRUE (0 == 0)
+# define FALSE (!TRUE)
+#endif
 
 #if defined(_MSC_VER)
 # include <windows.h>
@@ -65,8 +88,15 @@
 	exit(code);\
 } HUTILS_COND(while, 0)
 #else
-# include <err.h>
 # define HUTILS_COND(stmt, cond) stmt (cond)
+# if defined(__linux__)
+#  include <err.h>
+# else
+#  define err(code, str) do {\
+	fprintf(stderr, "%s: %s\n", str, strerror(errno));\
+	exit(code);\
+} HUTILS_COND(while, 0)
+# endif
 #endif
 
 #endif

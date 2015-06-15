@@ -19,7 +19,7 @@
 
 #include <hutils/macros.h>
 
-struct HWTWidget *hwt_panel_create(void) RETURN_UNUSED;
-struct HWTHolder *hwt_panel_get_holder(struct HWTWidget *) RETURN_UNUSED;
+struct HWTWidget *hwt_panel_create(void) FUNC_RETURNS;
+struct HWTHolder *hwt_panel_get_holder(struct HWTWidget *) FUNC_RETURNS;
 
 #endif

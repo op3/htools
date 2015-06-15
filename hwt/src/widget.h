@@ -33,6 +33,7 @@
 } HUTILS_COND(while, 0)
 
 struct HWT;
+struct HWTRect;
 
 struct HWTWidgetType {
 	char	const *name;
@@ -46,6 +47,8 @@ struct HWTWidget {
 
 void widget_free(struct HWT *, struct HWTWidget **);
 void widget_setup(struct HWTWidget *, struct HWTWidgetType const *);
-void widget_update(struct HWT *, struct HWTWidget *);
+void widget_propagate_min(struct HWT *, struct HWTWidget *, struct HWTRect *);
+void widget_propagate_size(struct HWT *, struct HWTWidget *, struct HWTRect
+    const *);
 
 #endif

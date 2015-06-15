@@ -98,9 +98,12 @@ hwt_set_root(struct HWT *const a_hwt, struct HWTWidget *const a_root)
 }
 
 void
-hwt_update(struct HWT *const a_hwt)
+hwt_update(struct HWT *const a_hwt, struct HWTRect const *const a_rect)
 {
-	widget_update(a_hwt, a_hwt->root);
+	struct HWTRect min;
+
+	widget_propagate_min(a_hwt, a_hwt->root, &min);
+	widget_propagate_size(a_hwt, a_hwt->root, a_rect);
 }
 
 struct HWTWidgetType const *

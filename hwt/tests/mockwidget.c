@@ -9,7 +9,10 @@ struct MockWidget {
 
 static void	mock_destroy(struct HWT *, struct HWTWidget *);
 static void	mock_draw(struct HWT *, struct HWTWidget *);
-static void	mock_update(struct HWT *, struct HWTWidget *);
+static void	mock_propagate_min(struct HWT *, struct HWTWidget *, struct
+    HWTRect *);
+static void	mock_propagate_size(struct HWT *, struct HWTWidget *, struct
+    HWTRect const *);
 
 static struct HWTWidgetType const *g_type;
 
@@ -28,13 +31,24 @@ mock_draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-mock_update(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+mock_propagate_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect *const a_min)
+{
+	(void)a_hwt;
+	(void)a_widget;
+	a_min->width = 0.0f;
+	a_min->height = 0.0f;
+}
+
+void
+mock_propagate_size(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect const *const a_size)
 {
 	struct MockWidget *mock;
 
 	(void)a_hwt;
 	HWT_CAST(g_type, mock, a_widget);
-	mock->user_callback.func(mock->user_callback.data);
+	mock->user_callback.func(a_size, mock->user_callback.data);
 }
 
 struct HWTWidget *

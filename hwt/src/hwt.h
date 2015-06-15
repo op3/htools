@@ -20,6 +20,6 @@
 struct HWTWidget;
 
 struct HWTWidgetCallback const *hwt_get_callback(struct HWTWidget const *)
-	RETURN_UNUSED;
+	FUNC_RETURNS;
 
 #endif
