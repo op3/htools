@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2014-15 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -56,7 +56,7 @@ void (*g_htest_dtor_)(void);
 void
 handler(int const a_signum)
 {
-#if defined(__linux__)
+#if defined(__linux__) || defined(__OpenBSD__)
 	htest_print_("  %sFail:%sCaught signal = %s, next suite...\n",
 	    g_color_fail, g_color_reset, strsignal(a_signum));
 #else

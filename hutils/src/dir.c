@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -89,7 +89,7 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 	return 1;
 }
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__OpenBSD__)
 
 #include <dirent.h>
 #include <stddef.h>
@@ -152,4 +152,6 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 	return 1;
 }
 
+#else
+# error "Platform not supported!"
 #endif

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -16,9 +16,25 @@
 
 #include <hutils/random.h>
 
+double
+random_getd(struct RandomSeed *const a_seed)
+{
+	double d1, d2;
+
+	d1 = random_getu32(a_seed) / 4294967296.0;
+	d2 = random_getu32(a_seed) / (4294967296.0 * 4294967296.0);
+	return d1 + d2;
+}
+
+float
+random_getf(struct RandomSeed *const a_seed)
+{
+	return random_getu32(a_seed) / 4294967296.0f;
+}
+
 /* By George Marsaglia. */
 uint32_t
-random_get(struct RandomSeed *const a_seed)
+random_getu32(struct RandomSeed *const a_seed)
 {
 	uint32_t *seed;
 	uint32_t t;

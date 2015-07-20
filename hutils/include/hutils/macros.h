@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -66,6 +66,7 @@
 # define TRUE (0 == 0)
 # define FALSE (!TRUE)
 #endif
+#define ZERO(x) memset(&x, 0, sizeof x)
 
 #if defined(_MSC_VER)
 # include <windows.h>
@@ -89,7 +90,7 @@
 } HUTILS_COND(while, 0)
 #else
 # define HUTILS_COND(stmt, cond) stmt (cond)
-# if defined(__linux__)
+# if defined(__linux__) || defined(__OpenBSD__)
 #  include <err.h>
 # else
 #  define err(code, str) do {\

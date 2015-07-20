@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -91,11 +91,11 @@ HTEST(Swap)
 
 HTEST(Trunc)
 {
-	HTRY_I(-1, ==, TRUNC(-2, -1, 1));
-	HTRY_I(-1, ==, TRUNC(-1, -1, 1));
-	HTRY_I(0, ==, TRUNC(0, -1, 1));
-	HTRY_I(1, ==, TRUNC(1, -1, 1));
-	HTRY_I(1, ==, TRUNC(2, -1, 1));
+	HTRY_I(-1, ==, CLAMP(-2, -1, 1));
+	HTRY_I(-1, ==, CLAMP(-1, -1, 1));
+	HTRY_I(0, ==, CLAMP(0, -1, 1));
+	HTRY_I(1, ==, CLAMP(1, -1, 1));
+	HTRY_I(1, ==, CLAMP(2, -1, 1));
 }
 
 HTEST_SUITE(Macros)

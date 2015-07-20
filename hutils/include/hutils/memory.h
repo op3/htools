@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2014-15 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -51,14 +51,12 @@
 	ptr = NULL;\
 } HUTILS_COND(while, 0)
 #define STRDUP(dst, src) do {\
-	dst = hutils_strdup_(src);\
+	dst = strdup(src);\
 	if (NULL == dst) {\
 		fprintf(stderr, "%s:%d: Could not strdup(\"%s\"): %s.\n", \
 		    __FILE__, __LINE__, src, strerror(errno));\
 		abort();\
 	}\
 } HUTILS_COND(while, 0)
-
-char *hutils_strdup_(char const *);
 
 #endif

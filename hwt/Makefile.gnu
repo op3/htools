@@ -1,6 +1,6 @@
-# Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 # 
-# Permission to use, copy, modify, and distribute this software for any
+# Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
 # 
@@ -25,12 +25,12 @@ GCC_MACHINE:=$(shell gcc -dumpmachine)
 GCC_VERSION:=$(shell gcc -dumpversion)
 BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HTEST_PATH)/include -D_GNU_SOURCE
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
+CPPFLAGS:=$(CPPFLAGS) -I$(HTEST_PATH)/include -I$(HUTILS_PATH)/include -Iinclude -Isrc -Itests
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wextra -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 ifneq (,$(findstring inux,$(GCC_MACHINE)))
  CFLAGS:=$(CFLAGS) -Wswitch-enum
 endif
-LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
+LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
@@ -50,7 +50,7 @@ MKDIR_V=@$(MKDIR)
 endif
 
 TARGET:=$(BUILD_DIR)/libhutils.a
-SRC:=$(filter-out %getopt.c,$(wildcard src/*.c))
+SRC:=$(filter-out src/example.c,$(wildcard src/*.c))
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 TEST:=$(BUILD_DIR)/test
