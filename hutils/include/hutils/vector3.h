@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014, 215 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,8 @@
 #ifndef HUTILS_VECTOR3_H
 #define HUTILS_VECTOR3_H
 
+#include <hutils/macros.h>
+
 struct Vector3f {
 	float	x;
 	float	y;
@@ -28,8 +30,8 @@ struct Vector3f	*vector3f_add(struct Vector3f *, struct Vector3f const *,
 struct Vector3f	*vector3f_cross(struct Vector3f *, struct Vector3f const *,
     struct Vector3f const *);
 float		vector3f_dot(struct Vector3f const *, struct Vector3f const
-    *);
-float		vector3f_get_magnitude(struct Vector3f const *);
+    *) FUNC_RETURNS;
+float		vector3f_get_magnitude(struct Vector3f const *) FUNC_RETURNS;
 struct Vector3f	*vector3f_negate(struct Vector3f *, struct Vector3f const *);
 struct Vector3f	*vector3f_normalize(struct Vector3f *, struct Vector3f const
     *);

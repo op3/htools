@@ -18,13 +18,14 @@
 #define HUTILS_RANDOM_H
 
 #include <stdint.h>
+#include <hutils/macros.h>
 
 struct RandomSeed {
 	uint32_t	seed[5];
 };
 
-double random_getd(struct RandomSeed *);
-float random_getf(struct RandomSeed *);
-uint32_t random_getu32(struct RandomSeed *);
+double		random_getd(struct RandomSeed *) FUNC_RETURNS;
+float		random_getf(struct RandomSeed *) FUNC_RETURNS;
+uint32_t	random_getu32(struct RandomSeed *) FUNC_RETURNS;
 
 #endif

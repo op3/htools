@@ -19,10 +19,10 @@
 
 #if defined(_MSC_VER)
 
-int getopt(int, char const **, char const *);
-
 extern char *optarg;
 extern int optind, optopt;
+
+int	getopt(int, char const **, char const *) FUNC_RETURNS;
 
 #endif
 

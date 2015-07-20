@@ -17,14 +17,16 @@
 #ifndef HUTILS_THREAD_H
 #define HUTILS_THREAD_H
 
+#include <hutils/macros.h>
+
 struct Thread;
 struct Mutex;
 
-struct Thread *thread_create(void (*)(void *), void *);
-void thread_free(struct Thread **);
-struct Mutex *thread_mutex_create(void);
-void thread_mutex_free(struct Mutex **);
-void thread_mutex_lock(struct Mutex *);
-void thread_mutex_unlock(struct Mutex *);
+struct Thread	*thread_create(void (*)(void *), void *) FUNC_RETURNS;
+void		thread_free(struct Thread **);
+struct Mutex	*thread_mutex_create(void) FUNC_RETURNS;
+void		thread_mutex_free(struct Mutex **);
+void		thread_mutex_lock(struct Mutex *);
+void		thread_mutex_unlock(struct Mutex *);
 
 #endif

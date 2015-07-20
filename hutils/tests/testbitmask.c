@@ -14,27 +14,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_VECTOR2_H
-#define HUTILS_VECTOR2_H
+#include <hutils/bitmask.h>
+#include <htest/htest.h>
 
-#include <hutils/macros.h>
+HTEST(DefaultValue)
+{
+	struct Bitmask *bitmask;
 
-struct Vector2f {
-	float	x;
-	float	y;
-};
+	bitmask = bitmask_create(1);
+	HTRY_PTR(NULL, !=, bitmask);
 
-struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
-    struct Vector2f const *);
-float		vector2f_dot(struct Vector2f const *, struct Vector2f const
-    *) FUNC_RETURNS;
-float		vector2f_get_magnitude(struct Vector2f const *) FUNC_RETURNS;
-struct Vector2f	*vector2f_negate(struct Vector2f *, struct Vector2f const *);
-struct Vector2f	*vector2f_normalize(struct Vector2f *, struct Vector2f const
-    *);
-struct Vector2f	*vector2f_scale(struct Vector2f *, struct Vector2f const *,
-    float);
-struct Vector2f	*vector2f_sub(struct Vector2f *, struct Vector2f const *,
-    struct Vector2f const *);
+	HTRY_I(0, ==, bitmask_get(bitmask, 0));
+	bitmask_set(bitmask, 0, 1);
+	HTRY_I(1, ==, bitmask_get(bitmask, 0));
 
-#endif
+	bitmask_free(&bitmask);
+	HTRY_PTR(NULL, ==, bitmask);
+}
+
+HTEST(ZeroSizeFails)
+{
+	HTRY_SIGNAL(bitmask_create(0));
+}
+
+HTEST(OutOfBounds)
+{
+	struct Bitmask *bitmask;
+
+	bitmask = bitmask_create(1);
+	HTRY_SIGNAL(bitmask_get(bitmask, -1));
+	HTRY_SIGNAL(bitmask_get(bitmask, 1));
+	HTRY_SIGNAL(bitmask_set(bitmask, -1, 1));
+	HTRY_SIGNAL(bitmask_set(bitmask, 1, 1));
+	bitmask_get(bitmask, 0);
+	bitmask_set(bitmask, 0, 1);
+}
+
+HTEST_SUITE(Bitmask)
+{
+	HTEST_ADD(DefaultValue);
+	HTEST_ADD(ZeroSizeFails);
+	HTEST_ADD(OutOfBounds);
+}

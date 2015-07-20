@@ -20,14 +20,15 @@
 #if defined(_MSC_VER)
 # include <windows.h>
 #endif
+#include <hutils/macros.h>
 
 struct Dir;
 struct DirEntry {
 	char	const *name;
 };
 
-struct Dir *dir_open(char const *);
-void dir_close(struct Dir **);
-int dir_get(struct Dir *, struct DirEntry *);
+struct Dir	*dir_open(char const *) FUNC_RETURNS;
+void		dir_close(struct Dir **);
+int		dir_get(struct Dir *, struct DirEntry *) FUNC_RETURNS;
 
 #endif
