@@ -25,8 +25,10 @@ HTEST(DefaultValue)
 	HTRY_PTR(NULL, !=, bitmask);
 
 	HTRY_I(0, ==, bitmask_get(bitmask, 0));
-	bitmask_set(bitmask, 0, 1);
+	bitmask_set(bitmask, 0);
 	HTRY_I(1, ==, bitmask_get(bitmask, 0));
+	bitmask_clear(bitmask, 0);
+	HTRY_I(0, ==, bitmask_get(bitmask, 0));
 
 	bitmask_free(&bitmask);
 	HTRY_PTR(NULL, ==, bitmask);
@@ -42,12 +44,15 @@ HTEST(OutOfBounds)
 	struct Bitmask *bitmask;
 
 	bitmask = bitmask_create(1);
+	HTRY_SIGNAL(bitmask_clear(bitmask, -1));
+	HTRY_SIGNAL(bitmask_clear(bitmask, 1));
 	HTRY_SIGNAL(bitmask_get(bitmask, -1));
 	HTRY_SIGNAL(bitmask_get(bitmask, 1));
-	HTRY_SIGNAL(bitmask_set(bitmask, -1, 1));
-	HTRY_SIGNAL(bitmask_set(bitmask, 1, 1));
+	HTRY_SIGNAL(bitmask_set(bitmask, -1));
+	HTRY_SIGNAL(bitmask_set(bitmask, 1));
+	bitmask_clear(bitmask, 0);
 	bitmask_get(bitmask, 0);
-	bitmask_set(bitmask, 0, 1);
+	bitmask_set(bitmask, 0);
 }
 
 HTEST_SUITE(Bitmask)

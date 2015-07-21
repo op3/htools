@@ -7,6 +7,15 @@ struct Bitmask {
 	uint32_t	*data;
 };
 
+void
+bitmask_clear(struct Bitmask *const a_bm, int const a_index)
+{
+	if (0 > a_index || a_bm->size <= a_index) {
+		abort();
+	}
+	a_bm->data[a_index / 32] &= ~(1 << (31 & a_index));
+}
+
 struct Bitmask *
 bitmask_create(int const a_size)
 {
@@ -44,17 +53,10 @@ bitmask_get(struct Bitmask *const a_bm, int const a_index)
 }
 
 void
-bitmask_set(struct Bitmask *const a_bm, int const a_index, int const a_value)
+bitmask_set(struct Bitmask *const a_bm, int const a_index)
 {
-	uint32_t bit;
-
 	if (0 > a_index || a_bm->size <= a_index) {
 		abort();
 	}
-	bit = (1 << (31 & a_index));
-	if (0 == a_value) {
-		a_bm->data[a_index / 32] &= ~bit;
-	} else {
-		a_bm->data[a_index / 32] |= bit;
-	}
+	a_bm->data[a_index / 32] |= (1 << (31 & a_index));
 }
