@@ -38,12 +38,14 @@ name(struct List *a_list, size_t a_size)\
 	/* Find the middle. */\
 	middle = a_size / 2;\
 	i = middle;\
+	prev = NULL;\
 	TAILQ_FOREACH(cur, a_list, field) {\
 		if (0 == i--) {\
 			break;\
 		}\
 		prev = cur;\
 	}\
+	assert(NULL != prev);\
 \
 	/* Hack-split lists. */\
 	left.tqh_first = a_list->tqh_first;\

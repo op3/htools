@@ -24,25 +24,25 @@
 #include <hutils/macros.h>
 
 #define CALLOC(ptr, num) do {\
-	size_t n;\
+	size_t n_;\
 \
-	n = num;\
-	ptr = calloc(n, sizeof *ptr);\
+	n_ = num;\
+	ptr = calloc(n_, sizeof *ptr);\
 	if (NULL == ptr) {\
 		fprintf(stderr, "%s:%d: Could not calloc(%d#,%dB): %s.\n", \
-		    __FILE__, __LINE__, (int)n, (int)sizeof *ptr, \
+		    __FILE__, __LINE__, (int)n_, (int)sizeof *ptr, \
 		    strerror(errno));\
 		abort();\
 	}\
 } HUTILS_COND(while, 0)
 #define MALLOC(ptr, size) do {\
-	size_t s;\
+	size_t s_;\
 \
-	s = size;\
-	ptr = malloc(s);\
+	s_ = size;\
+	ptr = malloc(s_);\
 	if (NULL == ptr) {\
 		fprintf(stderr, "%s:%d: Could not malloc(%dB): %s.\n", \
-		    __FILE__, __LINE__, (int)s, strerror(errno));\
+		    __FILE__, __LINE__, (int)s_, strerror(errno));\
 		abort();\
 	}\
 } HUTILS_COND(while, 0)

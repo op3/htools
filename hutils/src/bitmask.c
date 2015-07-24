@@ -53,10 +53,22 @@ bitmask_get(struct Bitmask *const a_bm, int const a_index)
 }
 
 void
+bitmask_one(struct Bitmask *const a_bm)
+{
+	memset(a_bm->data, 0xff, (a_bm->size + 7) / 8);
+}
+
+void
 bitmask_set(struct Bitmask *const a_bm, int const a_index)
 {
 	if (0 > a_index || a_bm->size <= a_index) {
 		abort();
 	}
 	a_bm->data[a_index / 32] |= (1 << (31 & a_index));
+}
+
+void
+bitmask_zero(struct Bitmask *const a_bm)
+{
+	memset(a_bm->data, 0, (a_bm->size + 7) / 8);
 }

@@ -55,9 +55,50 @@ HTEST(OutOfBounds)
 	bitmask_set(bitmask, 0);
 }
 
+HTEST(OneAll)
+{
+	struct Bitmask *bitmask;
+	int i;
+
+	bitmask = bitmask_create(100);
+
+	for (i = 0; 100 > i; ++i) {
+		HTRY_I(0, ==, bitmask_get(bitmask, i));
+	}
+	bitmask_one(bitmask);
+	for (i = 0; 100 > i; ++i) {
+		HTRY_I(0, !=, bitmask_get(bitmask, i));
+	}
+
+	bitmask_free(&bitmask);
+}
+
+HTEST(ZeroAll)
+{
+	struct Bitmask *bitmask;
+	int i;
+
+	bitmask = bitmask_create(100);
+
+	for (i = 0; 100 > i; ++i) {
+		bitmask_set(bitmask, i);
+	}
+	for (i = 0; 100 > i; ++i) {
+		HTRY_I(0, !=, bitmask_get(bitmask, i));
+	}
+	bitmask_zero(bitmask);
+	for (i = 0; 100 > i; ++i) {
+		HTRY_I(0, ==, bitmask_get(bitmask, i));
+	}
+
+	bitmask_free(&bitmask);
+}
+
 HTEST_SUITE(Bitmask)
 {
 	HTEST_ADD(DefaultValue);
 	HTEST_ADD(ZeroSizeFails);
 	HTEST_ADD(OutOfBounds);
+	HTEST_ADD(OneAll);
+	HTEST_ADD(ZeroAll);
 }
