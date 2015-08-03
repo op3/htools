@@ -63,6 +63,18 @@ HTEST(Length)
 	HTRY_I(3, ==, LENGTH(p32));
 }
 
+HTEST(Mask)
+{
+	HTRY_I(0x1, ==, MASK(0, 1));
+	HTRY_I(0x3, ==, MASK(0, 2));
+	HTRY_I(0x7, ==, MASK(0, 3));
+	HTRY_I(0x0, ==, MASK(1, 1));
+	HTRY_I(0x2, ==, MASK(1, 2));
+	HTRY_I(0x6, ==, MASK(1, 3));
+	HTRY_I(0x7ffffffe, ==, MASK(1, 31));
+	HTRY_I(0xffffffff, ==, MASK(0, 32));
+}
+
 HTEST(MaxMin)
 {
 	HTRY_I(1, ==, MAX(0, 1));
@@ -103,6 +115,7 @@ HTEST_SUITE(Macros)
 	HTEST_ADD(Copy);
 	HTEST_ADD(IsPow2);
 	HTEST_ADD(Length);
+	HTEST_ADD(Mask);
 	HTEST_ADD(MaxMin);
 	HTEST_ADD(Swap);
 	HTEST_ADD(Trunc);

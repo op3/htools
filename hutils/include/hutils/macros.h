@@ -27,10 +27,6 @@
 	assert(sizeof dst == sizeof src);\
 	memmove(&dst, &src, sizeof dst);\
 } HUTILS_COND(while, 0)
-#define IS_POW2(x) (0 == (x & (x - 1)))
-#define LENGTH(x) (sizeof x / sizeof *x)
-#define MAX(a, b) (a > b ? a : b)
-#define MIN(a, b) (a < b ? a : b)
 #define FUNC_NORETURN
 #define FUNC_PRINTF(fmt, args)
 #define FUNC_PURE
@@ -53,6 +49,12 @@
 #  define FUNC_RETURNS __attribute__((warn_unused_result))
 # endif
 #endif
+#define IS_POW2(x) (0 == (x & (x - 1)))
+#define LENGTH(x) (sizeof x / sizeof *x)
+#define MASK(lsb, msb) ((0xffffffff >> (32 - msb)) & \
+    ((0xffffffff >> lsb) << lsb))
+#define MAX(a, b) (a > b ? a : b)
+#define MIN(a, b) (a < b ? a : b)
 #define SQR(x) (x * x)
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
