@@ -63,6 +63,7 @@ handler(int const a_signum)
 	htest_print_("  %sFail:%sCaught signal = %d, next suite...\n",
 	    g_color_fail, g_color_reset, a_signum);
 #endif
+	GCOV_FLUSH;
 	_exit(EXIT_FAILURE);
 }
 
@@ -134,6 +135,7 @@ htest_sighandler_(int const a_signum)
 	(void)a_signum;
 	htest_output_restore_();
 	g_htest_dtor_();
+	GCOV_FLUSH;
 	_exit(EXIT_FAILURE);
 }
 
@@ -222,15 +224,14 @@ main(int const argc, char **const argv)
 					signal(SIGABRT, handler);
 					signal(SIGFPE, handler);
 					signal(SIGILL, handler);
-					signal(SIGINT, handler);
 					signal(SIGSEGV, handler);
-					signal(SIGTERM, handler);
 					test_enumerator = 0;
 					result = 1;
 					suite->suite(g_color_test,
 					    g_color_fail, g_color_reset,
 					    test_index, &test_enumerator,
 					    &result);
+					GCOV_FLUSH;
 					_exit(result ? EXIT_SUCCESS :
 					    EXIT_FAILURE);
 				} else {

@@ -32,6 +32,13 @@
 #include <string.h>
 #include <hutils/macros.h>
 
+#if DO_GCOV_FLUSH
+void __gcov_flush(void);
+# define GCOV_FLUSH __gcov_flush()
+#else
+# define GCOV_FLUSH
+#endif
+
 struct HTestSuite {
 	void	(*header)(char const *, char const *);
         void	(*suite)(char const *, char const *, char const *, int, int *,
@@ -171,7 +178,8 @@ struct HTestSuite g_htest_suite_list_[] = {
 		expr;\
 		htest_output_restore_();\
 		g_htest_dtor_();\
-		_exit(0);\
+		GCOV_FLUSH;\
+		_exit(EXIT_SUCCESS);\
 	}\
 	waitpid(pid_, &status_, 0);\
 	if (0 == status_) {\

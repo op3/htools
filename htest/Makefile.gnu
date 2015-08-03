@@ -18,19 +18,26 @@ CC=gcc
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
 else
- BUILD_TYPE=debug
- CFLAGS:=$(CFLAGS) -ggdb
+ ifeq (gcov,$(BUILD_TYPE))
+  CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
+  CFLAGS:=$(CFLAGS) --coverage
+  LDFLAGS:=$(LDFLAGS) --coverage -L/usr/lib/gcc/$(GCC_MACHINE)/$(GCC_VERSION) -lgcov
+ else
+  BUILD_TYPE=debug
+  CFLAGS:=$(CFLAGS) -ggdb
+ endif
 endif
 GCC_MACHINE:=$(shell gcc -dumpmachine)
 GCC_VERSION:=$(shell gcc -dumpversion)
 BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
 CPPFLAGS:=$(CPPFLAGS) -Iinclude -I../hutils/include -D_GNU_SOURCE
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wextra -Wmissing-prototypes -Wshadow -Wstrict-prototypes
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 ifneq (,$(findstring inux,$(GCC_MACHINE)))
- CFLAGS:=$(CFLAGS) -Wswitch-enum
+ CFLAGS:=$(CFLAGS) -Wextra -Wswitch-enum
+else
+ CFLAGS:=$(CFLAGS) -W
 endif
-LDFLAGS:=
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
@@ -78,12 +85,12 @@ $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
 	$(MKDIR_V)
 	$(LD_E_V)
 
-$(BUILD_DIR)/%.o: %.c Makefile htest.mk
+$(BUILD_DIR)/%.o: %.c Makefile.gnu htest.mk
 	$(MKDIR_V)
 	$(CC_O_V)
 	$(MV_D_V)
 
-%.o: %.c Makefile htest.mk
+%.o: %.c Makefile.gnu htest.mk
 	$(MKDIR_V)
 	$(CC_O_V)
 	$(MV_D_V)

@@ -27,29 +27,30 @@
 	assert(sizeof dst == sizeof src);\
 	memmove(&dst, &src, sizeof dst);\
 } HUTILS_COND(while, 0)
-#define FUNC_NORETURN
-#define FUNC_PRINTF(fmt, args)
-#define FUNC_PURE
-#define FUNC_RETURNS
-#if defined(__GNUC_PREREQ)
-# if __GNUC_PREREQ(2, 5)
-#  undef FUNC_NORETURN
-#  define FUNC_NORETURN __attribute__((noreturn))
-# endif
-# if __GNUC_PREREQ(2, 96)
-#  undef FUNC_PURE
-#  define FUNC_PURE __attribute__((pure))
-# endif
-# if __GNUC_PREREQ(3, 0)
-#  undef FUNC_PRINTF
-#  define FUNC_PRINTF(fmt, args) __attribute__((format(printf, fmt, args)))
-# endif
-# if __GNUC_PREREQ(3, 4)
-#  undef FUNC_RETURNS
-#  define FUNC_RETURNS __attribute__((warn_unused_result))
-# endif
+#if defined(__GNUC__)
+# define GCC_IS_ATLEAST(major, minor) ((__GNUC__ > major) || (__GNUC__ == major && __GNUC_MINOR__ >= minor))
 #endif
-#define IS_POW2(x) (0 == (x & (x - 1)))
+#if GCC_IS_ATLEAST(3, 0)
+# define FUNC_PRINTF(fmt, args) __attribute__((format(printf, fmt, args)))
+#else
+# define FUNC_PRINTF(fmt, args)
+#endif
+#if GCC_IS_ATLEAST(2, 96)
+# define FUNC_PURE __attribute__((pure))
+#else
+# define FUNC_PURE
+#endif
+#if GCC_IS_ATLEAST(2, 5)
+# define FUNC_NORETURN __attribute__((noreturn))
+#else
+# define FUNC_NORETURN
+#endif
+#if GCC_IS_ATLEAST(3, 4)
+# define FUNC_RETURNS __attribute__((warn_unused_result))
+#else
+# define FUNC_RETURNS
+#endif
+#define IS_POW2(x) (0 == ((x - 1) & x))
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MASK(lsb, msb) ((0xffffffff >> (32 - msb)) & \
     ((0xffffffff >> lsb) << lsb))

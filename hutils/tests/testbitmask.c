@@ -36,22 +36,27 @@ HTEST(DefaultValue)
 
 HTEST(ZeroSizeFails)
 {
-	HTRY_SIGNAL(bitmask_create(0));
+	struct Bitmask *dummy;
+
+	(void)dummy;
+	HTRY_SIGNAL(dummy = bitmask_create(0));
 }
 
 HTEST(OutOfBounds)
 {
 	struct Bitmask *bitmask;
+	int dummy;
 
+	(void)dummy;
 	bitmask = bitmask_create(1);
 	HTRY_SIGNAL(bitmask_clear(bitmask, -1));
 	HTRY_SIGNAL(bitmask_clear(bitmask, 1));
-	HTRY_SIGNAL(bitmask_get(bitmask, -1));
-	HTRY_SIGNAL(bitmask_get(bitmask, 1));
+	HTRY_SIGNAL(dummy = bitmask_get(bitmask, -1));
+	HTRY_SIGNAL(dummy = bitmask_get(bitmask, 1));
 	HTRY_SIGNAL(bitmask_set(bitmask, -1));
 	HTRY_SIGNAL(bitmask_set(bitmask, 1));
 	bitmask_clear(bitmask, 0);
-	bitmask_get(bitmask, 0);
+	dummy = bitmask_get(bitmask, 0);
 	bitmask_set(bitmask, 0);
 }
 

@@ -73,11 +73,11 @@ $(TEST): $(TEST_OBJ) $(OBJ)
 	$(MKDIR_V)
 	$(LD_E_V)
 
-$(BUILD_DIR)/%.o: %.c Makefile
+$(BUILD_DIR)/%.o: %.c Makefile.gnu
 	$(MKDIR_V)
 	$(CC_O_V)
 
-%.o: %.c Makefile
+%.o: %.c Makefile.gnu
 	$(MKDIR_V)
 	$(CC_O_V)
 
