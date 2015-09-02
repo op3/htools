@@ -29,6 +29,8 @@
 } HUTILS_COND(while, 0)
 #if defined(__GNUC__)
 # define GCC_IS_ATLEAST(major, minor) ((__GNUC__ > major) || (__GNUC__ == major && __GNUC_MINOR__ >= minor))
+#else
+# define GCC_IS_ATLEAST(major, minor) 0
 #endif
 #if GCC_IS_ATLEAST(3, 0)
 # define FUNC_PRINTF(fmt, args) __attribute__((format(printf, fmt, args)))
@@ -54,8 +56,12 @@
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MASK(lsb, msb) ((0xffffffff >> (32 - msb)) & \
     ((0xffffffff >> lsb) << lsb))
-#define MAX(a, b) (a > b ? a : b)
-#define MIN(a, b) (a < b ? a : b)
+#if !defined(MAX)
+# define MAX(a, b) (a > b ? a : b)
+#endif
+#if !defined(MIN)
+# define MIN(a, b) (a < b ? a : b)
+#endif 
 #define SQR(x) (x * x)
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)

@@ -19,14 +19,21 @@
 
 #include <hutils/macros.h>
 
-struct Thread;
+struct CondVar;
 struct Mutex;
+struct Thread;
 
-struct Thread	*thread_create(void (*)(void *), void *) FUNC_RETURNS;
-void		thread_free(struct Thread **);
-struct Mutex	*thread_mutex_create(void) FUNC_RETURNS;
-void		thread_mutex_free(struct Mutex **);
-void		thread_mutex_lock(struct Mutex *);
-void		thread_mutex_unlock(struct Mutex *);
+struct CondVar	*thread_condvar_create(char **) FUNC_RETURNS;
+int		thread_condvar_free(struct CondVar **, char **);
+int		thread_condvar_signal(struct CondVar *, char **);
+int		thread_condvar_wait(struct CondVar *, struct Mutex *, char
+    **);
+struct Thread	*thread_create(void (*)(void *), void *, char **)
+	FUNC_RETURNS;
+int		thread_free(struct Thread **, char **);
+struct Mutex	*thread_mutex_create(char **) FUNC_RETURNS;
+int		thread_mutex_free(struct Mutex **, char **);
+int		thread_mutex_lock(struct Mutex *, char **);
+int		thread_mutex_unlock(struct Mutex *, char **);
 
 #endif
