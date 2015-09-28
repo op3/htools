@@ -64,6 +64,9 @@ endif
 
 HTEST_GEN:=$(BUILD_DIR)/tests/test_all.c
 HTEST_SRC:=$(wildcard tests/*.c)
+HTEST_SUITE_PRE=$(MKDIR)
+HTEST_SUITE_SRC=$<
+HTEST_SUITE_DST=$@
 
 LIB_SRC:=$(wildcard src/*.c)
 LIB_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(LIB_SRC))
