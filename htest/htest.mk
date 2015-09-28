@@ -14,23 +14,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # Input:
-#  $(BUILD_DIR)   = where to put generated stuff.
-#  $(MKDIR)       = creates directory $(@D) if it does not exist.
-#  $(HTEST_GEN)   = source file in which to generate the suite list.
-#  $(HTEST_SRC)   = test source files.
+#  $(BUILD_DIR)       = where to put generated stuff.
+#  $(HTEST_GEN)       = source file in which to generate the suite list.
+#  $(HTEST_SRC)       = test source files.
+#  $(HTEST_SUITE_PRE) = called before creating suite file (e.g. mkdir).
+#  $(HTEST_SUITE_SRC) = source file pattern (e.g. $<).
+#  $(HTEST_SUITE_DST  = suite file pattern (e.g. $@).
 # Output:
 #  $(HTEST_SUITE) = test suite cache files.
 
-HTEST_CC_E=$(CC) -E $< $(CPPFLAGS) | \
-	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $@
+HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) | \
+	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $(HTEST_SUITE_DST)
 ifeq (1,$(V))
-HTEST_CC_E_V=$(HTEST_CC_E)
-HTEST_QUIET=
-HTEST_MKDIR_V=$(MKDIR)
+ HTEST_CC_E_V=
+ HTEST_QUIET=
 else
-HTEST_CC_E_V=@echo "SUITE $@" && $(HTEST_CC_E)
-HTEST_QUIET=@echo "TESTS $@" &&
-HTEST_MKDIR_V=@$(MKDIR)
+ HTEST_CC_E_V=@echo "SUITE $@" &&
+ HTEST_QUIET=@echo "TESTS $@" &&
 endif
 
 HTEST_SUITE:=$(addprefix $(BUILD_DIR)/,$(HTEST_SRC:.c=.suite))
@@ -43,8 +43,8 @@ $(HTEST_GEN): $(HTEST_SUITE)
 	echo "HTEST_SUITE_LIST_END" >> $@
 
 $(BUILD_DIR)/%.suite: %.c
-	$(HTEST_MKDIR_V)
-	$(HTEST_CC_E_V)
+	$(HTEST_CC_E_V)$(HTEST_SUITE_PRE);\
+	$(HTEST_CC_E)
 
 .PHONY: clean_htest
 clean_htest:
