@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #include <hutils/bitmask.h>
 #include <stdint.h>
 #include <hutils/memory.h>

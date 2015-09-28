@@ -1,10 +1,9 @@
-# Copyright (c) 2014, 2015
-# Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
-#
+# Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# 
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -19,88 +18,73 @@ CC=gcc
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
 else
- ifeq (gcov,$(BUILD_TYPE))
-  CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
-  CFLAGS:=$(CFLAGS) --coverage
-  LDFLAGS:=$(LDFLAGS) --coverage -L/usr/lib/gcc/$(GCC_MACHINE)/$(GCC_VERSION) -lgcov
- else
-  BUILD_TYPE=debug
-  CFLAGS:=$(CFLAGS) -ggdb
- endif
+ BUILD_TYPE=debug
+ CFLAGS:=$(CFLAGS) -ggdb
 endif
 GCC_MACHINE:=$(shell gcc -dumpmachine)
 GCC_VERSION:=$(shell gcc -dumpversion)
 BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I../hutils/include -D_GNU_SOURCE
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
+CPPFLAGS:=$(CPPFLAGS) -I$(HTEST_PATH)/include -I$(HUTILS_PATH)/include -Iinclude -Isrc -Itests
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wextra -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 ifneq (,$(findstring inux,$(GCC_MACHINE)))
- CFLAGS:=$(CFLAGS) -Wextra -Wswitch-enum
-else
- CFLAGS:=$(CFLAGS) -W
+ CFLAGS:=$(CFLAGS) -Wswitch-enum
 endif
+LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
 CC_O=$(CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
-MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
-	echo -n $(@D)/ | cat - $$file > $(@:.o=.d);\
-	rm -f $$file;\
-fi
 MKDIR=test -d $(@D) || mkdir -p $(@D)
 
-ifeq ($(V),1)
+ifeq (1,$(V))
  AR_A_V=$(AR_A)
  LD_E_V=$(LD_E)
  CC_O_V=$(CC_O)
- MV_D_V=$(MV_D)
  MKDIR_V=$(MKDIR)
 else
- AR_A_V=@echo "AR    $@" && $(AR_A)
- LD_E_V=@echo "LD    $@" && $(LD_E)
- CC_O_V=@echo "CC    $@" && $(CC_O)
- MV_D_V=@$(MV_D)
+ AR_A_V=@echo "AR    " $@ && $(AR_A)
+ LD_E_V=@echo "LD    " $@ && $(LD_E)
+ CC_O_V=@echo "CC    " $@ && $(CC_O)
  MKDIR_V=@$(MKDIR)
 endif
 
-HTEST_GEN:=$(BUILD_DIR)/tests/test_all.c
-HTEST_SRC:=$(wildcard tests/*.c)
-HTEST_SUITE_PRE=$(MKDIR)
-HTEST_SUITE_SRC=$<
-HTEST_SUITE_DST=$@
+TARGET:=$(BUILD_DIR)/libhutils.a
+SRC:=$(filter-out src/example.c,$(wildcard src/*.c))
+OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
-LIB_SRC:=$(wildcard src/*.c)
-LIB_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(LIB_SRC))
+TEST:=$(BUILD_DIR)/test
+HTEST_SRC:=$(wildcard tests/*.c)
+HTEST_GEN:=$(BUILD_DIR)/tests/tests.c
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
-ALL_DEP:=$(patsubst %.o,%.d,$(LIB_OBJ) $(TEST_OBJ))
 
 .PHONY: all
-all: $(BUILD_DIR)/test
+all: $(TARGET) test
+
+.PHONY: test
+test: $(TEST)
 	@./$< -c
-	@echo "The result should be 7/11!"
 
-include htest.mk
-
-$(BUILD_DIR)/libhtest.a: $(LIB_OBJ)
+$(TARGET): $(OBJ)
 	$(MKDIR_V)
 	$(AR_A_V)
 
-$(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
+$(TEST): $(OBJ) $(TEST_OBJ)
 	$(MKDIR_V)
 	$(LD_E_V)
 
-$(BUILD_DIR)/%.o: %.c Makefile.gnu htest.mk
+$(BUILD_DIR)/%.o: %.c Makefile
 	$(MKDIR_V)
 	$(CC_O_V)
-	$(MV_D_V)
 
-%.o: %.c Makefile.gnu htest.mk
+%.o: %.c Makefile
 	$(MKDIR_V)
 	$(CC_O_V)
-	$(MV_D_V)
+
+include $(HTEST_PATH)/htest.mk
 
 .PHONY: clean
 clean: clean_htest
 	rm -rf $(BUILD_DIR)
 
--include $(ALL_DEP)
+-include $(OBJ:.o=.d) $(TEST_OBJ:.o=.d)

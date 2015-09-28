@@ -14,40 +14,47 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 AR=ar
-LD=gcc
 CC=gcc
+LD=gcc
+
+include $(HBUILD_PATH)/build_dir.mk
+
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I$(HTEST_PATH)/include -D_GNU_SOURCE
+include $(HBUILD_PATH)/strict_cflags.mk
+CFLAGS:=$(CFLAGS) -Wswitch-enum
+LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
+
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
 else
- BUILD_TYPE=debug
  CFLAGS:=$(CFLAGS) -ggdb
 endif
-GCC_MACHINE:=$(shell gcc -dumpmachine)
-GCC_VERSION:=$(shell gcc -dumpversion)
-BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HTEST_PATH)/include -D_GNU_SOURCE
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wextra -Wmissing-prototypes -Wshadow -Wstrict-prototypes
-ifneq (,$(findstring inux,$(GCC_MACHINE)))
- CFLAGS:=$(CFLAGS) -Wswitch-enum
-endif
-LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
+HCONF=CC="$(CONFIG_CC)" CPPFLAGS="$(CPPFLAGS) $(CONFIG_CPPFLAGS)" CFLAGS="$(CFLAGS) $(CONFIG_CFLAGS)" $(HBUILD_PATH)/hconf.sh
+
+include $(HBUILD_PATH)/config_cache.mk
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
-CC_O=$(CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
+CC_O=$(CONFIG_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
 MKDIR=test -d $(@D) || mkdir -p $(@D)
 
 ifeq (1,$(V))
  AR_A_V=$(AR_A)
- LD_E_V=$(LD_E)
  CC_O_V=$(CC_O)
+ CONF_V=
+ HCONF_V=$(HCONF) -v
+ LD_E_V=$(LD_E)
  MKDIR_V=$(MKDIR)
+ QUIET_V=
 else
  AR_A_V=@echo "AR    " $@ && $(AR_A)
- LD_E_V=@echo "LD    " $@ && $(LD_E)
  CC_O_V=@echo "CC    " $@ && $(CC_O)
+ CONF_V=@echo "CONF  " $@
+ HCONF_V=@echo "HCONF " $@ && $(HCONF)
+ LD_E_V=@echo "LD    " $@ && $(LD_E)
  MKDIR_V=@$(MKDIR)
+ QUIET_V=@
 endif
 
 TARGET:=$(BUILD_DIR)/libhutils.a
@@ -55,8 +62,11 @@ SRC:=$(filter-out %getopt.c,$(wildcard src/*.c))
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 TEST:=$(BUILD_DIR)/test
-HTEST_SRC:=$(wildcard tests/*.c)
 HTEST_GEN:=$(BUILD_DIR)/tests/tests.c
+HTEST_SRC:=$(wildcard tests/*.c)
+HTEST_SUITE_PRE=$(MKDIR)
+HTEST_SUITE_SRC=$<
+HTEST_SUITE_DST=$@
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 
 .PHONY: all
@@ -74,13 +84,18 @@ $(TEST): $(TEST_OBJ) $(OBJ)
 	$(MKDIR_V)
 	$(LD_E_V)
 
-$(BUILD_DIR)/%.o: %.c Makefile.gnu
+$(BUILD_DIR)/%.o: %.c Makefile $(CONFIG_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 
-%.o: %.c Makefile.gnu
+%.o: %.c Makefile $(CONFIG_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
+
+$(BUILD_DIR)/src/time.o: $(BUILD_DIR)/hconf/src/time.c.h
+
+$(BUILD_DIR)/hconf/src/time.c.h: src/time.c
+	$(HCONF_V) $(BUILD_DIR) $<
 
 include $(HTEST_PATH)/htest.mk
 
@@ -89,3 +104,10 @@ clean: clean_htest
 	rm -rf $(BUILD_DIR)
 
 -include $(OBJ:.o=.d) $(TEST_OBJ:.o=.d)
+
+$(CONFIG_CACHE): Makefile
+	$(CONF_V)
+	$(MKDIR_V)
+	$(CONFIG_TEST_BEGIN)
+	$(CONFIG_TEST_CCACHE)
+	$(CONFIG_TEST_END)

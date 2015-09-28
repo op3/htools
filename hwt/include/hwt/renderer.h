@@ -17,8 +17,24 @@
 #ifndef HWT_RENDERER_H
 #define HWT_RENDERER_H
 
+#define HWT_RENDERER_BIND(dst) do {\
+		(dst).button_draw = button_draw;\
+		(dst).panel_draw = panel_draw;\
+		(dst).text_create = text_create;\
+		(dst).text_draw = text_draw;\
+		(dst).text_free = text_free;\
+	} HUTILS_COND(while, 0)
+
+struct HWTRendererText;
 struct HWTRenderer {
-	void	(*draw)(void);
+	void	(*button_draw)(struct Vector3f const *, struct Vector3f const
+	    *);
+	void	(*panel_draw)(struct Vector3f const *, struct Vector3f const
+	    *);
+	struct	HWTRendererText *(*text_create)(char const *) FUNC_RETURNS;
+	void	(*text_draw)(struct HWTRendererText const *, struct Vector3f
+	    const *);
+	void	(*text_free)(struct HWTRendererText **);
 };
 
 #endif

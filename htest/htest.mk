@@ -21,7 +21,7 @@
 #  $(HTEST_SUITE_SRC) = source file pattern (e.g. $<).
 #  $(HTEST_SUITE_DST  = suite file pattern (e.g. $@).
 # Output:
-#  $(HTEST_SUITE) = test suite cache files.
+#  $(HTEST_SUITE)     = test suite cache files.
 
 HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) | \
 	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $(HTEST_SUITE_DST)

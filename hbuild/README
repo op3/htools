@@ -1,0 +1,55 @@
+hbuild - Building tools
+-----------------------
+
+A collection of tools and snippets to make GNU make even more powerable.
+
+
+build_dir.mk
+------------
+Creates a nice build directory name.
+
+include build_dir.mk
+# BUILD_DIR now has the nice name.
+
+
+config_cc.mk
+------------
+Various ways to configure compilation.
+
+include config_cc.mk
+%.o: %.c
+	$(CONFIG_CC)
+$(CONFIG_CC): Makefile
+
+
+hconf.sh
+---------
+Shell script to auto configure source code with preprocessor branches
+identified by "if defined(HCONF_*). The branches are tested top-down, so
+fallback branches should be organized towards the bottom.
+
+my_header.h:
+	#ifndef MY_HEADER_H
+	#define MY_HEADER_H
+	#if defined(HCONF_1)
+	# define PRIz "d"
+	#elif defined(HCONF_THAT_OTHER_WAY)
+	# defined PRIz "z"
+	#endif
+	#define HCONF_TEST printf("%"PRIz, (size_t)0)
+	#endif
+sh hconf.sh -v my_build_dir my_header.h
+
+my_build_dir/hconf/my_header.h now defines the most appropriate branch and
+includes the given header. But this can be done also for sauce code:
+
+my_sauce.c:
+	#include <hconf/my_sauce.c.h>
+	#if defined(HCONF_OH_RLY)
+	# include <exotic/system/header.h>
+	#elif defined(HCONF_YA_RLY)
+	# include <another/system/header.h>
+	#endif
+sh hconf.sh -v my_build_dir my_sauce.c
+
+my_build_dir/hconf/my_sauce.c.h now defines the most appropriate branch.

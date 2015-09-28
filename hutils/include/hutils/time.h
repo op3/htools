@@ -14,32 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hwt.h>
-#include <hwt/panel.h>
-#include <hwt/renderer.h>
+#ifndef HUTILS_TIME_H
+#define HUTILS_TIME_H
 
-int
-main(void)
-{
-	struct HWTRenderer renderer;
-	struct HWT *hwt;
-	struct HWTWidget *panel;
+#include <hutils/macros.h>
 
-	hwt = hwt_create(renderer);
+int	hutils_sleep(double) FUNC_RETURNS;
+double	hutils_time(void) FUNC_RETURNS;
 
-	panel = hwt_panel_create();
-	hwt_set_root(hwt, panel);
-
-	for (;;) {
-		struct HWTEvent event;
-
-		/* TODO: Get event. */
-
-		hwt_event_setup(&event, HWT_EVENT_EXPOSE);
-		hwt_send_event(hwt, &event);
-	}
-
-	hwt_free(&hwt);
-
-	return 0;
-}
+#endif
