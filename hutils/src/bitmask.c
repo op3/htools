@@ -33,6 +33,16 @@ bitmask_clear(struct Bitmask *const a_bm, int const a_index)
 }
 
 struct Bitmask *
+bitmask_copy(struct Bitmask const *const a_src)
+{
+	struct Bitmask *dst;
+
+	dst = bitmask_create(a_src->size);
+	memmove(dst->data, a_src->data, (dst->size + 7) / 8);
+	return dst;
+}
+
+struct Bitmask *
 bitmask_create(int const a_size)
 {
 	struct Bitmask *bm;

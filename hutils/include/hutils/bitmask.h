@@ -22,6 +22,7 @@
 struct Bitmask;
 
 void		bitmask_clear(struct Bitmask *, int);
+struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_RETURNS;
 struct Bitmask	*bitmask_create(int) FUNC_RETURNS;
 void		bitmask_free(struct Bitmask **);
 int		bitmask_get(struct Bitmask *, int) FUNC_RETURNS;

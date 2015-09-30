@@ -17,10 +17,10 @@ AR=ar
 CC=gcc
 LD=gcc
 
-include $(HBUILD_PATH)/build_dir.mk
+include $(HGMAKE_PATH)/build_dir.mk
 
 CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I$(HTEST_PATH)/include -D_GNU_SOURCE
-include $(HBUILD_PATH)/strict_cflags.mk
+include $(HGMAKE_PATH)/strict_cflags.mk
 CFLAGS:=$(CFLAGS) -Wswitch-enum
 LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
 
@@ -30,9 +30,9 @@ else
  CFLAGS:=$(CFLAGS) -ggdb
 endif
 
-HCONF=CC="$(CONFIG_CC)" CPPFLAGS="$(CPPFLAGS) $(CONFIG_CPPFLAGS)" CFLAGS="$(CFLAGS) $(CONFIG_CFLAGS)" $(HBUILD_PATH)/hconf.sh
+HCONF=CC="$(CONFIG_CC)" CPPFLAGS="$(CPPFLAGS) $(CONFIG_CPPFLAGS)" CFLAGS="$(CFLAGS) $(CONFIG_CFLAGS)" $(HGMAKE_PATH)/hconf.sh
 
-include $(HBUILD_PATH)/config_cache.mk
+include $(HGMAKE_PATH)/config_cache.mk
 
 AR_A=$(AR) rcs $@ $^
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
@@ -109,5 +109,5 @@ $(CONFIG_CACHE): Makefile
 	$(CONF_V)
 	$(MKDIR_V)
 	$(CONFIG_TEST_BEGIN)
-	$(CONFIG_TEST_CCACHE)
+	$(CONFIG_TEST_CC)
 	$(CONFIG_TEST_END)

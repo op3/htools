@@ -23,9 +23,15 @@
 
 #define CALLOC(ptr, num) do {\
 	ptr = calloc(num, sizeof *ptr);\
+	if (NULL == ptr) {\
+		err(EXIT_FAILURE, "calloc");\
+	}\
 } HUTILS_COND(while, 0)
 #define MALLOC(ptr, size) do {\
 	ptr = malloc(size);\
+	if (NULL == ptr) {\
+		err(EXIT_FAILURE, "malloc");\
+	}\
 } HUTILS_COND(while, 0)
 #define FREE(ptr) do {\
 	if (NULL != ptr) {\

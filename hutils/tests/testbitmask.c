@@ -99,6 +99,25 @@ HTEST(ZeroAll)
 	bitmask_free(&bitmask);
 }
 
+HTEST(Copy)
+{
+	struct Bitmask *bitmask1;
+	struct Bitmask *bitmask2;
+	int i;
+
+	bitmask1 = bitmask_create(100);
+	for (i = 1; 100 > i; i *= 2) {
+		bitmask_set(bitmask1, i);
+	}
+	bitmask2 = bitmask_copy(bitmask1);
+	for (i = 0; 100 > i; ++i) {
+		HTRY_I(bitmask_get(bitmask1, i), ==, bitmask_get(bitmask2,
+		    i));
+	}
+	bitmask_free(&bitmask1);
+	bitmask_free(&bitmask2);
+}
+
 HTEST_SUITE(Bitmask)
 {
 	HTEST_ADD(DefaultValue);
@@ -106,4 +125,5 @@ HTEST_SUITE(Bitmask)
 	HTEST_ADD(OutOfBounds);
 	HTEST_ADD(OneAll);
 	HTEST_ADD(ZeroAll);
+	HTEST_ADD(Copy);
 }

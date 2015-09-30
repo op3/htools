@@ -30,13 +30,9 @@ CONFIG_CPPFLAGS=$(shell $(SED) -n 2p $(CONFIG_CACHE))
 CONFIG_CFLAGS=$(shell $(SED) -n 3p $(CONFIG_CACHE))
 CONFIG_LDFLAGS=$(shell $(SED) -n 4p $(CONFIG_CACHE))
 
-CONFIG_TEST_CCACHE=\
-	$(QUIET_V)cmd="ccache -h";out=`$$cmd 2>&1`;ret=$$?;echo "$$cmd: $$out" >> $(CONFIG_LOG);\
-	pre=;\
-	if [ 0 -eq $$ret ]; then\
-		pre="ccache ";\
-	fi;\
-	$(SED) "1s/$$/$${pre}$(CC)/" $(CONFIG_TMP) > $(CONFIG_TMP)2 && mv $(CONFIG_TMP)2 $(CONFIG_TMP)
+CONFIG_ADD_CPPFLAGS=$(SED) "2s,$$, $1," $(CONFIG_TMP) > $(CONFIG_TMP)2 && mv $(CONFIG_TMP)2 $(CONFIG_TMP)
+CONFIG_ADD_CFLAGS=$(SED) "3s,$$, $1," $(CONFIG_TMP) > $(CONFIG_TMP)2 && mv $(CONFIG_TMP)2 $(CONFIG_TMP)
+CONFIG_ADD_LDFLAGS=$(SED) "4s,$$, $1," $(CONFIG_TMP) > $(CONFIG_TMP)2 && mv $(CONFIG_TMP)2 $(CONFIG_TMP)
 
 CONFIG_TEST_BEGIN=\
 	$(QUIET_V)echo > $(CONFIG_LOG);\
@@ -47,3 +43,11 @@ CONFIG_TEST_BEGIN=\
 
 CONFIG_TEST_END=\
 	$(QUIET_V)mv $(CONFIG_TMP) $@
+
+CONFIG_TEST_CC=\
+	$(QUIET_V)cmd="ccache -h";out=`$$cmd 2>&1`;ret=$$?;echo "$$cmd: $$out" >> $(CONFIG_LOG);\
+	pre=;\
+	if [ 0 -eq $$ret ]; then\
+		pre="ccache ";\
+	fi;\
+	$(SED) "1s,$$,$${pre}$(CC)," $(CONFIG_TMP) > $(CONFIG_TMP)2 && mv $(CONFIG_TMP)2 $(CONFIG_TMP)

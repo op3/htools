@@ -23,6 +23,7 @@ struct CondVar;
 struct Mutex;
 struct Thread;
 
+/* TODO: How to handle errors? */
 struct CondVar	*thread_condvar_create(char **) FUNC_RETURNS;
 int		thread_condvar_free(struct CondVar **, char **);
 int		thread_condvar_signal(struct CondVar *, char **);
