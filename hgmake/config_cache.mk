@@ -51,3 +51,6 @@ CONFIG_TEST_CC=\
 		pre="ccache ";\
 	fi;\
 	$(SED) "1s,$$,$${pre}$(CC)," $(CONFIG_TMP) > $(CONFIG_TMP)2 && mv $(CONFIG_TMP)2 $(CONFIG_TMP)
+
+CONFIG_GCC=\
+	cmd="gcc $(CPPFLAGS) $$cppflags $(CFLAGS) $$cflags -o $(CONFIG_TMP)2 $(CONFIG_MAIN_C) $$libs";out=`$$cmd 2>&1`;ret=$$?;$(REDIRECT_V)

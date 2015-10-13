@@ -14,21 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_BITMASK_H
-#define HUTILS_BITMASK_H
+#ifndef HUTILS_HASH_H
+#define HUTILS_HASH_H
 
 #include <hutils/macros.h>
 
-struct Bitmask;
-
-struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_RETURNS;
-void		bitmask_copy_mask(struct Bitmask *, struct Bitmask const *);
-struct Bitmask	*bitmask_create(int) FUNC_RETURNS;
-void		bitmask_free(struct Bitmask **);
-int		bitmask_get(struct Bitmask *, int) FUNC_RETURNS;
-void		bitmask_one(struct Bitmask *);
-void		bitmask_set(struct Bitmask *, int);
-void		bitmask_unset(struct Bitmask *, int);
-void		bitmask_zero(struct Bitmask *);
+uint32_t	hutils_hash32(void const *, size_t) FUNC_RETURNS;
 
 #endif

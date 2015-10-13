@@ -27,7 +27,7 @@ HTEST(DefaultValue)
 	HTRY_I(0, ==, bitmask_get(bitmask, 0));
 	bitmask_set(bitmask, 0);
 	HTRY_I(1, ==, bitmask_get(bitmask, 0));
-	bitmask_clear(bitmask, 0);
+	bitmask_unset(bitmask, 0);
 	HTRY_I(0, ==, bitmask_get(bitmask, 0));
 
 	bitmask_free(&bitmask);
@@ -49,13 +49,13 @@ HTEST(OutOfBounds)
 
 	(void)dummy;
 	bitmask = bitmask_create(1);
-	HTRY_SIGNAL(bitmask_clear(bitmask, -1));
-	HTRY_SIGNAL(bitmask_clear(bitmask, 1));
+	HTRY_SIGNAL(bitmask_unset(bitmask, -1));
+	HTRY_SIGNAL(bitmask_unset(bitmask, 1));
 	HTRY_SIGNAL(dummy = bitmask_get(bitmask, -1));
 	HTRY_SIGNAL(dummy = bitmask_get(bitmask, 1));
 	HTRY_SIGNAL(bitmask_set(bitmask, -1));
 	HTRY_SIGNAL(bitmask_set(bitmask, 1));
-	bitmask_clear(bitmask, 0);
+	bitmask_unset(bitmask, 0);
 	dummy = bitmask_get(bitmask, 0);
 	bitmask_set(bitmask, 0);
 }
@@ -118,6 +118,26 @@ HTEST(Copy)
 	bitmask_free(&bitmask2);
 }
 
+HTEST(CopyData)
+{
+	struct Bitmask *bitmask1;
+	struct Bitmask *bitmask2;
+
+	bitmask1 = bitmask_create(10);
+	bitmask2 = bitmask_create(9);
+	HTRY_SIGNAL(bitmask_copy_mask(bitmask2, bitmask1));
+	bitmask_free(&bitmask2);
+
+	bitmask2 = bitmask_create(11);
+	HTRY_SIGNAL(bitmask_copy_mask(bitmask2, bitmask1));
+	bitmask_free(&bitmask2);
+
+	bitmask2 = bitmask_create(10);
+	bitmask_copy_mask(bitmask2, bitmask1);
+	bitmask_free(&bitmask1);
+	bitmask_free(&bitmask2);
+}
+
 HTEST_SUITE(Bitmask)
 {
 	HTEST_ADD(DefaultValue);
@@ -126,4 +146,5 @@ HTEST_SUITE(Bitmask)
 	HTEST_ADD(OneAll);
 	HTEST_ADD(ZeroAll);
 	HTEST_ADD(Copy);
+	HTEST_ADD(CopyData);
 }

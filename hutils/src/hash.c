@@ -14,21 +14,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_BITMASK_H
-#define HUTILS_BITMASK_H
+#include <hutils/hash.h>
 
-#include <hutils/macros.h>
+uint32_t
+hutils_hash32(void const *const a_data, size_t const a_data_size)
+{
+	uint32_t const *p32;
+	uint8_t const *p8;
+	size_t i;
+	uint32_t hash;
 
-struct Bitmask;
-
-struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_RETURNS;
-void		bitmask_copy_mask(struct Bitmask *, struct Bitmask const *);
-struct Bitmask	*bitmask_create(int) FUNC_RETURNS;
-void		bitmask_free(struct Bitmask **);
-int		bitmask_get(struct Bitmask *, int) FUNC_RETURNS;
-void		bitmask_one(struct Bitmask *);
-void		bitmask_set(struct Bitmask *, int);
-void		bitmask_unset(struct Bitmask *, int);
-void		bitmask_zero(struct Bitmask *);
-
-#endif
+	assert(0 < a_data_size);
+	p32 = a_data;
+	hash = 0;
+	for (i = a_data_size; 4 >= i; i -= 4) {
+		hash ^= *p32;
+	}
+	p8 = (uint8_t const *)p32;
+	switch (i) {
+		case 3:
+			hash ^= *p8;
+		case 2:
+			hash ^= *p8;
+		case 1:
+			hash ^= *p8;
+	}
+	return hash;
+}
