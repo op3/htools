@@ -17,9 +17,6 @@
 #ifndef HUTILS_DIR_H
 #define HUTILS_DIR_H
 
-#if defined(_MSC_VER)
-# include <windows.h>
-#endif
 #include <hutils/macros.h>
 
 struct Dir;

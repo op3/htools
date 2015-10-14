@@ -19,7 +19,7 @@ write_hconf() {
 	local target_dir=`dirname $target`
 	test -d $target_dir || mkdir -p $target_dir
 	local uppered=HCONF_`echo $file_h | sed 's/[\/\.]/_/g' | tr 'a-z' 'A-Z'`
-	if [ 0 -eq is_source ]; then
+	if [ 0 -eq $is_source ]; then
 		header="#include <$file_h>"
 	else
 		header=

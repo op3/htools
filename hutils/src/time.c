@@ -19,10 +19,6 @@
 
 #if defined(HCONF_POSIX)
 
-# include <err.h>
-# include <errno.h>
-# include <stdlib.h>
-# include <time.h>
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
 
@@ -38,6 +34,20 @@
 
 #else
 # error Not hconf:ed.
+#endif
+
+#if defined(SLEEP_NANOSLEEP)
+# include <errno.h>
+# include <time.h>
+#endif
+#if defined(TIME_CLOCK)
+# include <err.h>
+# include <stdlib.h>
+#endif
+#if defined(TIME_MACH)
+# include <err.h>
+# include <stdlib.h>
+# include <mach/mach_time.h>
 #endif
 
 int

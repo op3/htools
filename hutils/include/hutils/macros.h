@@ -99,7 +99,7 @@
 } HUTILS_COND(while, 0)
 #else
 # define HUTILS_COND(stmt, cond) stmt (cond)
-# if defined(__linux__) || defined(__OpenBSD__)
+# if defined(__APPLE__) || defined(__linux__) || defined(__OpenBSD__)
 #  include <err.h>
 # else
 #  define err(code, str) do {\

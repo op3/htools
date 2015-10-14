@@ -13,9 +13,12 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-AR?=ar
-LD?=gcc
-CC?=gcc
+AR=ar
+LD=gcc
+CC=gcc
+
+include $(HGMAKE_PATH)/build_dir.mk
+
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
 else
@@ -28,11 +31,8 @@ else
   CFLAGS:=$(CFLAGS) -ggdb
  endif
 endif
-GCC_MACHINE:=$(shell gcc -dumpmachine)
-GCC_VERSION:=$(shell gcc -dumpversion)
-BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I../hutils/include
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HUTILS_PATH)/include -I$(HUTILS_PATH)/$(BUILD_DIR)
 CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
 ifneq (,$(findstring inux,$(GCC_MACHINE)))
  CFLAGS:=$(CFLAGS) -Wextra -Wswitch-enum

@@ -15,9 +15,12 @@
  */
 
 #include <hutils/dir.h>
+#include <hconf/src/dir.c.h>
 #include <hutils/memory.h>
 
-#if defined(_MSC_VER)
+#if defined(HCONF_WINDOWS)
+
+# include <windows.h>
 
 struct Dir {
 	HANDLE	handle;
@@ -89,7 +92,7 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 	return 1;
 }
 
-#elif defined(__linux__) || defined(__OpenBSD__)
+#elif defined(HCONF_DIRENT)
 
 #include <dirent.h>
 #include <stddef.h>
@@ -153,5 +156,5 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 }
 
 #else
-# error "Platform not supported!"
+# error Not hconf:ed.
 #endif

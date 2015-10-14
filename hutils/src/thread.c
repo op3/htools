@@ -15,9 +15,10 @@
  */
 
 #include <hutils/thread.h>
+#include <hconf/src/thread.c.h>
 #include <hutils/memory.h>
 
-#if defined(_MSC_VER)
+#if defined(HCONF_WINDOWS)
 
 # include <windows.h>
 # include <process.h>
@@ -117,7 +118,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 	LeaveCriticalSection(&a_mutex->cs);
 }
 
-#elif defined(__linux__) || defined(__OpenBSD__)
+#elif defined(HCONF_PTHREADS)
 
 # include <pthread.h>
 
@@ -331,5 +332,5 @@ thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 }
 
 #else
-# error "Platform not supported!"
+# error Not hconf:ed.
 #endif

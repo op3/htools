@@ -19,7 +19,7 @@ LD=gcc
 
 include $(HGMAKE_PATH)/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I$(HTEST_PATH)/include -D_GNU_SOURCE
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTEST_PATH)/include -D_GNU_SOURCE
 include $(HGMAKE_PATH)/strict_cflags.mk
 CFLAGS:=$(CFLAGS) -Wswitch-enum
 LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
@@ -92,8 +92,15 @@ $(BUILD_DIR)/%.o: %.c Makefile $(CONFIG_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 
-$(BUILD_DIR)/src/time.o: $(BUILD_DIR)/hconf/src/time.c.h
+$(BUILD_DIR)/src/dir.o: $(BUILD_DIR)/hconf/src/dir.c.h
+$(BUILD_DIR)/hconf/src/dir.c.h: src/dir.c
+	$(HCONF_V) $(BUILD_DIR) $<
 
+$(BUILD_DIR)/src/thread.o: $(BUILD_DIR)/hconf/src/thread.c.h
+$(BUILD_DIR)/hconf/src/thread.c.h: src/thread.c
+	$(HCONF_V) $(BUILD_DIR) $<
+
+$(BUILD_DIR)/src/time.o: $(BUILD_DIR)/hconf/src/time.c.h
 $(BUILD_DIR)/hconf/src/time.c.h: src/time.c
 	$(HCONF_V) $(BUILD_DIR) $<
 
