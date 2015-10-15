@@ -188,6 +188,21 @@ thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
 }
 
 int
+thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
+{
+	int ret;
+
+	ret = pthread_cond_broadcast(&a_condvar->cond);
+	if (0 != ret) {
+		if (NULL != a_err) {
+			*a_err = strdup(strerror(ret));
+		}
+		return 0;
+	}
+	return 1;
+}
+
+int
 thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
 {
 	int ret;

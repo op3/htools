@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include <hconf/include/hutils/macros.h>
 
 #define ABS(x) (0 > x ? -x : x)
 #define CLAMP(x, a, b) (x < a ? a : x > b ? b : x)
@@ -61,7 +62,7 @@
 #endif
 #if !defined(MIN)
 # define MIN(a, b) (a < b ? a : b)
-#endif 
+#endif
 #define SQR(x) (x * x)
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
@@ -77,7 +78,8 @@
 #endif
 #define ZERO(x) memset(&x, 0, sizeof x)
 
-#if defined(_MSC_VER)
+#if defined(HCONF_MSC)
+
 # include <windows.h>
 # define HUTILS_COND(stmt, cond)\
 	__pragma(warning(push))\
@@ -85,28 +87,34 @@
 	stmt (cond)\
 	__pragma(warning(pop))
 # define err(code, str) do {\
-	LPTSTR str_;\
-	DWORD err_;\
-	err_ = GetLastError();\
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | \
-		      FORMAT_MESSAGE_FROM_SYSTEM | \
-		      FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_,\
-		      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),\
-		      (LPTSTR)&str_, 0, NULL);\
-	MessageBox(NULL, str_, NULL, MB_OK);\
-	LocalFree(str_);\
-	exit(code);\
-} HUTILS_COND(while, 0)
-#else
+		LPTSTR str_;\
+		DWORD err_;\
+		err_ = GetLastError();\
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | \
+			      FORMAT_MESSAGE_FROM_SYSTEM | \
+			      FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_, \
+			      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), \
+			      (LPTSTR)&str_, 0, NULL);\
+		MessageBox(NULL, str_, NULL, MB_OK);\
+		LocalFree(str_);\
+		exit(code);\
+	} HUTILS_COND(while, 0)
+
+#elif defined(HCONF_ERR_H)
+
+# include <err.h>
 # define HUTILS_COND(stmt, cond) stmt (cond)
-# if defined(__APPLE__) || defined(__linux__) || defined(__OpenBSD__)
-#  include <err.h>
-# else
-#  define err(code, str) do {\
-	fprintf(stderr, "%s: %s\n", str, strerror(errno));\
-	exit(code);\
-} HUTILS_COND(while, 0)
-# endif
+
+#elif defined(HCONF_ERR_CUSTOM)
+
+# define HUTILS_COND(stmt, cond) stmt (cond)
+# define err(code, str) do {\
+		fprintf(stderr, "%s: %s\n", str, strerror(errno));\
+		exit(code);\
+	} HUTILS_COND(while, 0)
+
+#else
+# error Not hconf:ed.
 #endif
 
 #endif

@@ -27,16 +27,18 @@ HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) | \
 	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $(HTEST_SUITE_DST)
 ifeq (1,$(V))
  HTEST_CC_E_V=
- HTEST_QUIET=
+ HTEST_GEN_V=
+ HTEST_RM_V=
 else
  HTEST_CC_E_V=@echo "SUITE $@" &&
- HTEST_QUIET=@echo "TESTS $@" &&
+ HTEST_GEN_V=@echo "TESTS $@" &&
+ HTEST_RM_V=@echo "RM    $@" &&
 endif
 
 HTEST_SUITE:=$(addprefix $(BUILD_DIR)/,$(HTEST_SRC:.c=.suite))
 
 $(HTEST_GEN): $(HTEST_SUITE)
-	$(HTEST_QUIET)echo "#include <htest/htest.h>" > $@ &&\
+	$(HTEST_GEN_V)echo "#include <htest/htest.h>" > $@ &&\
 	cat $^ | sed 's/^\(.*\)$$/HTEST_SUITE_PROTO(\1);/' >> $@ &&\
 	echo "HTEST_SUITE_LIST_BEGIN" >> $@ &&\
 	cat $^ | sed 's/^\(.*\)$$/ HTEST_SUITE_LIST_ADD(\1)/' >> $@ &&\
@@ -48,4 +50,4 @@ $(BUILD_DIR)/%.suite: %.c
 
 .PHONY: clean_htest
 clean_htest:
-	rm -f $(HTEST_GEN) $(HTEST_SUITE)
+	$(HTEST_RM_V)rm -f $(HTEST_GEN) $(HTEST_SUITE)

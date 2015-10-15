@@ -17,7 +17,7 @@
 #include <hutils/thread.h>
 #include <htest/htest.h>
 
-#define N 100
+#define N 1000
 
 static void	runner(void *);
 static void	runner_condvar(void *);
@@ -25,7 +25,7 @@ static void	runner_mutex(void *);
 
 static struct CondVar *g_condvar;
 static struct Mutex *g_mutex;
-static int g_messenger;
+static int g_messenger, g_task_exists;
 
 void
 runner(void *const a_data)
@@ -39,9 +39,12 @@ runner_condvar(void *const a_dummy)
 	(void)a_dummy;
 	while (N > g_messenger) {
 		thread_mutex_lock(g_mutex, NULL);
-		++g_messenger;
+		while (g_task_exists) {
+			thread_condvar_wait(g_condvar, g_mutex, NULL);
+		}
+		g_task_exists = 1;
+		thread_condvar_broadcast(g_condvar, NULL);
 		thread_mutex_unlock(g_mutex, NULL);
-		thread_condvar_signal(g_condvar, NULL);
 	}
 }
 
@@ -97,18 +100,18 @@ HTEST(ConditionVariable)
 
 	g_condvar = thread_condvar_create(NULL);
 	g_mutex = thread_mutex_create(NULL);
-	thread_mutex_lock(g_mutex, NULL);
+	g_task_exists = 0;
 	t = thread_create(runner_condvar, NULL, NULL);
-	for (g_messenger = 0; N > g_messenger;) {
-		int prev;
-
-		for (prev = g_messenger; prev == g_messenger;) {
+	for (g_messenger = 0; N > g_messenger; ++g_messenger) {
+		thread_mutex_lock(g_mutex, NULL);
+		while (!g_task_exists) {
 			thread_condvar_wait(g_condvar, g_mutex, NULL);
 		}
-		HTRY_I(prev + 1, ==, g_messenger);
-		++g_messenger;
+		HTRY_I(1, ==, g_task_exists);
+		g_task_exists = 0;
+		thread_condvar_broadcast(g_condvar, NULL);
+		thread_mutex_unlock(g_mutex, NULL);
 	}
-	thread_mutex_unlock(g_mutex, NULL);
 	thread_free(&t, NULL);
 	thread_mutex_free(&g_mutex, NULL);
 	thread_condvar_free(&g_condvar, NULL);

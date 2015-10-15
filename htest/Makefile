@@ -14,10 +14,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 AR=ar
-LD=gcc
 CC=gcc
+LD=gcc
 
 include $(HGMAKE_PATH)/build_dir.mk
+
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HUTILS_PATH)/$(BUILD_DIR) -I$(HUTILS_PATH)/include
+include $(HGMAKE_PATH)/strict_cflags.mk
 
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
@@ -27,85 +30,53 @@ else
   CFLAGS:=$(CFLAGS) --coverage
   LDFLAGS:=$(LDFLAGS) --coverage -L/usr/lib/gcc/$(GCC_MACHINE)/$(GCC_VERSION) -lgcov
  else
-  BUILD_TYPE=debug
   CFLAGS:=$(CFLAGS) -ggdb
  endif
 endif
 
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HUTILS_PATH)/include -I$(HUTILS_PATH)/$(BUILD_DIR)
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
-ifneq (,$(findstring inux,$(GCC_MACHINE)))
- CFLAGS:=$(CFLAGS) -Wextra -Wswitch-enum
-else
- CFLAGS:=$(CFLAGS) -W
-endif
+include $(HGMAKE_PATH)/hconf.mk
+include $(HGMAKE_PATH)/config_cache.mk
+include $(HGMAKE_PATH)/cmds.mk
 
-CONFIG_CC:=$(BUILD_DIR)/config_cc
-AR_A=$(AR) rcs $@ $^
-LD_E=$(LD) -o $@ $^ $(LDFLAGS)
-CC_O=$(CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
-MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
-	echo -n $(@D)/ | cat - $$file > $(@:.o=.d);\
-	rm -f $$file;\
-fi
-MKDIR=test -d $(@D) || mkdir -p $(@D)
-
-ifeq ($(V),1)
- AR_A_V=$(AR_A)
- LD_E_V=$(LD_E)
- CC_O_V=$(CC_O)
- MV_D_V=$(MV_D)
- MKDIR_V=$(MKDIR)
-else
- AR_A_V=@echo "AR    $@" && $(AR_A)
- LD_E_V=@echo "LD    $@" && $(LD_E)
- CC_O_V=@echo "CC    $@" && $(CC_O)
- MV_D_V=@$(MV_D)
- MKDIR_V=@$(MKDIR)
-endif
+SRC:=$(wildcard src/*.c)
+OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 HTEST_GEN:=$(BUILD_DIR)/tests/test_all.c
 HTEST_SRC:=$(wildcard tests/*.c)
 HTEST_SUITE_PRE=$(MKDIR)
 HTEST_SUITE_SRC=$<
 HTEST_SUITE_DST=$@
-
-LIB_SRC:=$(wildcard src/*.c)
-LIB_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(LIB_SRC))
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
-ALL_DEP:=$(patsubst %.o,%.d,$(LIB_OBJ) $(TEST_OBJ))
 
 .PHONY: all
 all: $(BUILD_DIR)/test
 	@./$< -c
 	@echo "The result should be 7/11!"
 
-include htest.mk
-
-$(BUILD_DIR)/libhtest.a: $(LIB_OBJ)
-	$(MKDIR_V)
-	$(AR_A_V)
-
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
 	$(MKDIR_V)
 	$(LD_E_V)
 
-$(BUILD_DIR)/%.o: %.c htest.mk $(CONFIG_CC)
+$(BUILD_DIR)/libhtest.a: $(OBJ)
+	$(MKDIR_V)
+	$(AR_A_V)
+
+$(BUILD_DIR)/%.o: %.c htest.mk $(CONFIG_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 	$(MV_D_V)
 
-%.o: %.c htest.mk $(CONFIG_CC)
-	$(MKDIR_V)
-	$(CC_O_V)
-	$(MV_D_V)
+include htest.mk
 
 .PHONY: clean
 clean: clean_htest
-	rm -rf $(BUILD_DIR)
+	$(RM_V) $(BUILD_DIR)
 
-$(CONFIG_CC): Makefile
-# ccache?
-	
+$(CONFIG_CACHE): Makefile
+	$(CONF_V)
+	$(MKDIR_V)
+	$(CONFIG_TEST_BEGIN)
+	$(CONFIG_TEST_CC)
+	$(CONFIG_TEST_END)
 
--include $(ALL_DEP)
+-include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))

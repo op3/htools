@@ -19,16 +19,10 @@ write_hconf() {
 	local target_dir=`dirname $target`
 	test -d $target_dir || mkdir -p $target_dir
 	local uppered=HCONF_`echo $file_h | sed 's/[\/\.]/_/g' | tr 'a-z' 'A-Z'`
-	if [ 0 -eq $is_source ]; then
-		header="#include <$file_h>"
-	else
-		header=
-	fi
 	cat << END > $target
 #ifndef $uppered
 #define $uppered
 #define $opt
-$header
 #endif
 END
 }
@@ -78,12 +72,8 @@ for opt in $option_list; do
 		exit 1
 	fi
 	echo -n " $file: Testing option '$opt'... " | tee -a $log
-	if [ 0 -eq $is_source ]; then
-		cmd="$CC -D$opt $CPPFLAGS $CFLAGS -o /dev/null $main"
-	else
-		write_hconf
-		cmd="$CC $CPPFLAGS $CFLAGS -c -o /dev/null $file"
-	fi
+	write_hconf
+	cmd="$CC $CPPFLAGS $CFLAGS -c -o /dev/null $file"
 	out="`$cmd 2>&1`"
 	result=$?
 	if [ 0 -ne $verbose ]; then
@@ -107,5 +97,4 @@ for opt in $option_list; do
 		echo Failed.
 	fi | tee -a $log
 done
-write_hconf
 echo Passed. | tee -a $log
