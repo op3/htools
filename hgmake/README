@@ -43,28 +43,39 @@ Shell script to auto configure source code with preprocessor branches
 identified by "if defined(HCONF_*). The branches are tested top-down, so
 fallback branches should be organized towards the bottom.
 
-my_header.h:
+include/my_header.h:
 	#ifndef MY_HEADER_H
 	#define MY_HEADER_H
+	/* The chosen macro will be put into "hconf/<file". */
+	#include <hconf/include/my_header.h>
+	/* An hconf option is identified by " defined(HCONF_". */
 	#if defined(HCONF_1)
 	# define PRIz "d"
 	#elif defined(HCONF_THAT_OTHER_WAY)
 	# defined PRIz "z"
+	/* This else is required to make sure a proper branch is used. */
+	#else
+	# error Not hconf:ed.
 	#endif
+	/* Optional, will be used by the hconf test program. */
 	#define HCONF_TEST printf("%"PRIz, (size_t)0)
 	#endif
-sh hconf.sh -v my_build_dir my_header.h
+sh hconf.sh my_build_dir my_header.h
 
-my_build_dir/hconf/my_header.h now defines the most appropriate branch and
-includes the given header. But this can be done also for sauce code:
+my_build_dir/hconf/include/my_header.h now defines the most appropriate
+branch. This can be done also for sauce code:
 
 my_sauce.c:
 	#include <hconf/my_sauce.c.h>
 	#if defined(HCONF_OH_RLY)
 	# include <exotic/system/header.h>
+	void this_rly_my_function() { ... }
 	#elif defined(HCONF_YA_RLY)
 	# include <another/system/header.h>
+	void no_this_rly_my_function() { ... }
+	#else
+	# error Not hconf:ed.
 	#endif
-sh hconf.sh -v my_build_dir my_sauce.c
+sh hconf.sh my_build_dir my_sauce.c
 
 my_build_dir/hconf/my_sauce.c.h now defines the most appropriate branch.

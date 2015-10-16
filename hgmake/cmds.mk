@@ -20,7 +20,6 @@ MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
 	echo -n $(@D)/ | cat - $$file > $(@:.o=.d);\
 	rm -f $$file;\
 fi
-RM_RF=rm -rf
 
 ifeq (1,$(V))
  AR_A_V=$(AR_A)
@@ -30,7 +29,6 @@ ifeq (1,$(V))
  LD_E_V=$(LD_E)
  MKDIR_V=$(MKDIR)
  MV_D_V=$(MV_D)
- RM_V=$(RM_RF)
  QUIET_V=
 else
  AR_A_V=@echo "AR    " $@ && $(AR_A)
@@ -40,6 +38,5 @@ else
  LD_E_V=@echo "LD    " $@ && $(LD_E)
  MKDIR_V=@$(MKDIR)
  MV_D_V=@$(MV_D)
- RM_V=@echo "RM    " $@ && $(RM_RF)
  QUIET_V=@
 endif

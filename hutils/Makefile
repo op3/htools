@@ -80,7 +80,7 @@ include $(HTEST_PATH)/htest.mk
 
 .PHONY: clean
 clean: clean_htest
-	$(RM_V) $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)
 
 $(CONFIG_CACHE): Makefile
 	$(CONF_V)

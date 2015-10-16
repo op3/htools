@@ -28,11 +28,9 @@ HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) | \
 ifeq (1,$(V))
  HTEST_CC_E_V=
  HTEST_GEN_V=
- HTEST_RM_V=
 else
  HTEST_CC_E_V=@echo "SUITE $@" &&
  HTEST_GEN_V=@echo "TESTS $@" &&
- HTEST_RM_V=@echo "RM    $@" &&
 endif
 
 HTEST_SUITE:=$(addprefix $(BUILD_DIR)/,$(HTEST_SRC:.c=.suite))
@@ -50,4 +48,4 @@ $(BUILD_DIR)/%.suite: %.c
 
 .PHONY: clean_htest
 clean_htest:
-	$(HTEST_RM_V)rm -f $(HTEST_GEN) $(HTEST_SUITE)
+	rm -f $(HTEST_GEN) $(HTEST_SUITE)
