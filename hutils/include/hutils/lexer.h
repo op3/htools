@@ -31,8 +31,9 @@ struct LexerToken {
 struct Lexer	*lexer_create(struct LexerCallback const *, void *)
 	FUNC_RETURNS;
 void		lexer_free(struct Lexer **);
-int		lexer_get_col(struct Lexer const *) FUNC_RETURNS;
+int		lexer_get_col_no(struct Lexer const *) FUNC_RETURNS;
 int		lexer_get_line_no(struct Lexer const *) FUNC_RETURNS;
-int		lexer_token_get(struct Lexer *, struct LexerToken *);
+int		lexer_token_get(struct Lexer *, struct LexerToken *)
+	FUNC_RETURNS;
 
 #endif

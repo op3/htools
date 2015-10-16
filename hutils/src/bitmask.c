@@ -41,7 +41,7 @@ bitmask_copy_mask(struct Bitmask *const a_dst, struct Bitmask const *const
     a_src)
 {
 	if (a_dst->bit_num != a_src->bit_num) {
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	memmove(a_dst->data, a_src->data, NUM_UINT8(a_src->bit_num));
 }
@@ -52,7 +52,7 @@ bitmask_create(int const a_bit_num)
 	struct Bitmask *bm;
 
 	if (0 >= a_bit_num) {
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	CALLOC(bm, 1);
 	bm->bit_num = a_bit_num;
@@ -77,7 +77,7 @@ int
 bitmask_get(struct Bitmask *const a_bm, int const a_index)
 {
 	if (0 > a_index || a_bm->bit_num <= a_index) {
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	return (1 << (31 & a_index)) & a_bm->data[a_index / 32];
 }
@@ -92,7 +92,7 @@ void
 bitmask_set(struct Bitmask *const a_bm, int const a_index)
 {
 	if (0 > a_index || a_bm->bit_num <= a_index) {
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	a_bm->data[a_index / 32] |= (1 << (31 & a_index));
 }
@@ -101,7 +101,7 @@ void
 bitmask_unset(struct Bitmask *const a_bm, int const a_index)
 {
 	if (0 > a_index || a_bm->bit_num <= a_index) {
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	a_bm->data[a_index / 32] &= ~(1 << (31 & a_index));
 }

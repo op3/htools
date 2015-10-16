@@ -1,5 +1,6 @@
 #include <hutils/lexer.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <hutils/memory.h>
 
 #define BUF_SIZE 256
@@ -23,6 +24,7 @@ struct Lexer {
 
 static char	*extract(struct Lexer *, size_t) FUNC_RETURNS;
 static int	peek_char(struct Lexer *, size_t) FUNC_RETURNS;
+static size_t	stdio_read(void *, char *, size_t) FUNC_RETURNS;
 
 char *
 extract(struct Lexer *const a_lexer, size_t const a_len)
@@ -55,7 +57,11 @@ lexer_create(struct LexerCallback const *const a_callback, void *const
 	struct Lexer *lexer;
 
 	CALLOC(lexer, 1);
-	COPY(lexer->callback, *a_callback);
+	if (NULL == a_callback) {
+		lexer->callback.read = stdio_read;
+	} else {
+		COPY(lexer->callback, *a_callback);
+	}
 	lexer->callback_data = a_callback_data;
 	lexer->line_no = 1;
 	lexer->col = 1;
@@ -75,7 +81,7 @@ lexer_free(struct Lexer **const a_lexer)
 }
 
 int
-lexer_get_col(struct Lexer const *const a_lexer)
+lexer_get_col_no(struct Lexer const *const a_lexer)
 {
 	return a_lexer->col;
 }
@@ -244,4 +250,10 @@ peek_char(struct Lexer *const a_lexer, size_t const a_ofs)
 		}
 	}
 	return a_lexer->buf[(BUF_SIZE - 1) & ofs];
+}
+
+size_t
+stdio_read(void *const a_user_data, char *const a_dst, size_t const a_max)
+{
+	return fread(a_dst, 1, a_max, a_user_data);
 }

@@ -58,10 +58,10 @@ void
 handler(int const a_signum)
 {
 #if defined(__linux__) || defined(__OpenBSD__)
-	htest_print_("  %sFail:%sCaught signal = %s, next suite...\n",
+	htest_print_("  %sFail:%sCaught signal \"%s\", next suite...\n",
 	    g_color_fail, g_color_reset, strsignal(a_signum));
 #else
-	htest_print_("  %sFail:%sCaught signal = %d, next suite...\n",
+	htest_print_("  %sFail:%sCaught signal %d, next suite...\n",
 	    g_color_fail, g_color_reset, a_signum);
 #endif
 	GCOV_FLUSH;
@@ -217,7 +217,7 @@ main(int const argc, char **const argv)
 				pid = fork();
 				if (0 > pid) {
 					perror(NULL);
-					abort();
+					exit(EXIT_FAILURE);
 				}
 				if (0 == pid) {
 					int result;
