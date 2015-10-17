@@ -188,8 +188,9 @@ load(struct Lexer *const a_lexer)
 	for (;;) {
 		struct LexerToken token;
 
+		token.str = NULL;
 #define LOAD_ERROR(descr) do {\
-		fprintf(stderr, "%d:%d: "descr".", \
+		fprintf(stderr, "%d:%d: "descr".\n", \
 		    lexer_get_line_no(a_lexer), lexer_get_col_no(a_lexer));\
 		FREE(token.str);\
 		goto load_error;\
@@ -208,6 +209,7 @@ load(struct Lexer *const a_lexer)
 			}
 			CALLOC(last_section, 1);
 			last_section->name = token.str;
+			token.str = NULL;
 			TAILQ_INIT(&last_section->config_list);
 			TAILQ_INSERT_TAIL(&coll->section_list, last_section,
 			    next);
@@ -224,6 +226,7 @@ load(struct Lexer *const a_lexer)
 			}
 			CALLOC(config, 1);
 			config->name = token.str;
+			token.str = NULL;
 			if (!lexer_token_get(a_lexer, &token) ||
 			    '=' != token.str[0]) {
 				LOAD_ERROR("Missing '='");
@@ -233,6 +236,7 @@ load(struct Lexer *const a_lexer)
 				LOAD_ERROR("Missing value");
 			}
 			config->str = token.str;
+			token.str = NULL;
 			TAILQ_INSERT_TAIL(&last_section->config_list, config,
 			    next);
 		} else {

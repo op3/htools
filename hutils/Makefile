@@ -52,6 +52,10 @@ all: $(TARGET)
 test: $(TEST)
 	@./$< -c
 
+.PHONY: splint
+splint:
+	splint -nullret +posixstrictlib $(CPPFLAGS) $(SRC)
+
 $(TARGET): $(OBJ)
 	$(MKDIR_V)
 	$(AR_A_V)

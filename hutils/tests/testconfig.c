@@ -36,11 +36,9 @@ HTEST(MixedSections)
 
 	coll = config_collection_read(c_cfg1, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg2, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg3, 0);
 	HTRY_PTR(NULL, !=, coll);
@@ -59,23 +57,18 @@ HTEST(MixedConfigs)
 
 	coll = config_collection_read(c_cfg1, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg2, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg3, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg4, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg5, 0);
 	HTRY_PTR(NULL, ==, coll);
-	config_collection_free(&coll);
 
 	coll = config_collection_read(c_cfg6, 0);
 	HTRY_PTR(NULL, !=, coll);

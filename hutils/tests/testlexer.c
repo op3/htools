@@ -96,6 +96,8 @@ HTEST(AlnumVariations)
 
 	HTRY_I(0, ==, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_EOF, ==, token.type);
+	HTRY_I(0, ==, lexer_token_get(lexer, &token));
+	HTRY_I(LEXER_EOF, ==, token.type);
 
 	lexer_free(&lexer);
 }
@@ -133,6 +135,10 @@ HTEST(HexVariations)
 
 	HTRY_I(0, ==, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ERROR, ==, token.type);
+	HTRY_I(LEXER_ERROR_INVALID_HEX, ==, lexer_get_error(lexer));
+
+	HTRY_I(0, ==, lexer_token_get(lexer, &token));
+	HTRY_I(LEXER_EOF, ==, token.type);
 
 	lexer_free(&lexer);
 }
@@ -197,7 +203,7 @@ HTEST(NumberVariations)
 
 HTEST(UglyText)
 {
-	char const c_text[] = "_alnum0x1 0x2\"literal\n0x1+\"+0.1e-1%";
+	char const c_text[] = "_alnum0x1 \t 0x2\n\"literal\n0x1+\"+0.1e-1%";
 	struct LexerToken token;
 	struct Lexer *lexer;
 	char const *p;
@@ -216,7 +222,7 @@ HTEST(UglyText)
 	HTRY_I(LEXER_HEX, ==, token.type);
 	HTRY_STR("0x2", ==, token.str);
 	FREE(token.str);
-	HTRY_I(14, ==, lexer_get_col_no(lexer));
+	HTRY_I(16, ==, lexer_get_col_no(lexer));
 	HTRY_I(1, ==, lexer_get_line_no(lexer));
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
@@ -224,21 +230,21 @@ HTEST(UglyText)
 	HTRY_STR("literal\n0x1+", ==, token.str);
 	FREE(token.str);
 	HTRY_I(6, ==, lexer_get_col_no(lexer));
-	HTRY_I(2, ==, lexer_get_line_no(lexer));
+	HTRY_I(3, ==, lexer_get_line_no(lexer));
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_NUMBER, ==, token.type);
 	HTRY_STR("+0.1e-1", ==, token.str);
 	FREE(token.str);
 	HTRY_I(13, ==, lexer_get_col_no(lexer));
-	HTRY_I(2, ==, lexer_get_line_no(lexer));
+	HTRY_I(3, ==, lexer_get_line_no(lexer));
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_SYMBOL, ==, token.type);
 	HTRY_STR("%", ==, token.str);
 	FREE(token.str);
 	HTRY_I(14, ==, lexer_get_col_no(lexer));
-	HTRY_I(2, ==, lexer_get_line_no(lexer));
+	HTRY_I(3, ==, lexer_get_line_no(lexer));
 
 	HTRY_I(0, ==, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_EOF, ==, token.type);

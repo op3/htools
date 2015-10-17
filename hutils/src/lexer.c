@@ -63,6 +63,7 @@ lexer_create(struct LexerCallback const *const a_callback, void *const
 		COPY(lexer->callback, *a_callback);
 	}
 	lexer->callback_data = a_callback_data;
+	lexer->error = LEXER_ERROR_NONE;
 	lexer->line_no = 1;
 	lexer->col = 1;
 	return lexer;
@@ -86,6 +87,12 @@ lexer_get_col_no(struct Lexer const *const a_lexer)
 	return a_lexer->col;
 }
 
+enum LexerError
+lexer_get_error(struct Lexer const *const a_lexer)
+{
+	return a_lexer->error;
+}
+
 int
 lexer_get_line_no(struct Lexer const *const a_lexer)
 {
@@ -95,6 +102,7 @@ lexer_get_line_no(struct Lexer const *const a_lexer)
 int
 lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
 {
+	a_lexer->error = LEXER_ERROR_NONE;
 	for (;;) {
 		size_t i;
 		int c, is_number;
@@ -119,6 +127,7 @@ lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
 			return 0;
 		}
 		if ('\n' == c) {
+			++a_lexer->ofs;
 			++a_lexer->line_no;
 			a_lexer->col = 1;
 			continue;

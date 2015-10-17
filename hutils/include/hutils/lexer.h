@@ -5,6 +5,7 @@
 #include <hutils/macros.h>
 
 enum LexerError {
+	LEXER_ERROR_NONE,
 	LEXER_ERROR_INVALID_HEX,
 	LEXER_ERROR_INVALID_NUMBER,
 	LEXER_ERROR_UNTERMINATED_LITERAL
@@ -32,6 +33,7 @@ struct Lexer	*lexer_create(struct LexerCallback const *, void *)
 	FUNC_RETURNS;
 void		lexer_free(struct Lexer **);
 int		lexer_get_col_no(struct Lexer const *) FUNC_RETURNS;
+enum LexerError	lexer_get_error(struct Lexer const *) FUNC_RETURNS;
 int		lexer_get_line_no(struct Lexer const *) FUNC_RETURNS;
 int		lexer_token_get(struct Lexer *, struct LexerToken *)
 	FUNC_RETURNS;
