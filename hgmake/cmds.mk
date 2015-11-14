@@ -24,7 +24,7 @@ HCONF=CC="$(CC)" \
       LDFLAGS="$(LDFLAGS)" \
       LIBS="$(LIBS)" \
       $(HTOOLS_PATH)/hgmake/hconf.sh
-LD_E=$(LD) -o $@ $^ $(LDFLAGS)
+LD_E=$(LD) -o $@ $^ $(LDFLAGS) $(HCONF_LDFLAGS) $(LIBS) $(HCONF_LIBS)
 MKDIR=test -d $(@D) || mkdir -p $(@D)
 MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
 	echo -n $(@D)/ | cat - $$file > $(@:.o=.d);\

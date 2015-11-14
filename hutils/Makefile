@@ -22,7 +22,7 @@ include $(HTOOLS_PATH)/hgmake/build_dir.mk
 CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTOOLS_PATH)/htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 LDFLAGS:=-L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
-LIBS:=-lm
+LIBS:=-lhtest -lm
 
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
@@ -59,9 +59,9 @@ $(TARGET): $(OBJ)
 	$(MKDIR_V)
 	$(AR_A_V)
 
-$(TEST): $(TARGET) $(TEST_OBJ)
+$(TEST): $(TEST_OBJ) $(TARGET)
 	$(MKDIR_V)
-	$(LD_E_V) $(TARGET) -lhtest
+	$(LD_E_V)
 
 HCONF_FILES:=include/hutils/err.h \
 	include/hutils/macros.h \

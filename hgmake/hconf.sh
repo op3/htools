@@ -17,11 +17,6 @@
 
 no_option=no_option
 
-clean_hconf()
-{
-	rm -f $target_h $target_mk
-}
-
 build_result=
 build()
 {
@@ -46,6 +41,11 @@ build()
 	else
 		build_result=`echo $out | wc -l`
 	fi
+}
+
+clean_hconf()
+{
+	rm -f $target_h $target_mk
 }
 
 best_args=
@@ -178,26 +178,28 @@ try
 list_line_no=`grep -n "if defined(HCONF_" $file | cut -f1 -d:`
 for line_no in $list_line_no; do
 	args[0]=`sed -n "${line_no}s/.*if defined(\(HCONF_.*\)).*/\1/p" $file`
-	args[1]=
-	args[2]=
-	args[3]=
-	args[4]=
 	while true; do
 		line_no=`expr $line_no + 1`
 		line="`sed -n "${line_no}p" $file`"
-		if echo "$line" | grep CPPFLAGS > /dev/null; then
-			i=1
-		elif echo "$line" | grep CFLAGS > /dev/null; then
-			i=2
-		elif echo "$line" | grep LDFLAGS > /dev/null; then
-			i=3
-		elif echo "$line" | grep LIBS > /dev/null; then
-			i=4
-		else
+
+		var=`echo "$line" | sed -n 's/\/\* *\([_0-9A-Za-z]*\)=.*/\1/p'`
+		if [ ! $var ]; then
 			break
 		fi
-		args[$i]=`echo "$line" | awk '{for(i=1;i<=NF;i++){if(match($i,/-[_0-9A-Za-z]*/)){printf" %s",substr($i,RSTART,RLENGTH)}}}'`
+		expr=`echo "$line" | sed -n 's/\/\* *\(.*\) *\*\/.*/\1/p'`
+		if [ "CPPFLAGS" = $var ] ||
+			[ "CFLAGS" = $var ] ||
+			[ "LDFLAGS" = $var ] ||
+			[ "LIBS" = $var ]; then
+			eval OPT_$expr
+		else
+			eval $expr
+		fi
 	done
+	args[1]="$OPT_CPPFLAGS"
+	args[2]="$OPT_CFLAGS"
+	args[3]="$OPT_LDFLAGS"
+	args[4]="$OPT_LIBS"
 	try
 done
 if [ $best_args ]; then

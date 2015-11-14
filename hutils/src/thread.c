@@ -119,7 +119,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 }
 
 #elif defined(HCONF_PTHREAD)
-/* LIBS = -lpthread */
+/* LIBS=-lpthread */
 
 # include <pthread.h>
 
