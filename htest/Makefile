@@ -17,10 +17,10 @@ AR=ar
 CC=gcc
 LD=gcc
 
-include $(HGMAKE_PATH)/build_dir.mk
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(HUTILS_PATH)/$(BUILD_DIR) -I$(HUTILS_PATH)/include
-include $(HGMAKE_PATH)/strict_cflags.mk
+CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(BUILD_DIR) -I$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -I$(HTOOLS_PATH)/hutils/include
+include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
@@ -34,9 +34,7 @@ else
  endif
 endif
 
-include $(HGMAKE_PATH)/hconf.mk
-include $(HGMAKE_PATH)/config_cache.mk
-include $(HGMAKE_PATH)/cmds.mk
+include $(HTOOLS_PATH)/hgmake/cmds.mk
 
 SRC:=$(wildcard src/*.c)
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
@@ -61,7 +59,10 @@ $(BUILD_DIR)/libhtest.a: $(OBJ)
 	$(MKDIR_V)
 	$(AR_A_V)
 
-$(BUILD_DIR)/%.o: %.c htest.mk $(CONFIG_CACHE)
+HCONF_FILES:=src/htest.c
+include $(HTOOLS_PATH)/hgmake/hconf.mk
+
+$(BUILD_DIR)/%.o: %.c Makefile htest.mk $(HCONF_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 	$(MV_D_V)
@@ -69,14 +70,7 @@ $(BUILD_DIR)/%.o: %.c htest.mk $(CONFIG_CACHE)
 include htest.mk
 
 .PHONY: clean
-clean: clean_htest
-	$(RM_V) $(BUILD_DIR)
-
-$(CONFIG_CACHE): Makefile
-	$(CONF_V)
-	$(MKDIR_V)
-	$(CONFIG_TEST_BEGIN)
-	$(CONFIG_TEST_CC)
-	$(CONFIG_TEST_END)
+clean:
+	rm -rf $(BUILD_DIR)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))

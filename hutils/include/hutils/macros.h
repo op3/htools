@@ -78,43 +78,18 @@
 #endif
 #define ZERO(x) memset(&x, 0, sizeof x)
 
-#if defined(HCONF_MSC)
-
-# include <windows.h>
+#if defined(HCONF_WARNING_4127)
 # define HUTILS_COND(stmt, cond)\
 	__pragma(warning(push))\
 	__pragma(warning(disable:4127))\
 	stmt (cond)\
 	__pragma(warning(pop))
-# define err(code, str) do {\
-		LPTSTR str_;\
-		DWORD err_;\
-		err_ = GetLastError();\
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | \
-			      FORMAT_MESSAGE_FROM_SYSTEM | \
-			      FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_, \
-			      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), \
-			      (LPTSTR)&str_, 0, NULL);\
-		MessageBox(NULL, str_, NULL, MB_OK);\
-		LocalFree(str_);\
-		exit(code);\
-	} HUTILS_COND(while, 0)
-
-#elif defined(HCONF_ERR_H)
-
-# include <err.h>
+#elif defined(HCONF_OTHERS)
 # define HUTILS_COND(stmt, cond) stmt (cond)
-
-#elif defined(HCONF_ERR_CUSTOM)
-
-# define HUTILS_COND(stmt, cond) stmt (cond)
-# define err(code, str) do {\
-		fprintf(stderr, "%s: %s\n", str, strerror(errno));\
-		exit(code);\
-	} HUTILS_COND(while, 0)
-
 #else
 # error Not hconf:ed.
 #endif
+
+#define HCONF_TEST do {} HUTILS_COND(while, 0)
 
 #endif

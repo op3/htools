@@ -15,6 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <hconf/src/htest.h>
 #include <sys/types.h>
 #include <assert.h>
 #include <stdarg.h>
@@ -22,17 +23,41 @@
 #include <string.h>
 #include <htest/htest.h>
 
-#ifdef _MSC_VER
+#if defined(HCONF_MSC)
+
 # include <io.h>
 # include <signal.h>
 # include <hutils/getopt.h>
+
 # define STDIN_FILENO 0
 # define STDOUT_FILENO 1
 # define STDERR_FILENO 2
+
 char const *const nul_path = "NUL";
-#else
+
+char const *strsignal(int const a_signum)
+{
+	switch (a_signum) {
+		case SIGABRT: return "SIGABRT";
+		case SIGFPE: return "SIGFPE";
+		case SIGILL: return "SIGILL";
+		case SIGINT: return "SIGINT";
+		case SIGSEGV: return "SIGSEGV";
+		case SIGTERM: return "SIGTERM";
+		default: return "Unknown";
+	}
+}
+
+#elif defined(HCONF_POSIX)
+
 # include <unistd.h>
+
+# define SUPPORT_FORK
+
 char const *const nul_path = "/dev/null";
+
+#else
+# error Not hconf:ed.
 #endif
 
 #define BLUE "\033[1;34m"
@@ -57,13 +82,8 @@ void (*g_htest_dtor_)(void);
 void
 handler(int const a_signum)
 {
-#if defined(__linux__) || defined(__OpenBSD__)
 	htest_print_("  %sFail:%sCaught signal \"%s\", next suite...\n",
 	    g_color_fail, g_color_reset, strsignal(a_signum));
-#else
-	htest_print_("  %sFail:%sCaught signal %d, next suite...\n",
-	    g_color_fail, g_color_reset, a_signum);
-#endif
 	GCOV_FLUSH;
 	_exit(EXIT_FAILURE);
 }
@@ -210,7 +230,7 @@ main(int const argc, char **const argv)
 
 		for (test_index = 1; test_enumerator >= test_index;
 		    ++test_index) {
-#if !defined(_MSC_VER)
+#ifdef SUPPORT_FORK
 			if (do_fork) {
 				pid_t pid;
 

@@ -24,20 +24,20 @@
 
 TAILQ_HEAD(TypeList, HWTWidgetType);
 struct HWT {
-	struct	HWTRenderer *renderer;
-	struct	HWTWidget *root;
+	struct	HWTRenderer const *renderer;
 	struct	TypeList type_list;
+	struct	HWTWidget *root;
 };
 
 struct HWT *
-hwt_create(struct HWTRenderer *const a_renderer)
+hwt_create(struct HWTRenderer const *const a_renderer)
 {
 	struct HWT *hwt;
 
 	CALLOC(hwt, 1);
 	hwt->renderer = a_renderer;
-	hwt->root = NULL;
 	TAILQ_INIT(&hwt->type_list);
+	hwt->root = NULL;
 	hwt_grid_setup_(hwt);
 	hwt_panel_setup_(hwt);
 	return hwt;
@@ -63,12 +63,6 @@ hwt_free(struct HWT **const a_hwt)
 	}
 
 	FREE(*a_hwt);
-}
-
-struct HWTWidgetCallback const *
-hwt_get_callback(struct HWTWidget const *const a_widget)
-{
-	return &a_widget->type->callback;
 }
 
 void

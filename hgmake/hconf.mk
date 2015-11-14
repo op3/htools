@@ -12,4 +12,39 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-HCONF=CC="$(CONFIG_CC)" CPPFLAGS="$(CPPFLAGS) $(CONFIG_CPPFLAGS)" CFLAGS="$(CFLAGS) $(CONFIG_CFLAGS)" $(HGMAKE_PATH)/hconf.sh
+# HCONF_FILES = list of files to be hconf:ed.
+
+ifndef SED
+ SED:=sed
+endif
+
+HCONF_CACHE:=$(BUILD_DIR)/hconf_cache
+HCONF_LOG:=$(BUILD_DIR)/hconf_log
+
+HCONF_CC=$(shell $(SED) -n 1p $(HCONF_CACHE))
+HCONF_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_CACHE))
+HCONF_CFLAGS=$(shell $(SED) -n 3p $(HCONF_CACHE))
+HCONF_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_CACHE))
+HCONF_LIBS=$(shell $(SED) -n 5p $(HCONF_CACHE))
+
+define HCONF_RULE
+$$(BUILD_DIR)/hconf/$$(FILE:.c=.h): $$(FILE)
+	$$(MKDIR_V)
+	$$(HCONF_V) $$(BUILD_DIR) $$<
+endef
+
+$(foreach FILE,$(HCONF_FILES),$(eval $(HCONF_RULE)))
+
+$(HCONF_CACHE): Makefile $(addprefix $(BUILD_DIR)/hconf/,$(HCONF_FILES:.c=.h))
+	$(MKDIR_V)
+	$(QUIET_V)cmd="ccache -h";out=`$$cmd 2>&1`;ret=$$?;echo "$$cmd: $$out" > $(HCONF_LOG);\
+	cc=gcc;\
+	if [ 0 -eq $$ret ]; then\
+		cc="ccache gcc";\
+	fi;\
+	echo $$cc > $(HCONF_CACHE).tmp;\
+	echo >> $(HCONF_CACHE).tmp;\
+	echo >> $(HCONF_CACHE).tmp;\
+	echo >> $(HCONF_CACHE).tmp;\
+	echo >> $(HCONF_CACHE).tmp;\
+	paste -d' ' $(HCONF_CACHE).tmp $(filter %.mk,$(^:.h=.mk)) | tr -s " " > $(HCONF_CACHE)

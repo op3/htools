@@ -14,12 +14,37 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef SRC_HWT_H
-#define SRC_HWT_H
+#ifndef HUTILS_ERR_H
+#define HUTILS_ERR_H
 
-struct HWTWidget;
+#include <hconf/include/hutils/err.h>
 
-struct HWTWidgetCallback const *hwt_get_callback(struct HWTWidget const *)
-	FUNC_RETURNS;
+#if defined(HCONF_MSC)
+# include <windows.h>
+# define err(code, str) do {\
+		LPTSTR str_;\
+		DWORD err_;\
+		err_ = GetLastError();\
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | \
+			      FORMAT_MESSAGE_FROM_SYSTEM | \
+			      FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_, \
+			      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), \
+			      (LPTSTR)&str_, 0, NULL);\
+		MessageBox(NULL, str_, NULL, MB_OK);\
+		LocalFree(str_);\
+		exit(code);\
+	} HUTILS_COND(while, 0)
+#elif defined(HCONF_ERR_H)
+# include <err.h>
+#elif defined(HCONF_ERR_CUSTOM)
+# define err(code, str) do {\
+		fprintf(stderr, "%s: %s\n", str, strerror(errno));\
+		exit(code);\
+	} HUTILS_COND(while, 0)
+#else
+# error Not hconf:ed.
+#endif
+
+#define HCONF_TEST err(0, 0)
 
 #endif

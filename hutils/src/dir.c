@@ -15,7 +15,7 @@
  */
 
 #include <hutils/dir.h>
-#include <hconf/src/dir.c.h>
+#include <hconf/src/dir.h>
 #include <hutils/memory.h>
 
 #if defined(HCONF_WINDOWS)

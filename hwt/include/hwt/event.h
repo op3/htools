@@ -17,22 +17,28 @@
 #ifndef HWT_EVENT_H
 #define HWT_EVENT_H
 
+#include <hwt/common.h>
+
 enum HWTEventType {
-	HWT_EVENT_EXPOSE
+	HWT_EVENT_EXPOSE,
+	HWT_EVENT_RESIZE
 };
 
 struct HWTEvent {
 	enum	HWTEventType type;
 	union {
 		struct {
-			float	x;
-			float	y;
-			float	width;
-			float	height;
+			HWTRect	rect;
 		} expose;
+		struct {
+			HWTSize	size;
+		} resize;
 	} data;
 };
 
-void hwt_event_setup(struct HWTEvent *, enum HWTEventType);
+void	hwt_event_expose_init(struct HWTEvent *, enum HWTEventType, float,
+    float, float, float);
+void	hwt_event_resize_init(struct HWTEvent *, enum HWTEventType, float,
+    float);
 
 #endif

@@ -28,8 +28,10 @@ struct MockWidgetCallback {
 	void	*data;
 };
 
-struct HWTWidget *mockwidget_create(struct MockWidgetCallback *)
+struct HWTWidget	*mockwidget_create(struct MockWidgetCallback *)
 	FUNC_RETURNS;
-void mockwidget_setup(struct HWT *);
+void			mockwidget_get_size(struct HWTWidth const *, struct
+    HWTSize *);
+void			mockwidget_setup(struct HWT *);
 
 #endif

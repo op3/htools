@@ -12,8 +12,18 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+ifndef SED
+SED:=sed
+endif
+
 AR_A=$(AR) rcs $@ $^
-CC_O=$(CONFIG_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CONFIG_CPPFLAGS) $(CFLAGS) $(CONFIG_CFLAGS)
+CC_O=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
+HCONF=CC="$(CC)" \
+      CPPFLAGS="$(CPPFLAGS)" \
+      CFLAGS="$(CFLAGS)" \
+      LDFLAGS="$(LDFLAGS)" \
+      LIBS="$(LIBS)" \
+      $(HTOOLS_PATH)/hgmake/hconf.sh
 LD_E=$(LD) -o $@ $^ $(LDFLAGS)
 MKDIR=test -d $(@D) || mkdir -p $(@D)
 MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
@@ -24,7 +34,8 @@ fi
 ifeq (1,$(V))
  AR_A_V=$(AR_A)
  CC_O_V=$(CC_O)
- CONF_V=
+ HCONF_BEGIN_V=$(HCONF_BEGIN)
+ HCONF_END_V=$(HCONF_END)
  HCONF_V=$(HCONF) -v
  LD_E_V=$(LD_E)
  MKDIR_V=$(MKDIR)
@@ -33,7 +44,8 @@ ifeq (1,$(V))
 else
  AR_A_V=@echo "AR    " $@ && $(AR_A)
  CC_O_V=@echo "CC    " $@ && $(CC_O)
- CONF_V=@echo "CONF  " $@
+ HCONF_BEGIN_V=@echo "HCONF " $@ && $(HCONF_BEGIN)
+ HCONF_END_V=@echo "HCONF " $@ && $(HCONF_END)
  HCONF_V=@echo "HCONF " $@ && $(HCONF)
  LD_E_V=@echo "LD    " $@ && $(LD_E)
  MKDIR_V=@$(MKDIR)

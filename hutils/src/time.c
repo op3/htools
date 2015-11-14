@@ -15,7 +15,7 @@
  */
 
 #include <hutils/time.h>
-#include <hconf/src/time.c.h>
+#include <hconf/src/time.h>
 
 #if defined(HCONF_POSIX)
 

@@ -14,27 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HWT_RENDERER_H
-#define HWT_RENDERER_H
+#ifndef HWT_EVENT_H
+#define HWT_EVENT_H
 
-#define HWT_RENDERER_BIND(dst) do {\
-		(dst).button_draw = button_draw;\
-		(dst).panel_draw = panel_draw;\
-		(dst).text_create = text_create;\
-		(dst).text_draw = text_draw;\
-		(dst).text_free = text_free;\
-	} HUTILS_COND(while, 0)
-
-struct HWTRendererText;
-struct HWTRenderer {
-	void	(*button_draw)(struct Vector3f const *, struct Vector3f const
-	    *);
-	void	(*panel_draw)(struct Vector3f const *, struct Vector3f const
-	    *);
-	struct	HWTRendererText *(*text_create)(char const *) FUNC_RETURNS;
-	void	(*text_draw)(struct HWTRendererText *, struct Vector3f const
-	    *);
-	void	(*text_free)(struct HWTRendererText **);
+struct HWTRect {
+	float	x;
+	float	y;
+	float	width;
+	float	height;
+};
+struct HWTSize {
+	float	width;
+	float	height;
 };
 
 #endif

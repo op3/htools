@@ -17,11 +17,12 @@ AR=ar
 CC=gcc
 LD=gcc
 
-include $(HGMAKE_PATH)/build_dir.mk
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTEST_PATH)/include -D_GNU_SOURCE
-include $(HGMAKE_PATH)/strict_cflags.mk
-LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm -lpthread
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTOOLS_PATH)/htest/include
+include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
+LDFLAGS:=-L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
+LIBS:=-lm
 
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
@@ -29,9 +30,7 @@ else
  CFLAGS:=$(CFLAGS) -ggdb
 endif
 
-include $(HGMAKE_PATH)/hconf.mk
-include $(HGMAKE_PATH)/config_cache.mk
-include $(HGMAKE_PATH)/cmds.mk
+include $(HTOOLS_PATH)/hgmake/cmds.mk
 
 TARGET:=$(BUILD_DIR)/libhutils.a
 SRC:=$(filter-out %getopt.c,$(wildcard src/*.c))
@@ -62,35 +61,23 @@ $(TARGET): $(OBJ)
 
 $(TEST): $(TARGET) $(TEST_OBJ)
 	$(MKDIR_V)
-	$(LD_E_V) $(TARGET)
+	$(LD_E_V) $(TARGET) -lhtest
 
-$(BUILD_DIR)/%.o: %.c Makefile $(CONFIG_CACHE) $(BUILD_DIR)/hconf/include/hutils/macros.h
+HCONF_FILES:=include/hutils/err.h \
+	include/hutils/macros.h \
+	src/dir.c \
+	src/thread.c \
+	src/time.c
+include $(HTOOLS_PATH)/hgmake/hconf.mk
+
+$(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 
-$(BUILD_DIR)/hconf/%.c.h: %.c $(BUILD_DIR)/hconf/include/hutils/macros.h
-	$(HCONF_V) $(BUILD_DIR) $<
-
-$(BUILD_DIR)/hconf/include/hutils/macros.h: include/hutils/macros.h $(CONFIG_CACHE)
-	$(HCONF_V) $(BUILD_DIR) $<
-
-$(BUILD_DIR)/src/dir.o: $(BUILD_DIR)/hconf/src/dir.c.h
-
-$(BUILD_DIR)/src/thread.o: $(BUILD_DIR)/hconf/src/thread.c.h
-
-$(BUILD_DIR)/src/time.o: $(BUILD_DIR)/hconf/src/time.c.h
-
-include $(HTEST_PATH)/htest.mk
+include $(HTOOLS_PATH)/htest/htest.mk
 
 .PHONY: clean
-clean: clean_htest
+clean:
 	rm -rf $(BUILD_DIR)
-
-$(CONFIG_CACHE): Makefile
-	$(CONF_V)
-	$(MKDIR_V)
-	$(CONFIG_TEST_BEGIN)
-	$(CONFIG_TEST_CC)
-	$(CONFIG_TEST_END)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))

@@ -19,6 +19,7 @@
 #define HUTILS_MEMORY_H
 
 #include <stdlib.h>
+#include <hutils/err.h>
 #include <hutils/macros.h>
 
 #define CALLOC(ptr, num) do {\

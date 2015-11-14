@@ -27,7 +27,7 @@
 	if (typ != in->type) {\
 		fprintf(stderr, "HWT cast mismatch (src=%s != dst=%s).\n",\
 		    in->type->name, typ->name);\
-		abort();\
+		exit(EXIT_FAILURE);\
 	}\
 	out = (void *)in;\
 } HUTILS_COND(while, 0)
@@ -42,13 +42,13 @@ struct HWTWidgetType {
 };
 struct HWTWidget {
 	struct	HWTWidgetType const *type;
-	struct	HWTHolder *holder;
+	struct	HWTWidget *parent;
 };
 
-void widget_free(struct HWT *, struct HWTWidget **);
-void widget_setup(struct HWTWidget *, struct HWTWidgetType const *);
-void widget_propagate_min(struct HWT *, struct HWTWidget *, struct HWTRect *);
-void widget_propagate_size(struct HWT *, struct HWTWidget *, struct HWTRect
+void	widget_free(struct HWT *, struct HWTWidget **);
+void	widget_propagate_size(struct HWT *, struct HWTWidget *, struct HWTRect
     const *);
+void	widget_query_min(struct HWT *, struct HWTWidget *, struct HWTRect *);
+void	widget_setup(struct HWTWidget *, struct HWTWidgetType const *);
 
 #endif

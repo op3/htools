@@ -15,7 +15,7 @@
  */
 
 #include <hutils/thread.h>
-#include <hconf/src/thread.c.h>
+#include <hconf/src/thread.h>
 #include <hutils/memory.h>
 
 #if defined(HCONF_WINDOWS)
@@ -118,7 +118,8 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 	LeaveCriticalSection(&a_mutex->cs);
 }
 
-#elif defined(HCONF_PTHREADS)
+#elif defined(HCONF_PTHREAD)
+/* LIBS = -lpthread */
 
 # include <pthread.h>
 

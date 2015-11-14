@@ -16,13 +16,6 @@
 hwt - Generic widget toolkit
 ----------------------------
 
-Another widget toolkit, very light and clean, and of course in ANSI C.
-Provides the logic, actual input and output comes from the outside. Tries hard
-to minimize redundant ways to do things, and opportunities for common
-mistakes.
-
-
-Pseudo-example
---------------
-
-To come.
+Another widget toolkit, very light and simple, and of course in ANSI C.
+Provides only the logic, user code must supply input and output. Tries hard to
+minimize redundant ways to do things, and opportunities for common mistakes.

@@ -31,33 +31,73 @@ dtor()
 	hwt_free(&g_hwt);
 }
 
-HTEST(NotZero)
+HTEST(PositiveDimensions)
 {
 	struct HWTWidget *grid;
+	int i;
 
-	(void)grid;
-	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(0, 0), dtor);
-	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(0, 1), dtor);
-	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(1, 0), dtor);
-	grid = hwt_grid_create(1, 1);
+	for (i = -1; 1 > i; ++i) {
+		int j;
+
+		for (j = -1; 1 > j; ++j) {
+			if (1 == i && 1 == j) {
+				grid = hwt_grid_create(i, j);
+			} else {
+				HTRY_SIGNAL(grid = hwt_grid_create(i, j));
+			}
+		}
+	}
 	hwt_set_root(g_hwt, grid);
 }
 
 HTEST(Children)
 {
 	struct HWTWidget *grid;
-	int row, col;
+	int row;
 
 	grid = hwt_grid_create(2, 2);
 	hwt_set_root(g_hwt, grid);
-	for (row = 0; 2 > row; ++row) {
-		for (col = 0; 2 > col; ++col) {
-			struct HWTHolder *holder;
-			struct HWTWidget *child;
+	for (row = -1; 3 > row; ++row) {
+		int col;
 
-			holder = hwt_grid_get_holder(grid, row, col);
-			child = hwt_panel_create();
-			HTRY_VOID(hwt_holder_set_child(holder, child));
+		for (col = -1; 3 > col; ++col) {
+			struct HWTHolder *holder;
+
+			g_widget = hwt_panel_create();
+			if (0 <= row && 2 > row &&
+			    0 <= col && 2 > col) {
+				HTRY_VOID(hwt_grid_set_child(grid, row, col,
+				    g_widget));
+			} else {
+				HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, row,
+				    col, g_widget), dtor);
+			}
+		}
+	}
+}
+
+HTEST(MinSize)
+{
+	struct HWTWidget *grid;
+	int row;
+
+	grid = hwt_grid_create(2, 2);
+	hwt_set_root(g_hwt, grid);
+	for (row = -1; 3 > row; ++row) {
+		int col;
+
+		for (col = -1; 3 > col; ++col) {
+			struct HWTHolder *holder;
+
+			g_widget = hwt_panel_create();
+			if (0 <= row && 2 > row &&
+			    0 <= col && 2 > col) {
+				HTRY_VOID(hwt_grid_set_child(grid, row, col,
+				    g_widget));
+			} else {
+				HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, row,
+				    col, g_widget), dtor);
+			}
 		}
 	}
 }
@@ -66,8 +106,9 @@ HTEST_SUITE(Grid)
 {
 	g_hwt = hwt_create(NULL);
 
-	HTEST_ADD(NotZero);
+	HTEST_ADD(PositiveDimensions);
 	HTEST_ADD(Children);
+	HTEST_ADD(MinSize);
 
 	hwt_free(&g_hwt);
 }
