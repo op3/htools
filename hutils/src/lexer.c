@@ -11,7 +11,7 @@ enum {
 };
 
 struct Lexer {
-	struct	LexerCallback callback;
+	LexerCallback	callback;
 	void	*callback_data;
 	enum	LexerError error;
 	int	line_no;
@@ -51,17 +51,12 @@ extract(struct Lexer *const a_lexer, size_t const a_len)
 }
 
 struct Lexer *
-lexer_create(struct LexerCallback const *const a_callback, void *const
-    a_callback_data)
+lexer_create(LexerCallback const a_callback, void *const a_callback_data)
 {
 	struct Lexer *lexer;
 
 	CALLOC(lexer, 1);
-	if (NULL == a_callback) {
-		lexer->callback.read = stdio_read;
-	} else {
-		COPY(lexer->callback, *a_callback);
-	}
+	lexer->callback = NULL == a_callback ? stdio_read : a_callback;
 	lexer->callback_data = a_callback_data;
 	lexer->error = LEXER_ERROR_NONE;
 	lexer->line_no = 1;
@@ -251,8 +246,8 @@ peek_char(struct Lexer *const a_lexer, size_t const a_ofs)
 			return PEEK_EOF;
 		}
 		len = BUF_SIZE - (a_lexer->buf_end - a_lexer->ofs);
-		ret = a_lexer->callback.read(a_lexer->callback_data,
-		    a_lexer->buf + a_lexer->buf_end, len);
+		ret = a_lexer->callback(a_lexer->callback_data, a_lexer->buf +
+		    a_lexer->buf_end, len);
 		a_lexer->buf_end += ret;
 		if (ret < len) {
 			a_lexer->buf_stop = 1;

@@ -20,8 +20,6 @@
 
 static size_t	my_read(void *, char *, size_t) FUNC_RETURNS;
 
-static struct LexerCallback c_cb = {my_read};
-
 size_t
 my_read(void *const a_data, char *const a_dst, size_t const a_max)
 {
@@ -43,7 +41,7 @@ HTEST(AlnumVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(&c_cb, &p);
+	lexer = lexer_create(my_read, &p);
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ALNUM, ==, token.type);
@@ -110,7 +108,7 @@ HTEST(HexVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(&c_cb, &p);
+	lexer = lexer_create(my_read, &p);
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_HEX, ==, token.type);
@@ -151,7 +149,7 @@ HTEST(NumberVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(&c_cb, &p);
+	lexer = lexer_create(my_read, &p);
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_NUMBER, ==, token.type);
@@ -209,7 +207,7 @@ HTEST(UglyText)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(&c_cb, &p);
+	lexer = lexer_create(my_read, &p);
 
 	HTRY_I(0, !=, lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ALNUM, ==, token.type);

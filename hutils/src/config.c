@@ -29,9 +29,7 @@ struct MemoryData {
 };
 
 struct ConfigCollection	*load(struct Lexer *) FUNC_RETURNS;
-static size_t		mem_read(void *, char *, size_t) FUNC_RETURNS;
-
-static struct LexerCallback const c_mem_callback = {mem_read};
+static size_t		memory_read(void *, char *, size_t) FUNC_RETURNS;
 
 void
 config_collection_free(struct ConfigCollection **const a_coll)
@@ -77,7 +75,7 @@ config_collection_get_section(struct ConfigCollection const *const a_coll,
 }
 
 struct ConfigCollection *
-config_collection_load(char const *const a_path)
+config_collection_load_from_file(char const *const a_path)
 {
 	FILE *file;
 	struct Lexer *lexer;
@@ -95,7 +93,8 @@ config_collection_load(char const *const a_path)
 }
 
 struct ConfigCollection *
-config_collection_read(char const *const a_buf, size_t const a_len)
+config_collection_load_from_memory(char const *const a_buf, size_t const
+    a_len)
 {
 	struct MemoryData memory_data;
 	struct Lexer *lexer;
@@ -104,9 +103,37 @@ config_collection_read(char const *const a_buf, size_t const a_len)
 	memory_data.buf = a_buf;
 	memory_data.len = 0 == a_len ? strlen(a_buf) : a_len;
 	memory_data.ofs = 0;
-	lexer = lexer_create(&c_mem_callback, &memory_data);
+	lexer = lexer_create(memory_read, &memory_data);
 	coll = load(lexer);
 	return coll;
+}
+
+int
+config_collection_write(struct ConfigCollection const *const a_coll, char
+    const *const a_path)
+{
+	time_t tt;
+	struct tm tm;
+	char buf[26];
+	FILE *file;
+	struct ConfigSection *section;
+
+	file = fopen(a_path, "wb");
+	if (NULL == file) {
+		return 0;
+	}
+	time(&tt);
+	gmtime_r(&tt, &tm);
+	fprintf(file, "# Created %s", asctime_r(&tm, buf));
+	TAILQ_FOREACH(section, &a_coll->section_list, next) {
+		struct Config *config;
+
+		fprintf(file, "\n[%s]\n", section->name);
+		TAILQ_FOREACH(config, &section->config_list, next) {
+			fprintf(file, "%s=%s\n", config->name, config->str);
+		}
+	}
+	return 1;
 }
 
 double
@@ -224,6 +251,7 @@ load(struct Lexer *const a_lexer)
 			if (NULL == last_section) {
 				LOAD_ERROR("Section required before config");
 			}
+			/* TODO: Memory leaks. */
 			CALLOC(config, 1);
 			config->name = token.str;
 			token.str = NULL;
@@ -235,6 +263,8 @@ load(struct Lexer *const a_lexer)
 			if (!lexer_token_get(a_lexer, &token)) {
 				LOAD_ERROR("Missing value");
 			}
+			config->d = strtod(token.str, NULL);
+			config->i32 = strtol(token.str, NULL, 10);
 			config->str = token.str;
 			token.str = NULL;
 			TAILQ_INSERT_TAIL(&last_section->config_list, config,
@@ -251,7 +281,7 @@ load_error:
 }
 
 size_t
-mem_read(void *const a_user_data, char *const a_dst, size_t const a_max)
+memory_read(void *const a_user_data, char *const a_dst, size_t const a_max)
 {
 	struct MemoryData *memory_data;
 	size_t len;
