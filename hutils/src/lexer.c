@@ -19,7 +19,7 @@ struct Lexer {
 	char	buf[BUF_SIZE];
 	size_t	ofs;
 	size_t	buf_end;
-	int	buf_stop;
+	int	buf_ended;
 };
 
 static char	*extract(struct Lexer *, size_t) FUNC_RETURNS;
@@ -38,6 +38,9 @@ extract(struct Lexer *const a_lexer, size_t const a_len)
 
 		c = peek_char(a_lexer, 0);
 		str[i] = c;
+		if (PEEK_EOF == c) {
+			break;
+		}
 		++a_lexer->ofs;
 		if ('\n' == c) {
 			++a_lexer->line_no;
@@ -148,7 +151,7 @@ lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
 			++a_lexer->col;
 			for (len = 0; BUF_SIZE > len; ++len) {
 				c = peek_char(a_lexer, len);
-				if ('\0' == c) {
+				if (PEEK_EOF == c) {
 					a_token->type = LEXER_ERROR;
 					a_lexer->error =
 					    LEXER_ERROR_UNTERMINATED_LITERAL;
@@ -216,6 +219,7 @@ lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
 					a_token->type = LEXER_ERROR;
 					a_lexer->error =
 					    LEXER_ERROR_INVALID_NUMBER;
+					return 0;
 				}
 				for (; isdigit(peek_char(a_lexer, j)); ++j)
 					;
@@ -240,17 +244,31 @@ peek_char(struct Lexer *const a_lexer, size_t const a_ofs)
 	}
 	ofs = a_lexer->ofs + a_ofs;
 	if (ofs >= a_lexer->buf_end) {
-		size_t len, ret;
+		char buf[BUF_SIZE];
+		size_t buf_first, buf_last, len, ret;
 
-		if (a_lexer->buf_stop) {
+		if (a_lexer->buf_ended) {
 			return PEEK_EOF;
 		}
 		len = BUF_SIZE - (a_lexer->buf_end - a_lexer->ofs);
-		ret = a_lexer->callback(a_lexer->callback_data, a_lexer->buf +
-		    a_lexer->buf_end, len);
+		ret = a_lexer->callback(a_lexer->callback_data, buf, len);
+		if (0 == ret) {
+			return PEEK_EOF;
+		}
+		buf_first = (BUF_SIZE - 1) & a_lexer->buf_end;
+		buf_last = (BUF_SIZE - 1) & (a_lexer->buf_end + len - 1);
+		if (buf_first > buf_last) {
+			size_t len1;
+
+			len1 = BUF_SIZE - buf_first;
+			memmove(a_lexer->buf + buf_first, buf, len1);
+			memmove(a_lexer->buf, buf + len1, len - len1);
+		} else {
+			memmove(a_lexer->buf + buf_first, buf, len);
+		}
 		a_lexer->buf_end += ret;
 		if (ret < len) {
-			a_lexer->buf_stop = 1;
+			a_lexer->buf_ended = 1;
 		}
 	}
 	return a_lexer->buf[(BUF_SIZE - 1) & ofs];

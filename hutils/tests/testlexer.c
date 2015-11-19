@@ -33,6 +33,31 @@ my_read(void *const a_data, char *const a_dst, size_t const a_max)
 	return len;
 }
 
+HTEST(BufMajeur)
+{
+	struct LexerToken token;
+	struct Lexer *lexer;
+	char *text;
+	int i;
+
+	MALLOC(text, 10000);
+	for (i = 0; 10000 > i; ++i) {
+		/* Fill with cycles of capitals and '['. */
+		text[i] = 'A' + i % ('Z' - 'A' + 2);
+	}
+	lexer = lexer_create(my_read, &text);
+
+	for (i = 0; 37 > i; ++i) {
+		HTRY_I(0, !=, lexer_token_get(lexer, &token));
+		HTRY_I(LEXER_ALNUM, ==, token.type);
+		HTRY_I(0, !=, lexer_token_get(lexer, &token));
+		HTRY_I(LEXER_SYMBOL, ==, token.type);
+	}
+
+	lexer_free(&lexer);
+	FREE(text);
+}
+
 HTEST(AlnumVariations)
 {
 	char const c_text[] = "a A _a a_ a0 0a";
@@ -252,6 +277,7 @@ HTEST(UglyText)
 
 HTEST_SUITE(Lexer)
 {
+	HTEST_ADD(BufMajeur);
 	HTEST_ADD(AlnumVariations);
 	HTEST_ADD(HexVariations);
 	HTEST_ADD(NumberVariations);

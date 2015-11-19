@@ -251,16 +251,19 @@ load(struct Lexer *const a_lexer)
 			if (NULL == last_section) {
 				LOAD_ERROR("Section required before config");
 			}
-			/* TODO: Memory leaks. */
 			CALLOC(config, 1);
 			config->name = token.str;
 			token.str = NULL;
 			if (!lexer_token_get(a_lexer, &token) ||
 			    '=' != token.str[0]) {
+				FREE(config->name);
+				FREE(config);
 				LOAD_ERROR("Missing '='");
 			}
 			FREE(token.str);
 			if (!lexer_token_get(a_lexer, &token)) {
+				FREE(config->name);
+				FREE(config);
 				LOAD_ERROR("Missing value");
 			}
 			config->d = strtod(token.str, NULL);
@@ -270,7 +273,7 @@ load(struct Lexer *const a_lexer)
 			TAILQ_INSERT_TAIL(&last_section->config_list, config,
 			    next);
 		} else {
-			LOAD_ERROR("Missing config name");
+			LOAD_ERROR("Missing section or config name");
 		}
 	}
 	return coll;
