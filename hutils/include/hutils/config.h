@@ -9,7 +9,7 @@ struct ConfigSection;
 
 void			config_collection_free(struct ConfigCollection **);
 struct ConfigSection	*config_collection_get_section(struct ConfigCollection
-    const *, char const *) FUNC_RETURNS;
+    *, char const *) FUNC_RETURNS;
 struct ConfigCollection	*config_collection_load_from_file(char const *)
 	FUNC_RETURNS;
 struct ConfigCollection	*config_collection_load_from_memory(char const *,
@@ -19,8 +19,8 @@ int			config_collection_write(struct ConfigCollection const
 double			config_getd(struct Config const *) FUNC_RETURNS;
 int32_t			config_geti32(struct Config const *) FUNC_RETURNS;
 char const		*config_gets(struct Config const *) FUNC_RETURNS;
-struct Config		*config_section_get_config(struct ConfigSection const
-    *, char const *) FUNC_RETURNS;
+struct Config		*config_section_get_config(struct ConfigSection *,
+    char const *) FUNC_RETURNS;
 void			config_setd(struct Config *, double);
 void			config_seti32(struct Config *, int32_t);
 void			config_sets(struct Config *, char const *);

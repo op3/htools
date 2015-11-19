@@ -61,8 +61,8 @@ config_collection_free(struct ConfigCollection **const a_coll)
 }
 
 struct ConfigSection *
-config_collection_get_section(struct ConfigCollection const *const a_coll,
-    char const *const a_name)
+config_collection_get_section(struct ConfigCollection *const a_coll, char
+    const *const a_name)
 {
 	struct ConfigSection *section;
 
@@ -71,7 +71,11 @@ config_collection_get_section(struct ConfigCollection const *const a_coll,
 			return section;
 		}
 	}
-	return NULL;
+	CALLOC(section, 1);
+	section->name = strdup(a_name);
+	TAILQ_INIT(&section->config_list);
+	TAILQ_INSERT_TAIL(&a_coll->section_list, section, next);
+	return section;
 }
 
 struct ConfigCollection *
@@ -155,8 +159,8 @@ config_gets(struct Config const *const a_config)
 }
 
 struct Config *
-config_section_get_config(struct ConfigSection const *const a_section, char
-    const *const a_name)
+config_section_get_config(struct ConfigSection *const a_section, char const
+    *const a_name)
 {
 	struct Config *config;
 
@@ -165,7 +169,12 @@ config_section_get_config(struct ConfigSection const *const a_section, char
 			return config;
 		}
 	}
-	return NULL;
+	CALLOC(config, 1);
+	config->name = strdup(a_name);
+	config->d = 0.0;
+	config->i32 = 0;
+	config->str = strdup("");
+	return config;
 }
 
 void

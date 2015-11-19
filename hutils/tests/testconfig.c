@@ -17,6 +17,25 @@
 #include <hutils/config.h>
 #include <htest/htest.h>
 
+HTEST(NULLsOk)
+{
+	char const c_cfg[] = "";
+	struct ConfigCollection *coll;
+	struct ConfigSection *sec;
+	struct Config *cfg;
+	char const *s;
+	double d;
+	int i;
+
+	coll = config_collection_load_from_memory(c_cfg, 0);
+	HTRY_VOID(sec = config_collection_get_section(coll, "none"));
+	HTRY_VOID(cfg = config_section_get_config(sec, "nada"));
+	HTRY_VOID(d = config_getd(cfg));
+	HTRY_VOID(i = config_geti32(cfg));
+	HTRY_VOID(s = config_gets(cfg));
+	config_collection_free(&coll);
+}
+
 HTEST(MissingSection)
 {
 	char const c_cfg[] = "name=value";
@@ -114,6 +133,7 @@ HTEST(ValueConversion)
 
 HTEST_SUITE(Config)
 {
+	HTEST_ADD(NULLsOk);
 	HTEST_ADD(MissingSection);
 	HTEST_ADD(MixedSections);
 	HTEST_ADD(MixedConfigs);
