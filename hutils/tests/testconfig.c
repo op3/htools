@@ -17,28 +17,41 @@
 #include <hutils/config.h>
 #include <htest/htest.h>
 
-HTEST(NULLsOk)
+HTEST(MissingIsNULL)
 {
 	char const c_cfg[] = "";
 	struct ConfigCollection *coll;
-	struct ConfigSection *sec;
-	struct Config *cfg;
-	char const *s;
-	double d;
-	int i;
+	struct ConfigSection *sec1, *sec2;
+	struct Config *cfg1, *cfg2;
 
 	coll = config_collection_load_from_memory(c_cfg, 0);
-	HTRY_VOID(sec = config_collection_get_section(coll, "none"));
-	HTRY_VOID(cfg = config_section_get_config(sec, "nada"));
-	HTRY_VOID(d = config_getd(cfg));
-	HTRY_VOID(i = config_geti32(cfg));
-	HTRY_VOID(s = config_gets(cfg));
+	sec1 = config_collection_get_section(coll, "section");
+	HTRY_PTR(NULL, ==, sec1);
+	sec1 = config_collection_create_section(coll, "section");
+	HTRY_PTR(NULL, !=, sec1);
+	sec2 = config_collection_create_section(coll, "section");
+	HTRY_PTR(sec1, ==, sec2);
+	sec2 = config_collection_get_section(coll, "section");
+	HTRY_PTR(sec1, ==, sec2);
+
+	cfg1 = config_section_get_config(sec1, "config");
+	HTRY_PTR(NULL, ==, cfg1);
+	cfg1 = config_section_create_config(sec1, "config");
+	HTRY_PTR(NULL, !=, cfg1);
+	cfg2 = config_section_create_config(sec1, "config");
+	HTRY_PTR(cfg1, ==, cfg2);
+	cfg2 = config_section_get_config(sec1, "config");
+	HTRY_PTR(cfg1, ==, cfg2);
+
+	HTRY_DBL(0.0, ==, config_getd(cfg1));
+	HTRY_I(0, ==, config_geti32(cfg1));
+	HTRY_STR("", ==, config_gets(cfg1));
 	config_collection_free(&coll);
 }
 
 HTEST(MissingSection)
 {
-	char const c_cfg[] = "name=value";
+	char const c_cfg[] = "config=value";
 	struct ConfigCollection *coll;
 
 	coll = config_collection_load_from_memory(c_cfg, 0);
@@ -131,11 +144,28 @@ HTEST(ValueConversion)
 	config_collection_free(&coll);
 }
 
+HTEST(Duplications)
+{
+	char const c_cfg_no1[] = "[section] [section]";
+	char const c_cfg_no2[] = "[section] config=0 config=1";
+	char const c_cfg_yes1[] = "[section1] config=0 [section2] config=1";
+	struct ConfigCollection *coll;
+
+	coll = config_collection_load_from_memory(c_cfg_no1, 0);
+	HTRY_PTR(NULL, ==, coll);
+	coll = config_collection_load_from_memory(c_cfg_no2, 0);
+	HTRY_PTR(NULL, ==, coll);
+	coll = config_collection_load_from_memory(c_cfg_yes1, 0);
+	HTRY_PTR(NULL, !=, coll);
+	config_collection_free(&coll);
+}
+
 HTEST_SUITE(Config)
 {
-	HTEST_ADD(NULLsOk);
+	HTEST_ADD(MissingIsNULL);
 	HTEST_ADD(MissingSection);
 	HTEST_ADD(MixedSections);
 	HTEST_ADD(MixedConfigs);
 	HTEST_ADD(ValueConversion);
+	HTEST_ADD(Duplications);
 }

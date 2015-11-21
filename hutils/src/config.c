@@ -31,6 +31,22 @@ struct MemoryData {
 struct ConfigCollection	*load(struct Lexer *) FUNC_RETURNS;
 static size_t		memory_read(void *, char *, size_t) FUNC_RETURNS;
 
+struct ConfigSection *
+config_collection_create_section(struct ConfigCollection *const a_coll, char
+    const *const a_name)
+{
+	struct ConfigSection *section;
+
+	section = config_collection_get_section(a_coll, a_name);
+	if (NULL == section) {
+		CALLOC(section, 1);
+		section->name = strdup(a_name);
+		TAILQ_INIT(&section->config_list);
+		TAILQ_INSERT_TAIL(&a_coll->section_list, section, next);
+	}
+	return section;
+}
+
 void
 config_collection_free(struct ConfigCollection **const a_coll)
 {
@@ -71,11 +87,7 @@ config_collection_get_section(struct ConfigCollection *const a_coll, char
 			return section;
 		}
 	}
-	CALLOC(section, 1);
-	section->name = strdup(a_name);
-	TAILQ_INIT(&section->config_list);
-	TAILQ_INSERT_TAIL(&a_coll->section_list, section, next);
-	return section;
+	return NULL;
 }
 
 struct ConfigCollection *
@@ -159,6 +171,24 @@ config_gets(struct Config const *const a_config)
 }
 
 struct Config *
+config_section_create_config(struct ConfigSection *const a_section, char const
+    *const a_name)
+{
+	struct Config *config;
+
+	config = config_section_get_config(a_section, a_name);
+	if (NULL == config) {
+		CALLOC(config, 1);
+		config->name = strdup(a_name);
+		config->d = 0.0;
+		config->i32 = 0;
+		config->str = strdup("");
+		TAILQ_INSERT_TAIL(&a_section->config_list, config, next);
+	}
+	return config;
+}
+
+struct Config *
 config_section_get_config(struct ConfigSection *const a_section, char const
     *const a_name)
 {
@@ -169,13 +199,7 @@ config_section_get_config(struct ConfigSection *const a_section, char const
 			return config;
 		}
 	}
-	CALLOC(config, 1);
-	config->name = strdup(a_name);
-	config->d = 0.0;
-	config->i32 = 0;
-	config->str = strdup("");
-	TAILQ_INSERT_TAIL(&a_section->config_list, config, next);
-	return config;
+	return NULL;
 }
 
 void
@@ -244,12 +268,13 @@ load(struct Lexer *const a_lexer)
 			    LEXER_ALNUM != token.type) {
 				LOAD_ERROR("Missing section name");
 			}
-			CALLOC(last_section, 1);
-			last_section->name = token.str;
-			token.str = NULL;
-			TAILQ_INIT(&last_section->config_list);
-			TAILQ_INSERT_TAIL(&coll->section_list, last_section,
-			    next);
+			last_section = config_collection_get_section(coll,
+			    token.str);
+			if (NULL != last_section) {
+				LOAD_ERROR("Duplicated section");
+			}
+			last_section = config_collection_create_section(coll,
+			    token.str);
 			if (!lexer_token_get(a_lexer, &token) ||
 			    ']' != token.str[0]) {
 				LOAD_ERROR("Missing ']'");
@@ -261,27 +286,26 @@ load(struct Lexer *const a_lexer)
 			if (NULL == last_section) {
 				LOAD_ERROR("Section required before config");
 			}
-			CALLOC(config, 1);
-			config->name = token.str;
-			token.str = NULL;
+			config = config_section_get_config(last_section,
+			    token.str);
+			if (NULL != config) {
+				LOAD_ERROR("Duplicated config");
+			}
+			config = config_section_create_config(last_section,
+			    token.str);
 			if (!lexer_token_get(a_lexer, &token) ||
 			    '=' != token.str[0]) {
-				FREE(config->name);
-				FREE(config);
 				LOAD_ERROR("Missing '='");
 			}
 			FREE(token.str);
 			if (!lexer_token_get(a_lexer, &token)) {
-				FREE(config->name);
-				FREE(config);
 				LOAD_ERROR("Missing value");
 			}
 			config->d = strtod(token.str, NULL);
 			config->i32 = strtol(token.str, NULL, 10);
+			FREE(config->str);
 			config->str = token.str;
 			token.str = NULL;
-			TAILQ_INSERT_TAIL(&last_section->config_list, config,
-			    next);
 		} else {
 			LOAD_ERROR("Missing section or config name");
 		}
