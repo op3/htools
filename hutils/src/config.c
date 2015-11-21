@@ -174,6 +174,7 @@ config_section_get_config(struct ConfigSection *const a_section, char const
 	config->d = 0.0;
 	config->i32 = 0;
 	config->str = strdup("");
+	TAILQ_INSERT_TAIL(&a_section->config_list, config, next);
 	return config;
 }
 

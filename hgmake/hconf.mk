@@ -42,9 +42,13 @@ $(HCONF_CACHE): Makefile $(addprefix $(BUILD_DIR)/hconf/,$(HCONF_FILES:.c=.h))
 	if [ 0 -eq $$ret ]; then\
 		cc="ccache gcc";\
 	fi;\
-	echo $$cc > $(HCONF_CACHE).tmp;\
-	echo >> $(HCONF_CACHE).tmp;\
-	echo >> $(HCONF_CACHE).tmp;\
-	echo >> $(HCONF_CACHE).tmp;\
-	echo >> $(HCONF_CACHE).tmp;\
-	paste -d' ' $(HCONF_CACHE).tmp $(filter %.mk,$(^:.h=.mk)) | tr -s " " > $(HCONF_CACHE)
+	echo $$cc > $@.tmp;\
+	echo >> $@.tmp;\
+	echo >> $@.tmp;\
+	echo >> $@.tmp;\
+	echo >> $@.tmp;\
+	paste -d' ' $@.tmp $(filter %.mk,$(^:.h=.mk)) | tr -s " " > $@.tmp2;\
+	diff $@ $@.tmp2 > /dev/null;\
+	if [ 1 -eq $$? ]; then\
+		mv $@.tmp2 $@;\
+	fi
