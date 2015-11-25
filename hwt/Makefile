@@ -13,49 +13,34 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 AR=ar
-LD=gcc
 CC=gcc
+LD=gcc
+
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
+
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTOOLS_PATH)/htest/include
+include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
+LDFLAGS:=-L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
+LIBS:=-lhtest -lm
+
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
 else
- BUILD_TYPE=debug
  CFLAGS:=$(CFLAGS) -ggdb
 endif
-GCC_MACHINE:=$(shell gcc -dumpmachine)
-GCC_VERSION:=$(shell gcc -dumpversion)
-BUILD_DIR:=build_$(GCC_MACHINE)_$(GCC_VERSION)_$(BUILD_TYPE)
 
-CPPFLAGS:=$(CPPFLAGS) -I$(HTEST_PATH)/include -I$(HUTILS_PATH)/include -Iinclude -Isrc -Itests
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wextra -Wmissing-prototypes -Wshadow -Wstrict-prototypes
-ifneq (,$(findstring inux,$(GCC_MACHINE)))
- CFLAGS:=$(CFLAGS) -Wswitch-enum
-endif
-LDFLAGS:=-L$(HTEST_PATH)/$(BUILD_DIR) -lhtest -lm
-
-AR_A=$(AR) rcs $@ $^
-LD_E=$(LD) -o $@ $^ $(LDFLAGS)
-CC_O=$(CC) -c -o $@ $< -MMD $(CPPFLAGS) $(CFLAGS)
-MKDIR=test -d $(@D) || mkdir -p $(@D)
-
-ifeq (1,$(V))
- AR_A_V=$(AR_A)
- LD_E_V=$(LD_E)
- CC_O_V=$(CC_O)
- MKDIR_V=$(MKDIR)
-else
- AR_A_V=@echo "AR    " $@ && $(AR_A)
- LD_E_V=@echo "LD    " $@ && $(LD_E)
- CC_O_V=@echo "CC    " $@ && $(CC_O)
- MKDIR_V=@$(MKDIR)
-endif
+include $(HTOOLS_PATH)/hgmake/cmds.mk
 
 TARGET:=$(BUILD_DIR)/libhutils.a
 SRC:=$(filter-out src/example.c,$(wildcard src/*.c))
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 TEST:=$(BUILD_DIR)/test
-HTEST_SRC:=$(wildcard tests/*.c)
 HTEST_GEN:=$(BUILD_DIR)/tests/tests.c
+HTEST_SRC:=$(wildcard tests/*.c)
+HTEST_SUITE_PRE=$(MKDIR)
+HTEST_SUITE_SRC=$<
+HTEST_SUITE_DST=$@
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 
 .PHONY: all
@@ -65,26 +50,29 @@ all: $(TARGET) test
 test: $(TEST)
 	@./$< -c
 
+.PHONY: splint
+splint:
+	splint -nullret +posixstrictlib $(CPPFLAGS) $(SRC)
+
 $(TARGET): $(OBJ)
 	$(MKDIR_V)
 	$(AR_A_V)
 
-$(TEST): $(OBJ) $(TEST_OBJ)
+$(TEST): $(TEST_OBJ) $(TARGET)
 	$(MKDIR_V)
 	$(LD_E_V)
 
-$(BUILD_DIR)/%.o: %.c Makefile
+HCONF_FILES:=
+include $(HTOOLS_PATH)/hgmake/hconf.mk
+
+$(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 
-%.o: %.c Makefile
-	$(MKDIR_V)
-	$(CC_O_V)
-
-include $(HTEST_PATH)/htest.mk
+include $(HTOOLS_PATH)/htest/htest.mk
 
 .PHONY: clean
-clean: clean_htest
+clean:
 	rm -rf $(BUILD_DIR)
 
--include $(OBJ:.o=.d) $(TEST_OBJ:.o=.d)
+-include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))

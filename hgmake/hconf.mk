@@ -48,7 +48,7 @@ $(HCONF_CACHE): Makefile $(addprefix $(BUILD_DIR)/hconf/,$(HCONF_FILES:.c=.h))
 	echo >> $@.tmp;\
 	echo >> $@.tmp;\
 	paste -d' ' $@.tmp $(filter %.mk,$(^:.h=.mk)) | tr -s " " > $@.tmp2;\
-	diff $@ $@.tmp2 > /dev/null;\
+	test -f $@ && diff $@ $@.tmp2 > /dev/null;\
 	if [ 1 -eq $$? ]; then\
 		mv $@.tmp2 $@;\
 	fi

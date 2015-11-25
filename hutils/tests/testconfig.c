@@ -17,35 +17,67 @@
 #include <hutils/config.h>
 #include <htest/htest.h>
 
-HTEST(MissingIsNULL)
+HTEST(MissingFileOk)
+{
+	struct ConfigCollection *coll;
+
+	coll = config_collection_load_from_file("nada.cfg");
+	HTRY_PTR(NULL, !=, coll);
+	config_collection_free(&coll);
+}
+
+HTEST(SectionAutoCreate)
 {
 	char const c_cfg[] = "";
 	struct ConfigCollection *coll;
-	struct ConfigSection *sec1, *sec2;
-	struct Config *cfg1, *cfg2;
+	struct ConfigSection *sec;
 
 	coll = config_collection_load_from_memory(c_cfg, 0);
-	sec1 = config_collection_get_section(coll, "section");
-	HTRY_PTR(NULL, ==, sec1);
-	sec1 = config_collection_create_section(coll, "section");
-	HTRY_PTR(NULL, !=, sec1);
-	sec2 = config_collection_create_section(coll, "section");
-	HTRY_PTR(sec1, ==, sec2);
-	sec2 = config_collection_get_section(coll, "section");
-	HTRY_PTR(sec1, ==, sec2);
+	sec = config_collection_get_section(coll, "section");
+	HTRY_PTR(NULL, !=, sec);
+	config_collection_free(&coll);
+}
 
-	cfg1 = config_section_get_config(sec1, "config");
-	HTRY_PTR(NULL, ==, cfg1);
-	cfg1 = config_section_create_config(sec1, "config");
-	HTRY_PTR(NULL, !=, cfg1);
-	cfg2 = config_section_create_config(sec1, "config");
-	HTRY_PTR(cfg1, ==, cfg2);
-	cfg2 = config_section_get_config(sec1, "config");
-	HTRY_PTR(cfg1, ==, cfg2);
+HTEST(DefaultGet)
+{
+	char const c_cfg[] = "";
+	struct ConfigCollection *coll;
+	struct ConfigSection *sec;
+	struct Config *cfg;
 
-	HTRY_DBL(0.0, ==, config_getd(cfg1));
-	HTRY_I(0, ==, config_geti32(cfg1));
-	HTRY_STR("", ==, config_gets(cfg1));
+	coll = config_collection_load_from_memory(c_cfg, 0);
+	sec = config_collection_get_section(coll, "section");
+
+	cfg = config_section_getd_config(sec, "d", 3.14);
+	HTRY_DBL(3.14, ==, config_getd(cfg));
+	HTRY_I(3, ==, config_geti32(cfg));
+	HTRY_STR("3.14", ==, config_gets(cfg));
+
+	cfg = config_section_getd_config(sec, "d", 2.72);
+	HTRY_DBL(3.14, ==, config_getd(cfg));
+	HTRY_I(3, ==, config_geti32(cfg));
+	HTRY_STR("3.14", ==, config_gets(cfg));
+
+	cfg = config_section_geti32_config(sec, "i32", -1);
+	HTRY_DBL(-1.0, ==, config_getd(cfg));
+	HTRY_I(-1, ==, config_geti32(cfg));
+	HTRY_STR("-1", ==, config_gets(cfg));
+
+	cfg = config_section_geti32_config(sec, "i32", 666);
+	HTRY_DBL(-1.0, ==, config_getd(cfg));
+	HTRY_I(-1, ==, config_geti32(cfg));
+	HTRY_STR("-1", ==, config_gets(cfg));
+
+	cfg = config_section_gets_config(sec, "s", "8ball");
+	HTRY_DBL(8.0, ==, config_getd(cfg));
+	HTRY_I(8, ==, config_geti32(cfg));
+	HTRY_STR("8ball", ==, config_gets(cfg));
+
+	cfg = config_section_gets_config(sec, "s", "bananas");
+	HTRY_DBL(8.0, ==, config_getd(cfg));
+	HTRY_I(8, ==, config_geti32(cfg));
+	HTRY_STR("8ball", ==, config_gets(cfg));
+
 	config_collection_free(&coll);
 }
 
@@ -116,27 +148,27 @@ HTEST(ValueConversion)
 	coll = config_collection_load_from_file("tests/values.cfg");
 	section = config_collection_get_section(coll, "Values");
 
-	config = config_section_get_config(section, "a");
+	config = config_section_getd_config(section, "a", 0.0);
 	HTRY_I(1, ==, config_geti32(config));
 	HTRY_DBL(1.0, ==, config_getd(config));
 	HTRY_STR("1", ==, config_gets(config));
 
-	config = config_section_get_config(section, "b");
+	config = config_section_getd_config(section, "b", 0.0);
 	HTRY_I(1, ==, config_geti32(config));
 	HTRY_DBL(1.1, ==, config_getd(config));
 	HTRY_STR("1.1", ==, config_gets(config));
 
-	config = config_section_get_config(section, "c");
+	config = config_section_getd_config(section, "c", 0.0);
 	HTRY_I(0, ==, config_geti32(config));
 	HTRY_DBL(1e-4, ==, config_getd(config));
 	HTRY_STR(".1e-3", ==, config_gets(config));
 
-	config = config_section_get_config(section, "d");
+	config = config_section_getd_config(section, "d", 0.0);
 	HTRY_I(1, ==, config_geti32(config));
 	HTRY_DBL(1.1, ==, config_getd(config));
 	HTRY_STR("1.1a", ==, config_gets(config));
 
-	config = config_section_get_config(section, "e");
+	config = config_section_getd_config(section, "e", 0.0);
 	HTRY_I(0, ==, config_geti32(config));
 	HTRY_DBL(0.0, ==, config_getd(config));
 	HTRY_STR("a1.1", ==, config_gets(config));
@@ -162,7 +194,9 @@ HTEST(Duplications)
 
 HTEST_SUITE(Config)
 {
-	HTEST_ADD(MissingIsNULL);
+	HTEST_ADD(MissingFileOk);
+	HTEST_ADD(SectionAutoCreate);
+	HTEST_ADD(DefaultGet);
 	HTEST_ADD(MissingSection);
 	HTEST_ADD(MixedSections);
 	HTEST_ADD(MixedConfigs);
