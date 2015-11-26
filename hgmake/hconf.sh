@@ -48,16 +48,18 @@ clean_hconf()
 	rm -f $target_h $target_mk
 }
 
-best_args=
+for i in 0 1 2 3 4; do
+	eval best_args$i=
+done
 best_link_result=1000
 try()
 {
 	write_hconf
-	local option=${args[0]}
-	local cppflags=${args[1]}
-	local cflags=${args[2]}
-	local ldflags=${args[3]}
-	local libs=${args[4]}
+	local option=$args0
+	local cppflags=$args1
+	local cflags=$args2
+	local ldflags=$args3
+	local libs=$args4
 	echo -n " $file: Testing option '$option'... " | tee -a $log
 	if [ $is_source ]; then
 		local compile_input=$file_c
@@ -84,7 +86,7 @@ try()
 		fi
 		if [ $link_result -lt $best_link_result ]; then
 			for i in 0 1 2 3 4; do
-				best_args[$i]=${args[$i]}
+				eval best_args$i=\$args$i
 			done
 			best_link_result=$link_result
 			echo Keeping. | tee -a $log
@@ -104,14 +106,15 @@ write_hconf()
 	cat << END > $target_h
 #ifndef $uppered
 #define $uppered
-#define ${args[0]}
+#define $args0
 #undef HCONF_TEST
 #endif
 END
 	echo > $target_mk
 	for i in 1 2 3 4; do
-		echo ${args[$i]} >> $target_mk
+		eval echo \$args$i >> $target_mk
 	done
+echo 0,$args0,$args1,$args2,$args3,$args4,
 }
 
 verbose=0
@@ -169,15 +172,14 @@ int main(void) {
 END
 fi
 
-args[0]=$no_option
-args[1]=
-args[2]=
-args[3]=
-args[4]=
+args0=$no_option
+for i in 1 2 3 4; do
+	eval args$i=
+done
 try
 list_line_no=`grep -n "if defined(HCONF_" $file | cut -f1 -d:`
 for line_no in $list_line_no; do
-	args[0]=`sed -n "${line_no}s/.*if defined(\(HCONF_.*\)).*/\1/p" $file`
+	args0=`sed -n "${line_no}s/.*if defined(\(HCONF_.*\)).*/\1/p" $file`
 	while true; do
 		line_no=`expr $line_no + 1`
 		line="`sed -n "${line_no}p" $file`"
@@ -196,18 +198,18 @@ for line_no in $list_line_no; do
 			eval $expr
 		fi
 	done
-	args[1]="$OPT_CPPFLAGS"
-	args[2]="$OPT_CFLAGS"
-	args[3]="$OPT_LDFLAGS"
-	args[4]="$OPT_LIBS"
+	args1="$OPT_CPPFLAGS"
+	args2="$OPT_CFLAGS"
+	args3="$OPT_LDFLAGS"
+	args4="$OPT_LIBS"
 	try
 done
-if [ $best_args ]; then
+if [ $best_args0 ]; then
 	for i in 0 1 2 3 4; do
-		args[$i]=${best_args[$i]}
+		eval args$i=\$best_args$i
 	done
 	write_hconf
-	echo Will use non-optimal option ${args[0]}. | tee -a $log
+	echo Will use non-optimal option $args0. | tee -a $log
 	exit 0
 fi
 clean_hconf
