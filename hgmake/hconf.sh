@@ -20,15 +20,15 @@ no_option=no_option
 build_result=
 build()
 {
-	local output=$1
-	local input=$2
-	local cppflags=$3
-	local cflags=$4
-	local ldflags=$5
-	local libs=$6
-	local cmd="$CC $cppflags -I. -I$build_dir $cflags $ldflags -o $output $input $libs"
+	build_output=$1
+	build_input=$2
+	build_cppflags=$3
+	build_cflags=$4
+	build_ldflags=$5
+	build_libs=$6
+	cmd="$CC $build_cppflags -I. -I$build_dir $build_cflags $build_ldflags -o $build_output $build_input $build_libs"
 	out="`$cmd 2>&1`"
-	local result=$?
+	build_result=$?
 	if [ 0 -ne $verbose ]; then
 		echo "$cmd:" | tee -a $log
 		echo "$out" | tee -a $log
@@ -36,9 +36,7 @@ build()
 		echo "$cmd:" >> $log
 		echo "$out" >> $log
 	fi
-	if [ 0 -eq $result ]; then
-		build_result=0
-	else
+	if [ 0 -ne $build_result ]; then
 		build_result=`echo $out | wc -l`
 	fi
 }
@@ -55,40 +53,40 @@ best_link_result=1000
 try()
 {
 	write_hconf
-	local option=$args0
-	local cppflags=$args1
-	local cflags=$args2
-	local ldflags=$args3
-	local libs=$args4
+	try_option=$args0
+	try_cppflags=$args1
+	try_cflags=$args2
+	try_ldflags=$args3
+	try_libs=$args4
 	echo -n " $file: Testing option '$option'... " | tee -a $log
 	if [ $is_source ]; then
-		local compile_input=$file_c
-		local compile_output=$file_o
-		local link_input="$file_o $main_c"
+		try_compile_input=$file_c
+		try_compile_output=$file_o
+		try_link_input="$file_o $main_c"
 	else
-		local compile_input=$main_c
-		local compile_output=$main_o
-		local link_input=$main_o
+		try_compile_input=$main_c
+		try_compile_output=$main_o
+		try_link_input=$main_o
 	fi
-	build "$compile_output" "$compile_input" "$CPPFLAGS $cppflags" "$CFLAGS $cflags -c" "" ""
-	local compile_result=$build_result
+	build "$try_compile_output" "$try_compile_input" "$CPPFLAGS $try_cppflags" "$CFLAGS $try_cflags -c" "" ""
+	compile_result=$build_result
 	if [ 0 -eq $compile_result ]; then
 		if [ "$no_option" = "$option" ]; then
 			clean_hconf
 			echo Compilation must fail if file not hconf:ed! | tee -a $log
 			exit 1
 		fi
-		build /dev/null "$link_input" "" "" "$LDFLAGS $ldflags" "$LIBS $libs"
-		local link_result=$build_result
-		if [ 0 -eq $link_result ]; then
+		build /dev/null "$try_link_input" "" "" "$LDFLAGS $try_ldflags" "$LIBS $try_libs"
+		try_link_result=$build_result
+		if [ 0 -eq try_link_result ]; then
 			echo Perfect. | tee -a $log
 			exit 0
 		fi
-		if [ $link_result -lt $best_link_result ]; then
+		if [ $try_link_result -lt $best_link_result ]; then
 			for i in 0 1 2 3 4; do
 				eval best_args$i=\$args$i
 			done
-			best_link_result=$link_result
+			best_link_result=$try_link_result
 			echo Keeping. | tee -a $log
 		fi
 	else
@@ -114,7 +112,6 @@ END
 	for i in 1 2 3 4; do
 		eval echo \$args$i >> $target_mk
 	done
-echo 0,$args0,$args1,$args2,$args3,$args4,
 }
 
 verbose=0
