@@ -13,7 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ifndef SED
-SED:=sed
+ SED:=sed
 endif
 
 AR_A=$(AR) rcs $@ $^
@@ -34,8 +34,6 @@ fi
 ifeq (1,$(V))
  AR_A_V=$(AR_A)
  CC_O_V=$(CC_O)
- HCONF_BEGIN_V=$(HCONF_BEGIN)
- HCONF_END_V=$(HCONF_END)
  HCONF_V=$(HCONF) -v
  LD_E_V=$(LD_E)
  MKDIR_V=$(MKDIR)
@@ -44,8 +42,6 @@ ifeq (1,$(V))
 else
  AR_A_V=@echo "AR    " $@ && $(AR_A)
  CC_O_V=@echo "CC    " $@ && $(CC_O)
- HCONF_BEGIN_V=@echo "HCONF " $@ && $(HCONF_BEGIN)
- HCONF_END_V=@echo "HCONF " $@ && $(HCONF_END)
  HCONF_V=@echo "HCONF " $@ && $(HCONF)
  LD_E_V=@echo "LD    " $@ && $(LD_E)
  MKDIR_V=@$(MKDIR)

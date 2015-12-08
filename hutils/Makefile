@@ -19,10 +19,10 @@ LD=gcc
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTOOLS_PATH)/htest/include
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I../htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
-LDFLAGS:=-L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
-LIBS:=-lhtest -lm
+LDFLAGS:=-L../htest/$(BUILD_DIR)
+LIBS:=-lm
 
 ifeq (release,$(BUILD_TYPE))
  CFLAGS:=$(CFLAGS) -O3
@@ -61,10 +61,12 @@ $(TARGET): $(OBJ)
 
 $(TEST): $(TEST_OBJ) $(TARGET)
 	$(MKDIR_V)
-	$(LD_E_V)
+	$(LD_E_V) -lhtest
 
 HCONF_FILES:=include/hutils/err.h \
 	include/hutils/macros.h \
+	include/hutils/strdup.h \
+	include/hutils/strsignal.h \
 	src/dir.c \
 	src/thread.c \
 	src/time.c
@@ -74,7 +76,7 @@ $(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
 
-include $(HTOOLS_PATH)/htest/htest.mk
+include ../htest/htest.mk
 
 .PHONY: clean
 clean:

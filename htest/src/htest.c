@@ -21,9 +21,19 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <hutils/strdup.h>
+#include <hutils/strsignal.h>
 #include <htest/htest.h>
 
-#if defined(HCONF_MSC)
+#if defined(HCONF_POSIX)
+
+# include <unistd.h>
+
+# define SUPPORT_FORK
+
+char const *const nul_path = "/dev/null";
+
+#elif defined(HCONF_MSC)
 
 # include <io.h>
 # include <signal.h>
@@ -35,7 +45,8 @@
 
 char const *const nul_path = "NUL";
 
-char const *strsignal(int const a_signum)
+char const *
+strsignal(int const a_signum)
 {
 	switch (a_signum) {
 		case SIGABRT: return "SIGABRT";
@@ -48,13 +59,6 @@ char const *strsignal(int const a_signum)
 	}
 }
 
-#elif defined(HCONF_POSIX)
-
-# include <unistd.h>
-
-# define SUPPORT_FORK
-
-char const *const nul_path = "/dev/null";
 
 #else
 # error Not hconf:ed.

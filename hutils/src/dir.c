@@ -18,7 +18,71 @@
 #include <hconf/src/dir.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_WINDOWS)
+#if defined(HCONF_DIRENT)
+/* CPPFLAGS="-D_POSIX_C_SOURCE=199506" */
+
+# include <dirent.h>
+# include <stddef.h>
+# include <unistd.h>
+
+struct Dir {
+	DIR	*dir;
+	struct	dirent *entry;
+};
+
+struct Dir *
+dir_open(char const *const a_path)
+{
+	DIR *d;
+	struct Dir *dir;
+	size_t len;
+	long name_max;
+
+	d = opendir(a_path);
+	if (NULL == d) {
+		return NULL;
+	}
+	CALLOC(dir, 1);
+	dir->dir = d;
+	name_max = pathconf(a_path, _PC_NAME_MAX);
+	if (-1 == name_max) {
+		name_max = 255;
+	}
+	len = offsetof(struct dirent, d_name) + name_max + 1;
+	MALLOC(dir->entry, len);
+	return dir;
+}
+
+void
+dir_close(struct Dir **const a_dir)
+{
+	struct Dir *dir;
+
+	dir = *a_dir;
+	if (NULL == dir) {
+		return;
+	}
+	FREE(dir->entry);
+	closedir(dir->dir);
+	FREE(*a_dir);
+}
+
+int
+dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
+{
+	struct dirent *result;
+
+	if (0 != readdir_r(a_dir->dir, a_dir->entry, &result)) {
+		return -1;
+	}
+	if (NULL == result) {
+		return 0;
+	}
+	a_entry->name = a_dir->entry->d_name;
+	return 1;
+}
+
+#elif defined(HCONF_WINDOWS)
 
 # include <windows.h>
 
@@ -89,69 +153,6 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 	}
 	STRDUP(a_dir->name, find_data);
 	a_entry->name = a_dir->name;
-	return 1;
-}
-
-#elif defined(HCONF_DIRENT)
-
-#include <dirent.h>
-#include <stddef.h>
-#include <unistd.h>
-
-struct Dir {
-	DIR	*dir;
-	struct	dirent *entry;
-};
-
-struct Dir *
-dir_open(char const *const a_path)
-{
-	DIR *d;
-	struct Dir *dir;
-	size_t len;
-	long name_max;
-
-	d = opendir(a_path);
-	if (NULL == d) {
-		return NULL;
-	}
-	CALLOC(dir, 1);
-	dir->dir = d;
-	name_max = pathconf(a_path, _PC_NAME_MAX);
-	if (-1 == name_max) {
-		name_max = 255;
-	}
-	len = offsetof(struct dirent, d_name) + name_max + 1;
-	MALLOC(dir->entry, len);
-	return dir;
-}
-
-void
-dir_close(struct Dir **const a_dir)
-{
-	struct Dir *dir;
-
-	dir = *a_dir;
-	if (NULL == dir) {
-		return;
-	}
-	FREE(dir->entry);
-	closedir(dir->dir);
-	FREE(*a_dir);
-}
-
-int
-dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
-{
-	struct dirent *result;
-
-	if (0 != readdir_r(a_dir->dir, a_dir->entry, &result)) {
-		return -1;
-	}
-	if (NULL == result) {
-		return 0;
-	}
-	a_entry->name = a_dir->entry->d_name;
 	return 1;
 }
 

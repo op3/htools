@@ -19,7 +19,8 @@
 
 #include <hutils/macros.h>
 
-int	hutils_sleep(double) FUNC_RETURNS;
-double	hutils_time(void) FUNC_RETURNS;
+double	time_getd(void) FUNC_RETURNS;
+char	*time_gets(void) FUNC_RETURNS;
+int	time_sleep(double) FUNC_RETURNS;
 
 #endif

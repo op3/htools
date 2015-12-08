@@ -1,4 +1,5 @@
-# Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015
+# Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,8 +19,8 @@ ifndef SED
  SED:=sed
 endif
 
-HCONF_CACHE:=$(BUILD_DIR)/hconf_cache
-HCONF_LOG:=$(BUILD_DIR)/hconf_log
+HCONF_CACHE:=$(BUILD_DIR)/hconf.cache
+HCONF_LOG:=$(BUILD_DIR)/hconf.log
 
 HCONF_CC=$(shell $(SED) -n 1p $(HCONF_CACHE))
 HCONF_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_CACHE))
@@ -27,28 +28,42 @@ HCONF_CFLAGS=$(shell $(SED) -n 3p $(HCONF_CACHE))
 HCONF_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_CACHE))
 HCONF_LIBS=$(shell $(SED) -n 5p $(HCONF_CACHE))
 
-define HCONF_RULE
-$$(BUILD_DIR)/hconf/$$(FILE:.c=.h): $$(FILE)
-	$$(MKDIR_V)
-	$$(HCONF_V) $$(BUILD_DIR) $$<
-endef
+HCONF_TMP_CC=`$(SED) -n 1p $@.tmp`
+HCONF_TMP_CPPFLAGS=`$(SED) -n 2p $@.tmp`
+HCONF_TMP_CFLAGS=`$(SED) -n 3p $@.tmp`
+HCONF_TMP_LDFLAGS=`$(SED) -n 4p $@.tmp`
+HCONF_TMP_LIBS=`$(SED) -n 5p $@.tmp`
 
-$(foreach FILE,$(HCONF_FILES),$(eval $(HCONF_RULE)))
+HCONF_CACHES_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_CACHES))
 
-$(HCONF_CACHE): Makefile $(addprefix $(BUILD_DIR)/hconf/,$(HCONF_FILES:.c=.h))
+$(HCONF_CACHE): Makefile $(HCONF_CACHES_FILES) $(HCONF_FILES)
 	$(MKDIR_V)
 	$(QUIET_V)cmd="ccache -h";out=`$$cmd 2>&1`;ret=$$?;echo "$$cmd: $$out" > $(HCONF_LOG);\
-	cc=gcc;\
-	if [ 0 -eq $$ret ]; then\
-		cc="ccache gcc";\
+	ccache=;\
+	[ 0 -eq $$ret ] && ccache="ccache ";\
+	echo $${ccache}$(CC) > $@.tmp;\
+	echo "$(CPPFLAGS)" >> $@.tmp;\
+	echo "$(CFLAGS)" >> $@.tmp;\
+	echo "$(LDFLAGS)" >> $@.tmp;\
+	echo "$(LIBS)" >> $@.tmp;\
+	if [ "$(HCONF_CACHES_FILES)" ]; then\
+		$(HTOOLS_PATH)/hgmake/hconf_merge.sh $@.tmp $(HCONF_CACHES_FILES) > $@.tmp2;\
+		mv $@.tmp2 $@.tmp;\
 	fi;\
-	echo $$cc > $@.tmp;\
-	echo >> $@.tmp;\
-	echo >> $@.tmp;\
-	echo >> $@.tmp;\
-	echo >> $@.tmp;\
-	paste -d' ' $@.tmp $(filter %.mk,$(^:.h=.mk)) | tr -s " " > $@.tmp2;\
-	test -f $@ && diff $@ $@.tmp2 > /dev/null;\
+	verbose=;\
+	[ "x1" = "x$V" ] && verbose=-v;\
+	for i in $(filter %.c %.h,$^); do\
+		mk=$(BUILD_DIR)/hconf/`echo $$i | sed 's/\.[c|h]$$/.mk/'`;\
+		if [ ! -f $$mk -o $$mk -ot $$i ]; then\
+			$(HTOOLS_PATH)/hgmake/hconf.sh $$verbose $@.tmp $(BUILD_DIR) $$i;\
+			[ 0 -ne $$? ] && exit 1;\
+		fi;\
+		$(HTOOLS_PATH)/hgmake/hconf_merge.sh $@.tmp $$mk > $@.tmp2;\
+		mv $@.tmp2 $@.tmp;\
+	done;\
+	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
 	if [ 1 -eq $$? ]; then\
-		mv $@.tmp2 $@;\
+		mv -f $@.tmp $@;\
+	else\
+		touch $@;\
 	fi

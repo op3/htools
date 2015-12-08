@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <hutils/lexer.h>
 #include <hutils/memory.h>
+#include <hutils/time.h>
 
 TAILQ_HEAD(ConfigList, Config);
 struct Config {
@@ -120,9 +121,7 @@ int
 config_collection_write(struct ConfigCollection const *const a_coll, char
     const *const a_path)
 {
-	time_t tt;
-	struct tm tm;
-	char buf[26];
+	char *time_str;
 	FILE *file;
 	struct ConfigSection *section;
 
@@ -134,9 +133,9 @@ config_collection_write(struct ConfigCollection const *const a_coll, char
 	if (NULL == file) {
 		return 0;
 	}
-	time(&tt);
-	gmtime_r(&tt, &tm);
-	fprintf(file, "# Created %s", asctime_r(&tm, buf));
+	time_str = time_gets();
+	fprintf(file, "# Created %s\n", time_str);
+	FREE(time_str);
 	TAILQ_FOREACH(section, &a_coll->section_list, next) {
 		struct Config *config;
 

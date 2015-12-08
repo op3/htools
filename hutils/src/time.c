@@ -16,8 +16,10 @@
 
 #include <hutils/time.h>
 #include <hconf/src/time.h>
+#include <hutils/memory.h>
 
 #if defined(HCONF_POSIX)
+/* LIBS=-lrt */
 
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
@@ -50,25 +52,8 @@
 # include <mach/mach_time.h>
 #endif
 
-int
-hutils_sleep(double const a_s)
-{
-#if defined(SLEEP_SLEEP)
-	Sleep((DWORD)(1e3 * a_s));
-#elif defined(SLEEP_NANOSLEEP)
-	struct timespec ts;
-
-	ts.tv_sec = 0;
-	ts.tv_nsec = 1e9 * a_s;
-	if (0 != nanosleep(&ts, NULL)) {
-		return errno;
-	}
-#endif
-	return 0;
-}
-
 double
-hutils_time()
+time_getd()
 {
 #if defined(TIME_PERF)
 	static double time_unit = -1.0;
@@ -106,7 +91,36 @@ hutils_time()
 		err(EXIT_FAILURE, "clock_gettime");
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;
-#else
-# error "No time implementation on this platform!"
 #endif
+}
+
+char *
+time_gets()
+{
+	struct tm tm;
+	time_t tt;
+	char *buf;
+
+	time(&tt);
+	gmtime_r(&tt, &tm);
+	MALLOC(buf, 26);
+	asctime_r(&tm, buf);
+	return buf;
+}
+
+int
+time_sleep(double const a_s)
+{
+#if defined(SLEEP_SLEEP)
+	Sleep((DWORD)(1e3 * a_s));
+#elif defined(SLEEP_NANOSLEEP)
+	struct timespec ts;
+
+	ts.tv_sec = 0;
+	ts.tv_nsec = 1e9 * a_s;
+	if (0 != nanosleep(&ts, NULL)) {
+		return errno;
+	}
+#endif
+	return 0;
 }

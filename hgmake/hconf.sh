@@ -26,7 +26,8 @@ build()
 	build_cflags=$4
 	build_ldflags=$5
 	build_libs=$6
-	cmd="$CC $build_cppflags -I. -I$build_dir $build_cflags $build_ldflags -o $build_output $build_input $build_libs"
+	cc=`cat $target_mk | sed -n 1p`
+	cmd="$cc $build_cppflags $build_cflags $build_ldflags -o $build_output $build_input $build_libs"
 	out="`$cmd 2>&1`"
 	build_result=$?
 	if [ 0 -ne $verbose ]; then
@@ -53,12 +54,12 @@ best_link_result=1000
 try()
 {
 	write_hconf
-	try_option=$args0
-	try_cppflags=$args1
-	try_cflags=$args2
-	try_ldflags=$args3
-	try_libs=$args4
-	echo -n " $file: Testing option '$option'... " | tee -a $log
+	try_option="$args0"
+	try_cppflags=`sed -n 2p $target_mk`
+	try_cflags=`sed -n 3p $target_mk`
+	try_ldflags=`sed -n 4p $target_mk`
+	try_libs=`sed -n 5p $target_mk`
+	echo -n " $file: Testing option '$try_option'... " | tee -a $log
 	if [ $is_source ]; then
 		try_compile_input=$file_c
 		try_compile_output=$file_o
@@ -68,29 +69,31 @@ try()
 		try_compile_output=$main_o
 		try_link_input=$main_o
 	fi
-	build "$try_compile_output" "$try_compile_input" "$CPPFLAGS $try_cppflags" "$CFLAGS $try_cflags -c" "" ""
+	build "$try_compile_output" "$try_compile_input" "$try_cppflags -I. -I$build_dir" "$try_cflags -c" "" ""
 	compile_result=$build_result
 	if [ 0 -eq $compile_result ]; then
-		if [ "$no_option" = "$option" ]; then
+		if [ "$no_option" = "$try_option" ]; then
 			clean_hconf
 			echo Compilation must fail if file not hconf:ed! | tee -a $log
 			exit 1
 		fi
-		build /dev/null "$try_link_input" "" "" "$LDFLAGS $try_ldflags" "$LIBS $try_libs"
+		build /dev/null "$try_link_input" "" "" "$try_ldflags" "$try_libs"
 		try_link_result=$build_result
-		if [ 0 -eq try_link_result ]; then
+		if [ 0 -eq $try_link_result ]; then
 			echo Perfect. | tee -a $log
 			exit 0
 		fi
 		if [ $try_link_result -lt $best_link_result ]; then
-			for i in 0 1 2 3 4; do
-				eval best_args$i=\$args$i
-			done
+			best_args0=$try_option
+			best_args1=$try_cppflags
+			best_args2=$try_cflags
+			best_args3=$try_ldflags
+			best_args4=$try_libs
 			best_link_result=$try_link_result
 			echo Keeping. | tee -a $log
 		fi
 	else
-		if [ "$no_option" = "$option" ]; then
+		if [ "$no_option" = "$try_option" ]; then
 			echo Ok, hconfing.
 		else
 			echo Failed.
@@ -108,10 +111,12 @@ write_hconf()
 #undef HCONF_TEST
 #endif
 END
-	echo > $target_mk
+	echo > $target_mk.tmp
 	for i in 1 2 3 4; do
-		eval echo \$args$i >> $target_mk
+		eval echo \$args$i >> $target_mk.tmp
 	done
+	$HTOOLS_PATH/hgmake/hconf_merge.sh $base_mk $target_mk.tmp > $target_mk
+	rm -f $target_mk.tmp
 }
 
 verbose=0
@@ -119,15 +124,17 @@ if [ "x-v" = "x$1" ]; then
 	verbose=1
 	shift
 fi
-if [ 2 -ne $# ]; then
-	echo "Usage: $0 [-v] build-dir file" 1>&2
-	echo " build_dir  Generated files will be put here." 1>&2
-	echo " file       File to undergo hconf:ing." 1>&2
-	echo " -v         Verbose output." 1>&2
+if [ 3 -ne $# ]; then
+	echo "Usage: $0 [-v] hconf-cache build-dir file" 1>&2
+	echo " hconf-cache  Hconf cache data to be used." 1>&2
+	echo " build-dir    Generated files will be put here." 1>&2
+	echo " file         File to undergo hconf:ing." 1>&2
+	echo " -v           Verbose output." 1>&2
 	exit 1
 fi
-build_dir=$1
-file=$2
+base_mk=$1
+build_dir=$2
+file=$3
 
 log=$build_dir/hconf/${file}.log
 rm -f $log
@@ -149,7 +156,7 @@ file_mk=`echo $file_h | sed 's/\.h$/.mk/'`
 target_h=$build_dir/hconf/$file_h
 target_mk=$build_dir/hconf/$file_mk
 target_dir=`dirname $target_h`
-test -d $target_dir || mkdir -p $target_dir
+[ -d $target_dir ] || mkdir -p $target_dir
 if [ ! $is_source ]; then
 	cat << END > $main_c
 #include <$file>

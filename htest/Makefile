@@ -59,13 +59,13 @@ $(BUILD_DIR)/libhtest.a: $(OBJ)
 	$(MKDIR_V)
 	$(AR_A_V)
 
+HCONF_CACHES:=../hutils
 HCONF_FILES:=src/htest.c
 include $(HTOOLS_PATH)/hgmake/hconf.mk
 
 $(BUILD_DIR)/%.o: %.c Makefile htest.mk $(HCONF_CACHE)
 	$(MKDIR_V)
 	$(CC_O_V)
-	$(MV_D_V)
 
 include htest.mk
 

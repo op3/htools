@@ -78,14 +78,14 @@
 #endif
 #define ZERO(x) memset(&x, 0, sizeof x)
 
-#if defined(HCONF_WARNING_4127)
+#if defined(HCONF_COND_SIMPLE)
+# define HUTILS_COND(stmt, cond) stmt (cond)
+#elif defined(HCONF_COND_WARNING_4127)
 # define HUTILS_COND(stmt, cond)\
 	__pragma(warning(push))\
 	__pragma(warning(disable:4127))\
 	stmt (cond)\
 	__pragma(warning(pop))
-#elif defined(HCONF_OTHERS)
-# define HUTILS_COND(stmt, cond) stmt (cond)
 #else
 # error Not hconf:ed.
 #endif
