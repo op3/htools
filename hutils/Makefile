@@ -65,6 +65,7 @@ $(TEST): $(TEST_OBJ) $(TARGET)
 
 HCONF_FILES:=include/hutils/err.h \
 	include/hutils/macros.h \
+	include/hutils/snprintf.h \
 	include/hutils/strdup.h \
 	include/hutils/strsignal.h \
 	src/dir.c \

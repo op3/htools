@@ -16,6 +16,7 @@
 
 #include <hutils/dir.h>
 #include <hconf/src/dir.h>
+#include <hutils/err.h>
 #include <hutils/memory.h>
 
 #if defined(HCONF_DIRENT)

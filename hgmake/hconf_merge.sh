@@ -32,7 +32,10 @@ fi
 head -n1 $1
 # Line 2.
 src=
-for file_i in `seq 1 $#`; do
+file_i=0
+while true; do
+	file_i=`expr $file_i + 1`
+	[ $# -lt $file_i ] && break
 	eval file=\$$file_i
 	src="$src `sed -n 2p $file`"
 done
@@ -72,11 +75,22 @@ echo $src
 # Line 3,4.
 for line_i in 3 4; do
 	src=
-	for file_i in `seq 1 $#`; do
+	file_i=0
+	while true; do
+		file_i=`expr $file_i + 1`
+		[ $# -lt $file_i ] && break
 		eval file=\$$file_i
 		src="$src `sed -n ${line_i}p $file`"
 	done
 	echo `echo $src | tr ' ' '\n' | sort -u`
 done
 # Line 5.
-echo `sed -n 5p $file | awk '!a[$0]++'`
+src=
+file_i=0
+while true; do
+	file_i=`expr $file_i + 1`
+	[ $# -lt $file_i ] && break
+	eval file=\$$file_i
+	src="$src `sed -n 5p $file`"
+done
+echo `echo $src | awk '!a[$0]++'`

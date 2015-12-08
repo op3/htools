@@ -19,6 +19,11 @@
 #include <hutils/memory.h>
 
 #if defined(HCONF_POSIX)
+
+# define SLEEP_NANOSLEEP
+# define TIME_CLOCK
+
+#elif defined(HCONF_POSIX_LRT)
 /* LIBS=-lrt */
 
 # define SLEEP_NANOSLEEP

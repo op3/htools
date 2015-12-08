@@ -51,7 +51,7 @@ vector3f_dot(struct Vector3f const *const a_v1, struct Vector3f const *const
 float
 vector3f_get_magnitude(struct Vector3f const *const a_v)
 {
-	return sqrtf(vector3f_dot(a_v, a_v));
+	return sqrt(vector3f_dot(a_v, a_v));
 }
 
 struct Vector3f *

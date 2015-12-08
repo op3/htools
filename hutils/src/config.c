@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <hutils/lexer.h>
 #include <hutils/memory.h>
+#include <hutils/snprintf.h>
 #include <hutils/time.h>
 
 TAILQ_HEAD(ConfigList, Config);
