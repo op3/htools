@@ -58,8 +58,7 @@ $(HCONF_CACHE): Makefile $(HCONF_CACHES_FILES) $(HCONF_FILES)
 			$(HTOOLS_PATH)/hgmake/hconf.sh $$verbose $@.tmp $(BUILD_DIR) $$i;\
 			[ 0 -ne $$? ] && exit 1;\
 		fi;\
-		$(HTOOLS_PATH)/hgmake/hconf_merge.sh $@.tmp $$mk > $@.tmp2;\
-		mv $@.tmp2 $@.tmp;\
+		cp -f $$mk $@.tmp;\
 	done;\
 	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
 	if [ 1 -eq $$? ]; then\

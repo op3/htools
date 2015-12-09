@@ -91,6 +91,6 @@ while true; do
 	file_i=`expr $file_i + 1`
 	[ $# -lt $file_i ] && break
 	eval file=\$$file_i
-	src="$src `sed -n 5p $file`"
+	src="$src   `sed -n 5p $file`"
 done
-echo `echo $src | awk '!a[$0]++'`
+echo " "$src | sed 's/  *\([^ ]*\)\(  *\1\)*/\1 /g'
