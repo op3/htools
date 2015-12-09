@@ -213,7 +213,6 @@ if [ $best_args0 ]; then
 		eval args$i=\$best_args$i
 	done
 	write_hconf
-	echo Will use non-optimal option $args0. | tee -a $log
 	exit 0
 fi
 clean_hconf
