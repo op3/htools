@@ -17,6 +17,7 @@
 #ifndef HUTILS_ARRAY_H
 #define HUTILS_ARRAY_H
 
+#include <assert.h>
 #include <hutils/memory.h>
 
 #define ARRAY_HEAD(Name, Type) struct Name {\

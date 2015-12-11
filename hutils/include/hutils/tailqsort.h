@@ -18,6 +18,8 @@
 #ifndef HUTILS_TAILQSORT_H
 #define HUTILS_TAILQSORT_H
 
+#include <assert.h>
+
 #define TAILQ_SORT_PROTOTYPE(List, name) \
 static void name(struct List *, size_t)
 

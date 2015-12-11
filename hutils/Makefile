@@ -61,7 +61,7 @@ $(TARGET): $(OBJ)
 
 $(TEST): $(TEST_OBJ) $(TARGET)
 	$(MKDIR_V)
-	$(LD_E_V)-L../htest/$(BUILD_DIR) -lhtest
+	$(LD_E_V) -L../htest/$(BUILD_DIR) -lhtest
 
 HCONF_FILES:=\
 	include/hutils/macros.h \

@@ -14,9 +14,11 @@
 
 
 hbuild - Building tools
------------------------
+=======================
 
-A collection of tools and snippets to make GNU make even more powerable.
+A collection of tools and snippets to make GNU make even more powerable. Note
+that some constructs look old, but they are required for ancient platforms
+that I want to support at work (GNU make 3.78, gcc 2.9 [mhm, not even 2.95]).
 
 
 build_dir.mk
@@ -27,55 +29,93 @@ include build_dir.mk
 # BUILD_DIR now has the nice name.
 
 
-config_cc.mk
-------------
-Various ways to configure compilation.
-
-include config_cc.mk
-%.o: %.c
-	$(CONFIG_CC)
-$(CONFIG_CC): Makefile
+cmds.mk
+-------
+Collection of useful command combos. Rather tied to hconf.
 
 
-hconf.sh
----------
-Shell script to auto configure source code with preprocessor branches
-identified by "if defined(HCONF_*). The branches are tested top-down, so
-fallback branches should be organized towards the bottom.
+strict_cflags.mk
+----------------
+Good set of flags for GCC to keep you on your toes while programming.
 
+
+hconf*
+------
+Ah yes, this is the magic that everybody needs.
+Shell scripts and a makefile snippet to auto configure various parts of a
+build. The basic principle is that a project auto configures its
+headers/sources and stores global results in a hconf cache, but also
+file-specific results. The global cache is read online to retrieve compiling
+and linking, whereas the file-specific caches are included automatically
+(given proper include paths of course). Global hconf cache files can be merged
+together in other projects.
+
+ *) hconf.mk
+    Basic compiler and flag configuring, merging of hconf caches, and
+    header/source auto configuring.
+ *) hconf.sh
+    Scans for preprocessor branches identified by "if defined(HCONF_*). The
+    branches are tested top-down, so fallback branches should be organized
+    towards the bottom.
+ *) hconf_merge.sh
+    Merges hconf cache files. The nature of the merging depends on the type of
+    flags.
+
+hconf cache file format:
+ 1: Compiler command, e.g. ccache gcc
+ 2: CPPFLAGS, e.g. -DDOH=pizza-dough -Ibatter
+ 3: CFLAGS, e.g. -ansi -pedantic (to start easy...)
+ 4: LDFLAGS, e.g. -Lcity-center
+ 5: LIBS, e.g. -lcommunity-center
+
+As always, a concrete example:
+
+MyMakefile:
+    include $(HTOOLS)/hgmake/build_dir.mk
+    HCONF_FILES:=include/my_header.h src/my_sauce.c
+    HCONF_CACHES:=
+    include $(HTOOLS_PATH)/hgmake/hconf.mk
 include/my_header.h:
-	#ifndef MY_HEADER_H
-	#define MY_HEADER_H
-	/* The chosen macro will be put into "hconf/<file". */
-	#include <hconf/include/my_header.h>
-	/* An hconf option is identified by " defined(HCONF_". */
-	#if defined(HCONF_1)
-	# define PRIz "d"
-	#elif defined(HCONF_THAT_OTHER_WAY)
-	# defined PRIz "z"
-	/* This else is required to make sure a proper branch is used. */
-	#else
-	# error Not hconf:ed.
-	#endif
-	/* Optional, will be used by the hconf test program. */
-	#define HCONF_TEST printf("%"PRIz, (size_t)0)
-	#endif
-sh hconf.sh my_build_dir my_header.h
+    #ifndef MY_HEADER_H
+    #define MY_HEADER_H
+    #include <hconf/include/my_header.h>
+    #if defined(HCONF_MY_WAY)
+    # define PRIz "d"
+    #elif defined(HCONF_THE_OTHER_WAY)
+    # defined PRIz "z"
+    #else
+    # error Not hconf:ed.
+    #endif
+    #define HCONF_TEST printf("%"PRIz, (size_t)0)
+    #endif
+src/my_sauce.c:
+    #include <hconf/src/my_sauce.h>
+    #if defined(HCONF_OH_RLY)
+    # /* CPPFLAGS=_BSD_SOURCE */
+    # include <exotic/system/header.h>
+    void this_rly_my_function() { ... }
+    #elif defined(HCONF_YA_RLY)
+    # include <adventurous/system/header.h>
+    void no_this_rly_my_function() { ... }
+    #else
+    # error Not hconf:ed.
+    #endif
+The result after running GNU make could be:
+ *) $(BUILD_DIR)/hconf.cache
+    ccache gcc
+    -D_BSD_SOURCE
+    -Wall
+    <empty>
+    <empty>
+ *) $(BUILD_DIR)/hconf/include/my_header.h
+    ...
+    #define HCONF_MY_WAY
+    #include <include/my_header.h>
+    ...
+ *) $(BUILD_DIR)/hconf/src/my_sauce.h
+    ...
+    #define HCONF_YA_RLY
+    ...
 
-my_build_dir/hconf/include/my_header.h now defines the most appropriate
-branch. This can be done also for sauce code:
-
-my_sauce.c:
-	#include <hconf/my_sauce.c.h>
-	#if defined(HCONF_OH_RLY)
-	# include <exotic/system/header.h>
-	void this_rly_my_function() { ... }
-	#elif defined(HCONF_YA_RLY)
-	# include <another/system/header.h>
-	void no_this_rly_my_function() { ... }
-	#else
-	# error Not hconf:ed.
-	#endif
-sh hconf.sh my_build_dir my_sauce.c
-
-my_build_dir/hconf/my_sauce.c.h now defines the most appropriate branch.
+Notice that it's a good idea to keep the hconf branch names descriptive and
+unique to avoid namespace collisions.

@@ -15,7 +15,6 @@
  */
 
 #include <hutils/vector2.h>
-#include <assert.h>
 #include <math.h>
 
 struct Vector2f *

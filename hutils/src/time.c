@@ -15,6 +15,7 @@
  */
 
 #include <hutils/time.h>
+#include <assert.h>
 #include <hconf/src/time.h>
 #include <hutils/memory.h>
 

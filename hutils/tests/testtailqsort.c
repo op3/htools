@@ -16,7 +16,6 @@
 
 #include <hutils/tailqsort.h>
 #include <sys/queue.h>
-#include <assert.h>
 #include <htest/htest.h>
 
 #define N 100
