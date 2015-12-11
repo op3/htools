@@ -16,35 +16,39 @@ ifndef SED
  SED:=sed
 endif
 
+MV_D=file_d_=$(patsubst %.c,%.d,$(<F));\
+	if [ -f $$file_d_ ]; then\
+		echo -n $(@D)/ | cat - $$file_d_ > $(@:.o=.d);\
+		rm -f $$file_d_;\
+	fi
 AR_A=$(AR) rcs $@ $^
-CC_O=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
+CC_O=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS);\
+	$(MV_D)
+CC_O_PRINCESS=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS);\
+	$(MV_D)
 HCONF=CC="$(CC)" \
       CPPFLAGS="$(CPPFLAGS)" \
       CFLAGS="$(CFLAGS)" \
       LDFLAGS="$(LDFLAGS)" \
       LIBS="$(LIBS)" \
       $(HTOOLS_PATH)/hgmake/hconf.sh
-LD_E=$(LD) -o $@ $^ $(LDFLAGS) $(HCONF_LDFLAGS) $(LIBS) $(HCONF_LIBS)
-MKDIR=test -d $(@D) || mkdir -p $(@D)
-MV_D=file=$(patsubst %.c,%.d,$(<F)); if test -f $$file; then\
-	echo -n $(@D)/ | cat - $$file > $(@:.o=.d);\
-	rm -f $$file;\
-fi
+LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(LDFLAGS) $(HCONF_LDFLAGS) $(LIBS) $(HCONF_LIBS)
+MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 
 ifeq (1,$(V))
  AR_A_V=$(AR_A)
  CC_O_V=$(CC_O)
+ CC_O_PRINCESS_V=$(CC_O_PRINCESS)
  HCONF_V=$(HCONF) -v
  LD_E_V=$(LD_E)
  MKDIR_V=$(MKDIR)
- MV_D_V=$(MV_D)
  QUIET_V=
 else
- AR_A_V=@echo "AR    " $@ && $(AR_A)
- CC_O_V=@echo "CC    " $@ && $(CC_O)
- HCONF_V=@echo "HCONF " $@ && $(HCONF)
- LD_E_V=@echo "LD    " $@ && $(LD_E)
+ AR_A_V=@echo "AR    $@" && $(AR_A)
+ CC_O_V=@echo "CC    $@" && $(CC_O)
+ CC_O_PRINCESS_V=@echo "CCP   $@" && $(CC_O_PRINCESS)
+ HCONF_V=@echo "HCONF $@" && $(HCONF)
+ LD_E_V=@echo "LD    $@" && $(LD_E)
  MKDIR_V=@$(MKDIR)
- MV_D_V=@$(MV_D)
  QUIET_V=@
 endif

@@ -53,7 +53,7 @@ static void \
 htest_test_header_##name##_(char const *const a_color_header_, char const \
     *const a_color_reset_)\
 {\
-	printf(" %sTest("__FILE__":%d:"#name")%s\n", a_color_header_,\
+	htest_print_(" %sTest("__FILE__":%d:"#name")%s\n", a_color_header_,\
 	    __LINE__, a_color_reset_);\
 }\
 static void \
@@ -72,7 +72,7 @@ void \
 htest_suite_header_##name##_(char const *const a_color_header_, char const \
     *const a_color_reset_)\
 {\
-	printf("%sSuite("__FILE__":%d:"#name")%s\n", a_color_header_,\
+	htest_print_("%sSuite("__FILE__":%d:"#name")%s\n", a_color_header_,\
 	    __LINE__, a_color_reset_);\
 }\
 void \
