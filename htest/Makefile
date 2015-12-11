@@ -53,7 +53,7 @@ all: $(BUILD_DIR)/test
 
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
 	$(MKDIR_V)
-	$(LD_E_V)
+	$(LD_E_V) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils
 
 $(BUILD_DIR)/libhtest.a: $(OBJ)
 	$(MKDIR_V)

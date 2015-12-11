@@ -17,11 +17,14 @@
 #ifndef HUTILS_ERR_H
 #define HUTILS_ERR_H
 
+#include <hutils/macros.h>
 #include <hconf/include/hutils/err.h>
 
 #if defined(HCONF_ERR_H)
+/* LIBS=dont */
 # include <err.h>
-#elif defined(HCONF_MSC)
+#elif defined(HCONF_ERR_MSC)
+/* LIBS=dont */
 # include <windows.h>
 # define err(code, str) do {\
 		LPTSTR str_;\
@@ -36,7 +39,11 @@
 		LocalFree(str_);\
 		exit(code);\
 	} HUTILS_COND(while, 0)
-#elif defined(HCONF_ERR_CUSTOM)
+#elif defined(HCONF_ERR_FPRINTF)
+/* LIBS=dont */
+# include <errno.h>
+# include <stdio.h>
+# include <string.h>
 # define err(code, str) do {\
 		fprintf(stderr, "%s: %s\n", str, strerror(errno));\
 		exit(code);\
@@ -45,6 +52,6 @@
 # error Not hconf:ed.
 #endif
 
-#define HCONF_TEST err(0, 0)
+#define HCONF_TEST err(0, "a")
 
 #endif

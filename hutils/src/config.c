@@ -1,5 +1,6 @@
 #include <hutils/config.h>
 #include <sys/queue.h>
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <hutils/lexer.h>

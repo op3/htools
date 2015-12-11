@@ -41,9 +41,16 @@ $(HCONF_CACHE): Makefile $(HCONF_CACHES_FILES) $(HCONF_FILES)
 	$(QUIET_V)cmd="ccache -h";out=`$$cmd 2>&1`;ret=$$?;echo "$$cmd: $$out" > $(HCONF_LOG);\
 	ccache=;\
 	[ 0 -eq $$ret ] && ccache="ccache ";\
+	echo "int main(){}" > $(BUILD_DIR)/hconf.main.c;\
+	wextra=-Wextra;\
+	$(CC) $$wextra -o /dev/null $(BUILD_DIR)/hconf.main.c &> /dev/null;\
+	[ 0 -ne $$? ] && wextra=-W;\
+	wswitchenum=-Wswitch-enum;\
+	$(CC) $$wswitchenum -o /dev/null $(BUILD_DIR)/hconf.main.c &> /dev/null;\
+	[ 0 -ne $$? ] && wswitchenum=;\
 	echo $${ccache}$(CC) > $@.tmp;\
 	echo "$(CPPFLAGS)" >> $@.tmp;\
-	echo "$(CFLAGS)" >> $@.tmp;\
+	echo "$(CFLAGS) $$wextra $$wswitchenum" >> $@.tmp;\
 	echo "$(LDFLAGS)" >> $@.tmp;\
 	echo "$(LIBS)" >> $@.tmp;\
 	if [ "$(HCONF_CACHES_FILES)" ]; then\
@@ -52,13 +59,17 @@ $(HCONF_CACHE): Makefile $(HCONF_CACHES_FILES) $(HCONF_FILES)
 	fi;\
 	verbose=;\
 	[ "x1" = "x$V" ] && verbose=-v;\
-	for i in $(filter %.c %.h,$^); do\
+	for i in $(HCONF_FILES); do\
 		mk=$(BUILD_DIR)/hconf/`echo $$i | sed 's/\.[c|h]$$/.mk/'`;\
-		if [ ! -f $$mk -o $$mk -ot $$i ]; then\
+		if [ ! -f $$mk -o $$mk -ot $$i -o $$mk -ot Makefile ]; then\
 			$(HTOOLS_PATH)/hgmake/hconf.sh $$verbose $@.tmp $(BUILD_DIR) $$i;\
 			[ 0 -ne $$? ] && exit 1;\
+		else\
+			$(HTOOLS_PATH)/hgmake/hconf_merge.sh $@.tmp $$mk > $@.tmp2;\
+			mv $@.tmp2 $$mk;\
 		fi;\
-		cp -f $$mk $@.tmp;\
+		rm -f $@.tmp;\
+		cp $$mk $@.tmp;\
 	done;\
 	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
 	if [ 1 -eq $$? ]; then\

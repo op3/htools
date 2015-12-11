@@ -18,23 +18,34 @@
 #include <hconf/src/time.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_POSIX)
+#if defined(HCONF_POSIX_MONOTONIC)
 
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
+# define CLOCK_SOURCE CLOCK_MONOTONIC
 
 #elif defined(HCONF_POSIX_LRT)
 /* LIBS=-lrt */
 
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
+# define CLOCK_SOURCE CLOCK_MONOTONIC
+
+#elif defined(HCONF_POSIX_REALTIME)
+/* LIBS=dont */
+
+# define SLEEP_NANOSLEEP
+# define TIME_CLOCK
+# define CLOCK_SOURCE CLOCK_REALTIME
 
 #elif defined(HCONF_WINDOWS)
+/* LIBS=dont */
 
 # define SLEEP_SLEEP
 # define TIME_PERF
 
 #elif defined(HCONF_MAC)
+/* LIBS=dont */
 
 # define SLEEP_NANOSLEEP
 # define TIME_MACH
@@ -48,13 +59,13 @@
 # include <time.h>
 #endif
 #if defined(TIME_CLOCK)
-# include <err.h>
 # include <stdlib.h>
+# include <hutils/err.h>
 #endif
 #if defined(TIME_MACH)
-# include <err.h>
 # include <stdlib.h>
 # include <mach/mach_time.h>
+# include <hutils/err.h>
 #endif
 
 double
@@ -92,7 +103,7 @@ time_getd()
 #elif defined(TIME_CLOCK)
 	struct timespec tp;
 
-	if (0 != clock_gettime(CLOCK_MONOTONIC, &tp)) {
+	if (0 != clock_gettime(CLOCK_SOURCE, &tp)) {
 		err(EXIT_FAILURE, "clock_gettime");
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;

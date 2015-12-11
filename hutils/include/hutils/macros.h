@@ -17,15 +17,31 @@
 #ifndef HUTILS_MACROS_H
 #define HUTILS_MACROS_H
 
-#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 #include <hconf/include/hutils/macros.h>
 
+#if defined(HCONF_COND_SIMPLE)
+/* LIBS=dont */
+# define HUTILS_COND(stmt, cond) stmt (cond)
+#elif defined(HCONF_COND_WARNING_4127)
+/* LIBS=dont */
+# define HUTILS_COND(stmt, cond)\
+	__pragma(warning(push))\
+	__pragma(warning(disable:4127))\
+	stmt (cond)\
+	__pragma(warning(pop))
+#else
+# error Not hconf:ed.
+#endif
+
+#define HCONF_TEST do {} HUTILS_COND(while, 0)
+
 #define ABS(x) (0 > x ? -x : x)
 #define CLAMP(x, a, b) (x < a ? a : x > b ? b : x)
 #define COPY(dst, src) do {\
-	assert(sizeof dst == sizeof src);\
+	int copy_assert_size_[sizeof dst == sizeof src];\
+	(void)copy_assert_size_;\
 	memmove(&dst, &src, sizeof dst);\
 } HUTILS_COND(while, 0)
 #if defined(__GNUC__)
@@ -67,29 +83,16 @@
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
 #define SWAP(a, b) do {\
-	uint8_t tmp_[sizeof a == sizeof b ? (signed)sizeof a : -1];\
-	memmove(tmp_, &a, sizeof a);\
+	uint8_t swap_assert_size_[sizeof a == sizeof b ? (signed)sizeof a : \
+	    -1];\
+	memmove(swap_assert_size_, &a, sizeof a);\
 	memmove(&a, &b, sizeof a);\
-	memmove(&b, tmp_, sizeof a);\
+	memmove(&b, swap_assert_size_, sizeof a);\
 } HUTILS_COND(while, 0)
 #if !defined(TRUE)
 # define TRUE (0 == 0)
 # define FALSE (!TRUE)
 #endif
 #define ZERO(x) memset(&x, 0, sizeof x)
-
-#if defined(HCONF_COND_SIMPLE)
-# define HUTILS_COND(stmt, cond) stmt (cond)
-#elif defined(HCONF_COND_WARNING_4127)
-# define HUTILS_COND(stmt, cond)\
-	__pragma(warning(push))\
-	__pragma(warning(disable:4127))\
-	stmt (cond)\
-	__pragma(warning(pop))
-#else
-# error Not hconf:ed.
-#endif
-
-#define HCONF_TEST do {} HUTILS_COND(while, 0)
 
 #endif

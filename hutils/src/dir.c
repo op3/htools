@@ -21,6 +21,7 @@
 
 #if defined(HCONF_DIRENT)
 /* CPPFLAGS="-D_POSIX_C_SOURCE=199506" */
+/* LIBS=dont */
 
 # include <dirent.h>
 # include <stddef.h>
@@ -84,6 +85,7 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 }
 
 #elif defined(HCONF_WINDOWS)
+/* LIBS=dont */
 
 # include <windows.h>
 

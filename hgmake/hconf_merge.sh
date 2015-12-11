@@ -19,7 +19,7 @@ if [ 0 -eq $# ]; then
 	echo Usage: $0 hconf-cache-files
 	echo " Does the following for each line of the given hconf cache files:"
 	echo " 1) Takes the line from the first file."
-	echo " 2) Removes duplicates and filters away -D* (must be grouped/sorted) with lesser values, e.g.:"
+	echo " 2) Removes duplicates and filters away -D* with lesser values, e.g.:"
 	echo "  ./$0 -D_BSD_SOURCE -D_POSIX_C_SOURCE=1 -D_POSIX_C_SOURCE=200809 -I."
 	echo "  -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809 -I."
 	echo " 3..4) Removes duplicates."
@@ -29,7 +29,7 @@ if [ 0 -eq $# ]; then
 fi
 
 # Line 1.
-head -n1 $1
+head -1 $1
 # Line 2.
 src=
 file_i=0
@@ -39,13 +39,14 @@ while true; do
 	eval file=\$$file_i
 	src="$src `sed -n 2p $file`"
 done
-src=`echo "$src" | sed 's/ *\(.*\) */\1/' | tr ' ' '\n' | sort -u`
+src=`echo "$src" | sed 's/ *\(.*\) */\1/' | tr ' ' '\n' | awk '!a[$0]++'`
 srcn=`echo "$src" | wc -l`
 i=0
 while true; do
 	i=`expr $i + 1`
 	[ $srcn -lt $i ] && break
 	arg_i=`echo "$src" | sed -n ${i}p`
+	[ "x-D" != "x`echo $arg_i | cut -c 1-2`" ] && continue
 	dname_i=`echo "$arg_i" | sed -n 's/-D\([^=]*\)=.*/\1/p'`
 	dvalue_i=`echo "$arg_i" | sed -n 's/-D[^=]*=\(.*\)/\1/p'`
 	j=$i
@@ -53,6 +54,7 @@ while true; do
 		j=`expr $j + 1`
 		[ $srcn -lt $j ] && break
 		arg_j=`echo "$src" | sed -n ${j}p`
+		[ "x-D" != "x`echo $arg_j | cut -c 1-2`" ] && continue
 		dname_j=`echo "$arg_j" | sed -n 's/-D\([^=]*\)=.*/\1/p'`
 		dvalue_j=`echo "$arg_j" | sed -n 's/-D[^=]*=\(.*\)/\1/p'`
 		if [ "$dname_i" -a "x$dname_j" = "x$dname_i" ]; then

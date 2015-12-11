@@ -21,16 +21,12 @@ HTEST(Copy)
 {
 	int *ap, *bp;
 	int a, b;
-	short c;
 
 	a = 0;
 	b = 1;
 	COPY(a, b);
 	HTRY_I(1, ==, a);
 	HTRY_I(1, ==, b);
-
-	c = 2;
-	HTRY_SIGNAL(COPY(a, c));
 
 	a = 0;
 	b = 1;

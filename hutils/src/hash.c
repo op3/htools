@@ -15,6 +15,7 @@
  */
 
 #include <hutils/hash.h>
+#include <assert.h>
 
 uint32_t
 hutils_hash32(void const *const a_data, size_t const a_data_size)

@@ -13,4 +13,5 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wextra -Wmissing-prototypes -Wshadow -Wstrict-prototypes -Wswitch-enum
+# -Wextra/-W and -Wswitch-enum are added by hconf.
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes

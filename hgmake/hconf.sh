@@ -20,13 +20,13 @@ no_option=no_option
 build_result=
 build()
 {
-	build_output=$1
-	build_input=$2
-	build_cppflags=$3
-	build_cflags=$4
-	build_ldflags=$5
-	build_libs=$6
-	cc=`cat $target_mk | sed -n 1p`
+	build_output="$1"
+	build_input="$2"
+	build_cppflags="$3"
+	build_cflags="$4"
+	build_ldflags="$5"
+	build_libs="$6"
+	cc="`sed -n 1p $target_mk`"
 	cmd="$cc $build_cppflags $build_cflags $build_ldflags -o $build_output $build_input $build_libs"
 	out="`$cmd 2>&1`"
 	build_result=$?
@@ -38,7 +38,11 @@ build()
 		echo "$out" >> $log
 	fi
 	if [ 0 -ne $build_result ]; then
-		build_result=`echo $out | wc -l`
+		if [ ! -z "`echo $out | grep 'cannot find'`" ]; then
+			build_result=100000
+		else
+			build_result=`echo "$out" | wc -l | tr -d ' '`
+		fi
 	fi
 }
 
@@ -47,18 +51,24 @@ clean_hconf()
 	rm -f $target_h $target_mk
 }
 
+perfect()
+{
+	echo Perfect. | tee -a $log
+	exit 0
+}
+
 for i in 0 1 2 3 4; do
 	eval best_args$i=
 done
-best_link_result=1000
+best_link_result=100000
 try()
 {
-	write_hconf
+	write_hconf 1
 	try_option="$args0"
-	try_cppflags=`sed -n 2p $target_mk`
-	try_cflags=`sed -n 3p $target_mk`
-	try_ldflags=`sed -n 4p $target_mk`
-	try_libs=`sed -n 5p $target_mk`
+	try_cppflags="`sed -n 2p $target_mk`"
+	try_cflags="`sed -n 3p $target_mk`"
+	try_ldflags="`sed -n 4p $target_mk`"
+	try_libs="`sed -n 5p $target_mk`"
 	echo -n " $file: Testing option '$try_option'... " | tee -a $log
 	if [ $is_source ]; then
 		try_compile_input=$file_c
@@ -77,11 +87,13 @@ try()
 			echo Compilation must fail if file not hconf:ed! | tee -a $log
 			exit 1
 		fi
+		if [ "xdont" = "x$args4" ]; then
+			perfect
+		fi
 		build /dev/null "$try_link_input" "" "" "$try_ldflags" "$try_libs"
 		try_link_result=$build_result
 		if [ 0 -eq $try_link_result ]; then
-			echo Perfect. | tee -a $log
-			exit 0
+			perfect
 		fi
 		if [ $try_link_result -lt $best_link_result ]; then
 			best_args0=$try_option
@@ -90,7 +102,9 @@ try()
 			best_args3=$try_ldflags
 			best_args4=$try_libs
 			best_link_result=$try_link_result
-			echo Keeping. | tee -a $log
+			echo "Keeping ($try_link_result)". | tee -a $log
+		else
+			echo "Skipping ($try_link_result <= $best_link_result)". | tee -a $log
 		fi
 	else
 		if [ "$no_option" = "$try_option" ]; then
@@ -103,6 +117,7 @@ try()
 
 write_hconf()
 {
+	do_merge="$1"
 	uppered=HCONF_`echo $file_h | sed 's/[\/\.]/_/g' | tr 'a-z' 'A-Z'`
 	cat << END > $target_h
 #ifndef $uppered
@@ -113,9 +128,15 @@ write_hconf()
 END
 	echo > $target_mk.tmp
 	for i in 1 2 3 4; do
-		eval echo \$args$i >> $target_mk.tmp
+		eval arg=\$args$i
+		[ "xdont" != "x$arg" ] && echo $arg >> $target_mk.tmp
 	done
-	$HTOOLS_PATH/hgmake/hconf_merge.sh $base_mk $target_mk.tmp > $target_mk
+	if [ 1 -eq $do_merge ]; then
+		$HTOOLS_PATH/hgmake/hconf_merge.sh $base_mk $target_mk.tmp > $target_mk
+	else
+		line1=`head -1 $base_mk`
+		sed "1s/$/$line1/" $target_mk.tmp > $target_mk
+	fi
 	rm -f $target_mk.tmp
 }
 
@@ -184,6 +205,10 @@ try
 list_line_no=`grep -n "if defined(HCONF_" $file | cut -f1 -d:`
 for line_no in $list_line_no; do
 	args0=`sed -n "${line_no}s/.*if defined(\(HCONF_.*\)).*/\1/p" $file`
+	opt_CPPFLAGS=
+	opt_CFLAGS=
+	opt_LDFLAGS=
+	opt_LIBS=
 	while true; do
 		line_no=`expr $line_no + 1`
 		line="`sed -n "${line_no}p" $file`"
@@ -197,22 +222,22 @@ for line_no in $list_line_no; do
 			[ "CFLAGS" = $var ] ||
 			[ "LDFLAGS" = $var ] ||
 			[ "LIBS" = $var ]; then
-			eval OPT_$expr
+			eval opt_$expr
 		else
 			eval $expr
 		fi
 	done
-	args1="$OPT_CPPFLAGS"
-	args2="$OPT_CFLAGS"
-	args3="$OPT_LDFLAGS"
-	args4="$OPT_LIBS"
+	args1="$opt_CPPFLAGS"
+	args2="$opt_CFLAGS"
+	args3="$opt_LDFLAGS"
+	args4="$opt_LIBS"
 	try
 done
 if [ $best_args0 ]; then
 	for i in 0 1 2 3 4; do
 		eval args$i=\$best_args$i
 	done
-	write_hconf
+	write_hconf 0
 	exit 0
 fi
 clean_hconf

@@ -33,6 +33,17 @@
 
 char const *const nul_path = "/dev/null";
 
+#elif defined(HCONF_ALMOST_POSIX)
+
+# include <unistd.h>
+int getopt(int, char * const [], const char *);
+/*extern char *optarg;
+extern int optind, opterr, optopt;*/
+
+# define SUPPORT_FORK
+
+char const *const nul_path = "/dev/null";
+
 #elif defined(HCONF_MSC)
 
 # include <io.h>

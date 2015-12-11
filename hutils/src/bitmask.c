@@ -18,8 +18,9 @@
 #include <stdint.h>
 #include <hutils/memory.h>
 
-#define NUM_UINT8(bit_num)  ((bit_num + 7) / 8)
 #define NUM_UINT32(bit_num) ((bit_num + 31) / 32)
+/* Optimizing bytes means endian must be considered, leave this... */
+#define NUM_UINT8(bit_num)  (NUM_UINT32(bit_num) * 4)
 
 struct Bitmask {
 	int	bit_num;

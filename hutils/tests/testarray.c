@@ -15,6 +15,7 @@
  */
 
 #include <hutils/array.h>
+#include <assert.h>
 #include <htest/htest.h>
 
 ARRAY_HEAD(IntArray, int);

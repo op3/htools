@@ -249,6 +249,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 }
 
 #elif defined(HCONF_WINDOWS)
+/* LIBS=dont */
 
 # include <windows.h>
 # include <process.h>
@@ -348,6 +349,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 	LeaveCriticalSection(&a_mutex->cs);
 }
 
+#elif defined(HCONF_SINGLE)
 #else
 # error Not hconf:ed.
 #endif

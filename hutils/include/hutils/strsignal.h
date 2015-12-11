@@ -5,14 +5,24 @@
 
 #if defined(HCONF_STRSIGNAL_POSIX_200809)
 /* CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
-#elif defined(HCONF_STRSIGNAL_GNU_SOURCE)
-/* CPPFLAGS=-D_GNU_SOURCE */
+/* LIBS=dont */
+#elif defined(HCONF_STRSIGNAL_PROTOTYPE)
+char *strsignal(int);
+#elif defined(HCONF_STRSIGNAL_CUSTOM)
+# include <signal.h>
+# define strsignal(signum) (\
+	SIGABRT == signum ? "SIGABRT" :\
+	SIGFPE == signum ? "SIGFPE" :\
+	SIGILL == signum ? "SIGILL" :\
+	SIGINT == signum ? "SIGINT" :\
+	SIGSEGV == signum ? "SIGSEGV" :\
+	SIGTERM == signum ? "SIGTERM" : "SIGUnknown")
 #else
 # error Not hconf:ed.
 #endif
 
 #include <string.h>
 
-#define HCONF_TEST strsignal(0)
+#define HCONF_TEST (void)strsignal(0)
 
 #endif

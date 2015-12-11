@@ -21,7 +21,7 @@ include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
 CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I../htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
-LDFLAGS:=-L../htest/$(BUILD_DIR)
+LDFLAGS:=
 LIBS:=-lm
 
 ifeq (release,$(BUILD_TYPE))
@@ -61,10 +61,11 @@ $(TARGET): $(OBJ)
 
 $(TEST): $(TEST_OBJ) $(TARGET)
 	$(MKDIR_V)
-	$(LD_E_V) -lhtest
+	$(LD_E_V)-L../htest/$(BUILD_DIR) -lhtest
 
-HCONF_FILES:=include/hutils/err.h \
+HCONF_FILES:=\
 	include/hutils/macros.h \
+	include/hutils/err.h \
 	include/hutils/snprintf.h \
 	include/hutils/strdup.h \
 	include/hutils/strsignal.h \
