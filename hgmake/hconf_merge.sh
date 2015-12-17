@@ -28,18 +28,14 @@ if [ 0 -eq $# ]; then
 	exit 1
 fi
 
+pasted=`paste -d' ' $*`
+
 # Line 1.
 head -1 $1
 # Line 2.
-src=
-file_i=0
-while true; do
-	file_i=`expr $file_i + 1`
-	[ $# -lt $file_i ] && break
-	eval file=\$$file_i
-	src="$src `sed -n 2p $file`"
-done
-src=`echo "$src" | sed 's/ *\(.*\) */\1/' | tr ' ' '\n' | awk '!a[$0]++'`
+src=`echo "$pasted" | sed -n 2p`
+# TODO: Separate -D and the rest, and filter only the -D options.
+src=`echo "$src" | tr ' ' '\n' | awk '!a[$0]++'`
 srcn=`echo "$src" | wc -l`
 i=0
 while true; do
@@ -76,23 +72,9 @@ done
 echo $src
 # Line 3,4.
 for line_i in 3 4; do
-	src=
-	file_i=0
-	while true; do
-		file_i=`expr $file_i + 1`
-		[ $# -lt $file_i ] && break
-		eval file=\$$file_i
-		src="$src `sed -n ${line_i}p $file`"
-	done
-	echo `echo $src | tr ' ' '\n' | sort -u`
+	echo "$pasted" | sed -n ${line_i}p | tr ' ' '\n' | sort -u | tr '\n' ' '
+	echo
 done
 # Line 5.
-src=
-file_i=0
-while true; do
-	file_i=`expr $file_i + 1`
-	[ $# -lt $file_i ] && break
-	eval file=\$$file_i
-	src="$src   `sed -n 5p $file`"
-done
-echo " "$src | sed 's/  *\([^ ]*\)\(  *\1\)*/\1 /g'
+echo "$pasted" | sed -n 5p | tr ' ' '\n' | awk '!a[$0]++' | tr '\n' ' '
+echo
