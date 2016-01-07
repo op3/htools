@@ -79,6 +79,13 @@ HTEST(MaxMin)
 	HTRY_I(-1, ==, MIN(-1, 2));
 }
 
+HTEST(Sign)
+{
+	HTRY_I(1, ==, SGN(+10));
+	HTRY_I(1, ==, SGN(0));
+	HTRY_I(-1, ==, SGN(-10));
+}
+
 HTEST(Swap)
 {
 	int *ap, *bp;
@@ -113,6 +120,7 @@ HTEST_SUITE(Macros)
 	HTEST_ADD(Length);
 	HTEST_ADD(Mask);
 	HTEST_ADD(MaxMin);
+	HTEST_ADD(Sign);
 	HTEST_ADD(Swap);
 	HTEST_ADD(Trunc);
 }

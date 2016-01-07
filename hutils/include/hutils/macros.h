@@ -79,6 +79,7 @@
 #if !defined(MIN)
 # define MIN(a, b) (a < b ? a : b)
 #endif
+#define SGN(x) (0 > x ? -1 : 1)
 #define SQR(x) (x * x)
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)

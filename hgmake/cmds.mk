@@ -23,8 +23,12 @@ MV_D=file_d_=$(patsubst %.c,%.d,$(<F));\
 	fi
 AR_A=$(AR) rcs $@ $^
 CC_O=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS);\
+	ret=$$?;\
+	[ 0 -ne $$ret ] && exit $$ret;\
 	$(MV_D)
-CC_O_PRINCESS=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS);\
+CC_O_PRINCESS=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS));\
+	ret=$$?;\
+	[ 0 -ne $$ret ] && exit $$ret;\
 	$(MV_D)
 HCONF=CC="$(CC)" \
       CPPFLAGS="$(CPPFLAGS)" \

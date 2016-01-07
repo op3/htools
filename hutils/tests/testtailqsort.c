@@ -17,6 +17,7 @@
 #include <hutils/tailqsort.h>
 #include <sys/queue.h>
 #include <htest/htest.h>
+#include <hutils/random.h>
 
 #define N 100
 
@@ -80,6 +81,7 @@ HTEST(Reversed)
 
 HTEST(PseudoRandom)
 {
+	struct RandomSeed seed = {{1, 2, 3, 4, 5}};
 	struct IntegerList list;
 	struct Integer i[N];
 	struct Integer *p;
@@ -87,7 +89,7 @@ HTEST(PseudoRandom)
 
 	TAILQ_INIT(&list);
 	for (idx = 0; N > idx; ++idx) {
-		i[idx].i = 15 & rand();
+		i[idx].i = 15 & random_getu32(&seed);
 		TAILQ_INSERT_TAIL(&list, &i[idx], next);
 	}
 	sort_ascending(&list, N);

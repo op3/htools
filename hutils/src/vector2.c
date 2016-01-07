@@ -39,6 +39,15 @@ vector2f_get_magnitude(struct Vector2f const *const a_v)
 	return sqrt(vector2f_dot(a_v, a_v));
 }
 
+struct Vector2f *
+vector2f_mad(struct Vector2f *const a_vo, struct Vector2f const *const a_v0,
+    struct Vector2f const *const a_v1, struct Vector2f const *const a_v2)
+{
+	a_vo->x = a_v0->x * a_v1->x + a_v2->x;
+	a_vo->y = a_v0->y * a_v1->y + a_v2->y;
+	return a_vo;
+}
+
 struct Vector2f	*
 vector2f_negate(struct Vector2f *const a_vo, struct Vector2f const *const a_v)
 {
