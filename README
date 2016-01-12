@@ -1,5 +1,4 @@
- Copyright (c) 2015, 2016
- Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -14,20 +13,12 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-hutils - utility code
-=====================
+htools - Hans' C-related tools
+==============================
 
-This is just a collection of useful little code snippets that I collect. It's
-tested with the htest unit testing framework. First read htools/README, then
-do:
-$ make
-or
-$ gmake
-and that's that.
+This is a collection of source code that I'm assembling to make future
+development easier. For me.
+Each project has its own uses, but there's one env var that should be set:
+HTOOLS_PATH=<path to htools>
 
-To test, you need to build htest first. Note that htest uses hutils, so the
-order from scratch would be:
-cd htools/
-gmake -C hutils
-gmake -C htest
-gmake -C hutils test
+Now have fun with the READMEs for the other projects!
