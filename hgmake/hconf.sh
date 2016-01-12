@@ -241,5 +241,6 @@ if [ $best_args0 ]; then
 	exit 0
 fi
 clean_hconf
-echo " $file: No usable HCONF_* option found." 1>&2
+echo " $file: No usable HCONF_* option found, dumping log:" 1>&2
+cat $log 1>&2
 exit 1
