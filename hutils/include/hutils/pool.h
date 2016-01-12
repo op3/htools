@@ -18,7 +18,7 @@
 #ifndef HUTILS_POOL_H
 #define HUTILS_POOL_H
 
-#include <sys/queue.h>
+#include <hutils/queue.h>
 #include <hutils/memory.h>
 
 #define POOL_HEAD(Name, Type) \

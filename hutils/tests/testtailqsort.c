@@ -15,7 +15,7 @@
  */
 
 #include <hutils/tailqsort.h>
-#include <sys/queue.h>
+#include <hutils/queue.h>
 #include <htest/htest.h>
 #include <hutils/random.h>
 
