@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2015
+# Copyright (c) 2015, 2016
 # Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
