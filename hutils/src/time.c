@@ -19,6 +19,9 @@
 #include <hconf/src/time.h>
 #include <hutils/memory.h>
 
+# define ASCTIME_R(tm, buf) asctime_r(tm, buf)
+# define GMTIME_R(tt, tm) gmtime_r(tt, tm)
+
 #if defined(HCONF_POSIX_MONOTONIC)
 
 # define SLEEP_NANOSLEEP
@@ -38,6 +41,17 @@
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
 # define CLOCK_SOURCE CLOCK_REALTIME
+
+#elif defined(HCONF_POSIX_REALTIME_DRAFT9)
+/* LIBS=dont */
+
+# define SLEEP_NANOSLEEP
+# define TIME_CLOCK
+# define CLOCK_SOURCE CLOCK_REALTIME
+# undef ASCTIME_R
+# undef GMTIME_R
+# define ASCTIME_R(tm, buf) asctime_r(tm, buf, 26)
+# define GMTIME_R(tt, tm) gmtime_r(tm, tt)
 
 #elif defined(HCONF_WINDOWS)
 /* LIBS=dont */
@@ -108,6 +122,8 @@ time_getd()
 		err(EXIT_FAILURE, "clock_gettime");
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;
+#else
+# error No implementation.
 #endif
 }
 
@@ -119,9 +135,9 @@ time_gets()
 	char *buf;
 
 	time(&tt);
-	gmtime_r(&tt, &tm);
+	GMTIME_R(&tt, &tm);
 	MALLOC(buf, 26);
-	asctime_r(&tm, buf);
+	ASCTIME_R(&tm, buf);
 	return buf;
 }
 
@@ -138,6 +154,8 @@ time_sleep(double const a_s)
 	if (0 != nanosleep(&ts, NULL)) {
 		return errno;
 	}
+#else
+# error No implementation.
 #endif
 	return 0;
 }

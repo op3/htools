@@ -350,6 +350,97 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 }
 
 #elif defined(HCONF_SINGLE)
+
+struct CondVar *
+thread_condvar_create(char **const a_err)
+{
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
+{
+	(void)a_condvar;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
+{
+	(void)a_condvar;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
+{
+	(void)a_condvar;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_condvar_wait(struct CondVar *const a_condvar, struct Mutex *const
+    a_mutex, char **const a_err)
+{
+	(void)a_condvar;
+	(void)a_mutex;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+struct Thread *
+thread_create(void (*const a_func)(void *), void *const a_data, char **const
+    a_err)
+{
+	(void)a_func;
+	(void)a_data;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_free(struct Thread **const a_thread, char **const a_err)
+{
+	(void)a_thread;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+struct Mutex *
+thread_mutex_create(char **const a_err)
+{
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_mutex_free(struct Mutex **const a_mutex, char **const a_err)
+{
+	(void)a_mutex;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int 
+thread_mutex_lock(struct Mutex *const a_mutex, char **const a_err)
+{
+	(void)a_mutex;
+	*a_err = "Not supported";
+	return NULL;
+}
+
+int
+thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
+{
+	(void)a_mutex;
+	*a_err = "Not supported";
+	return NULL;
+}
+
 #else
 # error Not hconf:ed.
 #endif

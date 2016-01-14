@@ -17,8 +17,8 @@
 #ifndef HUTILS_MACROS_H
 #define HUTILS_MACROS_H
 
-#include <stdint.h>
 #include <string.h>
+#include <hutils/stdint.h>
 #include <hconf/include/hutils/macros.h>
 
 #if defined(HCONF_COND_SIMPLE)

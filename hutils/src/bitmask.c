@@ -15,8 +15,8 @@
  */
 
 #include <hutils/bitmask.h>
-#include <stdint.h>
 #include <hutils/memory.h>
+#include <hutils/stdint.h>
 
 #define NUM_UINT32(bit_num) ((bit_num + 31) / 32)
 /* Optimizing bytes means endian must be considered, leave this... */

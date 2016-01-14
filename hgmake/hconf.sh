@@ -26,8 +26,9 @@ build()
 	build_cflags="$4"
 	build_ldflags="$5"
 	build_libs="$6"
+	build_extra="$7"
 	cc="`sed -n 1p $target_mk`"
-	cmd="$cc $build_cppflags $build_cflags $build_ldflags -o $build_output $build_input $build_libs"
+	cmd="$cc $build_cppflags $build_cflags $build_ldflags -o $build_output $build_input $build_libs $build_extra"
 	out="`$cmd 2>&1`"
 	build_result=$?
 	if [ 0 -ne $verbose ]; then
@@ -57,7 +58,7 @@ perfect()
 	exit 0
 }
 
-for i in 0 1 2 3 4; do
+for i in 0 1 2 3 4 5; do
 	eval best_args$i=
 done
 best_link_result=100000
@@ -69,6 +70,7 @@ try()
 	try_cflags="`sed -n 3p $target_mk`"
 	try_ldflags="`sed -n 4p $target_mk`"
 	try_libs="`sed -n 5p $target_mk`"
+	try_extra="$args5"
 	echo -n " $file: Testing option '$try_option'... " | tee -a $log
 	if [ $is_source ]; then
 		try_compile_input=$file_c
@@ -79,7 +81,7 @@ try()
 		try_compile_output=$main_o
 		try_link_input=$main_o
 	fi
-	build "$try_compile_output" "$try_compile_input" "$try_cppflags -I. -I$build_dir" "$try_cflags -c" "" ""
+	build "$try_compile_output" "$try_compile_input" "$try_cppflags -I. -I$build_dir" "$try_cflags -c" "" "" ""
 	compile_result=$build_result
 	if [ 0 -eq $compile_result ]; then
 		if [ "$no_option" = "$try_option" ]; then
@@ -90,7 +92,7 @@ try()
 		if [ "xdont" = "x$args4" ]; then
 			perfect
 		fi
-		build /dev/null "$try_link_input" "" "" "$try_ldflags" "$try_libs"
+		build /dev/null "$try_link_input" " -I$build_dir" "" "$try_ldflags" "$try_libs" "$try_extra"
 		try_link_result=$build_result
 		if [ 0 -eq $try_link_result ]; then
 			perfect
@@ -198,7 +200,7 @@ END
 fi
 
 args0=$no_option
-for i in 1 2 3 4; do
+for i in 1 2 3 4 5; do
 	eval args$i=
 done
 try
@@ -209,6 +211,7 @@ for line_no in $list_line_no; do
 	opt_CFLAGS=
 	opt_LDFLAGS=
 	opt_LIBS=
+	opt_EXTRA=
 	while true; do
 		line_no=`expr $line_no + 1`
 		line="`sed -n "${line_no}p" $file`"
@@ -221,7 +224,8 @@ for line_no in $list_line_no; do
 		if [ "CPPFLAGS" = $var ] ||
 			[ "CFLAGS" = $var ] ||
 			[ "LDFLAGS" = $var ] ||
-			[ "LIBS" = $var ]; then
+			[ "LIBS" = $var ] ||
+			[ "EXTRA" = $var ]; then
 			eval opt_$expr
 		else
 			eval $expr
@@ -231,6 +235,7 @@ for line_no in $list_line_no; do
 	args2="$opt_CFLAGS"
 	args3="$opt_LDFLAGS"
 	args4="$opt_LIBS"
+	args5="$opt_EXTRA"
 	try
 done
 if [ $best_args0 ]; then

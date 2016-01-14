@@ -64,6 +64,7 @@ $(TEST): $(TEST_OBJ) $(TARGET)
 	$(LD_E_V) -L../htest/$(BUILD_DIR) -lhtest
 
 HCONF_FILES:=\
+	include/hutils/stdint.h \
 	include/hutils/macros.h \
 	include/hutils/err.h \
 	include/hutils/snprintf.h \
