@@ -18,7 +18,16 @@ htools - Hans' C-related tools
 
 This is a collection of source code that I'm assembling to make future
 development easier. For me.
-Each project has its own uses, but there's one env var that should be set:
-HTOOLS_PATH=<path to htools>
+Each project has its own uses, but this is probably what should be done first:
 
-Now have fun with the READMEs for the other projects!
+$ export HTOOLS_PATH=<path to htools>
+$ cd $HTOOLS_PATH/hgmake
+$ make
+$ cd ../hutils
+$ make
+$ cd ../htest
+$ make
+$ cd -
+$ make test
+
+Now have fun with the README for each project!
