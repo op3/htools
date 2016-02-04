@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,40 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
+#include <hutils/fs.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <hutils/err.h>
+#include <hutils/memory.h>
+#include <hutils/strdup.h>
 
-static int *g_mojo;
-
-HTEST(SimpleFixture1)
+int
+fs_mkdirs(char const *const a_path)
 {
-	HTRY_U(*g_mojo, ==, 0x12345678);
-	++(*g_mojo);
-	HTRY_U(*g_mojo, ==, 0x12345679);
-}
+	char *path, *p;
 
-HTEST(SimpleFixture2)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-}
+	if ('\0' == a_path) {
+		return 0;
+	}
+	path = strdup(a_path);
+	for (p = path;; *p = '/') {
+		struct stat st;
 
-HTEST_SUITE(SimpleFixture)
-{
-	g_mojo = malloc(sizeof *g_mojo);
-	*g_mojo = 0x12345678;
-
-	HTEST_ADD(SimpleFixture1);
-	HTEST_ADD(SimpleFixture2);
-
-	free(g_mojo);
+		p = strchr(p + 1, '/');
+		if (NULL == p) {
+			FREE(path);
+			return 0;
+		}
+		*p = '\0';
+		if (0 == stat(path, &st)) {
+			if (!S_ISDIR(st.st_mode)) {
+				FREE(path);
+				return -1;
+			}
+			continue;
+		}
+		if (0 != mkdir(path, 0700)) {
+			err(EXIT_FAILURE, "mkdir(%s)", path);
+		}
+	}
 }

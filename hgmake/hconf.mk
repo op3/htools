@@ -1,5 +1,4 @@
-# Copyright (c) 2015
-# Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -54,22 +53,29 @@ $(HCONF_CACHE): Makefile $(HCONF_CACHES_FILES) $(HCONF_FILES)
 	echo "$(LDFLAGS)" >> $@.tmp;\
 	echo "$(LIBS)" >> $@.tmp;\
 	if [ "$(HCONF_CACHES_FILES)" ]; then\
-		$(HTOOLS_PATH)/hgmake/hconf_merge.sh $@.tmp $(HCONF_CACHES_FILES) > $@.tmp2;\
+		$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge $@.tmp $(HCONF_CACHES_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\
 	fi;\
 	verbose=;\
 	[ "x1" = "x$V" ] && verbose=-v;\
 	for i in $(HCONF_FILES); do\
-		mk=$(BUILD_DIR)/hconf/`echo $$i | sed 's/\.[c|h]$$/.mk/'`;\
-		if [ ! -f $$mk -o $$mk -ot $$i -o $$mk -ot Makefile ]; then\
-			$(HTOOLS_PATH)/hgmake/hconf.sh $$verbose $@.tmp $(BUILD_DIR) $$i;\
+		h=`echo $$i | sed 's/\.[0-9A-Za-z]*$$/.h/'`;\
+		h_fin=$(BUILD_DIR)/hconf/$$h;\
+		h_tmp=$(BUILD_DIR)/hconf_/hconf/$$h;\
+		mk_fin=$(BUILD_DIR)/hconf/$$i.mk;\
+		mk_tmp=$(BUILD_DIR)/hconf_/hconf/$$i.mk;\
+		if [ ! -f $$mk_fin -o $$mk_fin -ot $$i -o $$mk_fin -ot Makefile ]; then\
+			$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf $$verbose $@.tmp $(BUILD_DIR) $$i;\
 			[ 0 -ne $$? ] && exit 1;\
 		else\
-			$(HTOOLS_PATH)/hgmake/hconf_merge.sh $@.tmp $$mk > $@.tmp2;\
-			mv $@.tmp2 $$mk;\
+			$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge $@.tmp $$mk_fin > $$mk_tmp;\
 		fi;\
-		rm -f $@.tmp;\
-		cp $$mk $@.tmp;\
+		rm -f $$h_fin $$mk_fin $@.tmp;\
+		dname=`dirname $$mk_fin`;\
+		[ -d $$dname ] || mkdir -p $$dname;\
+		cp $$h_tmp $$h_fin;\
+		cp $$mk_tmp $$mk_fin;\
+		cp $$mk_tmp $@.tmp;\
 	done;\
 	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
 	if [ 1 -eq $$? ]; then\

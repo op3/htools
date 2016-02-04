@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
+#ifndef HUTILS_FS_H
+#define HUTILS_FS_H
 
-static int *g_mojo;
+int	fs_mkdirs(char const *);
 
-HTEST(SimpleFixture1)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-	++(*g_mojo);
-	HTRY_U(*g_mojo, ==, 0x12345679);
-}
-
-HTEST(SimpleFixture2)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-}
-
-HTEST_SUITE(SimpleFixture)
-{
-	g_mojo = malloc(sizeof *g_mojo);
-	*g_mojo = 0x12345678;
-
-	HTEST_ADD(SimpleFixture1);
-	HTEST_ADD(SimpleFixture2);
-
-	free(g_mojo);
-}
+#endif

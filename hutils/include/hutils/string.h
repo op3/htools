@@ -19,9 +19,13 @@
 
 #include <hutils/macros.h>
 
-#define STRCXT(arr) strcxt(arr, LENGTH(arr))
+#define STRCTV_BEGIN strctv_(
+#define STRCTV_END ,strctv_sentinel_)
 
-char	*strcxt(char const *const *, size_t) FUNC_RETURNS;
+extern char const *strctv_sentinel_;
+
+int	strbcmp(char const *, char const *) FUNC_RETURNS;
+char	*strctv_(char const *, ...) FUNC_RETURNS;
 int	strecmp(char const *, char const *) FUNC_RETURNS;
 
 #endif

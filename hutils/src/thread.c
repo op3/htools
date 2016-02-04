@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -354,7 +354,9 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 struct CondVar *
 thread_condvar_create(char **const a_err)
 {
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -362,7 +364,9 @@ int
 thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
 {
 	(void)a_condvar;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -370,7 +374,9 @@ int
 thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
 {
 	(void)a_condvar;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -378,7 +384,9 @@ int
 thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
 {
 	(void)a_condvar;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -388,7 +396,9 @@ thread_condvar_wait(struct CondVar *const a_condvar, struct Mutex *const
 {
 	(void)a_condvar;
 	(void)a_mutex;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -398,7 +408,9 @@ thread_create(void (*const a_func)(void *), void *const a_data, char **const
 {
 	(void)a_func;
 	(void)a_data;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -406,14 +418,18 @@ int
 thread_free(struct Thread **const a_thread, char **const a_err)
 {
 	(void)a_thread;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
 struct Mutex *
 thread_mutex_create(char **const a_err)
 {
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -421,7 +437,9 @@ int
 thread_mutex_free(struct Mutex **const a_mutex, char **const a_err)
 {
 	(void)a_mutex;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -429,7 +447,9 @@ int
 thread_mutex_lock(struct Mutex *const a_mutex, char **const a_err)
 {
 	(void)a_mutex;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 
@@ -437,7 +457,9 @@ int
 thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 {
 	(void)a_mutex;
-	*a_err = "Not supported";
+	if (NULL != a_err) {
+		*a_err = "Not supported";
+	}
 	return NULL;
 }
 

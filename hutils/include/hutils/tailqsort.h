@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2014, 2015
- * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +22,14 @@
 #define TAILQ_SORT_PROTOTYPE(List, name) \
 static void name(struct List *, size_t)
 
+/*
+ * Stable merge sort of a sys/queue.h:tailq.
+ *  List:  tailq struct name.
+ *  name:  list variable name.
+ *  Node:  tailq node struct name. 
+ *  field: tailq field (i.e. TAILQ_ENTRY(Node) field;).
+ *  cmp:   Comparison function, l - r <= 0 -> no swap, l - r > 0 -> swap.
+ */
 #define TAILQ_SORT_DEFINE(List, name, Node, field, cmp) \
 static void \
 name(struct List *a_list, size_t a_size)\

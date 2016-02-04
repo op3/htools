@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,29 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
+#ifndef HCONF_H
+#define HCONF_H
 
-static int *g_mojo;
+#define LENGTH(arr) (sizeof arr / sizeof *arr)
+#define STR_SIZ 1024
+#define STRBCMP(s, p) strncmp(s, p, sizeof p - 1)
 
-HTEST(SimpleFixture1)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-	++(*g_mojo);
-	HTRY_U(*g_mojo, ==, 0x12345679);
-}
+enum OptName {
+	/* Name is used while confing... */
+	OPT_NAME = 0,
+	/* ... and cc while using the config. */
+	OPT_CC = 0,
+	OPT_CPPFLAGS,
+	OPT_CFLAGS,
+	OPT_LDFLAGS,
+	OPT_LIBS,
+	OPT_EXTRA,
+	OPT_NUM
+};
+typedef char Options[OPT_NUM][STR_SIZ];
 
-HTEST(SimpleFixture2)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-}
+void	err_(int, char const *, ...);
+void	errx_(int, char const *, ...);
+void	hconf_merge(Options, int, char const **);
 
-HTEST_SUITE(SimpleFixture)
-{
-	g_mojo = malloc(sizeof *g_mojo);
-	*g_mojo = 0x12345678;
-
-	HTEST_ADD(SimpleFixture1);
-	HTEST_ADD(SimpleFixture2);
-
-	free(g_mojo);
-}
+#endif

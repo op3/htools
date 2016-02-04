@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
+#include <hutils/err.h>
 
-static int *g_mojo;
+#if defined(HCONF_ERR_CUSTOM)
 
-HTEST(SimpleFixture1)
+# include <errno.h>
+# include <stdarg.h>
+# include <stdio.h>
+
+void
+err(int const a_eval, const char *const a_fmt, ...)
 {
-	HTRY_U(*g_mojo, ==, 0x12345678);
-	++(*g_mojo);
-	HTRY_U(*g_mojo, ==, 0x12345679);
+	va_list args;
+	int errno_;
+
+	errno_ = errno;
+	va_start(args, a_fmt);
+	vfprintf(stderr, a_fmt, args);
+	fprintf(stderr, ": %s.\n", strerror(errno_));
+	va_end(args);
+	exit(a_eval);
 }
 
-HTEST(SimpleFixture2)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-}
-
-HTEST_SUITE(SimpleFixture)
-{
-	g_mojo = malloc(sizeof *g_mojo);
-	*g_mojo = 0x12345678;
-
-	HTEST_ADD(SimpleFixture1);
-	HTEST_ADD(SimpleFixture2);
-
-	free(g_mojo);
-}
+#endif

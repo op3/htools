@@ -1,5 +1,4 @@
-# Copyright (c) 2015, 2016
-# Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +35,7 @@ HCONF=CC="$(CC)" \
       CFLAGS="$(CFLAGS)" \
       LDFLAGS="$(LDFLAGS)" \
       LIBS="$(LIBS)" \
-      $(HTOOLS_PATH)/hgmake/hconf.sh
+      $(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf
 LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(LDFLAGS) $(HCONF_LDFLAGS) $(LIBS) $(HCONF_LIBS)
 MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 

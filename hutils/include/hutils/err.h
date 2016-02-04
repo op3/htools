@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,15 +39,9 @@
 		LocalFree(str_);\
 		exit(code);\
 	} HUTILS_COND(while, 0)
-#elif defined(HCONF_ERR_FPRINTF)
-/* LIBS=dont */
-# include <errno.h>
-# include <stdio.h>
-# include <string.h>
-# define err(code, str) do {\
-		fprintf(stderr, "%s: %s\n", str, strerror(errno));\
-		exit(code);\
-	} HUTILS_COND(while, 0)
+#elif defined(HCONF_ERR_CUSTOM)
+/* EXTRA="src/err.c" */
+void err(int, const char *, ...);
 #else
 # error Not hconf:ed.
 #endif

@@ -15,52 +15,81 @@
  */
 
 #include <hutils/string.h>
+#include <stdarg.h>
 #include <hutils/memory.h>
 
+char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
+
 /*
- * Concatenates an array of strings into a malloc:d string.
- * a_arr: Array of pointers to strings to be concatenated.
- * a_arr_len: Length of array.
- * Returns: Pointed to strings concatenated.
+ * Compares the beginning of the big string with the pattern.
+ *  a_big: Big string.
+ *  a_pattern: Pattern string.
+ *  Returns: Similar to strcmp.
+ */
+int
+strbcmp(char const *const a_big, char const *const a_pattern)
+{
+	size_t pattern_len;
+
+	pattern_len = strlen(a_pattern);
+	return strncmp(a_big, a_pattern, pattern_len);
+}
+
+/*
+ * Concatenates variadic strings into a malloc:d string.
+ *  a_s1: Variadic list of strings.
+ *  Returns: Concatenated string.
  */
 char *
-strcxt(char const *const *const a_arr, size_t const a_arr_len)
+strctv_(char const *a_s1, ...)
 {
+	va_list args;
+	char const *from;
 	char *dst, *to;
-	size_t i, len;
+	size_t len;
 
 	len = 0;
-	for (i = 0; a_arr_len > i; ++i) {
-		len += strlen(a_arr[i]);
-	}
+	va_start(args, a_s1);
+	from = a_s1;
+	do {
+		if (NULL != from) {
+			len += strlen(from);
+		}
+		from = va_arg(args, char const *);
+	} while (strctv_sentinel_ != from);
+	va_end(args);
 	MALLOC(dst, len + 1);
 	to = dst;
-	for (i = 0; a_arr_len > i; ++i) {
-		char const *from;
-
-		for (from = a_arr[i]; '\0' != *from;) {
-			*to++ = *from++;
+	va_start(args, a_s1);
+	from = a_s1;
+	do {
+		if (NULL != from) {
+			while ('\0' != *from) {
+				*to++ = *from++;
+			}
 		}
-	}
+		from = va_arg(args, char const *);
+	} while (strctv_sentinel_ != from);
+	va_end(args);
 	*to = '\0';
 	return dst;
 }
 
 /*
- * Compares the end of the first string with the second string.
- * a_s1: First string.
- * a_s2: Second string.
- * Returns: Similar to strcmp.
+ * Compares the end of the big string with the pattern.
+ *  a_big: Big string.
+ *  a_pattern: Pattern string.
+ *  Returns: Similar to strcmp.
  */
 int
-strecmp(char const *const a_s1, char const *const a_s2)
+strecmp(char const *const a_big, char const *const a_pattern)
 {
-	size_t len1, len2;
+	size_t big_len, pattern_len;
 
-	len1 = strlen(a_s1);
-	len2 = strlen(a_s2);
-	if (len1 < len2) {
+	big_len = strlen(a_big);
+	pattern_len = strlen(a_pattern);
+	if (big_len < pattern_len) {
 		return -1;
 	}
-	return strcmp(a_s1 + len1 - len2, a_s2);
+	return strcmp(a_big + big_len - pattern_len, a_pattern);
 }

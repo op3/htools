@@ -1,5 +1,4 @@
-# Copyright (c) 2014, 2015
-# Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -69,6 +68,7 @@ HCONF_FILES:=\
 	include/hutils/err.h \
 	include/hutils/snprintf.h \
 	include/hutils/strdup.h \
+	include/hutils/strndup.h \
 	include/hutils/strsignal.h \
 	src/dir.c \
 	src/thread.c \

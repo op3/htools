@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
+#ifndef HUTILS_STRNDUP_H
+#define HUTILS_STRNDUP_H
 
-static int *g_mojo;
+#include <hutils/macros.h>
+#include <hconf/include/hutils/strndup.h>
 
-HTEST(SimpleFixture1)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-	++(*g_mojo);
-	HTRY_U(*g_mojo, ==, 0x12345679);
-}
+#if defined(HCONF_STRNDUP_POSIX_200809)
+/* CPPFLAGS=-D_POSIX_C_SOURCE=200809L */
+/* LIBS=dont */
+# include <string.h>
+#elif defined(HCONF_STRNDUP_CUSTOM)
+/* EXTRA="src/strndup.c" */
+# define strndup strndup_custom_
+char *strndup_custom_(char const *, size_t) FUNC_RETURNS;
+#else
+# error Not hconf:ed.
+#endif
 
-HTEST(SimpleFixture2)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-}
+#define HCONF_TEST char *s = strndup("", 0); (void)s
 
-HTEST_SUITE(SimpleFixture)
-{
-	g_mojo = malloc(sizeof *g_mojo);
-	*g_mojo = 0x12345678;
-
-	HTEST_ADD(SimpleFixture1);
-	HTEST_ADD(SimpleFixture2);
-
-	free(g_mojo);
-}
+#endif

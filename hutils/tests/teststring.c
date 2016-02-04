@@ -18,19 +18,12 @@
 #include <htest/htest.h>
 #include <hutils/memory.h>
 
-HTEST(Strcxt)
+HTEST(Strctv)
 {
-	char const *arr[] = {
-		"This ",
-		"is ",
-		"a",
-		" bunch",
-		" of ",
-		"strings."
-	};
 	char *cat;
 
-	cat = STRCXT(arr);
+	cat = STRCTV_BEGIN "This ", "is ", "a", NULL, " bunch", " of",
+	    " strings." STRCTV_END;
 	HTRY_STR("This is a bunch of strings.", ==, cat);
 	FREE(cat);
 }
@@ -53,6 +46,6 @@ HTEST(Strecmp)
 
 HTEST_SUITE(String)
 {
-	HTEST_ADD(Strcxt);
+	HTEST_ADD(Strctv);
 	HTEST_ADD(Strecmp);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
+#include <hconf.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-static int *g_mojo;
-
-HTEST(SimpleFixture1)
+int
+main(int argc, char const **argv)
 {
-	HTRY_U(*g_mojo, ==, 0x12345678);
-	++(*g_mojo);
-	HTRY_U(*g_mojo, ==, 0x12345679);
-}
+	Options options;
+	size_t i;
 
-HTEST(SimpleFixture2)
-{
-	HTRY_U(*g_mojo, ==, 0x12345678);
-}
-
-HTEST_SUITE(SimpleFixture)
-{
-	g_mojo = malloc(sizeof *g_mojo);
-	*g_mojo = 0x12345678;
-
-	HTEST_ADD(SimpleFixture1);
-	HTEST_ADD(SimpleFixture2);
-
-	free(g_mojo);
+	if (2 > argc) {
+		errx_(EXIT_FAILURE, "Usage: %s file <files>", argv[0]);
+	}
+	hconf_merge(options, argc - 1, argv + 1);
+	for (i = 0; OPT_EXTRA > i; ++i) {
+		puts(options[i]);
+	}
+	return 0;
 }
