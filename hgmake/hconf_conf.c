@@ -63,7 +63,6 @@ static char const	c_no_option[] = "no_option";
 static int	g_is_verbose;
 static FILE	*g_log;
 static char	*g_work_base;
-static int	g_is_source;
 static char const	*g_base_mk;
 static char const	*g_out_dir;
 static char const	*g_filename;
@@ -74,6 +73,7 @@ static char	*g_filename_mk;
 static char	*g_filename_o;
 static char	*g_main_c;
 static char	*g_main_o;
+static char	*g_main_bin;
 static char	*g_upper;
 static Options	g_best_link;
 static int	g_best_link_ret = 1e9;
@@ -230,6 +230,7 @@ my_exit()
 	free(g_filename_o);
 	free(g_main_c);
 	free(g_main_o);
+	free(g_main_bin);
 	free(g_upper);
 }
 
@@ -384,9 +385,6 @@ void
 try(char const *const a_option, struct VariableList *const a_var_list)
 {
 	Options options;
-	char const *compile_in;
-	char const *compile_out;
-	char *link_in, *link_out;
 	char *cppflags, *cflags;
 	int do_not_link, ret;
 
@@ -394,21 +392,10 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 	strcpy(options[0], a_option);
 	resolve_variables(options, a_var_list);
 	do_not_link = write_hconf(options);
-	if (g_is_source) {
-		compile_out = g_filename_o;
-		compile_in = g_filename_c;
-		link_in = STRCTV_BEGIN g_filename_o, " ", g_main_c STRCTV_END;
-		link_out = STRCTV_BEGIN g_main_c, ".bin" STRCTV_END;
-	} else {
-		compile_out = g_main_o;
-		compile_in = g_main_c;
-		link_in = strdup(g_main_o);
-		link_out = STRCTV_BEGIN g_main_o, ".bin" STRCTV_END;
-	}
 	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/hconf_ ",
 		 options[OPT_CPPFLAGS] STRCTV_END;
 	cflags = STRCTV_BEGIN "-c ", options[OPT_CFLAGS] STRCTV_END;
-	ret = build(compile_out, compile_in, cppflags, cflags, NULL, NULL,
+	ret = build(g_main_o, g_main_c, cppflags, cflags, NULL, NULL,
 	    NULL);
 	free(cppflags);
 	free(cflags);
@@ -421,7 +408,7 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 		}
 		cppflags = STRCTV_BEGIN "-I", g_out_dir, "/hconf_ ",
 			 options[OPT_CPPFLAGS] STRCTV_END;
-		ret = build(link_out, link_in, cppflags, NULL,
+		ret = build(g_main_bin, g_main_o, cppflags, NULL,
 		    options[OPT_LDFLAGS], options[OPT_LIBS],
 		    options[OPT_EXTRA]);
 		free(cppflags);
@@ -432,9 +419,9 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 			g_best_link_ret = ret;
 			memmove(&g_best_link, options, sizeof g_best_link);
 			strcpy(g_best_link[OPT_NAME], a_option);
-			print(ALL, "Keeping (%d).\n", ret);
+			print(ALL, "Keeping (linking=%d).\n", ret);
 		} else {
-			print(ALL, "Skipping (%d).\n", ret);
+			print(ALL, "Skipping (linking=%d).\n", ret);
 		}
 	} else {
 		if (c_no_option == a_option) {
@@ -443,8 +430,6 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 			print(ALL, "Failed.\n");
 		}
 	}
-	free(link_in);
-	free(link_out);
 	while (!TAILQ_EMPTY(a_var_list)) {
 		struct Variable *var;
 
@@ -582,12 +567,9 @@ main(int argc, char const *const *argv)
 			}
 		}
 		g_filename_h = strdup(g_work_base);
-		if (0 == strecmp(g_filename, ".h")) {
-			g_is_source = 0;
-		} else {
+		if (0 != strecmp(g_filename, ".h")) {
 			size_t i;
 
-			g_is_source = 1;
 			g_filename_c = strdup(g_filename);
 			for (i = strlen(g_filename_h) - 1; '.' !=
 			    g_filename_h[i]; --i) {
@@ -603,6 +585,7 @@ main(int argc, char const *const *argv)
 		g_filename_o = STRCTV_BEGIN g_work_base, ".o" STRCTV_END;
 		g_main_c = STRCTV_BEGIN g_work_base, "_main.c" STRCTV_END;
 		g_main_o = STRCTV_BEGIN g_work_base, "_main.o" STRCTV_END;
+		g_main_bin = STRCTV_BEGIN g_work_base, "_main.bin" STRCTV_END;
 		g_log = fopen(g_filename_log, "wb");
 		if (NULL == g_log) {
 			err_(EXIT_FAILURE, "fopen(%s, wb)", g_filename_log);
@@ -625,11 +608,7 @@ main(int argc, char const *const *argv)
 		if (NULL == file) {
 			err_(EXIT_FAILURE, "fopen(%s, wb)", g_main_c);
 		}
-		if (g_is_source) {
-			fprintf(file, "#include <%s>\n", g_filename);
-		} else {
-			fprintf(file, "#include <%s>\n", g_filename);
-		}
+		fprintf(file, "#include <%s>\n", g_filename);
 		fprintf(file, "int main(void) {\n");
 		fprintf(file, "#ifdef HCONF_TEST\n");
 		fprintf(file, "\tHCONF_TEST;\n");

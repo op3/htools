@@ -28,7 +28,7 @@
 # define TIME_CLOCK
 # define CLOCK_SOURCE CLOCK_MONOTONIC
 
-#elif defined(HCONF_POSIX_LRT)
+#elif defined(HCONF_POSIX_MONOTONIC_LRT)
 /* LIBS=-lrt */
 
 # define SLEEP_NANOSLEEP
@@ -36,14 +36,12 @@
 # define CLOCK_SOURCE CLOCK_MONOTONIC
 
 #elif defined(HCONF_POSIX_REALTIME)
-/* LIBS=dont */
 
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
 # define CLOCK_SOURCE CLOCK_REALTIME
 
 #elif defined(HCONF_POSIX_REALTIME_DRAFT9)
-/* LIBS=dont */
 
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK
@@ -54,13 +52,11 @@
 # define GMTIME_R(tt, tm) gmtime_r(tm, tt)
 
 #elif defined(HCONF_WINDOWS)
-/* LIBS=dont */
 
 # define SLEEP_SLEEP
 # define TIME_PERF
 
 #elif defined(HCONF_MAC)
-/* LIBS=dont */
 
 # define SLEEP_NANOSLEEP
 # define TIME_MACH
