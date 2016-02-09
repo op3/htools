@@ -13,12 +13,12 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-hbuild - Building tools
+hgmake - GNU make tools
 =======================
 
-A collection of tools and snippets to make GNU make even more powerable. Note
+A collection of tools and snippets to make GNU make even more makeable. Note
 that some constructs look old, but they are required for ancient platforms
-that I want to support at work (GNU make 3.78, gcc 2.9 [mhm, not even 2.95]).
+that I must support at work (GNU make 3.78, gcc 2.9 [mhm, not even 2.95]).
 
 
 build_dir.mk
@@ -36,28 +36,28 @@ Collection of useful command combos. Rather tied to hconf.
 
 strict_cflags.mk
 ----------------
-Good set of flags for GCC to keep you on your toes while programming.
+Good set of flags for GCC to push you towards the fatal edge of your chair
+while programming.
 
 
 hconf*
 ------
 Ah yes, this is the magic that everybody needs.
-Shell scripts and a makefile snippet to auto configure various parts of a
-build. The basic principle is that a project auto configures its
-headers/sources and stores global results in a hconf cache, but also
-file-specific results. The global cache is read online to retrieve compiling
-and linking, whereas the file-specific caches are included automatically
-(given proper include paths of course). Global hconf cache files can be merged
-together in other projects.
+Little programs and a makefile snippet to auto configure parts of a build. The
+basic principle is that a project auto configures its headers/sources and
+stores global results in a hconf cache, but also file-specific results. The
+global cache is read on-the-fly to retrieve compiling and linking, whereas the
+file-specific caches are included automatically (given proper include paths of
+course). Global hconf cache files can be merged together in other projects.
 
  *) hconf.mk
     Basic compiler and flag configuring, merging of hconf caches, and
     header/source auto configuring.
- *) hconf.sh
+ *) hconf_conf
     Scans for preprocessor branches identified by "if defined(HCONF_*). The
     branches are tested top-down, so fallback branches should be organized
     towards the bottom.
- *) hconf_merge.sh
+ *) hconf_merge
     Merges hconf cache files. The nature of the merging depends on the type of
     flags.
 
@@ -91,7 +91,7 @@ include/my_header.h:
 src/my_sauce.c:
     #include <hconf/src/my_sauce.h>
     #if defined(HCONF_OH_RLY)
-    # /* CPPFLAGS=_BSD_SOURCE */
+    /* CPPFLAGS=_BSD_SOURCE */
     # include <exotic/system/header.h>
     void this_rly_my_function() { ... }
     #elif defined(HCONF_YA_RLY)
@@ -100,6 +100,14 @@ src/my_sauce.c:
     #else
     # error Not hconf:ed.
     #endif
+src/my_mayne.c:
+    #include <hconf/src/my_mayne.h>
+    #define HCONF_MAIN /* Tells hconf_conf this file defines 'main'. */
+    #if defined(HCONF_WAT)
+    #else
+    # error Not hconf:ed.
+    #endif
+    int main() { return 0; }
 The result after running GNU make could be:
  *) $(BUILD_DIR)/hconf.cache
     ccache gcc

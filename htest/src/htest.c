@@ -24,6 +24,8 @@
 #include <hutils/strsignal.h>
 #include <htest/htest.h>
 
+#define HCONF_MAIN
+
 #if defined(HCONF_POSIX)
 
 # include <unistd.h>
@@ -35,9 +37,7 @@ char const *const nul_path = "/dev/null";
 #elif defined(HCONF_ALMOST_POSIX)
 
 # include <unistd.h>
-int getopt(int, char * const [], const char *);
-/*extern char *optarg;
-extern int optind, opterr, optopt;*/
+extern int getopt(int, char * const [], const char *);
 
 # define SUPPORT_FORK
 

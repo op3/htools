@@ -30,6 +30,11 @@
 #define STRCTV_BEGIN strctv_(
 #define STRCTV_END ,strctv_sentinel_)
 
+enum DoMain {
+	YES,
+	NO,
+	DONE
+};
 enum PrintType {
 	ALL = 0,
 	VERBOSE
@@ -45,6 +50,7 @@ static void	argumentize(char ***, char const *);
 static int	build(char const *, char const *, char const *, char const *,
     char const *, char const *, char const *);
 static char	*get_option(char const *);
+static int	has_main(char const *);
 static void	my_exit(void);
 static void	perfect(Options);
 static void	print(enum PrintType, char const *, ...);
@@ -55,6 +61,7 @@ static char	*strndup_(char const *, size_t);
 static void	try(char const *, struct VariableList *);
 static void	unconfed(void);
 static void	usage(int);
+static void	write_main(void);
 static int	write_hconf(Options);
 
 static char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
@@ -63,6 +70,8 @@ static char const	c_no_option[] = "no_option";
 static int	g_is_verbose;
 static FILE	*g_log;
 static char	*g_work_base;
+static int	g_is_source;
+static enum DoMain	g_do_main;
 static char const	*g_base_mk;
 static char const	*g_out_dir;
 static char const	*g_filename;
@@ -214,6 +223,30 @@ get_option(char const *const a_str)
 		}
 	}
 	return strndup_(start, p - start);
+}
+
+int
+has_main(char const *const a_s)
+{
+	char const *p;
+
+	for (p = a_s; isspace(*p); ++p)
+		;
+	if ('#' != *p) {
+		return 0;
+	}
+	for (++p; isspace(*p); ++p)
+		;
+	if (0 != strncmp(p, "define", 6)) {
+		return 0;
+	}
+	for (p += 6; isspace(*p); ++p)
+		;
+	if (0 != strncmp(p, "HCONF_MAIN", 10)) {
+		return 0;
+	}
+	p += 10;
+	return !('_' == *p || isalnum(*p));
 }
 
 void
@@ -388,6 +421,8 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 	char *cppflags, *cflags;
 	int do_not_link, ret;
 
+	write_main();
+
 	print(ALL, "%s: Testing %s... ", g_filename, a_option);
 	strcpy(options[0], a_option);
 	resolve_variables(options, a_var_list);
@@ -395,8 +430,7 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/hconf_ ",
 		 options[OPT_CPPFLAGS] STRCTV_END;
 	cflags = STRCTV_BEGIN "-c ", options[OPT_CFLAGS] STRCTV_END;
-	ret = build(g_main_o, g_main_c, cppflags, cflags, NULL, NULL,
-	    NULL);
+	ret = build(g_main_o, g_main_c, cppflags, cflags, NULL, NULL, NULL);
 	free(cppflags);
 	free(cflags);
 	if (0 == ret) {
@@ -512,6 +546,34 @@ write_hconf(Options a_options)
 	return do_not_link;
 }
 
+void
+write_main()
+{
+	FILE *file;
+
+	if (DONE == g_do_main) {
+		return;
+	}
+	file = fopen(g_main_c, "wb");
+	if (NULL == file) {
+		err_(EXIT_FAILURE, "fopen(%s, wb)", g_main_c);
+	}
+	fprintf(file, "#include <%s>\n", g_filename);
+	if (YES == g_do_main) {
+		fprintf(file, "int main(void) {\n");
+	} else {
+		fprintf(file, "extern int hconf_test_(void);\n");
+		fprintf(file, "int hconf_test_() {\n");
+	}
+	fprintf(file, "#ifdef HCONF_TEST\n");
+	fprintf(file, "\tHCONF_TEST;\n");
+	fprintf(file, "#endif\n");
+	fprintf(file, "\treturn 0;\n");
+	fprintf(file, "}\n");
+	fclose(file);
+	g_do_main = DONE;
+}
+
 int
 main(int argc, char const *const *argv)
 {
@@ -567,9 +629,12 @@ main(int argc, char const *const *argv)
 			}
 		}
 		g_filename_h = strdup(g_work_base);
-		if (0 != strecmp(g_filename, ".h")) {
+		if (0 == strecmp(g_filename, ".h")) {
+			g_is_source = 0;
+		} else {
 			size_t i;
 
+			g_is_source = 1;
 			g_filename_c = strdup(g_filename);
 			for (i = strlen(g_filename_h) - 1; '.' !=
 			    g_filename_h[i]; --i) {
@@ -604,18 +669,6 @@ main(int argc, char const *const *argv)
 			++p;
 		}
 		*p = '\0';
-		file = fopen(g_main_c, "wb");
-		if (NULL == file) {
-			err_(EXIT_FAILURE, "fopen(%s, wb)", g_main_c);
-		}
-		fprintf(file, "#include <%s>\n", g_filename);
-		fprintf(file, "int main(void) {\n");
-		fprintf(file, "#ifdef HCONF_TEST\n");
-		fprintf(file, "\tHCONF_TEST;\n");
-		fprintf(file, "#endif\n");
-		fprintf(file, "\treturn 0;\n");
-		fprintf(file, "}\n");
-		fclose(file);
 	}
 
 	TAILQ_INIT(&var_list);
@@ -625,7 +678,9 @@ main(int argc, char const *const *argv)
 		err_(EXIT_FAILURE, "fopen(%s, rb)", g_filename);
 	}
 	/* Try without any input, this must always fail. */
+	g_do_main = YES;
 	try(c_no_option, &var_list);
+	g_do_main = YES;
 	option = NULL;
 	for (line_no = 1;; ++line_no) {
 		char line[STR_SIZ];
@@ -650,6 +705,10 @@ main(int argc, char const *const *argv)
 				free(option);
 			}
 			option = option_new;
+			continue;
+		}
+		if (has_main(line)) {
+			g_do_main = NO;
 			continue;
 		}
 		/* Look for commented variable assignment. */
