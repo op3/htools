@@ -58,25 +58,27 @@ $(HCONF_CACHE): Makefile $(HCONF_CACHES_FILES) $(HCONF_FILES)
 	fi;\
 	verbose=;\
 	[ "x1" = "x$V" ] && verbose=-v;\
-	for i in $(HCONF_FILES); do\
-		h=`echo $$i | sed 's/\.[0-9A-Za-z]*$$/.h/'`;\
-		h_fin=$(BUILD_DIR)/hconf/$$h;\
-		h_tmp=$(BUILD_DIR)/hconf_/hconf/$$h;\
-		mk_fin=$(BUILD_DIR)/hconf/$$i.mk;\
-		mk_tmp=$(BUILD_DIR)/hconf_/hconf/$$i.mk;\
-		if [ ! -f $$mk_fin -o $$mk_fin -ot $$i -o $$mk_fin -ot Makefile ]; then\
-			$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf $$verbose $@.tmp $(BUILD_DIR) $$i;\
-			[ 0 -ne $$? ] && exit 1;\
-		else\
-			$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge $@.tmp $$mk_fin > $$mk_tmp;\
-		fi;\
-		rm -f $$h_fin $$mk_fin $@.tmp;\
-		dname=`dirname $$mk_fin`;\
-		[ -d $$dname ] || mkdir -p $$dname;\
-		cp $$h_tmp $$h_fin;\
-		cp $$mk_tmp $$mk_fin;\
-		cp $$mk_tmp $@.tmp;\
-	done;\
+	if [ "$(HCONF_FILES)" ]; then\
+		for i in $(HCONF_FILES); do\
+			h=`echo $$i | sed 's/\.[0-9A-Za-z]*$$/.h/'`;\
+			h_fin=$(BUILD_DIR)/hconf/$$h;\
+			h_tmp=$(BUILD_DIR)/hconf_/hconf/$$h;\
+			mk_fin=$(BUILD_DIR)/hconf/$$i.mk;\
+			mk_tmp=$(BUILD_DIR)/hconf_/hconf/$$i.mk;\
+			if [ ! -f $$mk_fin -o $$mk_fin -ot $$i -o $$mk_fin -ot Makefile ]; then\
+				$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf $$verbose $@.tmp $(BUILD_DIR) $$i;\
+				[ 0 -ne $$? ] && exit 1;\
+			else\
+				$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge $@.tmp $$mk_fin > $$mk_tmp;\
+			fi;\
+			rm -f $$h_fin $$mk_fin $@.tmp;\
+			dname=`dirname $$mk_fin`;\
+			[ -d $$dname ] || mkdir -p $$dname;\
+			cp $$h_tmp $$h_fin;\
+			cp $$mk_tmp $$mk_fin;\
+			cp $$mk_tmp $@.tmp;\
+		done;\
+	fi;\
 	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
 	if [ 1 -eq $$? ]; then\
 		mv -f $@.tmp $@;\

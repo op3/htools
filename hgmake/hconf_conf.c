@@ -163,6 +163,7 @@ build(char const *const a_out, char const *const a_in, char const *const
 	close(pipefd[1]);
 	for (line_no = 0;;) {
 		char line[1024];
+		char const *p;
 		int ret;
 
 		ret = read(pipefd[0], line, sizeof line - 1);
@@ -175,7 +176,11 @@ build(char const *const a_out, char const *const a_in, char const *const
 		}
 		line[ret] = '\0';
 		print(VERBOSE, "%s", line);
-		if ('\n' == line[ret - 1]) {
+		for (p = line;; ++p) {
+			p = strchr(p, '\n');
+			if (NULL == p) {
+				break;
+			}
 			++line_no;
 		}
 	}
