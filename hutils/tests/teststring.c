@@ -33,8 +33,8 @@ HTEST(Strecmp)
 	char const s11[] = "abc";
 	char const s12[] = "aabc";
 	char const s13[] = "abcd";
-	char const s14[] = "abb";
-	char const s15[] = "abd";
+	char const s14[] = "zabb";
+	char const s15[] = "zabd";
 	char const s2[] = "abc";
 
 	HTRY_I(0, ==, strecmp(s11, s2));

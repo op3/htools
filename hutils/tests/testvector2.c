@@ -66,7 +66,7 @@ HTEST(Sub)
 	HTRY_FLT(7.0f, ==, v.y);
 }
 
-HTEST_SUITE(Vector2f)
+HTEST_SUITE(Vector2)
 {
 	HTEST_ADD(DotAxes);
 	HTEST_ADD(Magnitude);

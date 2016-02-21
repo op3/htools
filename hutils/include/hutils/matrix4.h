@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,34 +14,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_MEMORY_H
-#define HUTILS_MEMORY_H
+#ifndef HUTILS_MATRIX4_H
+#define HUTILS_MATRIX4_H
 
-#include <stdlib.h>
-#include <hutils/err.h>
-#include <hutils/macros.h>
+struct Matrix4f {
+	float	m[16];
+};
+struct Vector3f;
 
-#define CALLOC(ptr, num) do {\
-	int n_ = num;\
-	ptr = calloc(n_, sizeof *ptr);\
-	if (NULL == ptr) {\
-		err(EXIT_FAILURE, "calloc(%d,%d)", n_, (int)sizeof *ptr);\
-	}\
-} HUTILS_COND(while, 0)
-#define DUP(dst, src) do {\
-	MALLOC(dst, sizeof *dst);\
-	COPY(*dst, src);\
-} HUTILS_COND(while, 0)
-#define FREE(ptr) do {\
-	free(ptr);\
-	ptr = NULL;\
-} HUTILS_COND(while, 0)
-#define MALLOC(ptr, size) do {\
-	size_t s_ = size;\
-	ptr = malloc(s_);\
-	if (NULL == ptr) {\
-		err(EXIT_FAILURE, "malloc(%d)", (int)s_);\
-	}\
-} HUTILS_COND(while, 0)
+struct Matrix4f	*matrix4f_mul(struct Matrix4f *, struct Matrix4f const *,
+    struct Matrix4f const *);
+struct Vector3f	*matrix4f_mul_vector3f(struct Vector3f *, struct Matrix4f *,
+    struct Vector3f const *);
+struct Matrix4f	*matrix4f_set_identity(struct Matrix4f *);
+struct Matrix4f	*matrix4f_set_ortho(struct Matrix4f *, float, float, float,
+    float, float, float);
 
 #endif

@@ -45,19 +45,20 @@ hconf*
 Ah yes, this is the magic that everybody needs.
 Little programs and a makefile snippet to auto configure parts of a build. The
 basic principle is that a project auto configures its headers/sources and
-stores global results in a hconf cache, but also file-specific results. The
-global cache is read on-the-fly to retrieve compiling and linking, whereas the
-file-specific caches are included automatically (given proper include paths of
-course). Global hconf cache files can be merged together in other projects.
+stores the config in one hconf cache file, but also file-specific results. The
+main cachefile  is read on-the-fly to retrieve compiling and linking flags,
+whereas the file-specific caches should be included automatically. Global
+hconf cache files can be merged.
 
+Overview of important project files:
  *) hconf.mk
     Basic compiler and flag configuring, merging of hconf caches, and
     header/source auto configuring.
- *) hconf_conf
+ *) <build_dir>/hconf_conf
     Scans for preprocessor branches identified by "if defined(HCONF_*). The
     branches are tested top-down, so fallback branches should be organized
     towards the bottom.
- *) hconf_merge
+ *) <build_dir>/hconf_merge
     Merges hconf cache files. The nature of the merging depends on the type of
     flags.
 
@@ -68,9 +69,9 @@ hconf cache file format:
  4: LDFLAGS, e.g. -Lcity-center
  5: LIBS, e.g. -lcommunity-center
 
-As always, a concrete example:
+A concrete example:
 
-MyMakefile:
+my_build.mk:
     include $(HTOOLS)/hgmake/build_dir.mk
     HCONF_FILES:=include/my_header.h src/my_sauce.c
     HCONF_CACHES:=
@@ -113,8 +114,8 @@ The result after running GNU make could be:
     ccache gcc
     -D_BSD_SOURCE
     -Wall
-    <empty>
-    <empty>
+    <intentionally blank>
+    <intentionally blank>
  *) $(BUILD_DIR)/hconf/include/my_header.h
     ...
     #define HCONF_MY_WAY
@@ -124,6 +125,16 @@ The result after running GNU make could be:
     ...
     #define HCONF_YA_RLY
     ...
+ *) $(BUILD_DIR)/hconf/src/my_mayne.h
+    ...
+    #define HCONF_WAT
+    ...
 
 Notice that it's a good idea to keep the hconf branch names descriptive and
 unique to avoid namespace collisions.
+
+If you don't like the idea of using all GNU makefile mojo from hconf.mk but
+you'd like to use the results of a project hconf, you can just sed the
+appropriate lines from the main hconf cache file:
+ LDFLAGS=`sed -n 4p <dat_udder_project>/$BUILD_DIR/hconf.cache`
+ LIBS=`sed -n 5p <dat_udder_project>/$BUILD_DIR/hconf.cache`

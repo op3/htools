@@ -115,7 +115,7 @@ HTEST(Sub)
 	HTRY_FLT(8.0f, ==, v.z);
 }
 
-HTEST_SUITE(Vector3f)
+HTEST_SUITE(Vector3)
 {
 	HTEST_ADD(CrossAxes);
 	HTEST_ADD(CrossQuadArea);

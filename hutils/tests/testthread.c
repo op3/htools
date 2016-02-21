@@ -16,6 +16,7 @@
 
 #include <hutils/thread.h>
 #include <htest/htest.h>
+#include <hconf/src/thread.h>
 
 #define N 1000
 
@@ -121,5 +122,8 @@ HTEST_SUITE(Thread)
 {
 	HTEST_ADD(Runner);
 	HTEST_ADD(Mutex);
+#if !defined(HCONF_SINGLE)
+	/* Waiting for external conditions in one thread doesn't work... */
 	HTEST_ADD(ConditionVariable);
+#endif
 }

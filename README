@@ -21,13 +21,10 @@ development easier. For me.
 Each project has its own uses, but this is probably what should be done first:
 
 $ export HTOOLS_PATH=<path to htools>
-$ cd $HTOOLS_PATH/hgmake
+$ cd $HTOOLS_PATH
 $ make
-$ cd ../hutils
-$ make
-$ cd ../htest
-$ make
-$ cd -
-$ make test
+
+This will build and test hgmake, hutils, and htest, which tend to be the most
+useful for my work anyway.
 
 Now have fun with the README for each project!

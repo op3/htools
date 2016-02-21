@@ -18,15 +18,18 @@ hutils - utility code
 
 This is just a collection of useful little code snippets that I collect. It's
 tested with the htest unit testing framework. First read htools/README, then
-do:
-$ make
-or
-$ gmake
-and that's that.
+call GNU make:
+ $ make / gmake
 
-To test, you need to build htest first. Note that htest uses hutils, so the
-order from scratch would be:
-cd htools/
-gmake -C hutils
-gmake -C htest
-gmake -C hutils test
+To run the tests, htest must have been built. Note that htest uses hutils, so
+the order from scratch would be:
+ $ cd $HTOOLS_PATH
+ $ make -C hutils
+ $ make -C htest
+ $ make -C hutils test
+or just:
+ $ cd $HTOOLS_PATH
+ $ make
+
+In your own code, include whatever headers look like fun, and link in
+<build_dir>/libnurdlib.a.
