@@ -85,12 +85,13 @@ mock_push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
 }
 
 struct HWTWidget *
-mockwidget_create(struct MockWidgetCallback const *const a_user_callback)
+mockwidget_create(struct HWT *const a_hwt, struct MockWidgetCallback const
+    *const a_user_callback)
 {
 	struct MockWidget *mock;
 
 	CALLOC(mock, 1);
-	hwt_widget_init(&mock->widget, g_type);
+	hwt_widget_init(a_hwt, &mock->widget, g_type);
 	COPY(mock->user_callback, *a_user_callback);
 	return &mock->widget;
 }

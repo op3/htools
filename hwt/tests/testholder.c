@@ -25,9 +25,9 @@ HTEST(CanOverwrite)
 	struct HWTWidget *panel[3];
 	struct HWTHolder *holder;
 
-	panel[0] = hwt_panel_create();
-	panel[1] = hwt_panel_create();
-	panel[2] = hwt_panel_create();
+	panel[0] = hwt_panel_create(g_hwt);
+	panel[1] = hwt_panel_create(g_hwt);
+	panel[2] = hwt_panel_create(g_hwt);
 
 	holder = hwt_panel_get_child(panel[0]);
 	hwt_holder_set_widget(holder, panel[1]);

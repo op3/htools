@@ -38,12 +38,12 @@ static struct HWTWidgetType const *g_type;
 HWT_CASTER(Panel, g_type);
 
 struct HWTWidget *
-hwt_panel_create()
+hwt_panel_create(struct HWT *const a_hwt)
 {
 	struct Panel *panel;
 
 	CALLOC(panel, 1);
-	hwt_widget_init(&panel->widget, g_type);
+	hwt_widget_init(a_hwt, &panel->widget, g_type);
 	return &panel->widget;
 }
 

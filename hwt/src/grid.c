@@ -134,7 +134,8 @@ grid_push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
 }
 
 struct HWTWidget *
-hwt_grid_create(size_t const a_row_num, size_t const a_col_num)
+hwt_grid_create(struct HWT *const a_hwt, size_t const a_row_num, size_t const
+    a_col_num)
 {
 	struct Grid *grid;
 
@@ -145,19 +146,13 @@ hwt_grid_create(size_t const a_row_num, size_t const a_col_num)
 		abort();
 	}
 	CALLOC(grid, 1);
-	hwt_widget_init(&grid->widget, g_type);
+	hwt_widget_init(a_hwt, &grid->widget, g_type);
 	grid->row_num = a_row_num;
 	grid->col_num = a_col_num;
 	CALLOC(grid->row_min, a_row_num);
 	CALLOC(grid->col_min, a_col_num);
 	CALLOC(grid->child, a_row_num * a_col_num);
 	return &grid->widget;
-}
-
-void
-hwt_grid_setup_(struct HWT *const a_hwt)
-{
-	HWT_WIDGET_REGISTER(g_type, a_hwt, grid);
 }
 
 struct HWTHolder *
@@ -174,4 +169,10 @@ hwt_grid_get_child(struct HWTWidget *const a_grid, size_t const a_row, size_t
 		abort();
 	}
 	return &grid->child[grid->col_num * a_row + a_col];
+}
+
+void
+hwt_grid_setup_(struct HWT *const a_hwt)
+{
+	HWT_WIDGET_REGISTER(g_type, a_hwt, grid);
 }

@@ -21,9 +21,19 @@
 #include <src/widget.h>
 #include <tests/mockwidget.h>
 
+static void	destroy(void *);
 static void	push_rect(struct HWTRect const *, void *);
 
 static struct HWT *g_hwt;
+
+void
+destroy(void *const a_data)
+{
+	int *was_destroyed;
+
+	was_destroyed = a_data;
+	*was_destroyed = 1;
+}
 
 void
 push_rect(struct HWTRect const *const a_rect, void *const a_data)
@@ -38,14 +48,37 @@ HTEST(CreateAndFree)
 {
 	struct HWTWidget *panel;
 
-	panel = hwt_panel_create();
+	panel = hwt_panel_create(g_hwt);
 	HTRY_PTR(NULL, !=, panel);
 
 	hwt_widget_free(g_hwt, &panel);
 	HTRY_PTR(NULL, ==, panel);
 }
 
-HTEST(Child)
+HTEST(ChildFreed)
+{
+	struct MockWidgetCallback cb;
+	struct HWTWidget *panel, *mock;
+	struct HWTHolder *holder;
+	int was_destroyed;
+
+	panel = hwt_panel_create(g_hwt);
+	holder = hwt_panel_get_child(panel);
+
+	cb.destroy = destroy;
+	cb.pull_min = NULL;
+	cb.push_rect = NULL;
+	cb.data = &was_destroyed;
+	mock = mockwidget_create(g_hwt, &cb);
+
+	was_destroyed = 0;
+	hwt_holder_set_widget(holder, mock);
+	HTRY_BOOL(!was_destroyed);
+	hwt_widget_free(g_hwt, &mock);
+	HTRY_BOOL(was_destroyed);
+}
+
+HTEST(ChildRect)
 {
 	struct HWTRect const c_root_rect = {10, 20, 30, 40};
 	struct HWTRect rect;
@@ -53,7 +86,7 @@ HTEST(Child)
 	struct HWTWidget *panel, *mock;
 	struct HWTHolder *holder;
 
-	panel = hwt_panel_create();
+	panel = hwt_panel_create(g_hwt);
 	hwt_set_root(g_hwt, panel);
 	holder = hwt_panel_get_child(panel);
 
@@ -61,7 +94,7 @@ HTEST(Child)
 	cb.pull_min = NULL;
 	cb.push_rect = push_rect;
 	cb.data = &rect;
-	mock = mockwidget_create(&cb);
+	mock = mockwidget_create(g_hwt, &cb);
 
 	ZERO(rect);
 	hwt_holder_set_widget(holder, mock);
@@ -88,7 +121,8 @@ HTEST_SUITE(Panel)
 	mockwidget_setup(g_hwt);
 
 	HTEST_ADD(CreateAndFree);
-	HTEST_ADD(Child);
+	HTEST_ADD(ChildFreed);
+	HTEST_ADD(ChildRect);
 
 	hwt_free(&g_hwt);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,28 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <src/widget.h>
-#include <assert.h>
-#include <hutils/memory.h>
-#include <hwt/hwt.h>
-#include <src/holder.h>
+#ifndef HUTILS_PRINTF_H
+#define HUTILS_PRINTF_H
 
-void
-hwt_widget_push_rect(struct HWT *const a_hwt, struct HWTWidget *const
-    a_widget, struct HWTRect const *const a_rect)
-{
-	if (NULL != a_widget) {
-		a_widget->type->callback.push_rect(a_hwt, a_widget, a_rect);
-	}
-}
+#include <stdio.h>
+#include <hconf/include/hutils/fmtmod.h>
 
-void
-hwt_widget_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTSize *const a_min)
-{
-	if (NULL == a_widget) {
-		ZERO(*a_min);
-	} else {
-		a_widget->type->callback.pull_min(a_hwt, a_widget, a_min);
-	}
-}
+#if defined(HCONF_PRINTF_C90_ANCIENT)
+# define PRIz "d"
+# define PRIzx "x"
+#elif defined(HCONF_PRINTF_C90_DECENT)
+# define PRIz "ld"
+# define PRIzx "lx"
+#else
+# error Not hconf:ed.
+#endif
+
+#define HCONF_TEST printf("%"PRIz"%"PRIzx, (size_t)0, (size_t)0)
+
+#endif

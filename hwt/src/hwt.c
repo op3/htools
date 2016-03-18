@@ -114,6 +114,23 @@ hwt_widget_free(struct HWT *const a_hwt, struct HWTWidget **const a_widget)
 	FREE(*a_widget);
 }
 
+void
+hwt_widget_init(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTWidgetType const *const a_type)
+{
+	struct HWTWidgetType *type;
+
+	TAILQ_FOREACH(type, &a_hwt->type_list, next) {
+		if (a_type == type) {
+			a_widget->type = a_type;
+			a_widget->owner = NULL;
+			return;
+		}
+	}
+	fprintf(stderr, "Widget type not registered.\n");
+	abort();
+}
+
 struct HWTWidgetType const *
 hwt_widget_register_(struct HWT *const a_hwt, struct HWTWidgetCallback const
     *const a_callback)
