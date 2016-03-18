@@ -170,6 +170,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 	} else if (0 == pid_) {\
 		g_htest_dtor_ = dtor;\
 		signal(SIGABRT, htest_sighandler_);\
+		signal(SIGBUS, htest_sighandler_);\
 		signal(SIGFPE, htest_sighandler_);\
 		signal(SIGILL, htest_sighandler_);\
 		signal(SIGINT, htest_sighandler_);\

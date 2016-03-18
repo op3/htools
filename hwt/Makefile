@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@ LD=gcc
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I. -I$(HTOOLS_PATH)/htest/include
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -I$(HTOOLS_PATH)/hutils/include -I$(HTOOLS_PATH)/htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 LDFLAGS:=-L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
 LIBS:=-lhtest -lm
@@ -44,7 +44,7 @@ HTEST_SUITE_DST=$@
 TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 
 .PHONY: all
-all: $(TARGET) test
+all: $(TARGET)
 
 .PHONY: test
 test: $(TEST)

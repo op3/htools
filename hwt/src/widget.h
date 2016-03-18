@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,41 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef WIDGET_H
-#define WIDGET_H
+#ifndef SRC_WIDGET_H
+#define SRC_WIDGET_H
 
 #include <sys/queue.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <hutils/macros.h>
-#include <hwt/hwt.h>
-
-#define HWT_CAST(typ, out, in) do {\
-	if (typ != in->type) {\
-		fprintf(stderr, "HWT cast mismatch (src=%s != dst=%s).\n",\
-		    in->type->name, typ->name);\
-		exit(EXIT_FAILURE);\
-	}\
-	out = (void *)in;\
-} HUTILS_COND(while, 0)
-
-struct HWT;
-struct HWTRect;
+#include <hwt/widget.h>
 
 struct HWTWidgetType {
-	char	const *name;
 	struct	HWTWidgetCallback callback;
 	TAILQ_ENTRY(HWTWidgetType)	next;
 };
 struct HWTWidget {
 	struct	HWTWidgetType const *type;
-	struct	HWTWidget *parent;
+	struct	HWTHolder *owner;
 };
-
-void	widget_free(struct HWT *, struct HWTWidget **);
-void	widget_propagate_size(struct HWT *, struct HWTWidget *, struct HWTRect
-    const *);
-void	widget_query_min(struct HWT *, struct HWTWidget *, struct HWTRect *);
-void	widget_setup(struct HWTWidget *, struct HWTWidgetType const *);
 
 #endif

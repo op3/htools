@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,9 +29,10 @@ HTEST(CanOverwrite)
 	panel[1] = hwt_panel_create();
 	panel[2] = hwt_panel_create();
 
-	holder = hwt_panel_get_holder(panel[0]);
-	hwt_holder_set_child(holder, panel[1]);
-	hwt_holder_set_child(holder, panel[2]);
+	holder = hwt_panel_get_child(panel[0]);
+	hwt_holder_set_widget(holder, panel[1]);
+	hwt_holder_set_widget(holder, panel[2]);
+
 	hwt_set_root(g_hwt, panel[0]);
 
 	hwt_widget_free(g_hwt, &panel[1]);

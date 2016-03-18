@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,16 +21,19 @@
 
 struct HWT;
 struct HWTRect;
+struct HWTSize;
 struct HWTWidget;
 
 struct MockWidgetCallback {
-	void	(*func)(struct HWTRect const *, void *);
+	void	(*destroy)(void *);
+	void	(*pull_min)(struct HWTSize *, void *);
+	void	(*push_rect)(struct HWTRect const *, void *);
 	void	*data;
 };
 
-struct HWTWidget	*mockwidget_create(struct MockWidgetCallback *)
+struct HWTWidget	*mockwidget_create(struct MockWidgetCallback const *)
 	FUNC_RETURNS;
-void			mockwidget_get_size(struct HWTWidth const *, struct
+void			mockwidget_get_size(struct HWTWidget const *, struct
     HWTSize *);
 void			mockwidget_setup(struct HWT *);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,14 @@
  */
 
 #include <hwt/hwt.h>
+#include <assert.h>
+#include <stdio.h>
 #include <hutils/memory.h>
-#include <grid.h>
-#include <holder.h>
-#include <hwt.h>
-#include <panel.h>
-#include <widget.h>
+#include <hwt/common.h>
+#include <src/grid.h>
+#include <src/holder.h>
+#include <src/panel.h>
+#include <src/widget.h>
 
 TAILQ_HEAD(TypeList, HWTWidgetType);
 struct HWT {
@@ -52,7 +54,7 @@ hwt_free(struct HWT **const a_hwt)
 	if (NULL == hwt) {
 		return;
 	}
-	widget_free(hwt, &hwt->root);
+	hwt_widget_free(hwt, &hwt->root);
 
 	while (!TAILQ_EMPTY(&hwt->type_list)) {
 		struct HWTWidgetType *type;
@@ -66,23 +68,22 @@ hwt_free(struct HWT **const a_hwt)
 }
 
 void
-hwt_holder_set_child(struct HWTHolder *const a_holder, struct HWTWidget *const
-    a_child)
+hwt_holder_set_widget(struct HWTHolder *const a_holder, struct HWTWidget
+    *const a_widget)
 {
-	if (NULL == a_child) {
-		a_holder->child = NULL;
+	if (NULL != a_holder->widget) {
+		a_holder->widget->owner = NULL;
+	}
+	if (NULL == a_widget) {
+		a_holder->widget = NULL;
 		return;
 	}
-
-	if (NULL != a_child->holder) {
-		fprintf(stderr, "Assigning an owned child.\n");
+	if (NULL != a_widget->owner) {
+		fprintf(stderr, "Assigning an already owned child.\n");
 		abort();
 	}
-	if (NULL != a_holder->child) {
-		a_holder->child->holder = NULL;
-	}
-	a_holder->child = a_child;
-	a_child->holder = a_holder;
+	a_holder->widget = a_widget;
+	a_widget->owner = a_holder;
 }
 
 void
@@ -94,27 +95,33 @@ hwt_set_root(struct HWT *const a_hwt, struct HWTWidget *const a_root)
 void
 hwt_update(struct HWT *const a_hwt, struct HWTRect const *const a_rect)
 {
-	struct HWTRect min;
+	struct HWTSize min;
 
-	widget_propagate_min(a_hwt, a_hwt->root, &min);
-	widget_propagate_size(a_hwt, a_hwt->root, a_rect);
-}
-
-struct HWTWidgetType const *
-hwt_widget_register(struct HWT *const a_hwt, char const *const a_name, struct
-    HWTWidgetCallback const *const a_callback)
-{
-	struct HWTWidgetType *type;
-
-	CALLOC(type, 1);
-	type->name = a_name;
-	memmove(&type->callback, a_callback, sizeof type->callback);
-	TAILQ_INSERT_TAIL(&a_hwt->type_list, type, next);
-	return type;
+	hwt_widget_pull_min(a_hwt, a_hwt->root, &min);
+	hwt_widget_push_rect(a_hwt, a_hwt->root, a_rect);
 }
 
 void
 hwt_widget_free(struct HWT *const a_hwt, struct HWTWidget **const a_widget)
 {
-	widget_free(a_hwt, a_widget);
+	struct HWTWidget *widget;
+
+	widget = *a_widget;
+	if (NULL == widget) {
+		return;
+	}
+	widget->type->callback.destroy(a_hwt, widget);
+	FREE(*a_widget);
+}
+
+struct HWTWidgetType const *
+hwt_widget_register_(struct HWT *const a_hwt, struct HWTWidgetCallback const
+    *const a_callback)
+{
+	struct HWTWidgetType *type;
+
+	CALLOC(type, 1);
+	COPY(type->callback, *a_callback);
+	TAILQ_INSERT_TAIL(&a_hwt->type_list, type, next);
+	return type;
 }

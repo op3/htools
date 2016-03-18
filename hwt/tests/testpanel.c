@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,21 +14,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <htest/htest.h>
+#include <hwt/common.h>
 #include <hwt/hwt.h>
 #include <hwt/panel.h>
-#include <htest/htest.h>
-#include <mockwidget.h>
-#include <widget.h>
+#include <src/widget.h>
+#include <tests/mockwidget.h>
 
-static void	touch_child(struct HWTRect const *, void *);
+static void	push_rect(struct HWTRect const *, void *);
 
 static struct HWT *g_hwt;
 
 void
-touch_child(struct HWTRect const *const a_size, void *const a_data)
+push_rect(struct HWTRect const *const a_rect, void *const a_data)
 {
-	(void)a_size;
-	*((int *)a_data) = 1;
+	struct HWTRect *rect;
+
+	rect = a_data;
+	COPY(*rect, *a_rect);
 }
 
 HTEST(CreateAndFree)
@@ -36,34 +39,45 @@ HTEST(CreateAndFree)
 	struct HWTWidget *panel;
 
 	panel = hwt_panel_create();
-	HTRY_VOID(hwt_set_root(g_hwt, panel));
+	HTRY_PTR(NULL, !=, panel);
+
+	hwt_widget_free(g_hwt, &panel);
+	HTRY_PTR(NULL, ==, panel);
 }
 
 HTEST(Child)
 {
-	struct HWTRect c_size = {10, 10};
+	struct HWTRect const c_root_rect = {10, 20, 30, 40};
+	struct HWTRect rect;
 	struct MockWidgetCallback cb;
 	struct HWTWidget *panel, *mock;
 	struct HWTHolder *holder;
-	int touched;
 
 	panel = hwt_panel_create();
 	hwt_set_root(g_hwt, panel);
-	holder = hwt_panel_get_holder(panel);
+	holder = hwt_panel_get_child(panel);
 
-	cb.func = touch_child;
-	cb.data = &touched;
+	cb.destroy = NULL;
+	cb.pull_min = NULL;
+	cb.push_rect = push_rect;
+	cb.data = &rect;
 	mock = mockwidget_create(&cb);
 
-	touched = 0;
-	hwt_holder_set_child(holder, mock);
-	hwt_update(g_hwt, &c_size);
-	HTRY_BOOL(touched);
+	ZERO(rect);
+	hwt_holder_set_widget(holder, mock);
+	hwt_update(g_hwt, &c_root_rect);
+	HTRY_I(10, ==, rect.x);
+	HTRY_I(20, ==, rect.y);
+	HTRY_I(30, ==, rect.width);
+	HTRY_I(40, ==, rect.height);
 
-	touched = 0;
-	hwt_holder_set_child(holder, NULL);
-	hwt_update(g_hwt, &c_size);
-	HTRY_BOOL(!touched);
+	ZERO(rect);
+	hwt_holder_set_widget(holder, NULL);
+	hwt_update(g_hwt, &c_root_rect);
+	HTRY_I(0, ==, rect.x);
+	HTRY_I(0, ==, rect.y);
+	HTRY_I(0, ==, rect.width);
+	HTRY_I(0, ==, rect.height);
 
 	hwt_widget_free(g_hwt, &mock);
 }

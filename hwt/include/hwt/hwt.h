@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,39 +18,26 @@
 #define HTW_HWT_H
 
 #include <hutils/macros.h>
-
-#define HWT_CALLBACK_SETUP(callback, prefix) do {\
-	callback.draw = prefix##_draw;\
-	callback.destroy = prefix##_destroy;\
-	callback.propagate_min = prefix##_propagate_min;\
-	callback.propagate_size = prefix##_propagate_size;\
-} HUTILS_COND(while, 0)
+#include <hwt/common.h>
 
 struct HWT;
+struct HWTEvent;
+struct HWTHolder;
 struct HWTRenderer;
 struct HWTWidget;
-struct HWTWidgetType;
-
-struct HWTWidgetCallback {
-	void	(*destroy)(struct HWT *, struct HWTWidget *);
-	void	(*draw)(struct HWT *, struct HWTWidget *);
-	void	(*propagate_size)(struct HWT *, struct HWTWidget *, struct
-	    HWTSize const *);
-	void	(*query_min)(struct HWT *, struct HWTWidget *, struct HWTSize
-	    *);
-};
 
 struct HWT			*hwt_create(struct HWTRenderer const *)
 	FUNC_RETURNS;
 void				hwt_free(struct HWT **);
+void				hwt_holder_set_widget(struct HWTHolder *,
+    struct HWTWidget *);
 void				hwt_send_event(struct HWT *, struct HWTEvent
     const *);
 void				hwt_set_root(struct HWT *, struct HWTWidget
     *);
-void				hwt_update(struct HWT *);
+void				hwt_update(struct HWT *, struct HWTRect const
+    *);
 void				hwt_widget_free(struct HWT *, struct HWTWidget
     **);
-struct HWTWidgetType const	*hwt_widget_register(struct HWT *, char const
-    *, struct HWTWidgetCallback const *) FUNC_RETURNS;
 
 #endif

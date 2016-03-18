@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,8 @@
 
 #include <hutils/macros.h>
 
-struct HWTWidget *hwt_grid_create(int, int) FUNC_RETURNS;
-struct HWTHolder *hwt_grid_get_holder(struct HWTWidget *, int, int)
+struct HWTWidget *hwt_grid_create(size_t, size_t) FUNC_RETURNS;
+struct HWTHolder *hwt_grid_get_child(struct HWTWidget *, size_t, size_t)
 	FUNC_RETURNS;
 
 #endif

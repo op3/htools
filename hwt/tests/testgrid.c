@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,10 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <htest/htest.h>
 #include <hwt/hwt.h>
 #include <hwt/grid.h>
 #include <hwt/panel.h>
-#include <htest/htest.h>
 
 static void	dtor(void);
 
@@ -36,14 +36,15 @@ HTEST(PositiveDimensions)
 	struct HWTWidget *grid;
 	int i;
 
-	for (i = -1; 1 > i; ++i) {
+	for (i = -1; 1 >= i; ++i) {
 		int j;
 
-		for (j = -1; 1 > j; ++j) {
+		for (j = -1; 1 >= j; ++j) {
 			if (1 == i && 1 == j) {
 				grid = hwt_grid_create(i, j);
 			} else {
-				HTRY_SIGNAL(grid = hwt_grid_create(i, j));
+				HTRY_SIGNAL_DTOR(grid = hwt_grid_create(i, j),
+				    dtor);
 			}
 		}
 	}
@@ -66,11 +67,11 @@ HTEST(Children)
 			g_widget = hwt_panel_create();
 			if (0 <= row && 2 > row &&
 			    0 <= col && 2 > col) {
-				HTRY_VOID(hwt_grid_set_child(grid, row, col,
-				    g_widget));
+				HTRY_VOID(holder = hwt_grid_get_child(grid,
+				    row, col));
 			} else {
-				HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, row,
-				    col, g_widget), dtor);
+				HTRY_SIGNAL_DTOR(holder =
+				    hwt_grid_get_child(grid, row, col), dtor);
 			}
 		}
 	}
@@ -92,11 +93,11 @@ HTEST(MinSize)
 			g_widget = hwt_panel_create();
 			if (0 <= row && 2 > row &&
 			    0 <= col && 2 > col) {
-				HTRY_VOID(hwt_grid_set_child(grid, row, col,
-				    g_widget));
+				HTRY_VOID(holder = hwt_grid_get_child(grid,
+				    row, col));
 			} else {
-				HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, row,
-				    col, g_widget), dtor);
+				HTRY_SIGNAL_DTOR(holder =
+				    hwt_grid_get_child(grid, row, col), dtor);
 			}
 		}
 	}

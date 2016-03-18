@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,26 +15,27 @@
  */
 
 #include <hwt/panel.h>
+#include <assert.h>
 #include <hutils/memory.h>
 #include <hwt/hwt.h>
-#include <holder.h>
-#include <hwt.h>
-#include <panel.h>
-#include <widget.h>
+#include <src/holder.h>
+#include <src/panel.h>
+#include <src/widget.h>
 
 struct Panel {
 	struct	HWTWidget widget;
-	struct	HWTHolder holder;
+	struct	HWTHolder child;
 };
 
 static void	panel_destroy(struct HWT *, struct HWTWidget *);
 static void	panel_draw(struct HWT *, struct HWTWidget *);
-static void	panel_propagate_min(struct HWT *, struct HWTWidget *, struct
-    HWTRect *);
-static void	panel_propagate_size(struct HWT *, struct HWTWidget *, struct
+static void	panel_pull_min(struct HWT *, struct HWTWidget *, struct
+    HWTSize *);
+static void	panel_push_rect(struct HWT *, struct HWTWidget *, struct
     HWTRect const *);
 
 static struct HWTWidgetType const *g_type;
+HWT_CASTER(Panel, g_type);
 
 struct HWTWidget *
 hwt_panel_create()
@@ -42,26 +43,20 @@ hwt_panel_create()
 	struct Panel *panel;
 
 	CALLOC(panel, 1);
-	widget_setup(&panel->widget, g_type);
+	hwt_widget_init(&panel->widget, g_type);
 	return &panel->widget;
 }
 
 void
 hwt_panel_setup_(struct HWT *const a_hwt)
 {
-	struct HWTWidgetCallback callback;
-
-	HWT_CALLBACK_SETUP(callback, panel);
-	g_type = hwt_widget_register(a_hwt, "Panel", &callback);
+	HWT_WIDGET_REGISTER(g_type, a_hwt, panel);
 }
 
 struct HWTHolder *
-hwt_panel_get_holder(struct HWTWidget *const a_parent)
+hwt_panel_get_child(struct HWTWidget *const a_panel)
 {
-	struct Panel *panel;
-
-	HWT_CAST(g_type, panel, a_parent);
-	return &panel->holder;
+	return &hwt_cast_Panel(a_panel)->child;
 }
 
 void
@@ -69,8 +64,8 @@ panel_destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 {
 	struct Panel *panel;
 
-	HWT_CAST(g_type, panel, a_widget);
-	widget_free(a_hwt, &panel->holder.child);
+	panel = hwt_cast_Panel(a_widget);
+	hwt_widget_free(a_hwt, &panel->child.widget);
 }
 
 void
@@ -81,21 +76,21 @@ panel_draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-panel_propagate_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTRect *const a_min)
+panel_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTSize *const a_min)
 {
 	struct Panel *panel;
 
-	HWT_CAST(g_type, panel, a_widget);
-	widget_propagate_min(a_hwt, panel->holder.child, a_min);
+	panel = hwt_cast_Panel(a_widget);
+	hwt_widget_pull_min(a_hwt, panel->child.widget, a_min);
 }
 
 void
-panel_propagate_size(struct HWT *const a_hwt, struct HWTWidget *const
-    a_widget, struct HWTRect const *const a_size)
+panel_push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect const *const a_size)
 {
 	struct Panel *panel;
 
-	HWT_CAST(g_type, panel, a_widget);
-	widget_propagate_size(a_hwt, panel->holder.child, a_size);
+	panel = hwt_cast_Panel(a_widget);
+	hwt_widget_push_rect(a_hwt, panel->child.widget, a_size);
 }

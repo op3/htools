@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,9 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <mockwidget.h>
+#include <tests/mockwidget.h>
+#include <assert.h>
 #include <hutils/memory.h>
-#include <widget.h>
+#include <hwt/common.h>
+#include <src/widget.h>
 
 struct MockWidget {
 	struct	HWTWidget widget;
@@ -25,18 +27,24 @@ struct MockWidget {
 
 static void	mock_destroy(struct HWT *, struct HWTWidget *);
 static void	mock_draw(struct HWT *, struct HWTWidget *);
-static void	mock_propagate_min(struct HWT *, struct HWTWidget *, struct
-    HWTRect *);
-static void	mock_propagate_size(struct HWT *, struct HWTWidget *, struct
+static void	mock_pull_min(struct HWT *, struct HWTWidget *, struct HWTSize
+    *);
+static void	mock_push_rect(struct HWT *, struct HWTWidget *, struct
     HWTRect const *);
 
 static struct HWTWidgetType const *g_type;
+HWT_CASTER(MockWidget, g_type);
 
 void
 mock_destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 {
+	struct MockWidget *mock;
+
 	(void)a_hwt;
-	(void)a_widget;
+	mock = hwt_cast_MockWidget(a_widget);
+	if (NULL != mock->user_callback.destroy) {
+		mock->user_callback.destroy(mock->user_callback.data);
+	}
 }
 
 void
@@ -47,43 +55,48 @@ mock_draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-mock_propagate_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTRect *const a_min)
-{
-	(void)a_hwt;
-	(void)a_widget;
-	a_min->width = 0.0f;
-	a_min->height = 0.0f;
-}
-
-void
-mock_propagate_size(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTRect const *const a_size)
+mock_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTSize *const a_min)
 {
 	struct MockWidget *mock;
 
 	(void)a_hwt;
-	HWT_CAST(g_type, mock, a_widget);
-	mock->user_callback.func(a_size, mock->user_callback.data);
+	mock = hwt_cast_MockWidget(a_widget);
+	if (NULL == mock->user_callback.pull_min) {
+		a_min->width = 0.0f;
+		a_min->height = 0.0f;
+	} else {
+		mock->user_callback.pull_min(a_min, mock->user_callback.data);
+	}
+}
+
+void
+mock_push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
+    struct HWTRect const *const a_rect)
+{
+	struct MockWidget *mock;
+
+	(void)a_hwt;
+	mock = hwt_cast_MockWidget(a_widget);
+	if (NULL != mock->user_callback.push_rect) {
+		mock->user_callback.push_rect(a_rect,
+		    mock->user_callback.data);
+	}
 }
 
 struct HWTWidget *
-mockwidget_create(struct MockWidgetCallback *const a_user_callback)
+mockwidget_create(struct MockWidgetCallback const *const a_user_callback)
 {
 	struct MockWidget *mock;
 
 	CALLOC(mock, 1);
-	widget_setup(&mock->widget, g_type);
-	memmove(&mock->user_callback, a_user_callback, sizeof
-	    mock->user_callback);
+	hwt_widget_init(&mock->widget, g_type);
+	COPY(mock->user_callback, *a_user_callback);
 	return &mock->widget;
 }
 
 void
 mockwidget_setup(struct HWT *const a_hwt)
 {
-	struct HWTWidgetCallback callback;
-
-	HWT_CALLBACK_SETUP(callback, mock);
-	g_type = hwt_widget_register(a_hwt, "Mock", &callback);
+	HWT_WIDGET_REGISTER(g_type, a_hwt, mock);
 }

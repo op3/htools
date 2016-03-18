@@ -60,6 +60,7 @@ strsignal(int const a_signum)
 {
 	switch (a_signum) {
 		case SIGABRT: return "SIGABRT";
+		case SIGBUS: return "SIGBUS";
 		case SIGFPE: return "SIGFPE";
 		case SIGILL: return "SIGILL";
 		case SIGINT: return "SIGINT";
@@ -257,6 +258,7 @@ main(int const argc, char **const argv)
 					int result;
 
 					signal(SIGABRT, handler);
+					signal(SIGBUS, handler);
 					signal(SIGFPE, handler);
 					signal(SIGILL, handler);
 					signal(SIGSEGV, handler);

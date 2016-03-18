@@ -66,6 +66,7 @@ HCONF_FILES:=\
 	include/hutils/stdint.h \
 	include/hutils/macros.h \
 	include/hutils/err.h \
+	include/hutils/fmtmod.h \
 	include/hutils/snprintf.h \
 	include/hutils/strdup.h \
 	include/hutils/strndup.h \
