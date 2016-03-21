@@ -20,6 +20,7 @@
 #include <hutils/macros.h>
 
 struct HWT;
+struct HWTEvent;
 struct HWTRect;
 struct HWTSize;
 struct HWTWidget;
@@ -28,13 +29,12 @@ struct MockWidgetCallback {
 	void	(*destroy)(void *);
 	void	(*pull_min)(struct HWTSize *, void *);
 	void	(*push_rect)(struct HWTRect const *, void *);
+	void	(*respond)(struct HWTEvent const *, void *);
 	void	*data;
 };
 
 struct HWTWidget	*mockwidget_create(struct HWT *, struct
     MockWidgetCallback const *) FUNC_RETURNS;
-void			mockwidget_get_size(struct HWTWidget const *, struct
-    HWTSize *);
 void			mockwidget_setup(struct HWT *);
 
 #endif

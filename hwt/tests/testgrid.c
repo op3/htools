@@ -15,9 +15,8 @@
  */
 
 #include <htest/htest.h>
-#include <hwt/hwt.h>
 #include <hwt/grid.h>
-#include <hwt/panel.h>
+#include <hwt/hwt.h>
 #include <tests/mockwidget.h>
 
 struct Child {
@@ -89,16 +88,14 @@ HTEST(Children)
 		int col;
 
 		for (col = -1; 2 >= col; ++col) {
-			struct HWTHolder *holder;
-
-			g_widget = hwt_panel_create(g_hwt);
+			g_widget = mockwidget_create(g_hwt, NULL);
 			if (0 <= row && 2 > row &&
 			    0 <= col && 2 > col) {
-				HTRY_VOID(holder = hwt_grid_get_child(grid,
-				    row, col));
+				HTRY_VOID(hwt_grid_set_child(grid, row, col,
+				    &g_widget));
 			} else {
-				HTRY_SIGNAL_DTOR(holder =
-				    hwt_grid_get_child(grid, row, col), dtor);
+				HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, row,
+				    col, &g_widget), dtor);
 			}
 		}
 	}
@@ -106,15 +103,14 @@ HTEST(Children)
 
 HTEST(Update)
 {
-	struct HWTRect const c_root_rect = {10, 20, 120, 200};
-	struct Child child0 = {{ 0, 10}, {0, 0, 0, 0}};
-	struct Child child1 = {{20, 30}, {0, 0, 0, 0}};
-	struct Child child2 = {{40, 50}, {0, 0, 0, 0}};
-	struct Child child3 = {{60, 70}, {0, 0, 0, 0}};
+	struct Child child0 = {{ 0.0f, 10.0f}, {0.0f, 0.0f, 0.0f, 0.0f}};
+	struct Child child1 = {{20.0f, 30.0f}, {0.0f, 0.0f, 0.0f, 0.0f}};
+	struct Child child2 = {{40.0f, 50.0f}, {0.0f, 0.0f, 0.0f, 0.0f}};
+	struct Child child3 = {{60.0f, 70.0f}, {0.0f, 0.0f, 0.0f, 0.0f}};
 	struct MockWidgetCallback cb;
+	struct HWTEvent event_resize;
 	struct HWTWidget *grid;
 	struct HWTWidget *mock;
-	struct HWTHolder *holder;
 
 	grid = hwt_grid_create(g_hwt, 2, 2);
 	hwt_set_root(g_hwt, grid);
@@ -125,45 +121,45 @@ HTEST(Update)
 
 	cb.data = &child0;
 	mock = mockwidget_create(g_hwt, &cb);
-	holder = hwt_grid_get_child(grid, 0, 0);
-	hwt_holder_set_widget(holder, mock);
+	hwt_grid_set_child(grid, 0, 0, &mock);
 
 	cb.data = &child1;
 	mock = mockwidget_create(g_hwt, &cb);
-	holder = hwt_grid_get_child(grid, 0, 1);
-	hwt_holder_set_widget(holder, mock);
+	hwt_grid_set_child(grid, 0, 1, &mock);
 
 	cb.data = &child2;
 	mock = mockwidget_create(g_hwt, &cb);
-	holder = hwt_grid_get_child(grid, 1, 0);
-	hwt_holder_set_widget(holder, mock);
+	hwt_grid_set_child(grid, 1, 0, &mock);
 
 	cb.data = &child3;
 	mock = mockwidget_create(g_hwt, &cb);
-	holder = hwt_grid_get_child(grid, 1, 1);
-	hwt_holder_set_widget(holder, mock);
+	hwt_grid_set_child(grid, 1, 1, &mock);
 
-	hwt_update(g_hwt, &c_root_rect);
+	event_resize.type = HWT_EVENT_RESIZE;
+	event_resize.data.resize.size.width = 120.0f;
+	event_resize.data.resize.size.height = 200.0f;
 
-	HTRY_I(10, ==, child0.rect.x);
-	HTRY_I(20, ==, child0.rect.y);
-	HTRY_I(50, ==, child0.rect.width);
-	HTRY_I(80, ==, child0.rect.height);
+	hwt_send_event(g_hwt, &event_resize);
 
-	HTRY_I(60, ==, child1.rect.x);
-	HTRY_I(20, ==, child1.rect.y);
-	HTRY_I(70, ==, child1.rect.width);
-	HTRY_I(80, ==, child1.rect.height);
+	HTRY_FLT(  0.0f, ==, child0.rect.x);
+	HTRY_FLT(  0.0f, ==, child0.rect.y);
+	HTRY_FLT( 50.0f, ==, child0.rect.width);
+	HTRY_FLT( 80.0f, ==, child0.rect.height);
 
-	HTRY_I(10, ==, child2.rect.x);
-	HTRY_I(100, ==, child2.rect.y);
-	HTRY_I(50, ==, child2.rect.width);
-	HTRY_I(120, ==, child2.rect.height);
+	HTRY_FLT( 50.0f, ==, child1.rect.x);
+	HTRY_FLT(  0.0f, ==, child1.rect.y);
+	HTRY_FLT( 70.0f, ==, child1.rect.width);
+	HTRY_FLT( 80.0f, ==, child1.rect.height);
 
-	HTRY_I(60, ==, child3.rect.x);
-	HTRY_I(100, ==, child3.rect.y);
-	HTRY_I(70, ==, child3.rect.width);
-	HTRY_I(120, ==, child3.rect.height);
+	HTRY_FLT(  0.0f, ==, child2.rect.x);
+	HTRY_FLT( 80.0f, ==, child2.rect.y);
+	HTRY_FLT( 50.0f, ==, child2.rect.width);
+	HTRY_FLT(120.0f, ==, child2.rect.height);
+
+	HTRY_FLT( 50.0f, ==, child3.rect.x);
+	HTRY_FLT( 80.0f, ==, child3.rect.y);
+	HTRY_FLT( 70.0f, ==, child3.rect.width);
+	HTRY_FLT(120.0f, ==, child3.rect.height);
 }
 
 HTEST_SUITE(Grid)

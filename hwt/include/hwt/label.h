@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,9 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef GRID_H
-#define GRID_H
+#ifndef HWT_LABEL_H
+#define HWT_LABEL_H
 
-void hwt_grid_setup_(struct HWT *);
+#include <hutils/macros.h>
+
+struct HWT;
+
+struct HWTWidget *hwt_label_create(struct HWT *, char const *) FUNC_RETURNS;
 
 #endif

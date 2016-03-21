@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HWT_EVENT_H
-#define HWT_EVENT_H
+#ifndef HWT_COMMON_H
+#define HWT_COMMON_H
 
 struct HWTRect {
 	float	x;

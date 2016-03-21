@@ -15,28 +15,25 @@
  */
 
 #include <tests/mockwidget.h>
-#include <assert.h>
-#include <hutils/memory.h>
-#include <hwt/common.h>
-#include <src/widget.h>
+#include <hwt/widget.h>
 
 struct MockWidget {
-	struct	HWTWidget widget;
 	struct	MockWidgetCallback user_callback;
 };
 
-static void	mock_destroy(struct HWT *, struct HWTWidget *);
-static void	mock_draw(struct HWT *, struct HWTWidget *);
-static void	mock_pull_min(struct HWT *, struct HWTWidget *, struct HWTSize
-    *);
-static void	mock_push_rect(struct HWT *, struct HWTWidget *, struct
-    HWTRect const *);
+static void			destroy(struct HWT *, struct HWTWidget *);
+static void			draw(struct HWT *, struct HWTWidget *);
+static void			pull_min(struct HWT *, struct HWTWidget *,
+    struct HWTSize *);
+static void			push_rect(struct HWT *, struct HWTWidget *);
+static enum HWTEventFlow	respond(struct HWT *, struct HWTWidget *,
+    struct HWTEvent const *);
 
 static struct HWTWidgetType const *g_type;
 HWT_CASTER(MockWidget, g_type);
 
 void
-mock_destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 {
 	struct MockWidget *mock;
 
@@ -48,15 +45,36 @@ mock_destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-mock_draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 {
 	(void)a_hwt;
 	(void)a_widget;
 }
 
+struct HWTWidget *
+mockwidget_create(struct HWT *const a_hwt, struct MockWidgetCallback const
+    *const a_user_callback)
+{
+	struct MockWidget *mock;
+	struct HWTWidget *widget;
+
+	widget = hwt_widget_create(a_hwt, g_type);
+	mock = hwt_cast_MockWidget(widget);
+	if (NULL != a_user_callback) {
+		COPY(mock->user_callback, *a_user_callback);
+	}
+	return widget;
+}
+
 void
-mock_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTSize *const a_min)
+mockwidget_setup(struct HWT *const a_hwt)
+{
+	HWT_WIDGET_REGISTER(a_hwt, MockWidget, g_type);
+}
+
+void
+pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
+    HWTSize *const a_min)
 {
 	struct MockWidget *mock;
 
@@ -71,33 +89,29 @@ mock_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
 }
 
 void
-mock_push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTRect const *const a_rect)
+push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 {
 	struct MockWidget *mock;
 
 	(void)a_hwt;
 	mock = hwt_cast_MockWidget(a_widget);
 	if (NULL != mock->user_callback.push_rect) {
-		mock->user_callback.push_rect(a_rect,
+		mock->user_callback.push_rect(hwt_widget_get_rect(a_widget),
 		    mock->user_callback.data);
 	}
 }
 
-struct HWTWidget *
-mockwidget_create(struct HWT *const a_hwt, struct MockWidgetCallback const
-    *const a_user_callback)
+enum HWTEventFlow
+respond(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
+    HWTEvent const *const a_event)
 {
 	struct MockWidget *mock;
 
-	CALLOC(mock, 1);
-	hwt_widget_init(a_hwt, &mock->widget, g_type);
-	COPY(mock->user_callback, *a_user_callback);
-	return &mock->widget;
-}
-
-void
-mockwidget_setup(struct HWT *const a_hwt)
-{
-	HWT_WIDGET_REGISTER(g_type, a_hwt, mock);
+	(void)a_hwt;
+	mock = hwt_cast_MockWidget(a_widget);
+	if (NULL != mock->user_callback.pull_min) {
+		mock->user_callback.respond(a_event,
+		    mock->user_callback.data);
+	}
+	return HWT_CONTINUE;
 }

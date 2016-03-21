@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,21 @@
 
 #include <hwt/common.h>
 
+#define HWT_EVENT_RESPOND(hwt, widget, event) do {\
+	if (HWT_BREAK == hwt_widget_respond(hwt, widget, event)) {\
+		return HWT_BREAK;\
+	}\
+} HUTILS_COND(while, 0)
+
+enum HWTEventFlow {
+	HWT_BREAK,
+	HWT_CONTINUE
+};
 enum HWTEventType {
 	HWT_EVENT_EXPOSE,
+	HWT_EVENT_POINTER_DOWN,
+	HWT_EVENT_POINTER_MOVE,
+	HWT_EVENT_POINTER_UP,
 	HWT_EVENT_RESIZE
 };
 
@@ -28,16 +41,37 @@ struct HWTEvent {
 	enum	HWTEventType type;
 	union {
 		struct {
-			HWTRect	rect;
+			struct	HWTRect rect;
 		} expose;
 		struct {
-			HWTSize	size;
+			float	x;
+			float	y;
+			int	code;
+		} pointer_down;
+		struct {
+			float	x;
+			float	y;
+			int	code;
+		} pointer_move;
+		struct {
+			float	x;
+			float	y;
+			int	code;
+		} pointer_up;
+		struct {
+			struct	HWTSize size;
 		} resize;
 	} data;
 };
 
 void	hwt_event_expose_init(struct HWTEvent *, enum HWTEventType, float,
     float, float, float);
+void	hwt_event_pointer_down_init(struct HWTEvent *, enum HWTEventType,
+    float, float, int);
+void	hwt_event_pointer_move_init(struct HWTEvent *, enum HWTEventType,
+    float, float);
+void	hwt_event_pointer_up_init(struct HWTEvent *, enum HWTEventType, float,
+    float, int);
 void	hwt_event_resize_init(struct HWTEvent *, enum HWTEventType, float,
     float);
 

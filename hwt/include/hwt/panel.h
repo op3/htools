@@ -22,6 +22,6 @@
 struct HWT;
 
 struct HWTWidget *hwt_panel_create(struct HWT *) FUNC_RETURNS;
-struct HWTHolder *hwt_panel_get_child(struct HWTWidget *) FUNC_RETURNS;
+void hwt_panel_set_child(struct HWTWidget *, struct HWTWidget **);
 
 #endif

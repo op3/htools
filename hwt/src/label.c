@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,13 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hwt/panel.h>
-#include <hwt/hwt.h>
+#include <hwt/label.h>
+#include <hutils/strdup.h>
 #include <hwt/widget.h>
 #include <src/builtin.h>
 
-struct Panel {
-	struct	HWTWidget *child;
+struct Label {
+	char	*text;
 };
 
 static void			destroy(struct HWT *, struct HWTWidget *);
@@ -32,34 +32,34 @@ static enum HWTEventFlow	respond(struct HWT *, struct HWTWidget *,
     struct HWTEvent const *);
 
 static struct HWTWidgetType const *g_type;
-HWT_CASTER(Panel, g_type);
+HWT_CASTER(Label, g_type);
 
 struct HWTWidget *
-hwt_panel_create(struct HWT *const a_hwt)
+hwt_label_create(struct HWT *const a_hwt, char const *const a_text)
 {
-	return hwt_widget_create(a_hwt, g_type);
+	struct Label *label;
+	struct HWTWidget *widget;
+
+	widget = hwt_widget_create(a_hwt, g_type);
+	label = hwt_cast_Label(widget);
+	label->text = strdup(a_text);
+	return widget;
 }
 
 void
-hwt_panel_set_child(struct HWTWidget *const a_panel, struct HWTWidget **const
-    a_child)
+hwt_label_setup_(struct HWT *const a_hwt)
 {
-	hwt_widget_assign(&hwt_cast_Panel(a_panel)->child, a_child);
-}
-
-void
-hwt_panel_setup_(struct HWT *const a_hwt)
-{
-	HWT_WIDGET_REGISTER(a_hwt, Panel, g_type);
+	HWT_WIDGET_REGISTER(a_hwt, Label, g_type);
 }
 
 void
 destroy(struct HWT *const a_hwt, struct HWTWidget *const a_label)
 {
-	struct Panel *panel;
+	struct Label *label;
 
-	panel = hwt_cast_Panel(a_label);
-	hwt_widget_free(a_hwt, &panel->child);
+	(void)a_hwt;
+	label = hwt_cast_Label(a_label);
+	FREE(label->text);
 }
 
 void
@@ -73,29 +73,24 @@ void
 pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
     HWTSize *const a_min)
 {
-	struct Panel *panel;
-
-	panel = hwt_cast_Panel(a_label);
-	hwt_widget_pull_min(a_hwt, panel->child, a_min);
+	(void)a_hwt;
+	(void)a_label;
+	(void)a_min;
 }
 
 void
 push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_label)
 {
-	struct Panel *panel;
-
-	panel = hwt_cast_Panel(a_label);
-	hwt_widget_push_rect(a_hwt, panel->child,
-	    hwt_widget_get_rect(a_label));
+	(void)a_hwt;
+	(void)a_label;
 }
 
 enum HWTEventFlow
 respond(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
     HWTEvent const *const a_event)
 {
-	struct Panel *panel;
-
-	panel = hwt_cast_Panel(a_label);
-	HWT_EVENT_RESPOND(a_hwt, panel->child, a_event);
+	(void)a_hwt;
+	(void)a_label;
+	(void)a_event;
 	return HWT_CONTINUE;
 }

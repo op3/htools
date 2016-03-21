@@ -22,7 +22,7 @@
 struct HWT;
 
 struct HWTWidget *hwt_grid_create(struct HWT *, size_t, size_t) FUNC_RETURNS;
-struct HWTHolder *hwt_grid_get_child(struct HWTWidget *, size_t, size_t)
-	FUNC_RETURNS;
+void hwt_grid_set_child(struct HWTWidget *, size_t, size_t, struct HWTWidget
+    **);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@
  */
 
 #include <htest/htest.h>
+#include <hwt/button.h>
 #include <hwt/hwt.h>
-#include <hwt/panel.h>
 #include <tests/mockwidget.h>
 
 static void	destroy(void *);
@@ -42,24 +42,13 @@ push_rect(struct HWTRect const *const a_rect, void *const a_data)
 	COPY(*rect, *a_rect);
 }
 
-HTEST(CreateAndFree)
-{
-	struct HWTWidget *panel;
-
-	panel = hwt_panel_create(g_hwt);
-	HTRY_PTR(NULL, !=, panel);
-
-	hwt_widget_free(g_hwt, &panel);
-	HTRY_PTR(NULL, ==, panel);
-}
-
 HTEST(ChildFreed)
 {
 	struct MockWidgetCallback cb;
-	struct HWTWidget *panel, *mock;
+	struct HWTWidget *button, *mock;
 	int was_destroyed;
 
-	panel = hwt_panel_create(g_hwt);
+	button = hwt_button_create(g_hwt);
 
 	cb.destroy = destroy;
 	cb.pull_min = NULL;
@@ -68,9 +57,9 @@ HTEST(ChildFreed)
 	mock = mockwidget_create(g_hwt, &cb);
 
 	was_destroyed = 0;
-	hwt_panel_set_child(panel, &mock);
+	hwt_button_set_child(button, &mock);
 	HTRY_BOOL(!was_destroyed);
-	hwt_widget_free(g_hwt, &panel);
+	hwt_widget_free(g_hwt, &button);
 	HTRY_BOOL(was_destroyed);
 }
 
@@ -79,10 +68,10 @@ HTEST(ChildRect)
 	struct MockWidgetCallback cb;
 	struct HWTEvent event_resize;
 	struct HWTRect rect;
-	struct HWTWidget *panel, *mock;
+	struct HWTWidget *button, *mock;
 
-	panel = hwt_panel_create(g_hwt);
-	hwt_set_root(g_hwt, panel);
+	button = hwt_button_create(g_hwt);
+	hwt_set_root(g_hwt, button);
 
 	cb.destroy = NULL;
 	cb.pull_min = NULL;
@@ -95,28 +84,23 @@ HTEST(ChildRect)
 	event_resize.data.resize.size.height = 20.0f;
 
 	ZERO(rect);
-	hwt_panel_set_child(panel, &mock);
+	hwt_button_set_child(button, &mock);
 	hwt_send_event(g_hwt, &event_resize);
-	HTRY_FLT(0.0f, ==, rect.x);
-	HTRY_FLT(0.0f, ==, rect.y);
+	HTRY_FLT( 0.0f, ==, rect.x);
+	HTRY_FLT( 0.0f, ==, rect.y);
 	HTRY_FLT(10.0f, ==, rect.width);
 	HTRY_FLT(20.0f, ==, rect.height);
 
-	/* TODO: Test replacing child. */
-
-	hwt_widget_free(g_hwt, &mock);
+	/* TODO Test replacing child? */
 }
 
-HTEST_SUITE(Panel)
+HTEST_SUITE(Button)
 {
 	g_hwt = hwt_create(NULL);
 	mockwidget_setup(g_hwt);
 
-	HTEST_ADD(CreateAndFree);
 	HTEST_ADD(ChildFreed);
-	if (0) {
 	HTEST_ADD(ChildRect);
-	}
 
 	hwt_free(&g_hwt);
 }

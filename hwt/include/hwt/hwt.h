@@ -19,23 +19,19 @@
 
 #include <hutils/macros.h>
 #include <hwt/common.h>
+#include <hwt/event.h>
 
 struct HWT;
 struct HWTEvent;
-struct HWTHolder;
 struct HWTRenderer;
 struct HWTWidget;
 
 struct HWT			*hwt_create(struct HWTRenderer const *)
 	FUNC_RETURNS;
 void				hwt_free(struct HWT **);
-void				hwt_holder_set_widget(struct HWTHolder *,
-    struct HWTWidget *);
 void				hwt_send_event(struct HWT *, struct HWTEvent
     const *);
 void				hwt_set_root(struct HWT *, struct HWTWidget
-    *);
-void				hwt_update(struct HWT *, struct HWTRect const
     *);
 void				hwt_widget_free(struct HWT *, struct HWTWidget
     **);

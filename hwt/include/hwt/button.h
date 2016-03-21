@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,9 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef PANEL_H
-#define PANEL_H
+#ifndef HWT_BUTTON_H
+#define HWT_BUTTON_H
 
-void hwt_panel_setup_(struct HWT *);
+#include <hutils/macros.h>
+
+struct HWT;
+
+struct HWTWidget *hwt_button_create(struct HWT *) FUNC_RETURNS;
+void hwt_button_set_child(struct HWTWidget *, struct HWTWidget **);
+void hwt_button_set_callback(struct HWTWidget *, void(*)(struct HWTWidget *));
 
 #endif

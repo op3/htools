@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,28 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <src/widget.h>
-#include <assert.h>
-#include <hutils/memory.h>
-#include <hwt/hwt.h>
-#include <src/holder.h>
+#ifndef SRC_BUILTIN_H
+#define SRC_BUILTIN_H
 
-void
-hwt_widget_push_rect(struct HWT *const a_hwt, struct HWTWidget *const
-    a_widget, struct HWTRect const *const a_rect)
-{
-	if (NULL != a_widget) {
-		a_widget->type->callback.push_rect(a_hwt, a_widget, a_rect);
-	}
-}
+struct HWT;
 
-void
-hwt_widget_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTSize *const a_min)
-{
-	if (NULL == a_widget) {
-		ZERO(*a_min);
-	} else {
-		a_widget->type->callback.pull_min(a_hwt, a_widget, a_min);
-	}
-}
+void hwt_button_setup_(struct HWT *);
+void hwt_grid_setup_(struct HWT *);
+void hwt_label_setup_(struct HWT *);
+void hwt_panel_setup_(struct HWT *);
+
+#endif
