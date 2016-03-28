@@ -33,12 +33,14 @@ hutils_hash32(void const *const a_data, size_t const a_data_size)
 	}
 	p8 = (uint8_t const *)p32;
 	switch (i) {
-		case 3:
-			hash ^= *p8;
-		case 2:
-			hash ^= *p8;
-		case 1:
-			hash ^= *p8;
+	case 3:
+		hash ^= *p8;
+		/* FALLTHROUGH */
+	case 2:
+		hash ^= *p8;
+		/* FALLTHROUGH */
+	case 1:
+		hash ^= *p8;
 	}
 	return hash;
 }

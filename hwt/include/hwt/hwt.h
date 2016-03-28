@@ -18,22 +18,17 @@
 #define HTW_HWT_H
 
 #include <hutils/macros.h>
-#include <hwt/common.h>
+#include <hwt/base.h>
 #include <hwt/event.h>
 
 struct HWT;
-struct HWTEvent;
 struct HWTRenderer;
 struct HWTWidget;
 
-struct HWT			*hwt_create(struct HWTRenderer const *)
-	FUNC_RETURNS;
-void				hwt_free(struct HWT **);
-void				hwt_send_event(struct HWT *, struct HWTEvent
-    const *);
-void				hwt_set_root(struct HWT *, struct HWTWidget
-    *);
-void				hwt_widget_free(struct HWT *, struct HWTWidget
-    **);
+struct HWT	*hwt_create(struct HWTRenderer const *) FUNC_RETURNS;
+void		hwt_free(struct HWT **);
+void		hwt_send_event(struct HWT *, struct HWTEvent const *);
+void		hwt_set_root(struct HWT *, struct HWTWidget *);
+void		hwt_widget_free(struct HWT *, struct HWTWidget **);
 
 #endif

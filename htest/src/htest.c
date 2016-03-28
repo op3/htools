@@ -59,14 +59,14 @@ char const *
 strsignal(int const a_signum)
 {
 	switch (a_signum) {
-		case SIGABRT: return "SIGABRT";
-		case SIGBUS: return "SIGBUS";
-		case SIGFPE: return "SIGFPE";
-		case SIGILL: return "SIGILL";
-		case SIGINT: return "SIGINT";
-		case SIGSEGV: return "SIGSEGV";
-		case SIGTERM: return "SIGTERM";
-		default: return "Unknown";
+	case SIGABRT: return "SIGABRT";
+	case SIGBUS: return "SIGBUS";
+	case SIGFPE: return "SIGFPE";
+	case SIGILL: return "SIGILL";
+	case SIGINT: return "SIGINT";
+	case SIGSEGV: return "SIGSEGV";
+	case SIGTERM: return "SIGTERM";
+	default: return "Unknown";
 	}
 }
 
@@ -200,19 +200,19 @@ main(int const argc, char **const argv)
 	g_do_verbose = 0;
 	while (-1 != (opt = getopt(argc, argv, "cfhv"))) {
 		switch (opt) {
-			case 'c':
-				do_colors = 1;
-				break;
-			case 'f':
-				do_fork = 0;
-				break;
-			case 'v':
-				g_do_verbose = 1;
-				break;
-			case 'h':
-				usage(stdout, argv[0], EXIT_SUCCESS);
-			default:
-				usage(stderr, argv[0], EXIT_FAILURE);
+		case 'c':
+			do_colors = 1;
+			break;
+		case 'f':
+			do_fork = 0;
+			break;
+		case 'v':
+			g_do_verbose = 1;
+			break;
+		case 'h':
+			usage(stdout, argv[0], EXIT_SUCCESS);
+		default:
+			usage(stderr, argv[0], EXIT_FAILURE);
 		}
 	}
 

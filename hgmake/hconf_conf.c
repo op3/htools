@@ -756,7 +756,8 @@ main(int argc, char const *const *argv)
 	}
 
 	/* TODO: Why is this not working? */
-	fprintf(stderr, "%s: Failed, dumping log:\n", g_filename);
+	fprintf(stderr, "%s: Failed, dumping log %s:\n", g_filename,
+	    g_filename_log);
 	fclose(g_log);
 	g_log = fopen(g_filename_log, "rb");
 	if (NULL == g_log) {

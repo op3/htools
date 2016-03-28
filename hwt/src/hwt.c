@@ -95,9 +95,9 @@ hwt_send_event(struct HWT *const a_hwt, struct HWTEvent const *const a_event)
 }
 
 void
-hwt_set_root(struct HWT *const a_hwt, struct HWTWidget *const a_root)
+hwt_set_root(struct HWT *const a_hwt, struct HWTWidget *a_root)
 {
-	a_hwt->root = a_root;
+	hwt_widget_assign(&a_hwt->root, &a_root);
 }
 
 void
@@ -155,6 +155,10 @@ hwt_widget_free(struct HWT *const a_hwt, struct HWTWidget **const a_widget)
 	widget = *a_widget;
 	if (NULL == widget) {
 		return;
+	}
+	if (NULL != widget->parent) {
+		*widget->parent = NULL;
+		widget->parent = NULL;
 	}
 	widget->type->callback.destroy(a_hwt, widget);
 	FREE(*a_widget);

@@ -14,9 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <hwt/panel.h>
 #include <htest/htest.h>
 #include <hwt/hwt.h>
-#include <hwt/panel.h>
 #include <tests/mockwidget.h>
 
 static void	destroy(void *);

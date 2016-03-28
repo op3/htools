@@ -21,6 +21,7 @@
 
 struct HWT;
 
-struct HWTWidget *hwt_label_create(struct HWT *, char const *) FUNC_RETURNS;
+struct HWTWidget	*hwt_label_create(struct HWT *, char const *)
+	FUNC_RETURNS;
 
 #endif

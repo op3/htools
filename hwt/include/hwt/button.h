@@ -21,8 +21,10 @@
 
 struct HWT;
 
-struct HWTWidget *hwt_button_create(struct HWT *) FUNC_RETURNS;
-void hwt_button_set_child(struct HWTWidget *, struct HWTWidget **);
-void hwt_button_set_callback(struct HWTWidget *, void(*)(struct HWTWidget *));
+struct HWTWidget	*hwt_button_create(struct HWT *) FUNC_RETURNS;
+void			hwt_button_set_child(struct HWTWidget *, struct
+    HWTWidget **);
+void			hwt_button_set_callback(struct HWTWidget *,
+    void(*)(struct HWTWidget *));
 
 #endif
