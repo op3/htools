@@ -21,9 +21,9 @@
 #include <hconf/include/hutils/snprintf.h>
 
 #if defined(HCONF_SNPRINTF_BSD_SOURCE)
+/* HCONF: CPPFLAGS=-D_BSD_SOURCE */
+/* HCONF: nolink */
 
-/* CPPFLAGS=-D_BSD_SOURCE */
-/* LIBS=dont */
 # include <stdio.h>
 
 #elif defined(HCONF_SNPRINTF_PROTOTYPE)
@@ -31,8 +31,8 @@
 int snprintf(char *, size_t, char const *, ...) FUNC_PRINTF(2, 3);
 
 #elif defined(HCONF_SNPRINTF_UNSAFE)
+/* HCONF: EXTRA="-Iinclude src/snprintf.c" */
 
-/* EXTRA="-Iinclude src/snprintf.c" */
 # define snprintf snprintf_unsafe_
 int snprintf_unsafe_(char *, size_t, char const *, ...) FUNC_PRINTF(2, 3);
 

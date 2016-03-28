@@ -22,10 +22,10 @@
 #include <hconf/include/hutils/macros.h>
 
 #if defined(HCONF_COND_SIMPLE)
-/* LIBS=dont */
+/* HCONF: nolink */
 # define HUTILS_COND(stmt, cond) stmt (cond)
 #elif defined(HCONF_COND_WARNING_4127)
-/* LIBS=dont */
+/* HCONF: nolink */
 # define HUTILS_COND(stmt, cond)\
 	__pragma(warning(push))\
 	__pragma(warning(disable:4127))\

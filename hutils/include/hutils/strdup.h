@@ -20,10 +20,10 @@
 #include <hconf/include/hutils/strdup.h>
 
 #if defined(HCONF_STRDUP_NOTHING)
-/* LIBS=dont */
+/* HCONF: nolink */
 #elif defined(HCONF_STRDUP_BSD_SOURCE)
-/* CPPFLAGS=-D_BSD_SOURCE */
-/* LIBS=dont */
+/* HCONF: CPPFLAGS=-D_BSD_SOURCE */
+/* HCONF: nolink */
 #else
 # error Not hconf:ed.
 #endif

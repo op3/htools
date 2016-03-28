@@ -20,10 +20,10 @@
 #include <hconf/include/hutils/stdint.h>
 
 #if defined(HCONF_STDINT_STDINT_H)
-/* LIBS=dont */
+/* HCONF: nolink */
 # include <stdint.h>
 #elif defined(HCONF_STDINT_SYS_TYPES_H)
-/* LIBS=dont */
+/* HCONF: nolink */
 # include <sys/types.h>
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;

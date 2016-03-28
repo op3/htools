@@ -21,11 +21,11 @@
 #include <hconf/include/hutils/strndup.h>
 
 #if defined(HCONF_STRNDUP_POSIX_200809)
-/* CPPFLAGS=-D_POSIX_C_SOURCE=200809L */
-/* LIBS=dont */
+/* HCONF: CPPFLAGS=-D_POSIX_C_SOURCE=200809L */
+/* HCONF: nolink */
 # include <string.h>
 #elif defined(HCONF_STRNDUP_CUSTOM)
-/* EXTRA="src/strndup.c" */
+/* HCONF: EXTRA="src/strndup.c" */
 # define strndup strndup_custom_
 char *strndup_custom_(char const *, size_t) FUNC_RETURNS;
 #else

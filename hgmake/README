@@ -46,7 +46,7 @@ Ah yes, this is the magic that everybody needs.
 Little programs and a makefile snippet to auto configure parts of a build. The
 basic principle is that a project auto configures its headers/sources and
 stores the config in one hconf cache file, but also file-specific results. The
-main cachefile  is read on-the-fly to retrieve compiling and linking flags,
+main cachefile is read on-the-fly to retrieve compiling and linking flags,
 whereas the file-specific caches should be included automatically. Global
 hconf cache files can be merged.
 
@@ -67,7 +67,7 @@ hconf cache file format:
  2: CPPFLAGS, e.g. -DDOH=pizza-dough -Ibatter
  3: CFLAGS, e.g. -ansi -pedantic (to start easy...)
  4: LDFLAGS, e.g. -Lcity-center
- 5: LIBS, e.g. -lcommunity-center
+ 5: LIBS, e.g. -lskyscraper
 
 A concrete example:
 
@@ -92,7 +92,7 @@ include/my_header.h:
 src/my_sauce.c:
     #include <hconf/src/my_sauce.h>
     #if defined(HCONF_OH_RLY)
-    /* CPPFLAGS=_BSD_SOURCE */
+    /* HCONF: CPPFLAGS=_BSD_SOURCE */
     # include <exotic/system/header.h>
     void this_rly_my_function() { ... }
     #elif defined(HCONF_YA_RLY)
@@ -130,11 +130,33 @@ The result after running GNU make could be:
     #define HCONF_WAT
     ...
 
-Notice that it's a good idea to keep the hconf branch names descriptive and
-unique to avoid namespace collisions.
+It is possible to pass parameters to hconf with:
+/* HCONF: expr */
+where possible expr:s are:
+ CPPFLAGS=...
+ CFLAGS=...
+ LDFLAGS=...
+ LIBS=...
+  The above 4 should be rather self-explanatory.
+ EXTRA=...
+  Added verbatim to the linking step, but is not saved in the hconf cache,
+  useful for somewhat complicated hconf:ing.
+ nolink
+  Replaces the linking step with true.
+ penalty=integer
+  Adds the value to the linking result to push certain branch choices.
+The first 5 will be passed through a shell to resolve any global variable
+references or backticks, e.g. the following are valid:
+ CPPFLAGS="$GLOBAL_SCRIBBLES bah"
+ CFLAGS="`pkg-config --cflags dumbo`"
 
-If you don't like the idea of using all GNU makefile mojo from hconf.mk but
-you'd like to use the results of a project hconf, you can just sed the
+Notice that it's a good idea to keep the hconf branch names descriptive and
+unique to avoid name space collisions.
+
+If you don't like the idea of using all the GNU makefile mojo from hconf.mk
+but you'd like to use the results of a project hconf, you can just sed the
 appropriate lines from the main hconf cache file:
  LDFLAGS=`sed -n 4p <dat_udder_project>/$BUILD_DIR/hconf.cache`
  LIBS=`sed -n 5p <dat_udder_project>/$BUILD_DIR/hconf.cache`
+
+For concrete examples, have a look at the other htools projects.
