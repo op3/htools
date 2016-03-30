@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
@@ -17,6 +18,7 @@
 
 missing=
 invalid=
+skipped=
 pass=
 for file in `find . -type f | grep -v \.hg | grep -v data | grep -v build_`
 do
@@ -27,6 +29,11 @@ do
 		continue
 	fi
 	years="`hg log $file | grep ^date: | sed 's,.* \(20..\) .*,\1,'`"
+	if [ "x" = "x$years" ]
+	then
+		skipped="$skipped\n$file"
+		continue
+	fi
 	years="`echo $years | awk '{do printf"%s"(NF>1?FS:RS),$NF;while(--NF)}'`"
 	set -A array
 	for year in $years
@@ -46,8 +53,8 @@ do
 		else
 			value=${array[$i]}
 		fi
-		[ $value = $end_value ] && continue
-		if [ $value = $(($end_value + 1)) ]
+		[ $value -eq $end_value ] && continue
+		if [ $value -eq $(($end_value + 1)) ]
 		then
 			end_value=$value
 		else
@@ -72,4 +79,4 @@ do
 	fi
 	pass="$pass\n$file"
 done
-echo Missing:$missing\\nInvalid:$invalid\\nPass:$pass | less
+echo Missing:$missing\\nInvalid:$invalid\\nSkipped:$skipped\\nPass:$pass | less

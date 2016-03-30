@@ -12,9 +12,9 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-AR=ar
-CC=gcc
-LD=gcc
+AR?=ar
+CC?=gcc
+LD?=gcc
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
@@ -67,6 +67,7 @@ HCONF_FILES:=\
 	include/hutils/macros.h \
 	include/hutils/err.h \
 	include/hutils/fmtmod.h \
+	include/hutils/math.h \
 	include/hutils/snprintf.h \
 	include/hutils/strdup.h \
 	include/hutils/strndup.h \
