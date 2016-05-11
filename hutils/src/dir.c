@@ -33,6 +33,7 @@
 #elif defined(HCONF_DIRENT_POSIX_DRAFT9)
 /* HCONF: nolink */
 
+# include <sys/types.h>
 # define DO_DIRENT
 # define READDIR_R(a_dir, a_result) do {\
 		a_result = readdir_r(a_dir->dir, a_dir->entry);\
