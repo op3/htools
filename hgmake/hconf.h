@@ -21,22 +21,26 @@
 #define STR_SIZ 1024
 #define STRBCMP(s, p) strncmp(s, p, sizeof p - 1)
 
-enum OptName {
+enum VarName {
 	/* Name is used while confing... */
-	OPT_NAME = 0,
+	VAR_NAME = 0,
 	/* ... and cc while using the config. */
-	OPT_CC = 0,
-	OPT_CPPFLAGS,
-	OPT_CFLAGS,
-	OPT_LDFLAGS,
-	OPT_LIBS,
-	OPT_EXTRA,
-	OPT_NUM
+	VAR_CC = 0,
+	VAR_CPPFLAGS,
+	VAR_CFLAGS,
+	VAR_LDFLAGS,
+	VAR_LIBS,
+	VAR_EXTRA,
+	VAR_NUM
 };
-typedef char Options[OPT_NUM][STR_SIZ];
+struct Options {
+	char	var[VAR_NUM][STR_SIZ];
+	int	do_link;
+	int	penalty;
+};
 
 void	err_(int, char const *, ...);
 void	errx_(int, char const *, ...);
-void	hconf_merge(Options, int, char const **);
+void	hconf_merge(struct Options *, int, char const **);
 
 #endif

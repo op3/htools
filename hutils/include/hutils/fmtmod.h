@@ -21,9 +21,11 @@
 #include <hconf/include/hutils/fmtmod.h>
 
 #if defined(HCONF_PRINTF_C90_ANCIENT)
+/* LIBS=dont */
 # define PRIz "d"
 # define PRIzx "x"
 #elif defined(HCONF_PRINTF_C90_DECENT)
+/* LIBS=dont */
 # define PRIz "ld"
 # define PRIzx "lx"
 #else

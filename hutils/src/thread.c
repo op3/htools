@@ -20,7 +20,7 @@
 #include <hutils/strdup.h>
 
 #if defined(HCONF_PTHREAD)
-/* LIBS=-lpthread */
+/* HCONF: LIBS=-lpthread */
 
 # include <pthread.h>
 
@@ -249,7 +249,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 }
 
 #elif defined(HCONF_WINDOWS)
-/* LIBS=dont */
+/* HCONF: LIBS=dont */
 
 # include <windows.h>
 # include <process.h>

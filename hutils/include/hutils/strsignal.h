@@ -20,8 +20,8 @@
 #include <hconf/include/hutils/strsignal.h>
 
 #if defined(HCONF_STRSIGNAL_POSIX_200809)
-/* CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
-/* LIBS=dont */
+/* HCONF: CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
+/* HCONF: nolink */
 #elif defined(HCONF_STRSIGNAL_PROTOTYPE)
 char *strsignal(int);
 #elif defined(HCONF_STRSIGNAL_CUSTOM)

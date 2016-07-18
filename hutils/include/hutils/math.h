@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,21 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HTW_HWT_H
-#define HTW_HWT_H
+#ifndef HUTILS_MATH_H
+#define HUTILS_MATH_H
 
-#include <hutils/macros.h>
-#include <hwt/base.h>
-#include <hwt/event.h>
+#include <hconf/include/hutils/math.h>
 
-struct HWT;
-struct HWTRenderer;
-struct HWTWidget;
+#if defined(HCONF_MATH_SIMPLE)
+/* HCONF: nolink */
+#elif defined(HCONF_MATH_BSD_SOURCE)
+/* HCONF: CPPFLAGS=-D_BSD_SOURCE */
+/* HCONF: nolink */
+#else
+# error Not hconf:ed.
+#endif
 
-struct HWT	*hwt_create(struct HWTRenderer const *) FUNC_RETURNS;
-void		hwt_free(struct HWT **);
-void		hwt_send_event(struct HWT *, struct HWTEvent const *);
-void		hwt_set_root(struct HWT *, struct HWTWidget *);
-void		hwt_widget_free(struct HWT *, struct HWTWidget **);
+#include <math.h>
+
+#define HCONF_TEST double pi = M_PI; (void)pi
 
 #endif

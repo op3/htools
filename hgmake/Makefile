@@ -12,6 +12,9 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+CC?=gcc
+LD?=gcc
+
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 include $(HTOOLS_PATH)/hgmake/cmds.mk

@@ -20,8 +20,8 @@
 #include <hutils/memory.h>
 
 #if defined(HCONF_DIRENT)
-/* CPPFLAGS="-D_POSIX_C_SOURCE=199506" */
-/* LIBS=dont */
+/* HCONF: CPPFLAGS="-D_POSIX_C_SOURCE=199506" */
+/* HCONF: nolink */
 
 # define DO_DIRENT
 # define READDIR_R(a_dir, a_result) do {\
@@ -31,15 +31,16 @@
 	} while (0)
 
 #elif defined(HCONF_DIRENT_POSIX_DRAFT9)
-/* LIBS=dont */
+/* HCONF: nolink */
 
+# include <sys/types.h>
 # define DO_DIRENT
 # define READDIR_R(a_dir, a_result) do {\
 		a_result = readdir_r(a_dir->dir, a_dir->entry);\
 	} while (0)
 
 #elif defined(HCONF_WINDOWS)
-/* LIBS=dont */
+/* HCONF: nolink */
 
 # include <windows.h>
 

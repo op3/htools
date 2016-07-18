@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,18 @@
 
 #include <hwt/hwt.h>
 #include <htest/htest.h>
+#include <tests/mockwidget.h>
+
+static void	destroy(void *);
+
+static int g_was_destroyed;
+
+void
+destroy(void *const a_data)
+{
+	(void)a_data;
+	g_was_destroyed = 1;
+}
 
 HTEST(CreateAndFree)
 {
@@ -28,7 +40,37 @@ HTEST(CreateAndFree)
 	HTRY_PTR(NULL, ==, hwt);
 }
 
+HTEST(RootLinking)
+{
+	struct MockWidgetCallback cb;
+	struct HWT *hwt;
+	struct HWTWidget *mock;
+
+	ZERO(cb);
+	cb.destroy = destroy;
+
+	hwt = hwt_create(NULL);
+	mockwidget_setup(hwt);
+	mock = mockwidget_create(hwt, &cb);
+	g_was_destroyed = 0;
+	hwt_set_root(hwt, mock);
+	HTRY_I(0, ==, g_was_destroyed);
+	HTRY_VOID(hwt_free(&hwt));
+	HTRY_I(1, ==, g_was_destroyed);
+
+	hwt = hwt_create(NULL);
+	mockwidget_setup(hwt);
+	mock = mockwidget_create(hwt, &cb);
+	g_was_destroyed = 0;
+	hwt_set_root(hwt, mock);
+	HTRY_I(0, ==, g_was_destroyed);
+	hwt_widget_free(hwt, &mock);
+	HTRY_I(1, ==, g_was_destroyed);
+	HTRY_VOID(hwt_free(&hwt));
+}
+
 HTEST_SUITE(HWT)
 {
 	HTEST_ADD(CreateAndFree);
+	HTEST_ADD(RootLinking);
 }

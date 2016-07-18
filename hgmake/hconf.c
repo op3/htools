@@ -126,16 +126,17 @@ free_flag(struct Flag **const a_flag)
  *  a_argv - Array of filenames.
  */
 void
-hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
+hconf_merge(struct Options *const a_options, int const a_argc, char const
+    **const a_argv)
 {
-	struct FlagList flag_list[OPT_EXTRA];
-	int flag_num[OPT_EXTRA];
-	int ofs[OPT_EXTRA];
+	struct FlagList flag_list[VAR_EXTRA];
+	int flag_num[VAR_EXTRA];
+	int ofs[VAR_EXTRA];
 	FILE *file;
 	size_t i, idx;
 
-	for (i = 0; OPT_EXTRA > i; ++i) {
-		a_options[i][0] = '\0';
+	for (i = 0; VAR_EXTRA > i; ++i) {
+		a_options->var[i][0] = '\0';
 		TAILQ_INIT(&flag_list[i]);
 	}
 	memset(flag_num, 0, sizeof flag_num);
@@ -167,17 +168,17 @@ hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
 				}
 				start = p;
 				/* Some options can be pairs, pair them. */
-				if (OPT_CPPFLAGS == i &&
+				if (VAR_CPPFLAGS == i &&
 				    0 == STRBCMP(p, "-I")) {
 					for (p += LENGTH("-I") - 1;
 					    isspace(*p); ++p)
 						;
-				} else if (OPT_LIBS == i &&
+				} else if (VAR_LIBS == i &&
 				    0 == STRBCMP(p, "-l")) {
 					for (p += LENGTH("-l") - 1;
 					    isspace(*p); ++p)
 						;
-				} else if (OPT_LIBS == i &&
+				} else if (VAR_LIBS == i &&
 				    0 == STRBCMP(p, "-framework ")) {
 					for (p += LENGTH("-framework ") - 1;
 					    isspace(*p); ++p)
@@ -232,18 +233,18 @@ hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
 	 */
 
 	/* CC. */
-	while (!TAILQ_EMPTY(&flag_list[OPT_CC])) {
+	while (!TAILQ_EMPTY(&flag_list[VAR_CC])) {
 		struct Flag *flag;
 
-		flag = TAILQ_FIRST(&flag_list[OPT_CC]);
-		TAILQ_REMOVE(&flag_list[OPT_CC], flag, next);
-		strcat(a_options[OPT_CC], flag->str);
-		strcat(a_options[OPT_CC], " ");
+		flag = TAILQ_FIRST(&flag_list[VAR_CC]);
+		TAILQ_REMOVE(&flag_list[VAR_CC], flag, next);
+		strcat(a_options->var[VAR_CC], flag->str);
+		strcat(a_options->var[VAR_CC], " ");
 		free_flag(&flag);
 	}
 
 	/* CPPFLAGS. */
-	i = OPT_CPPFLAGS;
+	i = VAR_CPPFLAGS;
 	flag_sort_I(&flag_list[i], flag_num[i]);
 	{
 		/* First do O(n^2) -I dup removal. */
@@ -262,8 +263,8 @@ hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
 					free_flag(&rover);
 				}
 			}
-			strcat(a_options[i], flag->str);
-			strcat(a_options[i], " ");
+			strcat(a_options->var[i], flag->str);
+			strcat(a_options->var[i], " ");
 			free_flag(&flag);
 		}
 	}
@@ -295,8 +296,8 @@ hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
 				    strncmp(flag->str, prev->str, name_len);
 			}
 			if (do_write_prev) {
-				strcat(a_options[i], prev->str);
-				strcat(a_options[i], " ");
+				strcat(a_options->var[i], prev->str);
+				strcat(a_options->var[i], " ");
 			}
 			if (NULL != prev) {
 				free_flag(&prev);
@@ -305,14 +306,14 @@ hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
 			prev_name_len = name_len;
 		}
 		if (NULL != prev) {
-			strcat(a_options[i], prev->str);
-			strcat(a_options[i], " ");
+			strcat(a_options->var[i], prev->str);
+			strcat(a_options->var[i], " ");
 			free_flag(&prev);
 		}
 	}
 
 	/* CFLAGS, LDFLAGS, and LIBS. */
-	for (i = OPT_CFLAGS; OPT_LIBS >= i; ++i) {
+	for (i = VAR_CFLAGS; VAR_LIBS >= i; ++i) {
 		struct Flag *prev;
 
 		flag_sort(&flag_list[i], flag_num[i]);
@@ -328,8 +329,8 @@ hconf_merge(Options a_options, int const a_argc, char const **const a_argv)
 					free_flag(&prev);
 				}
 				prev = flag;
-				strcat(a_options[i], flag->str);
-				strcat(a_options[i], " ");
+				strcat(a_options->var[i], flag->str);
+				strcat(a_options->var[i], " ");
 			} else {
 				free_flag(&flag);
 			}

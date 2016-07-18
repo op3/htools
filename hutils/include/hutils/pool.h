@@ -67,9 +67,7 @@ Name##_init(struct Name *a_name)\
 {\
 	TAILQ_INIT(&a_name->page_list);\
 }\
-struct Pool##Type##SemicolonDummy_ {\
-	int	dummy;\
-}
+struct Pool##Type##SemicolonDummy_
 
 #define POOL_FREE(Name, name) Name##_free(name)
 #define POOL_GET(Name, name) Name##_get(name)

@@ -21,10 +21,10 @@
 #include <hconf/include/hutils/err.h>
 
 #if defined(HCONF_ERR_H)
-/* LIBS=dont */
+/* HCONF: nolink */
 # include <err.h>
 #elif defined(HCONF_ERR_MSC)
-/* LIBS=dont */
+/* HCONF: nolink */
 # include <windows.h>
 # define err(code, str) do {\
 		LPTSTR str_;\
@@ -40,7 +40,7 @@
 		exit(code);\
 	} HUTILS_COND(while, 0)
 #elif defined(HCONF_ERR_CUSTOM)
-/* EXTRA="src/err.c" */
+/* HCONF: EXTRA="src/err.c" */
 void err(int, const char *, ...);
 #else
 # error Not hconf:ed.

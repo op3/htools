@@ -43,6 +43,8 @@ enum PrintType {
 TAILQ_HEAD(VariableList, Variable);
 struct Variable {
 	char	*expr;
+	char	const *src_file;
+	int	src_line_no;
 	TAILQ_ENTRY(Variable)	next;
 };
 
@@ -52,9 +54,9 @@ static int	build(char const *, char const *, char const *, char const *,
 static char	*get_option(char const *);
 static int	has_main(char const *);
 static void	my_exit(void);
-static void	perfect(Options);
+static void	perfect(void);
 static void	print(enum PrintType, char const *, ...);
-static void	resolve_variables(Options, struct VariableList *);
+static void	resolve_variables(struct Options *, struct VariableList *);
 static char	*strctv_(char const *, ...);
 static int	strecmp(char const *, char const *);
 static char	*strndup_(char const *, size_t);
@@ -62,7 +64,7 @@ static void	try(char const *, struct VariableList *);
 static void	unconfed(void);
 static void	usage(int);
 static void	write_main(void);
-static int	write_hconf(Options);
+static void	write_hconf(struct Options *);
 
 static char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
 
@@ -84,7 +86,7 @@ static char	*g_main_c;
 static char	*g_main_o;
 static char	*g_main_bin;
 static char	*g_upper;
-static Options	g_best_link;
+static struct Options	g_best_link;
 static int	g_best_link_ret = 1e9;
 
 void
@@ -273,7 +275,7 @@ my_exit()
 }
 
 void
-perfect(Options a_options)
+perfect(void)
 {
 	print(ALL, "Perfect!\n");
 	exit(EXIT_SUCCESS);
@@ -298,7 +300,8 @@ print(enum PrintType const a_print_type, char const *a_fmt, ...)
 }
 
 void
-resolve_variables(Options a_opts, struct VariableList *const a_list)
+resolve_variables(struct Options *const a_opts, struct VariableList *const
+    a_list)
 {
 	FILE *file;
 	FILE *pip;
@@ -313,7 +316,14 @@ resolve_variables(Options a_opts, struct VariableList *const a_list)
 		err_(EXIT_FAILURE, "fopen(%s, wb)", script_filename);
 	}
 	TAILQ_FOREACH(var, a_list, next) {
-		fprintf(file, "%s\n", var->expr);
+		if (0 == STRBCMP(var->expr, "penalty=")) {
+			a_opts->penalty = strtol(var->expr + 8, NULL, 10);
+		} else if (0 == STRBCMP(var->expr, "nolink")) {
+			a_opts->do_link = 0;
+		} else {
+			fprintf(file, "%s # %s:%d\n", var->expr,
+			    var->src_file, var->src_line_no);
+		}
 	}
 	fprintf(file, "echo $CPPFLAGS\n");
 	fprintf(file, "echo $CFLAGS\n");
@@ -336,17 +346,17 @@ resolve_variables(Options a_opts, struct VariableList *const a_list)
 		if (NULL == fgets(result, sizeof result, pip)) {
 			break;
 		}
-		if (OPT_NUM <= line_num) {
+		if (VAR_NUM <= line_num) {
 			break;
 		}
 		for (p = result; '\0' != *p && '\n' != *p; ++p)
 			;
 		*p = '\0';
-		strcpy(a_opts[line_num + 1], result);
+		strcpy(a_opts->var[line_num + 1], result);
 	}
-	if (OPT_NUM - 1 != line_num) {
+	if (VAR_NUM - 1 != line_num) {
 		errx_(EXIT_FAILURE, "%s: Didn't echo %d expected "
-		    "variables.\n", script_filename, OPT_NUM);
+		    "variables.\n", script_filename, VAR_NUM - 1);
 	}
 	pclose(pip);
 	free(script_filename);
@@ -422,19 +432,21 @@ strndup_(char const *const a_s, size_t a_maxlen)
 void
 try(char const *const a_option, struct VariableList *const a_var_list)
 {
-	Options options;
+	struct Options options;
 	char *cppflags, *cflags;
-	int do_not_link, ret;
+	int ret;
 
 	write_main();
 
 	print(ALL, "%s: Testing %s... ", g_filename, a_option);
-	strcpy(options[0], a_option);
-	resolve_variables(options, a_var_list);
-	do_not_link = write_hconf(options);
+	strcpy(options.var[VAR_NAME], a_option);
+	options.penalty = 0;
+	options.do_link = 1;
+	resolve_variables(&options, a_var_list);
+	write_hconf(&options);
 	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/hconf_ ",
-		 options[OPT_CPPFLAGS] STRCTV_END;
-	cflags = STRCTV_BEGIN "-c ", options[OPT_CFLAGS] STRCTV_END;
+		 options.var[VAR_CPPFLAGS] STRCTV_END;
+	cflags = STRCTV_BEGIN "-c ", options.var[VAR_CFLAGS] STRCTV_END;
 	ret = build(g_main_o, g_main_c, cppflags, cflags, NULL, NULL, NULL);
 	free(cppflags);
 	free(cflags);
@@ -442,22 +454,22 @@ try(char const *const a_option, struct VariableList *const a_var_list)
 		if (c_no_option == a_option) {
 			unconfed();
 		}
-		if (do_not_link) {
-			perfect(options);
+		if (!options.do_link) {
+			perfect();
 		}
 		cppflags = STRCTV_BEGIN "-I", g_out_dir, "/hconf_ ",
-			 options[OPT_CPPFLAGS] STRCTV_END;
+			 options.var[VAR_CPPFLAGS] STRCTV_END;
 		ret = build(g_main_bin, g_main_o, cppflags, NULL,
-		    options[OPT_LDFLAGS], options[OPT_LIBS],
-		    options[OPT_EXTRA]);
+		    options.var[VAR_LDFLAGS], options.var[VAR_LIBS],
+		    options.var[VAR_EXTRA]) + options.penalty;
 		free(cppflags);
 		if (0 == ret) {
-			perfect(options);
+			perfect();
 		}
 		if (ret < g_best_link_ret) {
 			g_best_link_ret = ret;
-			memmove(&g_best_link, options, sizeof g_best_link);
-			strcpy(g_best_link[OPT_NAME], a_option);
+			memmove(&g_best_link, &options, sizeof g_best_link);
+			strcpy(g_best_link.var[VAR_NAME], a_option);
 			print(ALL, "Keeping (linking=%d).\n", ret);
 		} else {
 			print(ALL, "Skipping (linking=%d).\n", ret);
@@ -497,12 +509,11 @@ usage(int const a_exit_code)
 	exit(a_exit_code);
 }
 
-int
-write_hconf(Options a_options)
+void
+write_hconf(struct Options *const a_options)
 {
 	FILE *file;
 	size_t i;
-	int do_not_link;
 
 	file = fopen(g_filename_h, "wb");
 	if (NULL == file) {
@@ -510,7 +521,7 @@ write_hconf(Options a_options)
 	}
 	fprintf(file, "#ifndef %s\n", g_upper);
 	fprintf(file, "#define %s\n", g_upper);
-	fprintf(file, "#define %s\n", a_options[OPT_NAME]);
+	fprintf(file, "#define %s\n", a_options->var[VAR_NAME]);
 	fprintf(file, "#undef HCONF_TEST\n");
 	fprintf(file, "#endif\n");
 	fclose(file);
@@ -520,14 +531,8 @@ write_hconf(Options a_options)
 		err_(EXIT_FAILURE, "fopen(%s, wb)", g_filename_mk);
 	}
 	fprintf(file, "\n");
-	do_not_link = 0;
-	for (i = 1; OPT_EXTRA > i; ++i) {
-		if (OPT_LIBS == i && 0 == strcmp(a_options[i], "dont")) {
-			fprintf(file, "\n");
-			do_not_link = 1;
-		} else {
-			fprintf(file, "%s\n", a_options[i]);
-		}
+	for (i = 1; VAR_EXTRA > i; ++i) {
+		fprintf(file, "%s\n", a_options->var[i]);
 	}
 	fclose(file);
 
@@ -543,12 +548,10 @@ write_hconf(Options a_options)
 	if (NULL == file) {
 		err_(EXIT_FAILURE, "fopen(%s, wb)", g_filename_mk);
 	}
-	for (i = 0; OPT_EXTRA > i; ++i) {
-		fprintf(file, "%s\n", a_options[i]);
+	for (i = 0; VAR_EXTRA > i; ++i) {
+		fprintf(file, "%s\n", a_options->var[i]);
 	}
 	fclose(file);
-
-	return do_not_link;
 }
 
 void
@@ -689,8 +692,6 @@ main(int argc, char const *const *argv)
 	option = NULL;
 	for (line_no = 1;; ++line_no) {
 		char line[STR_SIZ];
-		struct Variable *var;
-		char *expr_start, *expr_end;
 		char *option_new, *p;
 
 		if (NULL == fgets(line, sizeof line, file)) {
@@ -699,6 +700,7 @@ main(int argc, char const *const *argv)
 				    "for hconf?", g_filename);
 			}
 			try(option, &var_list);
+			free(option);
 			break;
 		}
 		option_new = get_option(line);
@@ -717,46 +719,45 @@ main(int argc, char const *const *argv)
 			continue;
 		}
 		/* Look for commented variable assignment. */
-		p = strstr(line, "/*");
-		if (NULL == p) {
-			continue;
-		}
-		for (p += 2; isspace(*p); ++p)
-			;
-		if ('_' != *p && !isalpha(*p)) {
-			continue;
-		}
-		expr_start = p;
-		for (++p; '_' == *p || isalnum(*p); ++p)
-			;
-		if ('=' != *p) {
-			continue;
-		}
-		for (; '\0' != *p; ++p) {
-			if (0 == STRBCMP(p, "*/")) {
-				expr_end = p;
+		for (p = line; NULL != p;) {
+			struct Variable *var;
+			char *expr_start, *expr_end;
+
+			p = strstr(p, "/*");
+			if (NULL == p) {
 				break;
 			}
+			for (p += 2; isspace(*p); ++p)
+				;
+			if (0 != STRBCMP(p, "HCONF:")) {
+				p = strstr(p, "*/");
+				continue;
+			}
+			for (p += 6; isspace(*p); ++p)
+				;
+			expr_start = p;
+			p = strstr(p, "*/");
+			if (NULL == p) {
+				continue;
+			}
+			expr_end = p;
+			var = malloc(sizeof *var);
+			var->expr = strndup_(expr_start, expr_end -
+			    expr_start);
+			var->src_file = g_filename;
+			var->src_line_no = line_no;
+			TAILQ_INSERT_TAIL(&var_list, var, next);
 		}
-		if ('\0' == *p) {
-			print(ALL, "%s:%d: Is this line correct?", g_filename,
-			    line_no);
-			continue;
-		}
-		var = malloc(sizeof *var);
-		var->expr = strndup_(expr_start, expr_end - expr_start);
-		TAILQ_INSERT_TAIL(&var_list, var, next);
 	}
 
-	free(option);
-
-	if ('\0' != g_best_link[OPT_NAME][0]) {
-		write_hconf(g_best_link);
+	if ('\0' != g_best_link.var[VAR_NAME][0]) {
+		write_hconf(&g_best_link);
 		exit(EXIT_SUCCESS);
 	}
 
 	/* TODO: Why is this not working? */
-	fprintf(stderr, "%s: Failed, dumping log:\n", g_filename);
+	fprintf(stderr, "%s: Failed, dumping log \"%s\":\n", g_filename,
+	    g_filename_log);
 	fclose(g_log);
 	g_log = fopen(g_filename_log, "rb");
 	if (NULL == g_log) {

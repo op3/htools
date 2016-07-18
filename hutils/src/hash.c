@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -33,12 +33,14 @@ hutils_hash32(void const *const a_data, size_t const a_data_size)
 	}
 	p8 = (uint8_t const *)p32;
 	switch (i) {
-		case 3:
-			hash ^= *p8;
-		case 2:
-			hash ^= *p8;
-		case 1:
-			hash ^= *p8;
+	case 3:
+		hash ^= *p8;
+		/* FALLTHROUGH */
+	case 2:
+		hash ^= *p8;
+		/* FALLTHROUGH */
+	case 1:
+		hash ^= *p8;
 	}
 	return hash;
 }

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
 #include <hwt/button.h>
+#include <htest/htest.h>
 #include <hwt/hwt.h>
 #include <tests/mockwidget.h>
 

@@ -17,7 +17,7 @@
 #ifndef HWT_EVENT_H
 #define HWT_EVENT_H
 
-#include <hwt/common.h>
+#include <hwt/base.h>
 
 #define HWT_EVENT_RESPOND(hwt, widget, event) do {\
 	if (HWT_BREAK == hwt_widget_respond(hwt, widget, event)) {\

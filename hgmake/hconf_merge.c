@@ -21,15 +21,15 @@
 int
 main(int argc, char const **argv)
 {
-	Options options;
+	struct Options options;
 	size_t i;
 
 	if (2 > argc) {
 		errx_(EXIT_FAILURE, "Usage: %s file <files>", argv[0]);
 	}
-	hconf_merge(options, argc - 1, argv + 1);
-	for (i = 0; OPT_EXTRA > i; ++i) {
-		puts(options[i]);
+	hconf_merge(&options, argc - 1, argv + 1);
+	for (i = 0; VAR_EXTRA > i; ++i) {
+		puts(options.var[i]);
 	}
 	return 0;
 }

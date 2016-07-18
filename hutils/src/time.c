@@ -29,7 +29,7 @@
 # define CLOCK_SOURCE CLOCK_MONOTONIC
 
 #elif defined(HCONF_POSIX_MONOTONIC_LRT)
-/* LIBS=-lrt */
+/* HCONF: LIBS=-lrt */
 
 # define SLEEP_NANOSLEEP
 # define TIME_CLOCK

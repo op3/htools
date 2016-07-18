@@ -99,6 +99,10 @@ HTEST(ConditionVariable)
 {
 	struct Thread *t;
 
+#if defined(HCONF_SINGLE)
+	/* Waiting for external conditions in one thread doesn't work... */
+	return;
+#endif
 	g_condvar = thread_condvar_create(NULL);
 	g_mutex = thread_mutex_create(NULL);
 	g_task_exists = 0;
@@ -122,8 +126,5 @@ HTEST_SUITE(Thread)
 {
 	HTEST_ADD(Runner);
 	HTEST_ADD(Mutex);
-#if !defined(HCONF_SINGLE)
-	/* Waiting for external conditions in one thread doesn't work... */
 	HTEST_ADD(ConditionVariable);
-#endif
 }

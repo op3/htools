@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
 #include <hwt/grid.h>
+#include <htest/htest.h>
 #include <hwt/hwt.h>
 #include <tests/mockwidget.h>
 
@@ -59,46 +59,24 @@ push_rect(struct HWTRect const *const a_rect, void *const a_data)
 HTEST(PositiveDimensions)
 {
 	struct HWTWidget *grid;
-	int i;
 
-	for (i = -1; 1 >= i; ++i) {
-		int j;
-
-		for (j = -1; 1 >= j; ++j) {
-			if (1 == i && 1 == j) {
-				grid = hwt_grid_create(g_hwt, i, j);
-				hwt_set_root(g_hwt, grid);
-			} else {
-				HTRY_SIGNAL_DTOR(grid = hwt_grid_create(g_hwt,
-				    i, j),
-				    dtor);
-			}
-		}
-	}
+	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(g_hwt, -1, 1), dtor);
+	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(g_hwt, 1, -1), dtor);
+	grid = hwt_grid_create(g_hwt, 1, 1);
+	hwt_widget_free(g_hwt, &grid);
 }
 
 HTEST(Children)
 {
 	struct HWTWidget *grid;
-	int row;
 
-	grid = hwt_grid_create(g_hwt, 2, 2);
-	hwt_set_root(g_hwt, grid);
-	for (row = -1; 2 >= row; ++row) {
-		int col;
-
-		for (col = -1; 2 >= col; ++col) {
-			g_widget = mockwidget_create(g_hwt, NULL);
-			if (0 <= row && 2 > row &&
-			    0 <= col && 2 > col) {
-				HTRY_VOID(hwt_grid_set_child(grid, row, col,
-				    &g_widget));
-			} else {
-				HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, row,
-				    col, &g_widget), dtor);
-			}
-		}
-	}
+	grid = hwt_grid_create(g_hwt, 1, 1);
+	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, -1, 0, &g_widget), dtor);
+	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, 1, 0, &g_widget), dtor);
+	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, 0, -1, &g_widget), dtor);
+	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, 0, 1, &g_widget), dtor);
+	hwt_grid_set_child(grid, 0, 0, &g_widget);
+	hwt_widget_free(g_hwt, &grid);
 }
 
 HTEST(Update)
@@ -115,7 +93,7 @@ HTEST(Update)
 	grid = hwt_grid_create(g_hwt, 2, 2);
 	hwt_set_root(g_hwt, grid);
 
-	cb.destroy = NULL;
+	ZERO(cb);
 	cb.pull_min = pull_min;
 	cb.push_rect = push_rect;
 
