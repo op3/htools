@@ -20,10 +20,10 @@ include $(HTOOLS_PATH)/hgmake/build_dir.mk
 
 CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -I$(HTOOLS_PATH)/hutils/include -I$(HTOOLS_PATH)/htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
-LDFLAGS:=-L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
-LIBS:=-lhtest -lm
+LDFLAGS:=$(LDFLAGS) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR)
+LIBS:=$(LIBS) -lhtest -lm
 
-ifeq (release,$(BUILD_TYPE))
+ifeq (release,$(BUILD_MODE))
  CFLAGS:=$(CFLAGS) -O3
 else
  CFLAGS:=$(CFLAGS) -ggdb
