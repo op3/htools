@@ -18,3 +18,9 @@ endif
 CC_MACHINE:=$(shell $(CC) -dumpmachine)
 CC_VERSION:=$(shell $(CC) -dumpversion)
 BUILD_DIR:=build_$(CC_MACHINE)_$(CC_VERSION)_$(BUILD_MODE)
+ifeq (gcov,$(BUILD_MODE))
+ CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
+ CFLAGS:=$(CFLAGS) --coverage
+# LDFLAGS:=$(LDFLAGS) --coverage #-L/usr/lib/gcc/$(CC_MACHINE)/$(CC_VERSION)
+ LIBS:=$(LIBS) --coverage
+endif

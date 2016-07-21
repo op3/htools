@@ -21,16 +21,11 @@ include $(HTOOLS_PATH)/hgmake/build_dir.mk
 CPPFLAGS:=$(CPPFLAGS) -Iinclude -I$(BUILD_DIR) -I$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -I$(HTOOLS_PATH)/hutils/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 
-ifeq (release,$(BUILD_TYPE))
+ifeq (release,$(BUILD_MODE))
  CFLAGS:=$(CFLAGS) -O3
-else
- ifeq (gcov,$(BUILD_TYPE))
-  CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
-  CFLAGS:=$(CFLAGS) --coverage
-  LDFLAGS:=$(LDFLAGS) --coverage -L/usr/lib/gcc/$(GCC_MACHINE)/$(GCC_VERSION) -lgcov
- else
-  CFLAGS:=$(CFLAGS) -ggdb
- endif
+endif
+ifeq (debug,$(BUILD_MODE))
+ CFLAGS:=$(CFLAGS) -ggdb
 endif
 
 include $(HTOOLS_PATH)/hgmake/cmds.mk

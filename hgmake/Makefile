@@ -19,9 +19,8 @@ include $(HTOOLS_PATH)/hgmake/build_dir.mk
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 include $(HTOOLS_PATH)/hgmake/cmds.mk
 
+CPPFLAGS:=$(CPPFLAGS) -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -I. -I../hutils/include
 CFLAGS:=$(CFLAGS) -ggdb
-CPPFLAGS:=-D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -I. -I../hutils/include
-LDFLAGS:=
 
 HCONF_CONF:=$(BUILD_DIR)/hconf_conf
 HCONF_MERGE:=$(BUILD_DIR)/hconf_merge
@@ -31,11 +30,11 @@ all: $(HCONF_CONF) $(HCONF_MERGE)
 
 $(HCONF_CONF): $(BUILD_DIR)/hconf.o $(BUILD_DIR)/hconf_conf.o
 	$(MKDIR)
-	gcc $(LDFLAGS) -o $@ $^
+	gcc $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(HCONF_MERGE): $(BUILD_DIR)/hconf.o $(BUILD_DIR)/hconf_merge.o
 	$(MKDIR)
-	gcc $(LDFLAGS) -o $@ $^
+	gcc $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile hconf.h
 	$(MKDIR)
