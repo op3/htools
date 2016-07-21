@@ -24,8 +24,8 @@ static void	runner(void *);
 static void	runner_condvar(void *);
 static void	runner_mutex(void *);
 
-static struct CondVar *g_condvar;
 static struct Mutex *g_mutex;
+static struct CondVar *g_condvar;
 static int g_messenger, g_task_exists;
 
 void
@@ -122,8 +122,5 @@ HTEST_SUITE(Thread)
 {
 	HTEST_ADD(Runner);
 	HTEST_ADD(Mutex);
-#if !defined(HCONF_SINGLE)
-	/* Waiting for external conditions in one thread doesn't work... */
 	HTEST_ADD(ConditionVariable);
-#endif
 }
