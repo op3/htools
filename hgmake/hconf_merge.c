@@ -14,22 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hconf.h>
+#include <common.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 int
 main(int argc, char const **argv)
 {
-	struct Options options;
+	struct Bucket bucket;
 	size_t i;
 
-	if (2 > argc) {
-		errx_(EXIT_FAILURE, "Usage: %s file <files>", argv[0]);
-	}
-	hconf_merge(&options, argc - 1, argv + 1);
-	for (i = 0; VAR_EXTRA > i; ++i) {
-		puts(options.var[i]);
+	merge(&bucket, argc - 1, argv + 1);
+	for (i = 0; VAR_OUTPUT_NUM > i; ++i) {
+		puts(bucket.var[i]);
 	}
 	return 0;
 }

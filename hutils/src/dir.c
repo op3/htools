@@ -16,33 +16,24 @@
 
 #include <hutils/dir.h>
 #include <hconf/src/dir.h>
-#include <hutils/err.h>
+#include <hutils/macros.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_DIRENT)
-/* HCONF: CPPFLAGS="-D_POSIX_C_SOURCE=199506" */
-/* HCONF: nolink */
-
-# define DO_DIRENT
-# define READDIR_R(a_dir, a_result) do {\
-		if (0 != readdir_r(a_dir->dir, a_dir->entry, &a_result)) {\
-			a_result = NULL;\
-		}\
-	} while (0)
-
-#elif defined(HCONF_DIRENT_POSIX_DRAFT9)
-/* HCONF: nolink */
-
-# include <sys/types.h>
-# define DO_DIRENT
-# define READDIR_R(a_dir, a_result) do {\
-		a_result = readdir_r(a_dir->dir, a_dir->entry);\
-	} while (0)
-
-#elif defined(HCONF_WINDOWS)
-/* HCONF: nolink */
-
-# include <windows.h>
+#if defined(HCONF_mDIR_bDIRENT)
+#	define DO_DIRENT
+#	define READDIR_R(a_dir, a_result) do {\
+	if (0 != readdir_r(a_dir->dir, a_dir->entry, &a_result)) {\
+		a_result = NULL;\
+	}\
+} WHILE_0
+#elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
+#	include <sys/types.h>
+#	define DO_DIRENT
+#	define READDIR_R(a_dir, a_result) do {\
+	a_result = readdir_r(a_dir->dir, a_dir->entry);\
+} WHILE_0
+#elif defined(HCONF_mDIR_bWINDOWS)
+#	include <windows.h>
 
 struct Dir {
 	HANDLE	handle;
@@ -114,15 +105,13 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 	return 1;
 }
 
-#else
-# error Not hconf:ed.
 #endif
 
-#ifdef DO_DIRENT
+#if defined(DO_DIRENT)
 
-# include <dirent.h>
-# include <stddef.h>
-# include <unistd.h>
+#	include <dirent.h>
+#	include <stddef.h>
+#	include <unistd.h>
 
 struct Dir {
 	DIR	*dir;

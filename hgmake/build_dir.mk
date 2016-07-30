@@ -13,8 +13,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ifeq (,$(BUILD_MODE))
- BUILD_MODE:=debug
+	BUILD_MODE=debug
 endif
-CC_MACHINE:=$(shell $(CC) -dumpmachine)
-CC_VERSION:=$(shell $(CC) -dumpversion)
-BUILD_DIR:=build_$(CC_MACHINE)_$(CC_VERSION)_$(BUILD_MODE)
+BUILD_DIR:=build_$(shell $(CC) -dumpmachine)_$(shell $(CC) -dumpversion)_$(BUILD_MODE)

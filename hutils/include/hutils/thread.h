@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 #ifndef HUTILS_THREAD_H
 #define HUTILS_THREAD_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct CondVar;
 struct Mutex;

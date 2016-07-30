@@ -18,18 +18,12 @@
 #define HTEST_HTEST_H
 
 #include <sys/types.h>
-#if defined(__linux__)
-# include <sys/wait.h>
-# include <unistd.h>
-#elif defined(_WIN32)
-#else
-# include <sys/wait.h>
-# include <signal.h>
-# include <unistd.h>
-#endif
+#include <sys/wait.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <hutils/macros.h>
 
 #if DO_GCOV_FLUSH
@@ -87,7 +81,7 @@ htest_suite_##name##_(char const *const a_color_header_, char const *const \
 		    a_result_);\
 		htest_output_restore_();\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 /* Generated suite list. */
 
@@ -108,12 +102,12 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY(Type, fmt, a, op, b) do {\
 	Type const aa_ = a;\
 	Type const bb_ = b;\
-	HUTILS_COND(if, !(aa_ op bb_)) {\
+	IF_CONST(!(aa_ op bb_)) {\
 		htest_print_(HTRY_FAIL_FMT_"'"#a"'=%"#fmt" "#op" '"#b\
 		    "'=%"#fmt"\n", HTRY_FAIL_ARG_, aa_, bb_);\
 		HTRY_FAIL_;\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 #define HTRY_DBL(a, op, b) HTRY(double, e, a, op, b)
 #define HTRY_FLT(a, op, b) HTRY(float, e, a, op, b)
 #define HTRY_I(a, op, b) HTRY(int, d, a, op, b)
@@ -121,11 +115,11 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY_U(a, op, b) HTRY(unsigned int, u, a, op, b)
 
 #define HTRY_BOOL(expr) do {\
-	HUTILS_COND(if, !(expr)) {\
+	IF_CONST(!(expr)) {\
 		htest_print_(HTRY_FAIL_FMT_"'"#expr"'\n", HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 #define HTRY_STR(a, op, b) do {\
 	char const *aa_ = a;\
@@ -143,24 +137,24 @@ struct HTestSuite g_htest_suite_list_[] = {
 		    "'=\"%s\".\n", HTRY_FAIL_ARG_, aa_, bb_);\
 		HTRY_FAIL_;\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 #define HTRY_VOID(expr) do {\
 	(void)a_color_fail_;\
 	(void)a_color_reset_;\
 	(void)a_result_;\
 	expr;\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 #if defined(_MSC_VER)
-# define HTRY_SIGNAL_DTOR(expr, dtor) do {\
+#	define HTRY_SIGNAL_DTOR(expr, dtor) do {\
 	(void)a_color_fail_;\
 	(void)a_color_reset_;\
 	(void)a_result_;\
 	expr;\
-} HUTILS_COND(while, 0)
+} WHILE_0
 #else
-# define HTRY_SIGNAL_DTOR(expr, dtor) do {\
+#	define HTRY_SIGNAL_DTOR(expr, dtor) do {\
 	pid_t pid_;\
 	int status_;\
 	pid_ = fork();\
@@ -188,16 +182,16 @@ struct HTestSuite g_htest_suite_list_[] = {
 		    HTRY_FAIL_ARG_);\
 		HTRY_FAIL_;\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 #endif
 #define HTRY_SIGNAL(expr) HTRY_SIGNAL_DTOR(expr, htest_dtor_noop_)
 
-void htest_dtor_noop_(void);
-void htest_output_restore_(void);
-void htest_output_suppress_(void);
-void htest_print_(char const *, ...);
-void htest_sighandler_(int);
+void	htest_dtor_noop_(void);
+void	htest_output_restore_(void);
+void	htest_output_suppress_(void);
+void	htest_print_(char const *, ...);
+void	htest_sighandler_(int);
 
-extern void (*g_htest_dtor_)(void);
+extern void	(*g_htest_dtor_)(void);
 
 #endif

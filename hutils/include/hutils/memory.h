@@ -27,21 +27,21 @@
 	if (NULL == ptr) {\
 		err(EXIT_FAILURE, "calloc(%d,%d)", n_, (int)sizeof *ptr);\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 #define DUP(dst, src) do {\
 	MALLOC(dst, sizeof *dst);\
 	COPY(*dst, src);\
-} HUTILS_COND(while, 0)
+} WHILE_0
 #define FREE(ptr) do {\
 	free(ptr);\
 	ptr = NULL;\
-} HUTILS_COND(while, 0)
+} WHILE_0
 #define MALLOC(ptr, size) do {\
 	size_t s_ = size;\
 	ptr = malloc(s_);\
 	if (NULL == ptr) {\
 		err(EXIT_FAILURE, "malloc(%d)", (int)s_);\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 #endif

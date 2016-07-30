@@ -17,6 +17,7 @@
 #include <hutils/lexer.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 #include <hutils/memory.h>
 
 #define BUF_SIZE 256

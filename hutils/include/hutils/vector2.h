@@ -17,7 +17,7 @@
 #ifndef HUTILS_VECTOR2_H
 #define HUTILS_VECTOR2_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct Vector2f {
 	float	x;
@@ -27,8 +27,9 @@ struct Vector2f {
 struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *);
 float		vector2f_dot(struct Vector2f const *, struct Vector2f const
-    *) FUNC_RETURNS;
-float		vector2f_get_magnitude(struct Vector2f const *) FUNC_RETURNS;
+    *) FUNC_PURE FUNC_RETURNS;
+float		vector2f_get_magnitude(struct Vector2f const *) FUNC_PURE
+FUNC_RETURNS;
 struct Vector2f	*vector2f_mad(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *, struct Vector2f const *);
 struct Vector2f	*vector2f_negate(struct Vector2f *, struct Vector2f const *);

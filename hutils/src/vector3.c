@@ -16,7 +16,7 @@
 
 #include <hutils/vector3.h>
 #include <assert.h>
-#include <math.h>
+#include <hutils/math.h>
 
 struct Vector3f *
 vector3f_add(struct Vector3f *const a_vo, struct Vector3f const *const a_v1,

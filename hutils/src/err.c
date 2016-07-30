@@ -16,11 +16,30 @@
 
 #include <hutils/err.h>
 
-#if defined(HCONF_ERR_CUSTOM)
+#if HCONF_MODULE_ERR
+#	if HCONF_BRANCH_MSC
+#		include <windows.h>
 
-# include <errno.h>
-# include <stdarg.h>
-# include <stdio.h>
+void
+err(int const a_eval, const char *const a_fmt, ...)
+{
+	LPTSTR str;
+	DWORD code;
+
+	code = GetLastError();
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
+	    code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&str, 0,
+	    NULL);
+	MessageBox(NULL, str, NULL, MB_OK);
+	LocalFree(str);
+	exit(a_eval);
+}
+
+#	elif HCONF_BRANCH_CUSTOM
+#		include <errno.h>
+#		include <stdarg.h>
+#		include <stdio.h>
 
 void
 err(int const a_eval, const char *const a_fmt, ...)
@@ -36,4 +55,5 @@ err(int const a_eval, const char *const a_fmt, ...)
 	exit(a_eval);
 }
 
+#	endif
 #endif

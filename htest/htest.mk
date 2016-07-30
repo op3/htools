@@ -18,33 +18,36 @@
 #  $(HTEST_SRC)       = test source files.
 #  $(HTEST_SUITE_PRE) = called before creating suite file (e.g. mkdir).
 #  $(HTEST_SUITE_SRC) = source file pattern (e.g. $<).
-#  $(HTEST_SUITE_DST  = suite file pattern (e.g. $@).
+#  $(HTEST_SUITE_DST) = suite file pattern (e.g. $@).
 # Output:
-#  $(HTEST_SUITE)     = test suite cache files.
+#  $(HTEST_SUITES)    = test suite cache files.
 
-HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) | \
+HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) 2>/dev/null | \
 	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $(HTEST_SUITE_DST)
-ifeq (1,$(V))
- HTEST_CC_E_V=
- HTEST_GEN_V=
+ifneq (,$(V))
+ HTEST_CC_E_PRE=
+ HTEST_GEN_PRE=
 else
- HTEST_CC_E_V=@echo "SUITE $@" &&
- HTEST_GEN_V=@echo "TESTS $@" &&
+ HTEST_CC_E_PRE=@echo "SUITE $@" &&
+ HTEST_GEN_PRE=@echo "TESTS $@" &&
 endif
 
-HTEST_SUITE:=$(addprefix $(BUILD_DIR)/,$(HTEST_SRC:.c=.suite))
+HTEST_SUITES:=$(patsubst %.c,$(BUILD_DIR)/%.suite,$(HTEST_SRC))
 
-$(HTEST_GEN): $(HTEST_SUITE)
-	$(HTEST_GEN_V)echo "#include <htest/htest.h>" > $@ &&\
-	cat $^ | sed 's/^\(.*\)$$/HTEST_SUITE_PROTO(\1);/' >> $@ &&\
-	echo "HTEST_SUITE_LIST_BEGIN" >> $@ &&\
-	cat $^ | sed 's/^\(.*\)$$/ HTEST_SUITE_LIST_ADD(\1)/' >> $@ &&\
-	echo "HTEST_SUITE_LIST_END" >> $@
+$(HTEST_GEN): $(HTEST_SUITES)
+	$(HTEST_GEN_PRE)echo "#include <htest/htest.h>" > $@;\
+	if [ "$^" ]; then\
+		cat $^ | sed 's/^\(.*\)$$/HTEST_SUITE_PROTO(\1);/';\
+		echo "HTEST_SUITE_LIST_BEGIN";\
+		cat $^ | sed 's/^\(.*\)$$/ HTEST_SUITE_LIST_ADD(\1)/';\
+		echo "HTEST_SUITE_LIST_END";\
+	else\
+		echo;\
+	fi >> $@
 
 $(BUILD_DIR)/%.suite: %.c
-	$(HTEST_CC_E_V)$(HTEST_SUITE_PRE);\
-	$(HTEST_CC_E)
+	$(HTEST_CC_E_PRE)$(HTEST_SUITE_PRE) && $(HTEST_CC_E)
 
 .PHONY: clean_htest
 clean_htest:
-	rm -f $(HTEST_GEN) $(HTEST_SUITE)
+	rm -f $(HTEST_GEN) $(HTEST_SUITES)

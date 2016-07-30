@@ -14,46 +14,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hconf/src/htest.h>
+#include <htest/htest.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <assert.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hutils/strdup.h>
-#include <hutils/strsignal.h>
-#include <htest/htest.h>
+#include <hutils/getopt.h>
+#include <hutils/string.h>
+#include <hconf/src/htest.h>
 
-#define HCONF_MAIN
+/*#define HCONF_HAS_MAIN*/
 
-#if defined(HCONF_POSIX)
+#if defined(HCONF_mSYS_bPOSIX)
 
-# include <unistd.h>
+#	define SUPPORT_FORK
+char const *const c_nul_path = "/dev/null";
 
-# define SUPPORT_FORK
+#elif defined(HCONF_mSYS_bMSC)
 
-char const *const nul_path = "/dev/null";
+#	include <io.h>
+#	include <signal.h>
+#	include <hutils/getopt.h>
 
-#elif defined(HCONF_ALMOST_POSIX)
+#	define STDIN_FILENO 0
+#	define STDOUT_FILENO 1
+#	define STDERR_FILENO 2
 
-# include <unistd.h>
-extern int getopt(int, char * const [], const char *);
-
-# define SUPPORT_FORK
-
-char const *const nul_path = "/dev/null";
-
-#elif defined(HCONF_MSC)
-
-# include <io.h>
-# include <signal.h>
-# include <hutils/getopt.h>
-
-# define STDIN_FILENO 0
-# define STDOUT_FILENO 1
-# define STDERR_FILENO 2
-
-char const *const nul_path = "NUL";
+char const *const c_nul_path = "NUL";
 
 char const *
 strsignal(int const a_signum)
@@ -70,9 +60,6 @@ strsignal(int const a_signum)
 	}
 }
 
-
-#else
-# error Not hconf:ed.
 #endif
 
 #define BLUE "\033[1;34m"
@@ -97,8 +84,8 @@ void (*g_htest_dtor_)(void);
 void
 handler(int const a_signum)
 {
-	htest_print_("  %sFail:%sCaught signal \"%s\", next suite...\n",
-	    g_color_fail, g_color_reset, strsignal(a_signum));
+	htest_print_("  %sFail:%sCaught signal \"%s\".\n", g_color_fail,
+	    g_color_reset, strsignal(a_signum));
 	GCOV_FLUSH;
 	_exit(EXIT_FAILURE);
 }
@@ -142,7 +129,7 @@ htest_output_suppress_()
 	assert(NULL == g_nul);
 	assert(NULL == g_new_stderr);
 
-	g_nul = fopen(nul_path, "w");
+	g_nul = fopen(c_nul_path, "w");
 
 	g_old_stdout = dup(STDOUT_FILENO);
 	fflush(stdout);
@@ -275,7 +262,13 @@ main(int const argc, char **const argv)
 					int status;
 
 					waitpid(pid, &status, 0);
-					if (EXIT_SUCCESS == status) {
+					if (EXIT_SUCCESS !=
+					    WEXITSTATUS(status)) {
+						htest_print_(
+						    "  %sFail:%sExited\n",
+						    g_color_fail,
+						    g_color_reset);
+					} else {
 						++test_pass_num;
 					}
 				}

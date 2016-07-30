@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,15 +17,15 @@
 #ifndef HUTILS_BITMASK_H
 #define HUTILS_BITMASK_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct Bitmask;
 
-struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_RETURNS;
+struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_PURE FUNC_RETURNS;
 void		bitmask_copy_mask(struct Bitmask *, struct Bitmask const *);
 struct Bitmask	*bitmask_create(int) FUNC_RETURNS;
 void		bitmask_free(struct Bitmask **);
-int		bitmask_get(struct Bitmask *, int) FUNC_RETURNS;
+int		bitmask_get(struct Bitmask *, int) FUNC_PURE FUNC_RETURNS;
 void		bitmask_one(struct Bitmask *);
 void		bitmask_set(struct Bitmask *, int);
 void		bitmask_unset(struct Bitmask *, int);

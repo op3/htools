@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,8 +17,10 @@
 #ifndef HUTILS_HASH_H
 #define HUTILS_HASH_H
 
-#include <hutils/macros.h>
+#include <stdlib.h>
+#include <hutils/funcattr.h>
+#include <hutils/stdint.h>
 
-uint32_t	hutils_hash32(void const *, size_t) FUNC_RETURNS;
+uint32_t	hutils_hash32(void const *, size_t) FUNC_PURE FUNC_RETURNS;
 
 #endif

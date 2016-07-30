@@ -14,24 +14,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_PRINTF_H
-#define HUTILS_PRINTF_H
+#ifndef HUTILS_FMTMOD_H
+#define HUTILS_FMTMOD_H
 
 #include <stdio.h>
 #include <hconf/include/hutils/fmtmod.h>
 
-#if defined(HCONF_PRINTF_C90_ANCIENT)
-/* LIBS=dont */
-# define PRIz "d"
-# define PRIzx "x"
-#elif defined(HCONF_PRINTF_C90_DECENT)
-/* LIBS=dont */
-# define PRIz "ld"
-# define PRIzx "lx"
-#else
-# error Not hconf:ed.
+#if defined(HCONF_mFMTMOD_bSIZET_INT)
+/* HCONF_OPT=nolink */
+#	define PRIz "d"
+#	define PRIzx "x"
+#elif defined(HCONF_mFMTMOD_bSIZET_LONG)
+/* HCONF_OPT=nolink */
+#	define PRIz "ld"
+#	define PRIzx "lx"
 #endif
 
-#define HCONF_TEST printf("%"PRIz"%"PRIzx, (size_t)0, (size_t)0)
+#if defined(HCONFING_mFMTMOD)
+HCONF_TEST(int, (void))
+{
+	return printf("%"PRIz" %"PRIzx, (size_t)0, (size_t)0);
+}
+#endif
 
 #endif

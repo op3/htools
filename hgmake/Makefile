@@ -12,34 +12,31 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+include build_dir.mk
+include strict_cflags.mk
+
 CC?=gcc
-LD?=gcc
-
-include $(HTOOLS_PATH)/hgmake/build_dir.mk
-include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
-include $(HTOOLS_PATH)/hgmake/cmds.mk
-
+CPPFLAGS:=$(CPPFLAGS) -I. -I../hutils/include
 CFLAGS:=$(CFLAGS) -ggdb
-CPPFLAGS:=-D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -I. -I../hutils/include
-LDFLAGS:=
-
-HCONF_CONF:=$(BUILD_DIR)/hconf_conf
-HCONF_MERGE:=$(BUILD_DIR)/hconf_merge
+CONF:=$(BUILD_DIR)/hconf_conf
+MERGE:=$(BUILD_DIR)/hconf_merge
 
 .PHONY: all
-all: $(HCONF_CONF) $(HCONF_MERGE)
+all: $(CONF) $(MERGE)
 
-$(HCONF_CONF): $(BUILD_DIR)/hconf.o $(BUILD_DIR)/hconf_conf.o
-	$(MKDIR)
-	gcc $(LDFLAGS) -o $@ $^
+include hconf.mk
 
-$(HCONF_MERGE): $(BUILD_DIR)/hconf.o $(BUILD_DIR)/hconf_merge.o
+$(CONF): $(addprefix $(BUILD_DIR)/,common.o hconf_conf.o)
 	$(MKDIR)
-	gcc $(LDFLAGS) -o $@ $^
+	$(LD_E_PRE)$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-$(BUILD_DIR)/%.o: %.c Makefile hconf.h
+$(MERGE): $(addprefix $(BUILD_DIR)/,common.o hconf_merge.o)
 	$(MKDIR)
-	gcc -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
+	$(LD_E_PRE)$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+$(BUILD_DIR)/%.o: %.c Makefile
+	$(MKDIR)
+	$(CC_O_PRE)$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 .PHONY: clean
 clean:

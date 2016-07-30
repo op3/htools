@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,32 +14,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_SNPRINTF_H
-#define HUTILS_SNPRINTF_H
+#ifndef HUTILS_GCC_H
+#define HUTILS_GCC_H
 
-#include <hutils/macros.h>
-#include <hconf/include/hutils/snprintf.h>
+#include <hconf/include/hutils/gcc.h>
 
-#if defined(HCONF_SNPRINTF_BSD_SOURCE)
-/* HCONF: CPPFLAGS=-D_BSD_SOURCE */
-/* HCONF: nolink */
-
-# include <stdio.h>
-
-#elif defined(HCONF_SNPRINTF_PROTOTYPE)
-
-int snprintf(char *, size_t, char const *, ...) FUNC_PRINTF(2, 3);
-
-#elif defined(HCONF_SNPRINTF_UNSAFE)
-/* HCONF: EXTRA="-Iinclude src/snprintf.c" */
-
-# define snprintf snprintf_unsafe_
-int snprintf_unsafe_(char *, size_t, char const *, ...) FUNC_PRINTF(2, 3);
-
-#else
-# error Not hconf:ed.
+#if defined(HCONF_mCCACHE_bYES)
+/* HCONF_CC="ccache $CC" */
+/* HCONF_OPT=nolink */
+#elif defined(aHCONF_mCCACHE_bNO)
+/* aHCONF_CC="$CC" */
+/* aHCONF_OPT=nolink */
 #endif
 
-#define HCONF_TEST snprintf(NULL, 0, " ")
+#if defined(HCONF_mWEXTRA_bWEXTRA)
+/* HCONF_CFLAGS=-Wextra */
+/* HCONF_OPT=nolink */
+#elif defined(HCONF_mWEXTRA_bW)
+/* HCONF_CFLAGS=-W */
+/* HCONF_OPT=nolink */
+#endif
 
 #endif

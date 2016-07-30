@@ -15,11 +15,9 @@
  */
 
 #include <hutils/fs.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <hutils/err.h>
 #include <hutils/memory.h>
-#include <hutils/strdup.h>
+#include <hutils/string.h>
 
 int
 fs_mkdirs(char const *const a_path)

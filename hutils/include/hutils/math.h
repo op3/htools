@@ -19,17 +19,20 @@
 
 #include <hconf/include/hutils/math.h>
 
-#if defined(HCONF_MATH_SIMPLE)
-/* HCONF: nolink */
-#elif defined(HCONF_MATH_BSD_SOURCE)
-/* HCONF: CPPFLAGS=-D_BSD_SOURCE */
-/* HCONF: nolink */
-#else
-# error Not hconf:ed.
+#if defined(HCONF_mMATH_bNOTHING)
+#elif defined(HCONF_mMATH_bLM)
+/* HCONF_LIBS=-lm */
+#elif defined(HCONF_mMATH_bBSD_SOURCE)
+/* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 #endif
 
 #include <math.h>
 
-#define HCONF_TEST double pi = M_PI; (void)pi
+#if HCONFING_mMATH
+HCONF_TEST(double, (double const a_v))
+{
+	return sqrt(M_PI * a_v);
+}
+#endif
 
 #endif

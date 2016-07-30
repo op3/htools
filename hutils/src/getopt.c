@@ -14,12 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if defined(_MSC_VER)
+#include <hutils/getopt.h>
 
-# include <hutils/getopt.h>
-# include <assert.h>
-# include <stdlib.h>
-# include <string.h>
+#if HCONF_MODULE_GETOPT
+#	if HCONF_BRANCH_MSC
+#		include <assert.h>
+#		include <stdlib.h>
+#		include <string.h>
 
 char *optarg = NULL;
 int optind = 1;
@@ -65,4 +66,5 @@ getopt(int const a_argc, char *const *a_argv, char const *const a_optstring)
 	}
 }
 
+#	endif
 #endif

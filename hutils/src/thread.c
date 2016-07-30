@@ -15,14 +15,13 @@
  */
 
 #include <hutils/thread.h>
+#include <string.h>
 #include <hconf/src/thread.h>
 #include <hutils/memory.h>
-#include <hutils/strdup.h>
 
-#if defined(HCONF_PTHREAD)
-/* HCONF: LIBS=-lpthread */
-
-# include <pthread.h>
+#if defined(HCONF_mTHREAD_bPTHREAD)
+/* HCONF_LIBS=-lpthread */
+#	include <pthread.h>
 
 struct CondVar {
 	pthread_cond_t	cond;
@@ -248,11 +247,10 @@ thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 	return 0;
 }
 
-#elif defined(HCONF_WINDOWS)
-/* HCONF: LIBS=dont */
+#elif defined(HCONF_mTHREAD_bWINDOWS)
 
-# include <windows.h>
-# include <process.h>
+#	include <windows.h>
+#	include <process.h>
 
 struct Mutex {
 	CRITICAL_SECTION	cs;
@@ -349,7 +347,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 	LeaveCriticalSection(&a_mutex->cs);
 }
 
-#elif defined(HCONF_SINGLE)
+#elif defined(HCONF_mTHREAD_bSINGLE)
 
 struct CondVar *
 thread_condvar_create(char **const a_err)
@@ -367,7 +365,7 @@ thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 int
@@ -377,7 +375,7 @@ thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 int
@@ -387,7 +385,7 @@ thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 int
@@ -399,7 +397,7 @@ thread_condvar_wait(struct CondVar *const a_condvar, struct Mutex *const
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 struct Thread *
@@ -421,7 +419,7 @@ thread_free(struct Thread **const a_thread, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 struct Mutex *
@@ -440,7 +438,7 @@ thread_mutex_free(struct Mutex **const a_mutex, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 int 
@@ -450,7 +448,7 @@ thread_mutex_lock(struct Mutex *const a_mutex, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
 int
@@ -460,9 +458,7 @@ thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 	if (NULL != a_err) {
 		*a_err = "Not supported";
 	}
-	return NULL;
+	return 0;
 }
 
-#else
-# error Not hconf:ed.
 #endif

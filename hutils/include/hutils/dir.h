@@ -17,7 +17,7 @@
 #ifndef HUTILS_DIR_H
 #define HUTILS_DIR_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct Dir;
 struct DirEntry {

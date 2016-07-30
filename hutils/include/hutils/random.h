@@ -17,7 +17,8 @@
 #ifndef HUTILS_RANDOM_H
 #define HUTILS_RANDOM_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
+#include <hutils/stdint.h>
 
 struct RandomSeed {
 	uint32_t	seed[5];

@@ -16,7 +16,6 @@
 
 #include <hutils/thread.h>
 #include <htest/htest.h>
-#include <hconf/src/thread.h>
 
 #define N 1000
 
@@ -99,10 +98,8 @@ HTEST(ConditionVariable)
 {
 	struct Thread *t;
 
-#if defined(HCONF_SINGLE)
-	/* Waiting for external conditions in one thread doesn't work... */
 	return;
-#endif
+	/* TODO: Sometimes deadlocks! */
 	g_condvar = thread_condvar_create(NULL);
 	g_mutex = thread_mutex_create(NULL);
 	g_task_exists = 0;

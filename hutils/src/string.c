@@ -18,6 +18,83 @@
 #include <stdarg.h>
 #include <hutils/memory.h>
 
+#if defined(HCONF_mSNPRINTF_bUNSAFE)
+#	include <stdarg.h>
+#	include <stdio.h>
+int
+snprintf_unsafe_(char *const a_dst, size_t const a_dst_size, char const *const
+    a_fmt, ...)
+{
+	va_list args;
+	size_t len;
+
+	va_start(args, a_fmt);
+	len = vsprintf(a_dst, a_fmt, args);
+	if (a_dst_size < len) {
+		fprintf(stderr, "Overrun in snprintf_unsafe_, abort!()\n");
+		abort();
+	}
+	va_end(args);
+	return len;
+}
+#endif
+
+#if defined(HCONF_mSTRNDUP_bCUSTOM)
+#	include <string.h>
+char *
+strndup_custom_(char const *const a_s, size_t const a_maxlen)
+{
+	char *s;
+	size_t len;
+
+	len = strlen(a_s);
+	len = MIN(len, a_maxlen);
+	MALLOC(s, len + 1);
+	if (NULL != s) {
+		memmove(s, a_s, len);
+		s[len] = '\0';
+	}
+	return s;
+}
+#endif
+
+#if defined(HCONF_mSTRSIGNAL_bCUSTOM)
+char *
+strsignal(int const a_signum)
+{
+#	define TRANSLATE(name) case SIG##name: return #name
+	switch (a_signum) {
+		TRANSLATE(HUP);
+		TRANSLATE(INT);
+		TRANSLATE(QUIT);
+		TRANSLATE(ILL);
+		TRANSLATE(TRAP);
+		TRANSLATE(ABRT);
+		TRANSLATE(FPE);
+		TRANSLATE(KILL);
+		TRANSLATE(BUS);
+		TRANSLATE(SEGV);
+		TRANSLATE(SYS);
+		TRANSLATE(PIPE);
+		TRANSLATE(ALRM);
+		TRANSLATE(TERM);
+		TRANSLATE(URG);
+		TRANSLATE(STOP);
+		TRANSLATE(TSTP);
+		TRANSLATE(CONT);
+		TRANSLATE(CHLD);
+		TRANSLATE(TTIN);
+		TRANSLATE(TTOU);
+		TRANSLATE(XCPU);
+		TRANSLATE(XFSZ);
+		TRANSLATE(VTALRM);
+		TRANSLATE(PROF);
+		TRANSLATE(USR1);
+		TRANSLATE(USR2);
+	}
+}
+#endif
+
 char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
 
 /*

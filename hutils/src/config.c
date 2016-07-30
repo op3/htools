@@ -15,13 +15,12 @@
  */
 
 #include <hutils/config.h>
-#include <hutils/queue.h>
 #include <assert.h>
-#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <hutils/lexer.h>
 #include <hutils/memory.h>
-#include <hutils/snprintf.h>
+#include <hutils/queue.h>
 #include <hutils/time.h>
 
 TAILQ_HEAD(ConfigList, Config);
@@ -185,42 +184,42 @@ config_gets(struct Config const *const a_config)
 
 struct Config *
 config_section_getd_config(struct ConfigSection *const a_section, char const
-    *const a_name, double const a_d)
+    *const a_name, double const a_default_value)
 {
 	struct Config *config;
 
 	config = get_config(a_section, a_name);
 	if (NULL == config) {
 		config = create_config(a_section, a_name);
-		config_setd(config, a_d);
+		config_setd(config, a_default_value);
 	}
 	return config;
 }
 
 struct Config *
 config_section_geti32_config(struct ConfigSection *const a_section, char const
-    *const a_name, int32_t const a_i32)
+    *const a_name, int32_t const a_default_value)
 {
 	struct Config *config;
 
 	config = get_config(a_section, a_name);
 	if (NULL == config) {
 		config = create_config(a_section, a_name);
-		config_seti32(config, a_i32);
+		config_seti32(config, a_default_value);
 	}
 	return config;
 }
 
 struct Config *
 config_section_gets_config(struct ConfigSection *const a_section, char const
-    *const a_name, char const *a_s)
+    *const a_name, char const *a_default_value)
 {
 	struct Config *config;
 
 	config = get_config(a_section, a_name);
 	if (NULL == config) {
 		config = create_config(a_section, a_name);
-		config_sets(config, a_s);
+		config_sets(config, a_default_value);
 	}
 	return config;
 }
@@ -230,6 +229,7 @@ config_setd(struct Config *const a_config, double const a_d)
 {
 	int len, ret;
 
+puts("4-------");
 	FREE(a_config->str);
 	a_config->d = a_d;
 	a_config->i32 = a_d;
@@ -237,6 +237,7 @@ config_setd(struct Config *const a_config, double const a_d)
 	MALLOC(a_config->str, len);
 	ret = snprintf(a_config->str, len, "%g", a_d);
 	assert(len > ret);
+printf("%f %d %s\n", a_config->d, a_config->i32, a_config->str);
 }
 
 void
@@ -333,7 +334,7 @@ load(struct Lexer *const a_lexer)
 		    lexer_get_line_no(a_lexer), lexer_get_col_no(a_lexer));\
 		FREE(token.str);\
 		goto load_error;\
-	} HUTILS_COND(while, 0)
+	} WHILE_0
 		if (!lexer_token_get(a_lexer, &token)) {
 			if (LEXER_ERROR == token.type) {
 				LOAD_ERROR("Lexer parser error");

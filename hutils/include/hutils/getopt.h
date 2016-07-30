@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,13 +17,23 @@
 #ifndef HUTILS_GETOPT_H
 #define HUTILS_GETOPT_H
 
-#if defined(_MSC_VER)
+#include <hconf/include/hutils/getopt.h>
 
+#if defined(HCONF_mGETOPT_bUNISTD_H)
+#	include <unistd.h>
+#elif defined(HCONF_mGETOPT_bCUSTOM)
+/* HCONF_SRC=src/getopt.c */
+#	include <hutils/funcattr.h>
 extern char *optarg;
 extern int optind, optopt;
-
 int	getopt(int, char const **, char const *) FUNC_RETURNS;
+#endif
 
+#if HCONFING_mGETOPT
+HCONF_TEST(int, (int argc, char **argv))
+{
+	return getopt(argc, argv, "b");
+}
 #endif
 
 #endif

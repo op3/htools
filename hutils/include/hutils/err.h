@@ -17,35 +17,25 @@
 #ifndef HUTILS_ERR_H
 #define HUTILS_ERR_H
 
-#include <hutils/macros.h>
 #include <hconf/include/hutils/err.h>
 
-#if defined(HCONF_ERR_H)
-/* HCONF: nolink */
-# include <err.h>
-#elif defined(HCONF_ERR_MSC)
-/* HCONF: nolink */
-# include <windows.h>
-# define err(code, str) do {\
-		LPTSTR str_;\
-		DWORD err_;\
-		err_ = GetLastError();\
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | \
-			      FORMAT_MESSAGE_FROM_SYSTEM | \
-			      FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err_, \
-			      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), \
-			      (LPTSTR)&str_, 0, NULL);\
-		MessageBox(NULL, str_, NULL, MB_OK);\
-		LocalFree(str_);\
-		exit(code);\
-	} HUTILS_COND(while, 0)
-#elif defined(HCONF_ERR_CUSTOM)
-/* HCONF: EXTRA="src/err.c" */
+#if defined(HCONF_mERR_bERR_H)
+/* HCONF_OPT=nolink */
+#	include <err.h>
+#elif defined(HCONF_mERR_bMSC)
+/* HCONF_SRC=src/err.c */
 void err(int, const char *, ...);
-#else
-# error Not hconf:ed.
+#elif defined(HCONF_mERR_bCUSTOM)
+/* HCONF_SRC=src/err.c */
+void err(int, const char *, ...);
 #endif
 
-#define HCONF_TEST err(0, "a")
+#if defined(HCONF_TESTING)
+void
+test(void)
+{
+	err(0, "a");
+}
+#endif
 
 #endif

@@ -18,23 +18,32 @@
 #define HUTILS_MACROS_H
 
 #include <string.h>
-#include <hutils/stdint.h>
 #include <hconf/include/hutils/macros.h>
 
-#if defined(HCONF_COND_SIMPLE)
-/* HCONF: nolink */
-# define HUTILS_COND(stmt, cond) stmt (cond)
-#elif defined(HCONF_COND_WARNING_4127)
-/* HCONF: nolink */
-# define HUTILS_COND(stmt, cond)\
-	__pragma(warning(push))\
-	__pragma(warning(disable:4127))\
-	stmt (cond)\
-	__pragma(warning(pop))
-#else
-# error Not hconf:ed.
+#if defined(HCONF_mCONST_EXPR_bSIMPLE)
+/* HCONF_OPT=nolink */
+#	define WHILE_0 while (0)
+#	define IF_CONST(cond) if (cond)
+#elif defined(HCONF_mCONST_EXPR_bWARNING_4127)
+/* HCONF_OPT=nolink */
+#	define WHILE_0\
+		__pragma(warning(push))\
+		__pragma(warning(disable:4127))\
+		while (0)\
+		__pragma(warning(pop))
+#	define IF_CONST(cond)\
+		__pragma(warning(push))\
+		__pragma(warning(disable:4127))\
+		if (cond)\
+		__pragma(warning(pop))
 #endif
-#define HCONF_TEST do {} HUTILS_COND(while, 0)
+#if HCONFING_mDO_WHILE
+void
+hconf_test(void)
+{
+	do {} WHILE_0;
+}
+#endif
 
 #define ABS(x) (0 > x ? -x : x)
 #define CLAMP(x, a, b) (x < a ? a : x > b ? b : x)
@@ -42,56 +51,32 @@
 	int copy_assert_size_[sizeof dst == sizeof src];\
 	(void)copy_assert_size_;\
 	memmove(&dst, &src, sizeof dst);\
-} HUTILS_COND(while, 0)
-#if defined(__GNUC__)
-# define GCC_IS_ATLEAST(major, minor) ((__GNUC__ > major) || (__GNUC__ == major && __GNUC_MINOR__ >= minor))
-#else
-# define GCC_IS_ATLEAST(major, minor) 0
-#endif
-#if GCC_IS_ATLEAST(3, 0)
-# define FUNC_PRINTF(fmt, args) __attribute__((format(printf, fmt, args)))
-#else
-# define FUNC_PRINTF(fmt, args)
-#endif
-#if GCC_IS_ATLEAST(2, 96)
-# define FUNC_PURE __attribute__((pure))
-#else
-# define FUNC_PURE
-#endif
-#if GCC_IS_ATLEAST(2, 5)
-# define FUNC_NORETURN __attribute__((noreturn))
-#else
-# define FUNC_NORETURN
-#endif
-#if GCC_IS_ATLEAST(3, 4)
-# define FUNC_RETURNS __attribute__((warn_unused_result))
-#else
-# define FUNC_RETURNS
-#endif
+} WHILE_0
 #define IS_POW2(x) (0 == ((x - 1) & x))
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MASK(lsb, msb) ((0xffffffff >> (32 - msb)) & \
     ((0xffffffff >> lsb) << lsb))
-#if !defined(MAX)
-# define MAX(a, b) (a > b ? a : b)
+#ifndef MAX
+#	define MAX(a, b) (a > b ? a : b)
 #endif
-#if !defined(MIN)
-# define MIN(a, b) (a < b ? a : b)
+#ifndef MIN
+#	define MIN(a, b) (a < b ? a : b)
 #endif
 #define SGN(x) (0 > x ? -1 : 1)
 #define SQR(x) (x * x)
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
 #define SWAP(a, b) do {\
-	uint8_t swap_assert_size_[sizeof a == sizeof b ? (signed)sizeof a : \
-	    -1];\
+	char swap_assert_size_[sizeof a == sizeof b ? (signed)sizeof a : -1];\
 	memmove(swap_assert_size_, &a, sizeof a);\
 	memmove(&a, &b, sizeof a);\
 	memmove(&b, swap_assert_size_, sizeof a);\
-} HUTILS_COND(while, 0)
-#if !defined(TRUE)
-# define TRUE (0 == 0)
-# define FALSE (!TRUE)
+} WHILE_0
+#ifndef TRUE
+#	define TRUE (0 == 0)
+#endif
+#ifndef FALSE
+#	define FALSE (!TRUE)
 #endif
 #define ZERO(x) memset(&x, 0, sizeof x)
 

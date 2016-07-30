@@ -17,6 +17,8 @@
 #ifndef HUTILS_FS_H
 #define HUTILS_FS_H
 
-int	fs_mkdirs(char const *);
+#include <hutils/funcattr.h>
+
+int	fs_mkdirs(char const *) FUNC_RETURNS;
 
 #endif

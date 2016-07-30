@@ -17,7 +17,8 @@
 #ifndef HUTILS_CONFIG_H
 #define HUTILS_CONFIG_H
 
-#include <hutils/macros.h>
+#include <stdlib.h>
+#include <hutils/funcattr.h>
 
 struct Config;
 struct ConfigCollection;
@@ -32,9 +33,12 @@ struct ConfigCollection	*config_collection_load_from_memory(char const *,
     size_t) FUNC_RETURNS;
 int			config_collection_write(struct ConfigCollection const
     *, char const *) FUNC_RETURNS;
-double			config_getd(struct Config const *) FUNC_RETURNS;
-int32_t			config_geti32(struct Config const *) FUNC_RETURNS;
-char const		*config_gets(struct Config const *) FUNC_RETURNS;
+double			config_getd(struct Config const *) FUNC_PURE
+FUNC_RETURNS;
+int32_t			config_geti32(struct Config const *) FUNC_PURE
+FUNC_RETURNS;
+char const		*config_gets(struct Config const *) FUNC_PURE
+FUNC_RETURNS;
 struct Config		*config_section_getd_config(struct ConfigSection *,
     char const *, double) FUNC_RETURNS;
 struct Config		*config_section_geti32_config(struct ConfigSection *,

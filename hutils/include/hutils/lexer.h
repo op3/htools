@@ -18,7 +18,7 @@
 #define HUTILS_LEXER_H
 
 #include <stdlib.h>
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 enum LexerError {
 	LEXER_ERROR_NONE,
@@ -46,9 +46,10 @@ struct LexerToken {
 
 struct Lexer	*lexer_create(LexerCallback, void *) FUNC_RETURNS;
 void		lexer_free(struct Lexer **);
-int		lexer_get_col_no(struct Lexer const *) FUNC_RETURNS;
+int		lexer_get_col_no(struct Lexer const *) FUNC_PURE FUNC_RETURNS;
 enum LexerError	lexer_get_error(struct Lexer const *) FUNC_RETURNS;
-int		lexer_get_line_no(struct Lexer const *) FUNC_RETURNS;
+int		lexer_get_line_no(struct Lexer const *) FUNC_PURE
+FUNC_RETURNS;
 int		lexer_token_get(struct Lexer *, struct LexerToken *)
 	FUNC_RETURNS;
 

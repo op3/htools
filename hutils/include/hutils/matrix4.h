@@ -17,6 +17,8 @@
 #ifndef HUTILS_MATRIX4_H
 #define HUTILS_MATRIX4_H
 
+#include <hutils/funcattr.h>
+
 struct Matrix4f {
 	float	m[16];
 };

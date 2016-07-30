@@ -14,33 +14,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HCONF_H
-#define HCONF_H
+#ifndef COMMON_H
+#define COMMON_H
 
-#define LENGTH(arr) (sizeof arr / sizeof *arr)
+#include <stdlib.h>
+
+#define LENGTH(arr) (sizeof(arr) / sizeof *(arr))
 #define STR_SIZ 1024
-#define STRBCMP(s, p) strncmp(s, p, sizeof p - 1)
+#define STRBCMP(str, ptn) strncmp(str, ptn, sizeof ptn - 1)
+#define STRECMP(str, ptn) strcmp(str + strlen(str) - sizeof ptn + 1, ptn)
+#define STRCTV_BEGIN strctv_(
+#define STRCTV_END ,strctv_sentinel_)
 
-enum VarName {
-	/* Name is used while confing... */
-	VAR_NAME = 0,
-	/* ... and cc while using the config. */
+enum VariableEnum {
 	VAR_CC = 0,
 	VAR_CPPFLAGS,
 	VAR_CFLAGS,
 	VAR_LDFLAGS,
 	VAR_LIBS,
-	VAR_EXTRA,
-	VAR_NUM
+	VAR_OUTPUT_NUM,
+	VAR_SRC,
+	VAR_OPT,
+	VAR_INPUT_NUM
 };
-struct Options {
-	char	var[VAR_NUM][STR_SIZ];
+
+struct Bucket {
+	char	var[VAR_INPUT_NUM][STR_SIZ];
+	char	src[STR_SIZ];
 	int	do_link;
 	int	penalty;
 };
 
+extern char const *strctv_sentinel_;
+
 void	err_(int, char const *, ...);
 void	errx_(int, char const *, ...);
-void	hconf_merge(struct Options *, int, char const **);
+void	merge(struct Bucket *, int, char const *const *);
+char	*strctv_(char const *, ...);
+char	*strndup_(char const *, size_t);
 
 #endif

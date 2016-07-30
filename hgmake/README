@@ -18,145 +18,115 @@ hgmake - GNU make tools
 
 A collection of tools and snippets to make GNU make even more makeable. Note
 that some constructs look old, but they are required for ancient platforms
-that I must support at work (GNU make 3.78, gcc 2.9 [mhm, not even 2.95]).
+that I must support at work (GNU make 3.78, gcc 2.9).
 
 
 build_dir.mk
 ------------
-Creates a nice build directory name.
+Creates a nice build directory name, which involves adjusting BUILD_MODE.
 
 include build_dir.mk
-# BUILD_DIR now has the nice name.
+
+BUILD_DIR now has the nice name, and BUILD_MODE will be "debug" by default.
 
 
-cmds.mk
--------
-Collection of useful command combos. Rather tied to hconf.
-
-
-strict_cflags.mk
-----------------
-Good set of flags for GCC to push you towards the fatal edge of your chair
-while programming.
+good_flags.mk
+-------------
+Good set of flags for GCC, some to push you towards the fatal edge of your
+chair, while others aim to make you smile uncontrollably.
 
 
 hconf*
 ------
-Ah yes, this is the magic that everybody needs.
-Little programs and a makefile snippet to auto configure parts of a build. The
-basic principle is that a project auto configures its headers/sources and
-stores the config in one hconf cache file, but also file-specific results. The
-main cachefile is read on-the-fly to retrieve compiling and linking flags,
-whereas the file-specific caches should be included automatically. Global
-hconf cache files can be merged.
+An "approach" to autoconfing things which tries to solve the following things:
+ *) No separate phase.
+    Everything is done with make, including use of dependency rules.
+ *) Much simpler macro guards.
+    Bye-bye to: #ifdef __linux__ && GNUC_BLABLA
+    Hello to:   #if HCONF_M_MYMODULE
+                # if HCONF_B_MYBRANCH
+    hconf will test HCONF guards top-down until one compiles perfectly and
+    optionally links as well as possible.
+ *) Production code rather than special test code tested, although a
+    HCONF_TESTING macro is defined while configuring.
+ *) Parallel processing.
+    make -j
 
 Overview of important project files:
  *) hconf.mk
-    Basic compiler and flag configuring, merging of hconf caches, and
-    header/source auto configuring.
- *) <build_dir>/hconf_conf
-    Scans for preprocessor branches identified by "if defined(HCONF_*). The
-    branches are tested top-down, so fallback branches should be organized
-    towards the bottom.
- *) <build_dir>/hconf_merge
-    Merges hconf cache files. The nature of the merging depends on the type of
-    flags.
+    A bunch of commands and recipes for creating and using hconfs.
+ *) <build_dir>/hconf_conf [-v] build-dir file hconf-files...
+    Scans for preprocessor modules and branches, tries to compile and link,
+    and writes the results to an hconf file.
+ *) <build_dir>/hconf_merge hconf-files...
+    Merges flags from a list of hconf files to stdout.
 
-hconf cache file format:
- 1: Compiler command, e.g. ccache gcc
- 2: CPPFLAGS, e.g. -DDOH=pizza-dough -Ibatter
- 3: CFLAGS, e.g. -ansi -pedantic (to start easy...)
- 4: LDFLAGS, e.g. -Lcity-center
- 5: LIBS, e.g. -lskyscraper
+How to create an hconf:ed file:
 
-A concrete example:
+ *) Create a header file with switches:
+    include/myheader.h:
+#include <hconf/include/myheader.h>
+#if HCONF_MODULE(MY_MODULE)
+#	if HCONF_BRANCE(MY_BRANCH_1)
+#		include <string.h>
+#	elif HCONF_BRANCH(DEUX)
+/* HCONF_CPPFLAGS=-D_BSD_SOURCE */
+#		include <string.h>
+#	elif HCONF_BRANCH(SAN)
+char *strndup(char const *, size_t);
+#	endif
+/* Optional test to be run by hconf. */
+#	if HCONF_TESTING
+void
+hconf_test(char const *const a_str, size_t const a_siz)
+{
+	return strndup(a_str, a_siz);
+}
+#	endif
+#endif
 
-my_build.mk:
-    include $(HTOOLS)/hgmake/build_dir.mk
-    HCONF_FILES:=include/my_header.h src/my_sauce.c
-    HCONF_CACHES:=
-    include $(HTOOLS_PATH)/hgmake/hconf.mk
-include/my_header.h:
-    #ifndef MY_HEADER_H
-    #define MY_HEADER_H
-    #include <hconf/include/my_header.h>
-    #if defined(HCONF_MY_WAY)
-    # define PRIz "d"
-    #elif defined(HCONF_THE_OTHER_WAY)
-    # defined PRIz "z"
-    #else
-    # error Not hconf:ed.
-    #endif
-    #define HCONF_TEST printf("%"PRIz, (size_t)0)
-    #endif
-src/my_sauce.c:
-    #include <hconf/src/my_sauce.h>
-    #if defined(HCONF_OH_RLY)
-    /* HCONF: CPPFLAGS=_BSD_SOURCE */
-    # include <exotic/system/header.h>
-    void this_rly_my_function() { ... }
-    #elif defined(HCONF_YA_RLY)
-    # include <adventurous/system/header.h>
-    void no_this_rly_my_function() { ... }
-    #else
-    # error Not hconf:ed.
-    #endif
-src/my_mayne.c:
-    #include <hconf/src/my_mayne.h>
-    #define HCONF_MAIN /* Tells hconf_conf this file defines 'main'. */
-    #if defined(HCONF_WAT)
-    #else
-    # error Not hconf:ed.
-    #endif
-    int main() { return 0; }
-The result after running GNU make could be:
- *) $(BUILD_DIR)/hconf.cache
-    ccache gcc
-    -D_BSD_SOURCE
-    -Wall
-    <intentionally blank>
-    <intentionally blank>
- *) $(BUILD_DIR)/hconf/include/my_header.h
-    ...
-    #define HCONF_MY_WAY
-    #include <include/my_header.h>
-    ...
- *) $(BUILD_DIR)/hconf/src/my_sauce.h
-    ...
-    #define HCONF_YA_RLY
-    ...
- *) $(BUILD_DIR)/hconf/src/my_mayne.h
-    ...
-    #define HCONF_WAT
-    ...
+ *) List hconf:able files and include hconf.mk:
+    Makefile:
+     HCONF_FILES=include/myheader.h
+     include $(HTOOLS_PATH)/hgmake/hconf.mk
+    In short, this runs:
+     for i in $(HCONF_FILES)
+     do
+      ./hconf_conf [-v] $(BUILD_DIR) $i
+      ./hconf_merge $(HCONF_RESULT) > $(HCONF_RESULT)
+     done
+    to create a big hconf file with merged compiler options.
 
-It is possible to pass parameters to hconf with:
-/* HCONF: expr */
-where possible expr:s are:
- CPPFLAGS=...
- CFLAGS=...
- LDFLAGS=...
- LIBS=...
-  The above 4 should be rather self-explanatory.
- EXTRA=...
-  Added verbatim to the linking step, but is not saved in the hconf cache,
-  useful for somewhat complicated hconf:ing.
- nolink
-  Replaces the linking step with true.
- penalty=integer
-  Adds the value to the linking result to push certain branch choices.
-The first 5 will be passed through a shell to resolve any global variable
-references or backticks, e.g. the following are valid:
- CPPFLAGS="$GLOBAL_SCRIBBLES bah"
- CFLAGS="`pkg-config --cflags dumbo`"
+ *) Create dependencies on hconf results:
+    Makefile:
+     %.o: %.c $(HCONF_RESULT)
 
-Notice that it's a good idea to keep the hconf branch names descriptive and
-unique to avoid name space collisions.
+ *) You should get the chosen branches in a generated header file:
+    $(BUILD_DIR)/hconf/include/myheader.h:
+     #ifndef HCONF_INCLUDE_MYHEADER_H
+     #define HCONF_INCLUDE_MYHEADER_H
+     #define HCONF_MODULE_MY_MODULE 1
+     #define HCONF_BRANCH_DEUX 1
+     #endif
+ *) ... and compiler/linker flags in the hconf file:
+    $(BUILD_DIR)/hconf/include/myheader.hconf:
+     -D_BSD_SOURCE # CPPFLAGS
+                   # CFLAGS
+                   # LDFLAGS
+                   # LIBS
 
-If you don't like the idea of using all the GNU makefile mojo from hconf.mk
-but you'd like to use the results of a project hconf, you can just sed the
-appropriate lines from the main hconf cache file:
- LDFLAGS=`sed -n 4p <dat_udder_project>/$BUILD_DIR/hconf.cache`
- LIBS=`sed -n 5p <dat_udder_project>/$BUILD_DIR/hconf.cache`
+ *) In order to use hconf results from another project:
+    Makefile:
+     HCONF_EXTERNAL:=path/to/project
+     include $(HTOOLS_PATH)/hgmake/hconf.mk
+    hconf.mk will append $(BUILD_DIR) and the hconf result filename, plus add
+    the appropriate include path.
 
-For concrete examples, have a look at the other htools projects.
+Notes:
+
+*) hconf.mk should be included only once.
+
+*) hconf.mk contains rules, so put your default rule before.
+
+*) Branches are put into a generated header file rather than into the hconf
+file, to reduce command line arguments.

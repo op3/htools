@@ -28,7 +28,7 @@ static void name(struct List *, size_t)
  *  name:  list variable name.
  *  Node:  tailq node struct name. 
  *  field: tailq field (i.e. TAILQ_ENTRY(Node) field;).
- *  cmp:   Comparison function, l - r <= 0 -> no swap, l - r > 0 -> swap.
+ *  cmp:   Comparison function, l <= r -> no swap, l > r -> swap.
  */
 #define TAILQ_SORT_DEFINE(List, name, Node, field, cmp) \
 static void \

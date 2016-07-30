@@ -15,6 +15,8 @@
  */
 
 #include <hutils/bitmask.h>
+#include <stdlib.h>
+#include <string.h>
 #include <hutils/memory.h>
 #include <hutils/stdint.h>
 
