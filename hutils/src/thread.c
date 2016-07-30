@@ -19,8 +19,153 @@
 #include <hconf/src/thread.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_mTHREAD_bPTHREAD)
+#if defined(HCONF_mTHREAD_bST_OLD)
+/* HCONF_LDFLAGS=-mthreads */
+#	define DO_PTHREADS 1
+#	include <st.h>
+#	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
+#	define ATTR_CREATE(ret, t) ret = pthread_attr_create(&t->attr)
+#	define ATTR_DESTROY(t)
+#	define STACK_GET_SIZE(ret, stack_size, t) do {\
+	ret = 0;\
+	stack_size = pthread_attr_getstacksize(&t->attr);\
+} WHILE_0
+#	define THREAD_CREATE(ret, t)\
+    ret = pthread_create(&t->thread, t->attr, run, starter)
+
+#elif defined(HCONF_mTHREAD_bST_NEW)
+/* HCONF_LDFLAGS=-mthreads */
+/* HCONF_OPT=penalty=50 */
+#	define DO_PTHREADS 1
+#	include <st.h>
+#	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
+#	define ATTR_CREATE(ret, t) ret = pthread_attr_init(&t->attr)
+#	define ATTR_DESTROY(t) pthread_attr_destroy(&t->attr)
+#	define STACK_GET_SIZE(ret, stack_size, t) do {\
+	stack_size = 0;\
+	ret = pthread_attr_getstacksize(&t->attr, &stack_size);\
+} WHILE_0
+#	define THREAD_CREATE(ret, t)\
+    ret = pthread_create(&t->thread, &t->attr, run, starter)
+
+#elif defined(HCONF_mTHREAD_bPHTREAD)
 /* HCONF_LIBS=-lpthread */
+/* HCONF_OPT=penalty=100 */
+#	define DO_PTHREADS 1
+#	include <limits.h>
+#	define ATTR_CREATE(ret, t) ret = pthread_attr_init(&t->attr)
+#	define ATTR_DESTROY(t) pthread_attr_destroy(&t->attr)
+#	define STACK_GET_SIZE(ret, stack_size, t) do {\
+	stack_size = 0;\
+	ret = pthread_attr_getstacksize(&t->attr, &stack_size);\
+} WHILE_0
+#	define THREAD_CREATE(ret, t)\
+    ret = pthread_create(&t->thread, &t->attr, run, starter)
+
+#elif defined(HCONF_mTHREAD_bWINDOWS)
+
+#	include <windows.h>
+#	include <process.h>
+
+struct Mutex {
+	CRITICAL_SECTION	cs;
+};
+struct Starter {
+	void	(*func)(void *);
+	void	*data;
+};
+struct Thread {
+	HANDLE	handle;
+};
+
+static unsigned int __stdcall	run(void *);
+
+unsigned int __stdcall
+run(void *a_data)
+{
+	struct Starter starter;
+
+	memmove(&starter, a_data, sizeof starter);
+	FREE(a_data);
+	starter.func(starter.data);
+	return 0;
+}
+
+struct Thread *
+thread_create(void (*const a_func)(void *), void *const a_data)
+{
+	struct Starter *starter;
+	struct Thread *thread;
+	uintptr_t ret;
+
+	CALLOC(starter, 1);
+	starter->func = a_func;
+	starter->data = a_data;
+	ret = _beginthreadex(NULL, 0, run, starter, 0, NULL);
+	if (-1 == ret) {
+		FREE(starter);
+		return NULL;
+	}
+	CALLOC(thread, 1);
+	thread->handle = (HANDLE)ret;
+	return thread;
+}
+
+int
+thread_free(struct Thread **const a_thread)
+{
+	struct Thread *thread;
+
+	thread = *a_thread;
+	if (NULL == thread) {
+		return;
+	}
+	WaitForSingleObject(thread->handle, INFINITE);
+	CloseHandle(thread->handle);
+	FREE(*a_thread);
+}
+
+struct Mutex *
+thread_mutex_create()
+{
+	struct Mutex *mutex;
+
+	CALLOC(mutex, 1);
+	if (!InitializeCriticalSectionAndSpinCount(&mutex->cs, 0x00000400)) {
+		return NULL;
+	}
+	return mutex;
+}
+
+int
+thread_mutex_free(struct Mutex **const a_mutex)
+{
+	struct Mutex *mutex;
+
+	mutex = *a_mutex;
+	if (NULL == mutex) {
+		return;
+	}
+	DeleteCriticalSection(&mutex->cs);
+	FREE(*a_mutex);
+}
+
+int 
+thread_mutex_lock(struct Mutex *const a_mutex)
+{
+	EnterCriticalSection(&a_mutex->cs);
+}
+
+int
+thread_mutex_unlock(struct Mutex *const a_mutex)
+{
+	LeaveCriticalSection(&a_mutex->cs);
+}
+
+#endif
+
+#if DO_PTHREADS
+
 #	include <pthread.h>
 
 struct CondVar {
@@ -34,6 +179,7 @@ struct Starter {
 	void	*data;
 };
 struct Thread {
+	pthread_attr_t	attr;
 	pthread_t	thread;
 };
 
@@ -145,17 +291,23 @@ thread_create(void (*const a_func)(void *), void *const a_data, char **const
 	CALLOC(starter, 1);
 	starter->func = a_func;
 	starter->data = a_data;
-
 	CALLOC(thread, 1);
-	ret = pthread_create(&thread->thread, NULL, run, starter);
+	ATTR_CREATE(ret, thread);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
-		FREE(starter);
-		FREE(thread);
+		goto thread_create_fail;
+	}
+	THREAD_CREATE(ret, thread);
+	if (0 != ret) {
+		goto thread_create_fail;
 	}
 	return thread;
+thread_create_fail:
+	if (NULL != a_err) {
+		*a_err = strdup(strerror(ret));
+	}
+	FREE(starter);
+	FREE(thread);
+	return NULL;
 }
 
 int
@@ -169,6 +321,7 @@ thread_free(struct Thread **const a_thread, char **const a_err)
 		return 1;
 	}
 	ret = pthread_join(thread->thread, NULL);
+	ATTR_DESTROY(thread);
 	FREE(*a_thread);
 	if (0 != ret) {
 		if (NULL != a_err) {
@@ -243,220 +396,6 @@ thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
 			*a_err = strdup(strerror(ret));
 		}
 		return 1;
-	}
-	return 0;
-}
-
-#elif defined(HCONF_mTHREAD_bWINDOWS)
-
-#	include <windows.h>
-#	include <process.h>
-
-struct Mutex {
-	CRITICAL_SECTION	cs;
-};
-struct Starter {
-	void	(*func)(void *);
-	void	*data;
-};
-struct Thread {
-	HANDLE	handle;
-};
-
-static unsigned int __stdcall	run(void *);
-
-unsigned int __stdcall
-run(void *a_data)
-{
-	struct Starter starter;
-
-	memmove(&starter, a_data, sizeof starter);
-	FREE(a_data);
-	starter.func(starter.data);
-	return 0;
-}
-
-struct Thread *
-thread_create(void (*const a_func)(void *), void *const a_data)
-{
-	struct Starter *starter;
-	struct Thread *thread;
-	uintptr_t ret;
-
-	CALLOC(starter, 1);
-	starter->func = a_func;
-	starter->data = a_data;
-	ret = _beginthreadex(NULL, 0, run, starter, 0, NULL);
-	if (-1 == ret) {
-		FREE(starter);
-		return NULL;
-	}
-	CALLOC(thread, 1);
-	thread->handle = (HANDLE)ret;
-	return thread;
-}
-
-int
-thread_free(struct Thread **const a_thread)
-{
-	struct Thread *thread;
-
-	thread = *a_thread;
-	if (NULL == thread) {
-		return;
-	}
-	WaitForSingleObject(thread->handle, INFINITE);
-	CloseHandle(thread->handle);
-	FREE(*a_thread);
-}
-
-struct Mutex *
-thread_mutex_create()
-{
-	struct Mutex *mutex;
-
-	CALLOC(mutex, 1);
-	if (!InitializeCriticalSectionAndSpinCount(&mutex->cs, 0x00000400)) {
-		return NULL;
-	}
-	return mutex;
-}
-
-int
-thread_mutex_free(struct Mutex **const a_mutex)
-{
-	struct Mutex *mutex;
-
-	mutex = *a_mutex;
-	if (NULL == mutex) {
-		return;
-	}
-	DeleteCriticalSection(&mutex->cs);
-	FREE(*a_mutex);
-}
-
-int 
-thread_mutex_lock(struct Mutex *const a_mutex)
-{
-	EnterCriticalSection(&a_mutex->cs);
-}
-
-int
-thread_mutex_unlock(struct Mutex *const a_mutex)
-{
-	LeaveCriticalSection(&a_mutex->cs);
-}
-
-#elif defined(HCONF_mTHREAD_bSINGLE)
-
-struct CondVar *
-thread_condvar_create(char **const a_err)
-{
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return NULL;
-}
-
-int
-thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
-{
-	(void)a_condvar;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-int
-thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
-{
-	(void)a_condvar;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-int
-thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
-{
-	(void)a_condvar;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-int
-thread_condvar_wait(struct CondVar *const a_condvar, struct Mutex *const
-    a_mutex, char **const a_err)
-{
-	(void)a_condvar;
-	(void)a_mutex;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-struct Thread *
-thread_create(void (*const a_func)(void *), void *const a_data, char **const
-    a_err)
-{
-	(void)a_func;
-	(void)a_data;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return NULL;
-}
-
-int
-thread_free(struct Thread **const a_thread, char **const a_err)
-{
-	(void)a_thread;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-struct Mutex *
-thread_mutex_create(char **const a_err)
-{
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return NULL;
-}
-
-int
-thread_mutex_free(struct Mutex **const a_mutex, char **const a_err)
-{
-	(void)a_mutex;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-int 
-thread_mutex_lock(struct Mutex *const a_mutex, char **const a_err)
-{
-	(void)a_mutex;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
-	}
-	return 0;
-}
-
-int
-thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
-{
-	(void)a_mutex;
-	if (NULL != a_err) {
-		*a_err = "Not supported";
 	}
 	return 0;
 }

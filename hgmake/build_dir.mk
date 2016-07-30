@@ -15,4 +15,9 @@
 ifeq (,$(BUILD_MODE))
 	BUILD_MODE=debug
 endif
+ifeq (gcov,$(BUILD_MODE))
+	CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
+	CFLAGS:=$(CFLAGS) --coverage
+	LIBS:=$(LIBS) --coverage
+endif
 BUILD_DIR:=build_$(shell $(CC) -dumpmachine)_$(shell $(CC) -dumpversion)_$(BUILD_MODE)

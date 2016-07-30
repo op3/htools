@@ -21,10 +21,11 @@ include ../hgmake/build_dir.mk
 CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I../hutils/include
 include ../hgmake/strict_cflags.mk
 
-ifeq (gcov,$(BUILD_TYPE))
- CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
- CFLAGS:=$(CFLAGS) --coverage
- LDFLAGS:=$(LDFLAGS) --coverage -L/usr/lib/gcc/$(GCC_MACHINE)/$(GCCERSION) -lgcov
+ifeq (release,$(BUILD_MODE))
+	CFLAGS:=$(CFLAGS) -O3
+endif
+ifeq (debug,$(BUILD_MODE))
+	CFLAGS:=$(CFLAGS) -ggdb
 endif
 
 SRC:=$(wildcard src/*.c)

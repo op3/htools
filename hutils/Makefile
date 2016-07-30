@@ -20,6 +20,11 @@ include ../hgmake/build_dir.mk
 
 CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I../htest/include
 include ../hgmake/strict_cflags.mk
+ifeq (release,$(BUILD_MODE))
+ CFLAGS:=$(CFLAGS) -O3
+else
+ CFLAGS:=$(CFLAGS) -ggdb
+endif
 
 TARGET:=$(BUILD_DIR)/libhutils.a
 SRC:=$(wildcard src/*.c)

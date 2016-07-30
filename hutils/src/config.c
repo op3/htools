@@ -108,6 +108,9 @@ config_collection_load_from_file(char const *const a_path)
 
 	file = fopen(a_path, "rb");
 	if (NULL == file) {
+		/* TODO: How to deliver messages in htools? */
+		fprintf(stderr, "fopen(%s, rb) failed, empty config.\n",
+		    a_path);
 		CALLOC(coll, 1);
 		TAILQ_INIT(&coll->section_list);
 	} else {
