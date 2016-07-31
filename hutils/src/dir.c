@@ -15,7 +15,6 @@
  */
 
 #include <hutils/dir.h>
-#include <hconf/src/dir.h>
 #include <hutils/macros.h>
 #include <hutils/memory.h>
 

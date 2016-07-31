@@ -18,7 +18,7 @@ LD?=gcc
 
 include ../hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I../hutils/include
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I../hutils/include
 include ../hgmake/strict_cflags.mk
 
 ifeq (release,$(BUILD_MODE))
@@ -31,7 +31,7 @@ endif
 SRC:=$(wildcard src/*.c)
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 HCONF_CACHES:=../hutils
-HCONF_SRC:=src/htest.c
+HCONF_SRC:=src/htest.h
 
 HTEST_GEN:=$(BUILD_DIR)/tests/tests.c
 HTEST_SRC:=$(wildcard tests/*.c)

@@ -16,13 +16,10 @@
 
 #include <hutils/thread.h>
 #include <string.h>
-#include <hconf/src/thread.h>
 #include <hutils/memory.h>
 
 #if defined(HCONF_mTHREAD_bST_OLD)
-/* HCONF_LDFLAGS=-mthreads */
 #	define DO_PTHREADS 1
-#	include <st.h>
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, t) ret = pthread_attr_create(&t->attr)
 #	define ATTR_DESTROY(t)
@@ -34,10 +31,7 @@
     ret = pthread_create(&t->thread, t->attr, run, starter)
 
 #elif defined(HCONF_mTHREAD_bST_NEW)
-/* HCONF_LDFLAGS=-mthreads */
-/* HCONF_OPT=penalty=50 */
 #	define DO_PTHREADS 1
-#	include <st.h>
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, t) ret = pthread_attr_init(&t->attr)
 #	define ATTR_DESTROY(t) pthread_attr_destroy(&t->attr)
@@ -49,8 +43,6 @@
     ret = pthread_create(&t->thread, &t->attr, run, starter)
 
 #elif defined(HCONF_mTHREAD_bPHTREAD)
-/* HCONF_LIBS=-lpthread */
-/* HCONF_OPT=penalty=100 */
 #	define DO_PTHREADS 1
 #	include <limits.h>
 #	define ATTR_CREATE(ret, t) ret = pthread_attr_init(&t->attr)
@@ -63,8 +55,6 @@
     ret = pthread_create(&t->thread, &t->attr, run, starter)
 
 #elif defined(HCONF_mTHREAD_bWINDOWS)
-
-#	include <windows.h>
 #	include <process.h>
 
 struct Mutex {
@@ -165,8 +155,6 @@ thread_mutex_unlock(struct Mutex *const a_mutex)
 #endif
 
 #if DO_PTHREADS
-
-#	include <pthread.h>
 
 struct CondVar {
 	pthread_cond_t	cond;

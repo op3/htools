@@ -14,25 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_GCC_H
-#define HUTILS_GCC_H
+#ifndef HTEST_H
+#define HTEST_H
 
-#include <hconf/include/hutils/gcc.h>
+#include <hconf/src/htest.h>
 
-#if defined(HCONF_mCCACHE_bYES)
-/* HCONF_CC="ccache $CC" */
-/* HCONF_OPT=nolink */
-#elif defined(HCONF_mCCACHE_bNO)
-/* HCONF_CC="$CC" */
-/* HCONF_OPT=nolink */
-#endif
+#if defined(HCONF_mHTEST_bPOSIX)
+#	include <unistd.h>
+#	if defined(HCONFING_mHTEST_bPOSIX)
+HCONF_TEST(pid_t, (void))
+{
+	return fork();
+}
+#	endif
 
-#if defined(HCONF_mWEXTRA_bWEXTRA)
-/* HCONF_CFLAGS=-Wextra */
-/* HCONF_OPT=nolink */
-#elif defined(HCONF_mWEXTRA_bW)
-/* HCONF_CFLAGS=-W */
-/* HCONF_OPT=nolink */
+#elif defined(HCONF_mHTEST_bMSC)
+#	include <io.h>
 #endif
 
 #endif

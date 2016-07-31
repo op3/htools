@@ -33,8 +33,7 @@ enum VariableEnum {
 	VAR_LDFLAGS,
 	VAR_LIBS,
 	VAR_OUTPUT_NUM,
-	VAR_SRC,
-	VAR_OPT,
+	VAR_DOLINK,
 	VAR_INPUT_NUM
 };
 
@@ -42,7 +41,6 @@ struct Bucket {
 	char	var[VAR_INPUT_NUM][STR_SIZ];
 	char	src[STR_SIZ];
 	int	do_link;
-	int	penalty;
 };
 
 extern char const *strctv_sentinel_;

@@ -17,7 +17,34 @@
 #ifndef HUTILS_DIR_H
 #define HUTILS_DIR_H
 
+#include <hconf/include/hutils/dir.h>
 #include <hutils/funcattr.h>
+
+#if defined(HCONF_mDIR_bDIRENT)
+#	include <dirent.h>
+#	if defined(HCONFING_mDIR_bDIRENT)
+HCONF_TEST(int, (void))
+{
+	return readdir_r(NULL, NULL, NULL);
+}
+#	endif
+#elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
+#	include <dirent.h>
+#	if defined(HCONFING_mDIR_bDIRENT_POSIX_DRAFT9)
+HCONF_TEST(struct dirent *, (void))
+{
+	return readdir_r(NULL, NULL);
+}
+#	endif
+#elif defined(HCONF_mDIR_bWINDOWS)
+#	include <windows.h>
+#	if defined(HCONFING_mDIR_bWINDOWS)
+HCONF_TEST(HANDLE, (char const *const a_path))
+{
+	return FindFirstFile(a_path, NULL);
+}
+#	endif
+#endif
 
 struct Dir;
 struct DirEntry {

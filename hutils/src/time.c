@@ -15,39 +15,14 @@
  */
 
 #include <hutils/time.h>
-#include <hconf/src/time.h>
 #include <hutils/memory.h>
 
-#define ASCTIME_R(tm, buf) asctime_r(tm, buf)
-#define GMTIME_R(tt, tm) gmtime_r(tt, tm)
-
-#if defined(HCONF_mTIME_bPOSIX_MONOTONIC)
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_MONOTONIC
-#elif defined(HCONF_mTIME_bPOSIX_MONOTONIC_LRT)
-/* HCONF_LIBS=-lrt */
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_MONOTONIC
-#elif defined(HCONF_mTIME_bPOSIX_REALTIME)
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_REALTIME
-#elif defined(HCONF_mTIME_bPOSIX_REALTIME_DRAFT9)
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_REALTIME
-#	undef ASCTIME_R
-#	undef GMTIME_R
+#if defined(HCONF_mTIME_bPOSIX_REALTIME_DRAFT9)
 #	define ASCTIME_R(tm, buf) asctime_r(tm, buf, 26)
 #	define GMTIME_R(tt, tm) gmtime_r(tm, tt)
-#elif defined(HCONF_mTIME_bWINDOWS)
-#	define SLEEP_SLEEP
-#	define TIME_PERF 1
-#elif defined(HCONF_mTIME_bMAC)
-#	define SLEEP_NANOSLEEP
-#	define TIME_MACH
+#else
+#	define ASCTIME_R(tm, buf) asctime_r(tm, buf)
+#	define GMTIME_R(tt, tm) gmtime_r(tt, tm)
 #endif
 
 #if defined(SLEEP_NANOSLEEP)

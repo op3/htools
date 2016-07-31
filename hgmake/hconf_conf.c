@@ -34,6 +34,7 @@ struct Variable {
 };
 TAILQ_HEAD(VariableList, Variable);
 struct Branch {
+	int	is_ok;
 	char	*name;
 	struct	VariableList var_list;
 	struct	Bucket bucket;
@@ -41,8 +42,6 @@ struct Branch {
 struct Module {
 	char	*name;
 	struct	Branch *branch;
-	struct	Branch *best_branch;
-	int	best_score;
 	TAILQ_ENTRY(Module)	next;
 };
 TAILQ_HEAD(ModuleList, Module);
@@ -55,9 +54,7 @@ static void		get_branch(char const *, char **, char **);
 static void		log_(char const *, ...);
 static struct Module	*module_add(char *);
 static void		my_exit(void);
-static void		perfect(void);
 static void		resolve_variables(struct Branch *);
-static void		set_best(struct Module *, int);
 static void		try(void);
 static void		usage(int);
 static void		write_files(int);
@@ -67,16 +64,12 @@ static int	g_is_verbose;
 static char const	*g_out_dir;
 static char const	*g_filename;
 static char const	*g_hconf_base;
-static int	g_is_header;
 static FILE	*g_log;
-static char	*g_out_base;
 static char	*g_filename_h;
 static char	*g_filename_hconf;
 static char	*g_filename_log;
 static char	*g_filename_main_bin;
 static char	*g_filename_main_c;
-static char	*g_filename_main_o;
-static char	*g_filename_o;
 static char	*g_filename_sh;
 static char	*g_filename_upper;
 static int	g_line_no;
@@ -292,7 +285,7 @@ module_add(char *const a_name)
 
 	module = TAILQ_LAST(&g_module_list, ModuleList);
 	if (TAILQ_END(&g_module_list) != module) {
-		if (NULL == module->best_branch) {
+		if (NULL == module->branch) {
 			errx_(EXIT_FAILURE, "%s: Module %s failed, check log "
 			    "%s.", g_filename, module->name, g_filename_log);
 		}
@@ -300,7 +293,6 @@ module_add(char *const a_name)
 	if (NULL != a_name) {
 		module = calloc(1, sizeof *module);
 		module->name = a_name;
-		module->best_score = 1e9;
 		TAILQ_INSERT_TAIL(&g_module_list, module, next);
 	}
 	return module;
@@ -312,25 +304,12 @@ my_exit()
 	if (NULL != g_log) {
 		fclose(g_log);
 	}
-	free(g_out_base);
 	free(g_filename_h);
 	free(g_filename_hconf);
 	free(g_filename_log);
-	free(g_filename_o);
 	free(g_filename_main_bin);
 	free(g_filename_main_c);
-	free(g_filename_main_o);
 	free(g_filename_sh);
-}
-
-void
-perfect(void)
-{
-	struct Module *module;
-
-	log_("Perfect!\n");
-	module = TAILQ_LAST(&g_module_list, ModuleList);
-	set_best(module, 0);
 }
 
 void
@@ -348,13 +327,10 @@ resolve_variables(struct Branch *const a_branch)
 	}
 	bucket = &a_branch->bucket;
 	bucket->do_link = 1;
-	bucket->penalty = 0;
 	TAILQ_FOREACH(var, &a_branch->var_list, next) {
-		if (0 == STRBCMP(var->expr, "HCONF_SRC")) {
-		} else if (0 == STRBCMP(var->expr, "HCONF_OPT")) {
+		if (0 == STRBCMP(var->expr, "HCONF_OPT")) {
 			char const *p;
 			char const *nolink;
-			char const *penalty;
 
 			p = strchr(var->expr, '=');
 			assert(NULL != p);
@@ -362,25 +338,6 @@ resolve_variables(struct Branch *const a_branch)
 			nolink = strstr(p, "nolink");
 			if (NULL != nolink) {
 				bucket->do_link = 0;
-			}
-			penalty = strstr(p, "penalty");
-			if (NULL != penalty) {
-				char *end;
-
-				for (p = penalty + 7; isspace(*p); ++p)
-					;
-				if ('=' != *p) {
-					errx_(EXIT_FAILURE, "%s:%d: Penalty "
-					    "option missing '='.", g_filename,
-					    var->line_no);
-				}
-				++p;
-				bucket->penalty = strtol(p, &end, 10);
-				if (p == end) {
-					errx_(EXIT_FAILURE, "%s:%d: Penalty "
-					    "option missing number.",
-					    g_filename, var->line_no);
-				}
 			}
 		} else {
 			fprintf(file, "%s # %d\n", var->expr, var->line_no);
@@ -424,72 +381,46 @@ resolve_variables(struct Branch *const a_branch)
 }
 
 void
-set_best(struct Module *const a_module, int const a_score)
-{
-	branch_free(&a_module->best_branch);
-	a_module->best_branch = a_module->branch;
-	a_module->branch = NULL;
-	a_module->best_score = a_score;
-}
-
-void
 try()
 {
 	struct Module *module;
 	struct Bucket *bucket;
-	char *cppflags, *cflags, *src;
+	char *cppflags;
 	int ret;
 
 	if (TAILQ_EMPTY(&g_module_list)) {
 		return;
 	}
 	module = TAILQ_LAST(&g_module_list, ModuleList);
-	if (0 == module->best_score) {
+	if (module->branch->is_ok) {
 		return;
 	}
 	log_("Module=%s, branch=%s.\n", module->name, module->branch->name);
 	resolve_variables(module->branch);
 	write_files(0);
 	bucket = &module->branch->bucket;
-	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf -DHCONFING_m",
-		 module->name, " ", bucket->var[VAR_CPPFLAGS] STRCTV_END;
-	cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS] STRCTV_END;
-	ret = g_is_header ?
-	    build(g_filename_main_o, g_filename_main_c, bucket->var[VAR_CC],
-		cppflags, cflags, NULL, NULL) :
-	    build(g_filename_o, g_filename, bucket->var[VAR_CC], cppflags,
-		cflags, NULL, NULL);
-	free(cppflags);
-	free(cflags);
-	if (0 != ret) {
-		log_("Failed.\n");
-		return;
-	}
-	if (!bucket->do_link) {
-		perfect();
-		return;
-	}
-	src = g_is_header ?
-	    STRCTV_BEGIN bucket->var[VAR_SRC], " ", g_filename_main_o
-	    STRCTV_END :
-	    STRCTV_BEGIN bucket->var[VAR_SRC], " ", g_filename_o, " ",
-			 g_filename_main_c STRCTV_END;
-	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf",
+	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf ",
 		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
-	ret = build(g_filename_main_bin, src, bucket->var[VAR_CC], cppflags,
-	    NULL, bucket->var[VAR_LDFLAGS], bucket->var[VAR_LIBS]) +
-	    bucket->penalty;
-	free(src);
+	if (bucket->do_link) {
+		ret = build(g_filename_main_bin, g_filename_main_c,
+		    bucket->var[VAR_CC], cppflags, bucket->var[VAR_CFLAGS],
+		    bucket->var[VAR_LDFLAGS], bucket->var[VAR_LIBS]);
+	} else {
+		char *cflags;
+
+		cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS]
+		    STRCTV_END;
+		ret = build(g_filename_main_bin, g_filename_main_c,
+		    bucket->var[VAR_CC], cppflags, cflags, NULL, NULL);
+		free(cflags);
+	}
 	free(cppflags);
 	if (0 == ret) {
-		perfect();
-		return;
-	}
-	if (module->best_score > ret) {
-		set_best(module, ret);
-		log_("Keeping (score=%d).\n", ret);
+		log_("Passed.\n");
+		module->branch->is_ok = 1;
 	} else {
-		log_("Skipping (score=%d).\n", ret);
+		log_("Failed.\n");
+		branch_free(&module->branch);
 	}
 }
 
@@ -499,11 +430,11 @@ usage(int const a_exit_code)
 	FILE *str;
 
 	str = 0 == a_exit_code ? stdout : stderr;
-	fprintf(str, "Usage: %s [-v] -d dir [-h hconf] -i file\n", g_arg0);
-	fprintf(str, " -v        Optional verbose output.\n");
-	fprintf(str, " -d dir    Generated files will be put here.\n");
-	fprintf(str, " -h hconf  Optional hconf file to start with.\n");
-	fprintf(str, " -i file   File to undergo hconf:ing.\n");
+	fprintf(str, "Usage: %s [-v] -d dir [-h hconf] -i header\n", g_arg0);
+	fprintf(str, " -v         Optional verbose output.\n");
+	fprintf(str, " -d dir     Generated files will be put here.\n");
+	fprintf(str, " -h hconf   Optional hconf file to start with.\n");
+	fprintf(str, " -i header  File to undergo hconf:ing.\n");
 	exit(a_exit_code);
 }
 
@@ -527,9 +458,12 @@ write_files(int const a_write_final)
 	}
 	TAILQ_FOREACH(module, &g_module_list, next) {
 		fprintf(f, "#define HCONF_m%s_b%s\n", module->name,
-		    a_write_final ? module->best_branch->name :
-		    NULL != module->branch ? module->branch->name :
-		    module->best_branch->name);
+		    module->branch->name);
+		if (!module->branch->is_ok) {
+			fprintf(f, "#define HCONFING_m%s\n", module->name);
+			fprintf(f, "#define HCONFING_m%s_b%s\n", module->name,
+			    module->branch->name);
+		}
 	}
 	fprintf(f, "#endif \n");
 	fclose(f);
@@ -545,9 +479,7 @@ write_files(int const a_write_final)
 
 		is_first = 1;
 		TAILQ_FOREACH(module, &g_module_list, next) {
-			bucket = a_write_final ? &module->best_branch->bucket :
-			    NULL != module->branch ? &module->branch->bucket :
-			    &module->best_branch->bucket;
+			bucket = &module->branch->bucket;
 			if (!is_first) {
 				fprintf(f, " ");
 			}
@@ -580,7 +512,6 @@ int
 main(int argc, char const *const *argv)
 {
 	FILE *file;
-	struct Module *module;
 	int argi, do_usage;
 
 	atexit(my_exit);
@@ -627,53 +558,40 @@ main(int argc, char const *const *argv)
 	{
 		char *p;
 
-		g_out_base = STRCTV_BEGIN g_out_dir, "/_hconf/hconf/",
+		g_filename_h = STRCTV_BEGIN g_out_dir, "/_hconf/hconf/",
 			   g_filename STRCTV_END;
-		for (p = g_out_base;; *p = '/') {
+		for (p = g_filename_h;; *p = '/') {
 			struct stat st;
 
 			p = strchr(p + 1, '/');
 			if (NULL == p) {
 				break;
 			}
-			if (p - 2 >= g_out_base &&
+			if (p - 2 >= g_filename_h &&
 			    0 == STRBCMP(p - 2, "../")) {
 				memmove(p - 2, "__/", 3);
 			}
 			*p = '\0';
-			if (0 == stat(g_out_base, &st)) {
+			if (0 == stat(g_filename_h, &st)) {
 				if (!S_ISDIR(st.st_mode)) {
 					errx_(EXIT_FAILURE, "%s: Not a "
-					    "directory.", g_out_base);
+					    "directory.", g_filename_h);
 				}
 				continue;
 			}
-			if (0 != mkdir(g_out_base, 0700)) {
+			if (0 != mkdir(g_filename_h, 0700)) {
 				err_(EXIT_FAILURE, "mkdir(%s, 0700)",
-				    g_out_base);
+				    g_filename_h);
 			}
 		}
-		g_filename_h = strdup(g_out_base);
-		g_is_header = 0 == STRECMP(g_filename, ".h");
-		if (!g_is_header) {
-			p = strrchr(g_filename_h, '.');
-			if (NULL == p || 4 < strlen(p)) {
-				errx_(EXIT_FAILURE, "%s: Strange input "
-				    "filename.", g_filename);
-			}
-			memmove(p, ".h", 3);
-		}
-		g_filename_hconf = STRCTV_BEGIN g_out_base, ".hconf"
+		g_filename_hconf = STRCTV_BEGIN g_filename_h, ".hconf"
 		    STRCTV_END;
-		g_filename_log = STRCTV_BEGIN g_out_base, ".log" STRCTV_END;
+		g_filename_log = STRCTV_BEGIN g_filename_h, ".log" STRCTV_END;
 		g_filename_main_bin = STRCTV_BEGIN g_out_dir,
 				    "/_hconf/main.bin" STRCTV_END;
-		g_filename_main_c = STRCTV_BEGIN g_out_base, ".main.c"
+		g_filename_main_c = STRCTV_BEGIN g_filename_h, ".main.c"
 		    STRCTV_END;
-		g_filename_main_o = STRCTV_BEGIN g_out_dir, "/_hconf/main.o"
-		    STRCTV_END;
-		g_filename_o = STRCTV_BEGIN g_out_base, ".o" STRCTV_END;
-		g_filename_sh = STRCTV_BEGIN g_out_base, ".sh" STRCTV_END;
+		g_filename_sh = STRCTV_BEGIN g_filename_h, ".sh" STRCTV_END;
 		g_filename_upper = strdup(g_filename);
 		for (p = g_filename_upper; '\0' != *p; ++p) {
 			if (isalpha(*p)) {
@@ -691,14 +609,8 @@ main(int argc, char const *const *argv)
 			err_(EXIT_FAILURE, "fopen(%s, wb)",
 			    g_filename_main_c);
 		}
-		if (g_is_header) {
-			fprintf(file, "#include <%s>\n", g_filename);
-		}
-		fprintf(file, "#ifndef HCONF_HAS_MAIN\n");
+		fprintf(file, "#include <%s>\n", g_filename);
 		fprintf(file, "int main(void) { return 0; }\n");
-		fprintf(file, "#else\n");
-		fprintf(file, "int main_not_really_(void) { return 0; }\n");
-		fprintf(file, "#endif\n");
 		fclose(file);
 	}
 
@@ -708,6 +620,7 @@ main(int argc, char const *const *argv)
 	}
 	for (g_line_no = 1;; ++g_line_no) {
 		char line[STR_SIZ];
+		struct Module *module;
 		struct Variable *var;
 		char *module_new, *branch_new, *p;
 		char *expr_start, *expr_end;
@@ -726,13 +639,18 @@ main(int argc, char const *const *argv)
 			if (TAILQ_END(&g_module_list) != module &&
 			    0 == strcmp(module->name, module_new)) {
 				free(module_new);
+				if (NULL != module->branch &&
+				    module->branch->is_ok) {
+					free(branch_new);
+					continue;
+				}
 			} else {
 				module = module_add(module_new);
 			}
-			branch_free(&module->branch);
 			branch = calloc(1, sizeof *branch);
 			branch->name = branch_new;
 			TAILQ_INIT(&branch->var_list);
+			assert(NULL == module->branch);
 			module->branch = branch;
 			continue;
 		}

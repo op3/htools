@@ -27,7 +27,7 @@
 #	define FUNC_NORETURN
 #endif
 #if defined(HCONFING_mFUNC_NORETURN)
-void hconf_test(void) FUNC_NORETURN;
+void hconf_test_noreturn(void) FUNC_NORETURN;
 #endif
 
 #if defined(HCONF_mFUNC_PRINTF_bYES)
@@ -39,7 +39,7 @@ void hconf_test(void) FUNC_NORETURN;
 #	define FUNC_PRINTF(fmt, args)
 #endif
 #if defined(HCONFING_mFUNC_PRINTF)
-void hconf_test(int, char const *, ...) FUNC_PRINTF(2, 3);
+void hconf_test_printf(int, char const *, ...) FUNC_PRINTF(2, 3);
 #endif
 
 #if defined(HCONF_mFUNC_PURE_bYES)
@@ -50,7 +50,7 @@ void hconf_test(int, char const *, ...) FUNC_PRINTF(2, 3);
 #	define FUNC_PURE
 #endif
 #if defined(HCONFING_mFUNC_PURE)
-void hconf_test(void) FUNC_PURE;
+void hconf_test_pure(void) FUNC_PURE;
 #endif
 
 #if defined(HCONF_mFUNC_RETURNS_bYES)
@@ -61,7 +61,7 @@ void hconf_test(void) FUNC_PURE;
 #	define FUNC_RETURNS
 #endif
 #if defined(HCONFING_mFUNC_RETURNS)
-int hconf_test(void) FUNC_RETURNS;
+int hconf_test_returns(void) FUNC_RETURNS;
 #endif
 
 #endif

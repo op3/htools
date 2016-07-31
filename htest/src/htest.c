@@ -24,18 +24,13 @@
 #include <string.h>
 #include <hutils/getopt.h>
 #include <hutils/string.h>
-#include <hconf/src/htest.h>
+#include <src/htest.h>
 
-/*#define HCONF_HAS_MAIN*/
-
-#if defined(HCONF_mSYS_bPOSIX)
-
+#if defined(HCONF_mHTEST_bPOSIX)
 #	define SUPPORT_FORK
 char const *const c_nul_path = "/dev/null";
+#elif defined(HCONF_mHTEST_bMSC)
 
-#elif defined(HCONF_mSYS_bMSC)
-
-#	include <io.h>
 #	include <signal.h>
 #	include <hutils/getopt.h>
 

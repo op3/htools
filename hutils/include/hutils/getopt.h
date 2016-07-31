@@ -29,7 +29,7 @@ extern int optind, optopt;
 int	getopt(int, char const **, char const *) FUNC_RETURNS;
 #endif
 
-#if HCONFING_mGETOPT
+#if defined(HCONFING_mGETOPT)
 HCONF_TEST(int, (int argc, char **argv))
 {
 	return getopt(argc, argv, "b");

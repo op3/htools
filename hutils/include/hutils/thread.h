@@ -17,7 +17,39 @@
 #ifndef HUTILS_THREAD_H
 #define HUTILS_THREAD_H
 
+#include <hconf/include/hutils/thread.h>
 #include <hutils/funcattr.h>
+
+#if defined(HCONF_mTHREAD_bST_OLD)
+/* HCONF_LDFLAGS=-mthreads */
+#	include <st.h>
+#	if defined(HCONFING_mTHREAD_bST_OLD)
+HCONF_TEST(int, (void))
+{
+	return pthread_attr_create(NULL);
+}
+#	endif
+#elif defined(HCONF_mTHREAD_bST_NEW)
+/* HCONF_LDFLAGS=-mthreads */
+#	include <st.h>
+#	if defined(HCONF_mTHREAD_bST_NEW)
+HCONF_TEST(int, (void))
+{
+	return pthread_attr_init(NULL);
+}
+#	endif
+#elif defined(HCONF_mTHREAD_bPHTREAD)
+/* HCONF_LIBS=-lpthread */
+#	include <pthread.h>
+#	if defined(HCONFING_mTHREAD_bPTHREAD)
+HCONF_TEST(int, (void))
+{
+	return pthread_attr_init(NULL);
+}
+#	endif
+#elif defined(HCONF_mTHREAD_bWINDOWS)
+#	include <windows.h>
+#endif
 
 struct CondVar;
 struct Mutex;

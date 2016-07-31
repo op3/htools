@@ -32,7 +32,7 @@ typedef u_int64_t uint64_t;
 typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
 #endif
-#if HCONFING_mSTDINT
+#if defined(HCONFING_mSTDINT)
 HCONF_TEST(void, (void))
 {
 	char pi8 [             1 == sizeof(int8_t)    ? 1 : -1];

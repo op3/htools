@@ -17,6 +17,7 @@
 #ifndef HUTILS_MATH_H
 #define HUTILS_MATH_H
 
+#include <math.h>
 #include <hconf/include/hutils/math.h>
 
 #if defined(HCONF_mMATH_bNOTHING)
@@ -26,9 +27,7 @@
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 #endif
 
-#include <math.h>
-
-#if HCONFING_mMATH
+#if defined(HCONFING_mMATH)
 HCONF_TEST(double, (double const a_v))
 {
 	return sqrt(M_PI * a_v);
