@@ -259,8 +259,8 @@ get_branch(char const *const a_str, char **const a_module, char **const
 	for (; '_' == *p || isalnum(*p); ++p)
 		;
 	branch_end = p;
-	*a_module = strndup(module_start, module_end - module_start);
-	*a_branch = strndup(branch_start, branch_end - branch_start);
+	*a_module = strndup_(module_start, module_end - module_start);
+	*a_branch = strndup_(branch_start, branch_end - branch_start);
 }
 
 void
@@ -328,7 +328,16 @@ resolve_variables(struct Branch *const a_branch)
 	bucket = &a_branch->bucket;
 	bucket->do_link = 1;
 	TAILQ_FOREACH(var, &a_branch->var_list, next) {
-		if (0 == STRBCMP(var->expr, "HCONF_OPT")) {
+		if (0 == STRBCMP(var->expr, "HCONF_SRC")) {
+			char const *p;
+
+			p = strchr(var->expr, '=');
+			assert(NULL != p);
+			++p;
+			*bucket->var[VAR_SRC] = '\0';
+			cat_str(bucket->var[VAR_SRC], p, sizeof
+			    bucket->var[VAR_SRC]);
+		} else if (0 == STRBCMP(var->expr, "HCONF_OPT")) {
 			char const *p;
 			char const *nolink;
 
@@ -385,7 +394,7 @@ try()
 {
 	struct Module *module;
 	struct Bucket *bucket;
-	char *cppflags;
+	char *cppflags, *src;
 	int ret;
 
 	if (TAILQ_EMPTY(&g_module_list)) {
@@ -401,20 +410,23 @@ try()
 	bucket = &module->branch->bucket;
 	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf ",
 		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
+	src = STRCTV_BEGIN bucket->var[VAR_SRC], " ", g_filename_main_c
+	    STRCTV_END;
 	if (bucket->do_link) {
-		ret = build(g_filename_main_bin, g_filename_main_c,
-		    bucket->var[VAR_CC], cppflags, bucket->var[VAR_CFLAGS],
+		ret = build(g_filename_main_bin, src, bucket->var[VAR_CC],
+		    cppflags, bucket->var[VAR_CFLAGS],
 		    bucket->var[VAR_LDFLAGS], bucket->var[VAR_LIBS]);
 	} else {
 		char *cflags;
 
 		cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS]
 		    STRCTV_END;
-		ret = build(g_filename_main_bin, g_filename_main_c,
-		    bucket->var[VAR_CC], cppflags, cflags, NULL, NULL);
+		ret = build(g_filename_main_bin, src, bucket->var[VAR_CC],
+		    cppflags, cflags, NULL, NULL);
 		free(cflags);
 	}
 	free(cppflags);
+	free(src);
 	if (0 == ret) {
 		log_("Passed.\n");
 		module->branch->is_ok = 1;
@@ -693,7 +705,6 @@ main(int argc, char const *const *argv)
 		errx_(EXIT_FAILURE, "%s: Is this file ready for hconf?",
 		    g_filename);
 	}
-	fclose(g_log);
 	write_files(1);
 	exit(EXIT_SUCCESS);
 }

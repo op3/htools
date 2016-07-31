@@ -54,6 +54,10 @@ HCONF_TEST(char *, (char *const a_s))
 
 #if defined(HCONF_mSTRL_bBSD_SOURCE)
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
+#elif defined(HCONF_mSTRL_bCUSTOM)
+/* HCONF_OPT=nolink */
+size_t strlcat(char *, char const *, size_t);
+size_t strlcpy(char *, char const *, size_t);
 #endif
 #if defined(HCONFING_mSTRL)
 HCONF_TEST(size_t, (char *const a_dst, char const *const a_src, size_t const

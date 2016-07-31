@@ -21,11 +21,13 @@
 #include <hutils/funcattr.h>
 
 #if defined(HCONF_mDIR_bDIRENT)
+/* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
 #	include <dirent.h>
 #	if defined(HCONFING_mDIR_bDIRENT)
 HCONF_TEST(int, (void))
 {
-	return readdir_r(NULL, NULL, NULL);
+	void *p = 0;
+	return readdir_r(p, p, p);
 }
 #	endif
 #elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)

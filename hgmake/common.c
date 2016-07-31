@@ -55,6 +55,20 @@ add_flag(struct FlagList *const a_list, char const *const a_name, size_t const
 	TAILQ_INSERT_TAIL(a_list, flag, next);
 }
 
+void
+cat_str(char *const a_dst, char const *const a_src, size_t const a_dst_len)
+{
+	char const *from;
+	char *to;
+
+	for (to = a_dst; '\0' != *to; ++to)
+		;
+	for (from = a_src; '\0' != *from && a_dst_len - 1 > to - a_dst;) {
+		*to++ = *from++;
+	}
+	*to = '\0';
+}
+
 int
 cmp(struct Flag const *const a_l, struct Flag const *const a_r)
 {
@@ -215,8 +229,8 @@ fprintf(stderr, "%s:%s\n", a_argv[idx], flag->str);
 				FREE(next);
 			}
 		}
-		strlcat(a_bucket->var[i], flag->str, sizeof a_bucket->var[i]);
-		strlcat(a_bucket->var[i], " ", sizeof a_bucket->var[i]);
+		cat_str(a_bucket->var[i], flag->str, sizeof a_bucket->var[i]);
+		cat_str(a_bucket->var[i], " ", sizeof a_bucket->var[i]);
 		FREE(flag);
 	}
 
@@ -261,9 +275,9 @@ fprintf(stderr, "%s:%s\n", a_argv[idx], flag->str);
 				    0 != strcmp(flag->str, prev->str);
 			}
 			if (END != prev && do_write_prev) {
-				strlcat(a_bucket->var[i], prev->str, sizeof
+				cat_str(a_bucket->var[i], prev->str, sizeof
 				    a_bucket->var[i]);
-				strlcat(a_bucket->var[i], " ", sizeof
+				cat_str(a_bucket->var[i], " ", sizeof
 				    a_bucket->var[i]);
 			}
 			if (END != prev) {
@@ -294,12 +308,10 @@ fprintf(stderr, "%s:%s\n", a_argv[idx], flag->str);
 		}
 		while (!EMPTY) {
 			flag = FIRST;
-/*printf("_%s_->", a_bucket->var[i]);*/
-			strlcat(a_bucket->var[i], flag->str, sizeof
+			cat_str(a_bucket->var[i], flag->str, sizeof
 			    a_bucket->var[i]);
-			strlcat(a_bucket->var[i], " ", sizeof
+			cat_str(a_bucket->var[i], " ", sizeof
 			    a_bucket->var[i]);
-/*printf("_%s_\n", a_bucket->var[i]);*/
 			REMOVE(flag);
 			FREE(flag);
 		}

@@ -17,11 +17,11 @@
 #ifndef HUTILS_TIME_H
 #define HUTILS_TIME_H
 
+#	include <time.h>
 #include <hconf/include/hutils/time.h>
 #include <hutils/funcattr.h>
 
 #if defined(HCONF_mTIME_bPOSIX_MONOTONIC)
-#	include <time.h>
 #	define SLEEP_NANOSLEEP
 #	define TIME_CLOCK
 #	define CLOCK_SOURCE CLOCK_MONOTONIC

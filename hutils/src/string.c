@@ -40,7 +40,6 @@ snprintf_unsafe_(char *const a_dst, size_t const a_dst_size, char const *const
 #endif
 
 #if defined(HCONF_mSTRNDUP_bCUSTOM)
-#	include <string.h>
 char *
 strndup_custom_(char const *const a_s, size_t const a_maxlen)
 {
