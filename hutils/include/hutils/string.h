@@ -83,7 +83,7 @@ HCONF_TEST(char *, (char *const a_s, size_t const a_n))
 #endif
 
 #if defined(HCONF_mSTRSIGNAL_bPOSIX_200809)
-/* HCONF_CPPFLAGS=-DPOSIX_C_SOURCE=200809 */
+/* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
 #elif defined(HCONF_mSTRSIGNAL_bPROTOTYPE)
 char *strsignal(int) FUNC_RETURNS;
 #elif defined(HCONF_mSTRSIGNAL_bCUSTOM)

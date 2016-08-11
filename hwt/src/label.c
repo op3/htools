@@ -15,7 +15,7 @@
  */
 
 #include <hwt/label.h>
-#include <hutils/strdup.h>
+#include <hutils/string.h>
 #include <hwt/widget.h>
 #include <src/builtin.h>
 

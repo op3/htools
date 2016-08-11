@@ -39,7 +39,7 @@ HCONF_TMP_LIBS=`$(SED) -n 5p $@.tmp`
 
 AR_A_VERB=$(AR) rcs $@ $(filter %.o,$^)
 CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
-CC_PRINCESS_O_VERB=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
+CC_PRINCESS_O_VERB=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
 LD_E_VERB=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(HCONF_LIBS) $(LIBS)
 MKDIR_VERB=[ -d $(@D) ] || mkdir -p $(@D)
 

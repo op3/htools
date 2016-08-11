@@ -17,7 +17,7 @@
 #ifndef HWT_PANEL_H
 #define HWT_PANEL_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct HWT;
 

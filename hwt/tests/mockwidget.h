@@ -17,7 +17,7 @@
 #ifndef MOCKWIDGET_H
 #define MOCKWIDGET_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct HWT;
 struct HWTEvent;

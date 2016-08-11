@@ -17,11 +17,10 @@
 #ifndef HTW_HWT_H
 #define HTW_HWT_H
 
-#include <hutils/macros.h>
-#include <hwt/base.h>
-#include <hwt/event.h>
+#include <hutils/funcattr.h>
 
 struct HWT;
+struct HWTEvent;
 struct HWTRenderer;
 struct HWTWidget;
 

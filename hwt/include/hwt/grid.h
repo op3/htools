@@ -17,7 +17,8 @@
 #ifndef HWT_GRID_H
 #define HWT_GRID_H
 
-#include <hutils/macros.h>
+#include <stdlib.h>
+#include <hutils/funcattr.h>
 
 struct HWT;
 

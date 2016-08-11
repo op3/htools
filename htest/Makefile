@@ -33,12 +33,10 @@ OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 HCONF_CACHES:=../hutils
 HCONF_SRC:=src/htest.h
 
-HTEST_GEN:=$(BUILD_DIR)/tests/tests.c
 HTEST_SRC:=$(wildcard tests/*.c)
-HTEST_SUITE_PRE=$(MKDIR_VERB)
+HTEST_PRE=$(MKDIR_VERB)
 HTEST_SUITE_SRC=$<
 HTEST_SUITE_DST=$@
-TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_GEN:.c=.o)
 
 .PHONY: all
 all: $(BUILD_DIR)/test
@@ -52,7 +50,7 @@ clean:
 include ../hgmake/hconf.mk
 include htest.mk
 
-$(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(TEST_OBJ)
+$(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(HTEST_OBJ)
 	$(MKDIR)
 	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils
 
@@ -68,4 +66,4 @@ $(BUILD_DIR)/%.o: %.c Makefile htest.mk $(HCONF_CACHE)
 	$(MKDIR)
 	$(CC_O)
 
--include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))
+-include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))

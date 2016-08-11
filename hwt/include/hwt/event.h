@@ -23,7 +23,7 @@
 	if (HWT_BREAK == hwt_widget_respond(hwt, widget, event)) {\
 		return HWT_BREAK;\
 	}\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 enum HWTEventFlow {
 	HWT_BREAK,

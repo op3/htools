@@ -17,7 +17,7 @@
 #ifndef HWT_BUTTON_H
 #define HWT_BUTTON_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct HWT;
 

@@ -172,6 +172,11 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 						    "Funny -framework flag.",
 						    filename, i + 1);
 					}
+					/*
+					 * Add a space to the name, because:
+					 * "-framework yadayada".
+					 */
+					++p;
 				} else if ('-' == p[0]) {
 					p += 2;
 				}
@@ -189,12 +194,6 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 				    name_start, value_start, value_end -
 				    value_start);
 				++flag_num[i];
-/*if (END != prev) fprintf(stderr, "%s:%d\n", prev->str, do_write_prev);*/
-/*{
-	struct Flag *flag;
-	flag = TAILQ_LAST(&flag_list[i], FlagList);
-fprintf(stderr, "%s:%s\n", a_argv[idx], flag->str);
-}*/
 			}
 		}
 		fclose(file);

@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* This header declares things needed only for creating new widgets. */
+/* This header declares things needed only for creating widgets. */
 
 #ifndef HTW_WIDGET_H
 #define HTW_WIDGET_H
@@ -39,7 +39,7 @@ struct Type *hwt_cast_##Type(struct HWTWidget *)
 	callback_.push_rect = push_rect;\
 	callback_.respond = respond;\
 	o_type = hwt_widget_register_(hwt, sizeof(struct Type), &callback_);\
-} HUTILS_COND(while, 0)
+} WHILE_0
 
 struct HWT;
 struct HWTEvent;

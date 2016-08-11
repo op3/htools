@@ -19,9 +19,9 @@
 
 struct HWT;
 
-void hwt_button_setup_(struct HWT *);
-void hwt_grid_setup_(struct HWT *);
-void hwt_label_setup_(struct HWT *);
-void hwt_panel_setup_(struct HWT *);
+void	hwt_button_setup_(struct HWT *);
+void	hwt_grid_setup_(struct HWT *);
+void	hwt_label_setup_(struct HWT *);
+void	hwt_panel_setup_(struct HWT *);
 
 #endif

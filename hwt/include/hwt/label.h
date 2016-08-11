@@ -17,7 +17,7 @@
 #ifndef HWT_LABEL_H
 #define HWT_LABEL_H
 
-#include <hutils/macros.h>
+#include <hutils/funcattr.h>
 
 struct HWT;
 
