@@ -29,8 +29,8 @@ endif
 TARGET:=$(BUILD_DIR)/libhutils.a
 SRC:=$(wildcard src/*.c)
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr err dir fmtmod \
-	getopt macros math stdint string thread time)
+HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr err fmtmod \
+	macros math stdint string getopt dir thread time)
 HCONF_DEP:=Makefile
 
 TEST:=$(BUILD_DIR)/test

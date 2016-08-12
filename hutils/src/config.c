@@ -17,10 +17,10 @@
 #include <hutils/config.h>
 #include <assert.h>
 #include <stdio.h>
-#include <string.h>
 #include <hutils/lexer.h>
 #include <hutils/memory.h>
 #include <hutils/queue.h>
+#include <hutils/string.h>
 #include <hutils/time.h>
 
 TAILQ_HEAD(ConfigList, Config);

@@ -17,7 +17,9 @@
 # HCONF_SRC    = List of files to be hconf:ed.
 # HCONF_DEP    = List of files to depend on.
 
-SED?=sed
+ifeq (,$(SED))
+SED=sed
+endif
 
 HCONF_CONF:=$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf
 HCONF_MERGE:=$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge
@@ -30,12 +32,6 @@ HCONF_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_CACHE))
 HCONF_CFLAGS=$(shell $(SED) -n 3p $(HCONF_CACHE))
 HCONF_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_CACHE))
 HCONF_LIBS=$(shell $(SED) -n 5p $(HCONF_CACHE))
-
-HCONF_TMP_CC=`$(SED) -n 1p $@.tmp`
-HCONF_TMP_CPPFLAGS=`$(SED) -n 2p $@.tmp`
-HCONF_TMP_CFLAGS=`$(SED) -n 3p $@.tmp`
-HCONF_TMP_LDFLAGS=`$(SED) -n 4p $@.tmp`
-HCONF_TMP_LIBS=`$(SED) -n 5p $@.tmp`
 
 AR_A_VERB=$(AR) rcs $@ $(filter %.o,$^)
 CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
@@ -75,6 +71,7 @@ $(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC)
 		$(HCONF_MERGE) $@.tmp $(HCONF_CACHES_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\
 	fi;\
+	do_rebuild=;\
 	for i in $(HCONF_SRC) x; do\
 		[ "x" = "$$i" ] && break;\
 		h=`echo $$i | sed 's/\.[0-9A-Za-z]*$$/.h/'`;\
@@ -82,7 +79,6 @@ $(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC)
 		h_tmp=$(BUILD_DIR)/_hconf/hconf/$$h;\
 		hc_fin=$(BUILD_DIR)/hconf/$$i.hconf;\
 		hc_tmp=$(BUILD_DIR)/_hconf/hconf/$$i.hconf;\
-		do_rebuild=;\
 		if [ ! -f $$hc_fin -o $$hc_fin -ot $$i ]; then\
 			do_rebuild=1;\
 		else\

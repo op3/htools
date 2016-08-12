@@ -20,10 +20,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
+#include <hutils/err.h>
 #include <hutils/macros.h>
 
 #if DO_GCOV_FLUSH
@@ -159,8 +159,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 	int status_;\
 	pid_ = fork();\
 	if (0 > pid_) {\
-		perror(NULL);\
-		exit(EXIT_FAILURE);\
+		err(EXIT_FAILURE, "fork");\
 	} else if (0 == pid_) {\
 		g_htest_dtor_ = dtor;\
 		signal(SIGABRT, htest_sighandler_);\

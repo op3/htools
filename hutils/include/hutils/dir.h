@@ -31,11 +31,12 @@ HCONF_TEST(int, (void))
 }
 #	endif
 #elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
+#	include <sys/types.h>
 #	include <dirent.h>
 #	if defined(HCONFING_mDIR_bDIRENT_POSIX_DRAFT9)
 HCONF_TEST(struct dirent *, (void))
 {
-	return readdir_r(NULL, NULL);
+	return readdir_r(0, 0);
 }
 #	endif
 #elif defined(HCONF_mDIR_bWINDOWS)

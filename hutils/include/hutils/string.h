@@ -71,8 +71,8 @@ HCONF_TEST(size_t, (char *const a_dst, char const *const a_src, size_t const
 #if defined(HCONF_mSTRNDUP_bPOSIX_200809)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
 #elif defined(HCONF_mSTRNDUP_bCUSTOM)
-#	define strndup hutils_strndup_
 /* HCONF_SRC=src/string.c */
+#	define strndup hutils_strndup_
 char *hutils_strndup_(char const *, size_t) FUNC_RETURNS;
 #endif
 #if defined(HCONFING_mSTRNDUP)
@@ -88,7 +88,8 @@ HCONF_TEST(char *, (char *const a_s, size_t const a_n))
 char *strsignal(int) FUNC_RETURNS;
 #elif defined(HCONF_mSTRSIGNAL_bCUSTOM)
 /* HCONF_SRC=src/string.c */
-char *strsignal(int) FUNC_RETURNS;
+#	define strsignal hutils_strsignal_
+char *hutils_strsignal_(int) FUNC_RETURNS;
 #endif
 #if defined(HCONFING_mSTRSIGNAL)
 HCONF_TEST(char *, (int const a_signum))

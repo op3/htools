@@ -43,19 +43,16 @@ An "approach" to autoconfing things which tries to solve the following things:
     Everything is done with make, including use of dependency rules.
  *) Much simpler macro guards.
     Bye-bye to: #ifdef __linux__ && GNUC_BLABLA
-    Hello to:   #if HCONF_M_MYMODULE
-                # if HCONF_B_MYBRANCH
-    hconf will test HCONF guards top-down until one compiles perfectly and
-    optionally links as well as possible.
+    Hello to:   #if defined(HCONF_mMYMODULE_bMYBRANCH)
+    hconf will test HCONF guards top-down until one compiles and optionally
+    links perfectly.
  *) Production code rather than special test code tested, although a
-    HCONF_TESTING macro is defined while configuring.
- *) Parallel processing.
-    make -j
+    HCONFING_* macro is defined while configuring.
 
 Overview of important project files:
  *) hconf.mk
     A bunch of commands and recipes for creating and using hconfs.
- *) <build_dir>/hconf_conf [-v] build-dir file hconf-files...
+ *) <build_dir>/hconf_conf [-v] -d build-dir -i file -h hconf-file
     Scans for preprocessor modules and branches, tries to compile and link,
     and writes the results to an hconf file.
  *) <build_dir>/hconf_merge hconf-files...
@@ -66,61 +63,60 @@ How to create an hconf:ed file:
  *) Create a header file with switches:
     include/myheader.h:
 #include <hconf/include/myheader.h>
-#if HCONF_MODULE(MY_MODULE)
-#	if HCONF_BRANCE(MY_BRANCH_1)
-#		include <string.h>
-#	elif HCONF_BRANCH(DEUX)
+#if defined(HCONF_mMY_MODULE_bMY_BRANCH_1)
+#	include <string.h>
+#elif defined(HCONF_mMY_MODULE_bDEUX)
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
-#		include <string.h>
-#	elif HCONF_BRANCH(SAN)
+#	include <string.h>
+#elif defined(HCONF_mMY_MODULE_bSAN)
 char *strndup(char const *, size_t);
-#	endif
-/* Optional test to be run by hconf. */
-#	if HCONF_TESTING
-void
-hconf_test(char const *const a_str, size_t const a_siz)
+#endif
+/* Optional module-level test to be run by hconf. */
+#if HCONFING_mMY_MODULE
+HCONF_TEST(char *, (void))
 {
-	return strndup(a_str, a_siz);
+	return strndup(0, 0);
 }
-#	endif
+#endif
+/* Optional branch-level test. */
+#if HCONFING_mMY_MODULE_bMY_BRANCH_1
+...
 #endif
 
  *) List hconf:able files and include hconf.mk:
     Makefile:
-     HCONF_FILES=include/myheader.h
+     HCONF_SRC=include/myheader.h
      include $(HTOOLS_PATH)/hgmake/hconf.mk
-    In short, this runs:
-     for i in $(HCONF_FILES)
-     do
-      ./hconf_conf [-v] $(BUILD_DIR) $i
-      ./hconf_merge $(HCONF_RESULT) > $(HCONF_RESULT)
+    In principle, this does:
+     for i in $(HCONF_SRC); do
+      ./hconf_conf [-v] -d $(BUILD_DIR) -i $i -h $(HCONF_CACHE)
+      ./hconf_merge $(HCONF_CACHE) > $(HCONF_CACHE)
      done
     to create a big hconf file with merged compiler options.
 
- *) Create dependencies on hconf results:
+ *) Create dependencies on hconf cache:
     Makefile:
-     %.o: %.c $(HCONF_RESULT)
+     %.o: %.c Makefile $(HCONF_CACHE)
 
  *) You should get the chosen branches in a generated header file:
     $(BUILD_DIR)/hconf/include/myheader.h:
      #ifndef HCONF_INCLUDE_MYHEADER_H
      #define HCONF_INCLUDE_MYHEADER_H
-     #define HCONF_MODULE_MY_MODULE 1
-     #define HCONF_BRANCH_DEUX 1
+     #define HCONF_mMY_MODULE_bDEUX
      #endif
- *) ... and compiler/linker flags in the hconf file:
+ *) ... and compiler/linker flags in the hconf file for fun:
     $(BUILD_DIR)/hconf/include/myheader.hconf:
+     ccache cc     # CC
      -D_BSD_SOURCE # CPPFLAGS
                    # CFLAGS
                    # LDFLAGS
                    # LIBS
 
- *) In order to use hconf results from another project:
+ *) In order to use hconf results from another project, e.g. to use hutils:
     Makefile:
-     HCONF_EXTERNAL:=path/to/project
+     HCONF_SRC:=...
+     HCONF_EXT:=$(HTOOLS_PATH)/hutils
      include $(HTOOLS_PATH)/hgmake/hconf.mk
-    hconf.mk will append $(BUILD_DIR) and the hconf result filename, plus add
-    the appropriate include path.
 
 Notes:
 
@@ -128,5 +124,5 @@ Notes:
 
 *) hconf.mk contains rules, so put your default rule before.
 
-*) Branches are put into a generated header file rather than into the hconf
-file, to reduce command line arguments.
+*) Branches are put into a generated header file rather than being given as
+CPPFLAGS to reduce command line arguments.

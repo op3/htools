@@ -26,7 +26,6 @@
 	}\
 } WHILE_0
 #elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
-#	include <sys/types.h>
 #	define DO_DIRENT
 #	define READDIR_R(a_dir, a_result) do {\
 	a_result = readdir_r(a_dir->dir, a_dir->entry);\

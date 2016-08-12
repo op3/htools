@@ -22,7 +22,7 @@
 
 #if defined(HCONF_mTHREAD_bST_OLD)
 /* HCONF_LDFLAGS=-mthreads */
-#	include <st.h>
+#	include <pthread.h>
 #	if defined(HCONFING_mTHREAD_bST_OLD)
 HCONF_TEST(int, (void))
 {
@@ -31,8 +31,8 @@ HCONF_TEST(int, (void))
 #	endif
 #elif defined(HCONF_mTHREAD_bST_NEW)
 /* HCONF_LDFLAGS=-mthreads */
-#	include <st.h>
-#	if defined(HCONF_mTHREAD_bST_NEW)
+#	include <pthread.h>
+#	if defined(HCONFING_mTHREAD_bST_NEW)
 HCONF_TEST(int, (void))
 {
 	return pthread_attr_init(NULL);

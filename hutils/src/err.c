@@ -16,9 +16,7 @@
 
 #include <hutils/err.h>
 
-#if HCONF_MODULE_ERR
-#	if HCONF_BRANCH_MSC
-#		include <windows.h>
+#if defined(HCONF_mERR_bMSC)
 
 void
 err(int const a_eval, const char *const a_fmt, ...)
@@ -36,10 +34,11 @@ err(int const a_eval, const char *const a_fmt, ...)
 	exit(a_eval);
 }
 
-#	elif HCONF_BRANCH_CUSTOM
+#elif defined(HCONF_mERR_bCUSTOM)
 #		include <errno.h>
 #		include <stdarg.h>
 #		include <stdio.h>
+#		include <string.h>
 
 void
 err(int const a_eval, const char *const a_fmt, ...)
@@ -55,5 +54,4 @@ err(int const a_eval, const char *const a_fmt, ...)
 	exit(a_eval);
 }
 
-#	endif
 #endif

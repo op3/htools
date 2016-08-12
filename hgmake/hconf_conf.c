@@ -46,7 +46,6 @@ struct Module {
 };
 TAILQ_HEAD(ModuleList, Module);
 
-static void		argumentize(char ***, char const *);
 static void		branch_free(struct Branch **);
 static int		build(char const *, char const *, char const *, char
     const *, char const *, char const *, char const *);
@@ -70,48 +69,12 @@ static char	*g_filename_hconf;
 static char	*g_filename_log;
 static char	*g_filename_main_bin;
 static char	*g_filename_main_c;
+static char	*g_filename_o;
 static char	*g_filename_sh;
 static char	*g_filename_upper;
 static int	g_line_no;
 static struct	ModuleList g_module_list =
 	TAILQ_HEAD_INITIALIZER(g_module_list);
-
-void
-argumentize(char ***const a_arr, char const *const a_str)
-{
-	char **arr;
-	char const *p;
-	size_t num;
-
-	num = 0;
-	for (p = a_str;;) {
-		for (; isspace(*p); ++p)
-			;
-		if ('\0' == *p) {
-			break;
-		}
-		for (; '\0' != *p && !isspace(*p); ++p)
-			;
-		++num;
-	}
-	arr = calloc(num + 1, sizeof(char *));
-	num = 0;
-	for (p = a_str;;) {
-		size_t len;
-
-		for (; isspace(*p); ++p)
-			;
-		if ('\0' == *p) {
-			break;
-		}
-		for (len = 0; '\0' != p[len] && !isspace(p[len]); ++len)
-			;
-		arr[num++] = strndup_(p, len);
-		p += len;
-	}
-	arr[num] = NULL;
-	*a_arr = arr;
-}
 
 void
 branch_free(struct Branch **const a_branch)
@@ -140,66 +103,68 @@ build(char const *const a_out, char const *const a_in, char const *const a_cc,
     char const *const a_cppflags, char const *const a_cflags, char const
     *const a_ldflags, char const *const a_libs)
 {
+	FILE *file;
 	int pipefd[2];
 	pid_t pid;
-	char *cmd, *prog, *p;
+	char *cmd;
 	int line_no, status;
 
+	/*
+	 * Run in script to make sure exec* "100%" runs, because some moldy
+	 * platforms do nasty things when one end is closed while accessing
+	 * the other end (i.e. bug majore).
+	 */
+	file = fopen(g_filename_sh, "wb");
+	if (NULL == file) {
+		err_(EXIT_FAILURE, "fopen(%s)", g_filename_sh);
+	}
 	cmd = STRCTV_BEGIN a_cc, " ", a_cppflags, " ", a_cflags, " -o ",
 	    a_out, " ", a_in, " ", a_ldflags, " ", a_libs STRCTV_END;
+	fprintf(file, "%s", cmd);
+	fclose(file);
 	log_("%s\n", cmd);
+	free(cmd);
 	if (0 != pipe(pipefd)) {
 		err_(EXIT_FAILURE, "pipe");
 	}
-	p = strchr(cmd, ' ');
-	if (NULL == p) {
-		errx_(EXIT_FAILURE, "Invalid build command.");
-	}
-	prog = strndup_(cmd, p - cmd);
 	pid = fork();
 	if (-1 == pid) {
 		err_(EXIT_FAILURE, "fork()");
 	} else if (0 == pid) {
-		char **arr;
-
 		close(pipefd[0]);
 		dup2(pipefd[1], 1);
 		dup2(pipefd[1], 2);
 		close(pipefd[1]);
-		argumentize(&arr, cmd);
-		execvp(prog, arr);
-		err_(EXIT_FAILURE, "exec(%s)", prog);
+		execlp("sh", "sh", g_filename_sh, NULL);
+		err_(EXIT_FAILURE, "exec(sh)");
 	}
 	close(pipefd[1]);
 	for (line_no = 0;;) {
-		char line[1024];
+		char buf[1024];
+		char *p;
 		int ret;
 
-		ret = read(pipefd[0], line, sizeof line - 1);
+		ret = read(pipefd[0], buf, sizeof buf - 1);
 		if (-1 == ret) {
-			err_(EXIT_FAILURE, "read(%s)", prog);
+			err_(EXIT_FAILURE, "read(sh)");
 			break;
 		}
 		if (0 == ret) {
 			break;
 		}
-		line[ret] = '\0';
-		log_("%s", line);
-		for (p = line;; ++p) {
-			p = strchr(p, '\n');
-			if (NULL == p) {
-				break;
+		buf[ret] = '\0';
+		log_("%s", buf);
+		for (p = buf; '\0' != *p; ++p) {
+			if ('\n' == *p) {
+				++line_no;
 			}
-			++line_no;
 		}
 	}
 	close(pipefd[0]);
-	if (-1 == wait(&status)) {
-		err_(EXIT_FAILURE, "wait(%s)", prog);
+	if (-1 == waitpid(pid, &status, 0)) {
+		err_(EXIT_FAILURE, "wait(sh)");
 	}
-	free(cmd);
-	free(prog);
-	return 0 == status ? 0 : line_no;
+	return WIFEXITED(status) && 0 == WEXITSTATUS(status) ? 0 : line_no;
 }
 
 void
@@ -309,6 +274,7 @@ my_exit()
 	free(g_filename_log);
 	free(g_filename_main_bin);
 	free(g_filename_main_c);
+	free(g_filename_o);
 	free(g_filename_sh);
 }
 
@@ -394,7 +360,7 @@ try()
 {
 	struct Module *module;
 	struct Bucket *bucket;
-	char *cppflags, *src;
+	char *cppflags, *cflags, *src;
 	int ret;
 
 	if (TAILQ_EMPTY(&g_module_list)) {
@@ -408,32 +374,38 @@ try()
 	resolve_variables(module->branch);
 	write_files(0);
 	bucket = &module->branch->bucket;
-	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf ",
-		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
-	src = STRCTV_BEGIN bucket->var[VAR_SRC], " ", g_filename_main_c
-	    STRCTV_END;
-	if (bucket->do_link) {
-		ret = build(g_filename_main_bin, src, bucket->var[VAR_CC],
-		    cppflags, bucket->var[VAR_CFLAGS],
-		    bucket->var[VAR_LDFLAGS], bucket->var[VAR_LIBS]);
-	} else {
-		char *cflags;
-
-		cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS]
-		    STRCTV_END;
-		ret = build(g_filename_main_bin, src, bucket->var[VAR_CC],
-		    cppflags, cflags, NULL, NULL);
-		free(cflags);
+	cppflags = STRCTV_BEGIN "-DHCONFING_m", module->name, " -DHCONFING_m",
+		 module->name, "_b", module->branch->name, " -I. -I",
+		 g_out_dir, "/_hconf ", bucket->var[VAR_CPPFLAGS] STRCTV_END;
+	cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS] STRCTV_END;
+	ret = build(g_filename_o, g_filename_main_c, bucket->var[VAR_CC],
+	    cppflags, cflags, "", "");
+	free(cppflags);
+	free(cflags);
+	if (0 != ret) {
+		goto try_failed;
 	}
+	if (!bucket->do_link) {
+		goto try_passed;
+	}
+	cppflags = STRCTV_BEGIN "-I", g_out_dir, "/_hconf ",
+		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
+	src = STRCTV_BEGIN g_filename_o, " ", bucket->var[VAR_SRC] STRCTV_END;
+	ret = build(g_filename_main_bin, src, bucket->var[VAR_CC], cppflags,
+	    bucket->var[VAR_CFLAGS], bucket->var[VAR_LDFLAGS],
+	    bucket->var[VAR_LIBS]);
 	free(cppflags);
 	free(src);
 	if (0 == ret) {
-		log_("Passed.\n");
-		module->branch->is_ok = 1;
-	} else {
-		log_("Failed.\n");
-		branch_free(&module->branch);
+		goto try_passed;
 	}
+try_failed:
+	log_("Failed.\n");
+	branch_free(&module->branch);
+	return;
+try_passed:
+	log_("Passed.\n");
+	module->branch->is_ok = 1;
 }
 
 void
@@ -471,11 +443,6 @@ write_files(int const a_write_final)
 	TAILQ_FOREACH(module, &g_module_list, next) {
 		fprintf(f, "#define HCONF_m%s_b%s\n", module->name,
 		    module->branch->name);
-		if (!module->branch->is_ok) {
-			fprintf(f, "#define HCONFING_m%s\n", module->name);
-			fprintf(f, "#define HCONFING_m%s_b%s\n", module->name,
-			    module->branch->name);
-		}
 	}
 	fprintf(f, "#endif \n");
 	fclose(f);
@@ -504,10 +471,14 @@ write_files(int const a_write_final)
 	/* Merge with given base hconf into current branch bucket. */
 	{
 		char const *argv[2];
+		size_t argc;
 
-		argv[0] = g_hconf_base;
-		argv[1] = g_filename_hconf;
-		merge(bucket, 2, argv);
+		argc = 0;
+		if (NULL != g_hconf_base) {
+			argv[argc++] = g_hconf_base;
+		}
+		argv[argc++] = g_filename_hconf;
+		merge(bucket, argc, argv);
 	}
 	/* Write it. */
 	f = fopen(g_filename_hconf, "wb");
@@ -529,7 +500,6 @@ main(int argc, char const *const *argv)
 	atexit(my_exit);
 	g_arg0 = argv[0];
 
-	do_usage = 0;
 	for (argi = 1; argc > argi; ++argi) {
 #define OPT_VALUE(dst, opt) \
 	if (0 == strncmp(argv[argi], opt, sizeof opt)) {\
@@ -539,8 +509,7 @@ main(int argc, char const *const *argv)
 			dst = argv[argi];\
 		} else {\
 			fprintf(stderr, "Missing value for "opt".\n");\
-			do_usage = 1;\
-			break;\
+			usage(EXIT_FAILURE);\
 		}\
 	}
 		if (0 == strcmp(argv[argi], "-v")) {
@@ -550,10 +519,10 @@ main(int argc, char const *const *argv)
 		else OPT_VALUE(g_hconf_base, "-h")
 		else {
 			fprintf(stderr, "Unknown argument %s.\n", argv[argi]);
-			do_usage = 1;
-			break;
+			usage(EXIT_FAILURE);
 		}
 	}
+	do_usage = 0;
 	if (NULL == g_out_dir) {
 		fprintf(stderr, "Missing mandatory -d argument.\n");
 		do_usage = 1;
@@ -603,6 +572,7 @@ main(int argc, char const *const *argv)
 				    "/_hconf/main.bin" STRCTV_END;
 		g_filename_main_c = STRCTV_BEGIN g_filename_h, ".main.c"
 		    STRCTV_END;
+		g_filename_o = STRCTV_BEGIN g_filename_h, ".o" STRCTV_END;
 		g_filename_sh = STRCTV_BEGIN g_filename_h, ".sh" STRCTV_END;
 		g_filename_upper = strdup(g_filename);
 		for (p = g_filename_upper; '\0' != *p; ++p) {
@@ -694,6 +664,8 @@ main(int argc, char const *const *argv)
 			errx_(EXIT_FAILURE, "%s:%d: Variable missing end of "
 			    "comment.", g_filename, g_line_no);
 		}
+		for (; isspace(p[-1]); --p)
+			;
 		expr_end = p;
 		var = malloc(sizeof *var);
 		var->expr = strndup_(expr_start, expr_end - expr_start);

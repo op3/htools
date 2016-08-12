@@ -15,6 +15,7 @@
  */
 
 #include <htest/htest.h>
+#include <stdio.h>
 
 HTEST(PrintoutsSuppressed)
 {

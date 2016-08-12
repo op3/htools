@@ -26,11 +26,11 @@
 HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) 2>/dev/null | \
 	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $(HTEST_SUITE_DST)
 ifneq (,$(V))
-	HTEST_CC_E_PRE=
-	HTEST_TESTS_PRE=
+ HTEST_CC_E_PRE=
+ HTEST_TESTS_PRE=
 else
-	HTEST_CC_E_PRE=@echo "SUITE $@" &&
-	HTEST_TESTS_PRE=@echo "TESTS $@" &&
+ HTEST_CC_E_PRE=@echo "SUITE $@" &&
+ HTEST_TESTS_PRE=@echo "TESTS $@" &&
 endif
 
 HTEST_TESTS:=$(BUILD_DIR)/htest/tests.c

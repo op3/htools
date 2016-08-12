@@ -18,37 +18,50 @@
 #include <stdarg.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_mSNPRINTF_bUNSAFE)
+#if defined(HCONF_mNPRINTF_bUNSAFE)
 #	include <stdarg.h>
 #	include <stdio.h>
 int
-snprintf_unsafe_(char *const a_dst, size_t const a_dst_size, char const *const
+hutils_snprintf_(char *const a_dst, size_t const a_dst_size, char const *const
     a_fmt, ...)
 {
 	va_list args;
-	size_t len;
+	int len;
 
 	va_start(args, a_fmt);
-	len = vsprintf(a_dst, a_fmt, args);
-	if (a_dst_size < len) {
+	len = hutils_vsnprintf_(a_dst, a_dst_size, a_fmt, args);
+	va_end(args);
+	return len;
+}
+
+int
+hutils_vsnprintf_(char *const a_dst, size_t const a_dst_size, char const
+    *const a_fmt, va_list a_args)
+{
+	int len;
+
+	len = vsprintf(a_dst, a_fmt, a_args);
+	if ((int)a_dst_size < len) {
 		fprintf(stderr, "Overrun in snprintf_unsafe_, abort!()\n");
 		abort();
 	}
-	va_end(args);
 	return len;
 }
 #endif
 
 #if defined(HCONF_mSTRNDUP_bCUSTOM)
 char *
-strndup_custom_(char const *const a_s, size_t const a_maxlen)
+hutils_strndup_(char const *const a_s, size_t const a_maxlen)
 {
 	char *s;
 	size_t len;
 
 	len = strlen(a_s);
 	len = MIN(len, a_maxlen);
-	MALLOC(s, len + 1);
+	s = malloc(len + 1);
+	if (NULL == s) {
+		return NULL;
+	}
 	if (NULL != s) {
 		memmove(s, a_s, len);
 		s[len] = '\0';
@@ -58,8 +71,10 @@ strndup_custom_(char const *const a_s, size_t const a_maxlen)
 #endif
 
 #if defined(HCONF_mSTRSIGNAL_bCUSTOM)
+#	include <sigcodes.h>
+
 char *
-strsignal(int const a_signum)
+hutils_strsignal_(int const a_signum)
 {
 #	define TRANSLATE(name) case SIG##name: return #name
 	switch (a_signum) {
@@ -91,6 +106,7 @@ strsignal(int const a_signum)
 		TRANSLATE(USR1);
 		TRANSLATE(USR2);
 	}
+	return "Unknown";
 }
 #endif
 
@@ -134,7 +150,10 @@ strctv_(char const *a_s1, ...)
 		from = va_arg(args, char const *);
 	} while (strctv_sentinel_ != from);
 	va_end(args);
-	MALLOC(dst, len + 1);
+	dst = malloc(len + 1);
+	if (NULL == dst) {
+		return NULL;
+	}
 	to = dst;
 	va_start(args, a_s1);
 	from = a_s1;

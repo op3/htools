@@ -16,11 +16,10 @@
 
 #include <hutils/getopt.h>
 
-#if HCONF_MODULE_GETOPT
-#	if HCONF_BRANCH_MSC
-#		include <assert.h>
-#		include <stdlib.h>
-#		include <string.h>
+#if defined(HCONF_mGETOPT_bMSC)
+#	include <assert.h>
+#	include <stdlib.h>
+#	include <string.h>
 
 char *optarg = NULL;
 int optind = 1;
@@ -66,5 +65,4 @@ getopt(int const a_argc, char *const *a_argv, char const *const a_optstring)
 	}
 }
 
-#	endif
 #endif

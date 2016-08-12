@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <hutils/funcattr.h>
+#include <hutils/stdint.h>
 
 struct Config;
 struct ConfigCollection;

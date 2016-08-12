@@ -15,6 +15,7 @@
  */
 
 #include <hutils/fs.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <hutils/memory.h>
 #include <hutils/string.h>

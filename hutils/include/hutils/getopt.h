@@ -26,7 +26,7 @@
 #	include <hutils/funcattr.h>
 extern char *optarg;
 extern int optind, optopt;
-int	getopt(int, char const **, char const *) FUNC_RETURNS;
+int	getopt(int, char *const *, char const *) FUNC_RETURNS;
 #endif
 
 #if defined(HCONFING_mGETOPT)

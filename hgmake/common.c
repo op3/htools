@@ -85,7 +85,7 @@ err_(int const a_code, char const *const a_fmt, ...)
 	vfprintf(stderr, a_fmt, args);
 	va_end(args);
 	fprintf(stderr, ": %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
+	exit(a_code);
 }
 
 void
@@ -97,7 +97,7 @@ errx_(int const a_code, char const *const a_fmt, ...)
 	vfprintf(stderr, a_fmt, args);
 	va_end(args);
 	fprintf(stderr, "\n");
-	exit(EXIT_FAILURE);
+	exit(a_code);
 }
 
 void
@@ -151,9 +151,10 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 				++i;
 				break;
 			}
-			for (p = line;; ++p) {
+			for (p = line;;) {
 				char const *name_start, *name_end;
 				char const *value_start, *value_end;
+				int do_no_arg;
 
 				for (; isspace(*p); ++p)
 					;
@@ -162,9 +163,10 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 				}
 				name_start = p;
 				/*
-				 * Flag = -X[ \t]*[^ \t]*, except Apple's
-				 * weird -framework stuff.
+				 * Flag = -X[ \t]*[^ \t]*, except ancient -W
+				 * and Apple's weird -framework stuff.
 				 */
+				do_no_arg = 0;
 				if (0 == STRBCMP(p, "-framework")) {
 					p += 10;
 					if (!isspace(*p)) {
@@ -178,18 +180,25 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 					 */
 					++p;
 				} else if ('-' == p[0]) {
+					do_no_arg = 0 == STRBCMP(p, "-W") &&
+					    ('\0' == p[2] || isspace(p[2]));
 					p += 2;
 				}
 				name_end = p;
-				for (; isspace(*p); ++p)
-					;
-				value_start = p;
-				for (; '\0' != *p && !isspace(*p); ++p) {
-					if ('\\' == p[0] && isspace(p[1])) {
-						++p;
+				if (do_no_arg) {
+					value_end = value_start = p;
+				} else {
+					for (; isspace(*p); ++p)
+						;
+					value_start = p;
+					for (; '\0' != *p && !isspace(*p);
+					    ++p) {
+						if ('\\' == p[0] &&
+						    isspace(p[1])) { ++p;
+						}
 					}
+					value_end = p;
 				}
-				value_end = p;
 				add_flag(&flag_list[i], name_start, name_end -
 				    name_start, value_start, value_end -
 				    value_start);

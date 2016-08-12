@@ -24,6 +24,7 @@
 #	include <err.h>
 #elif defined(HCONF_mERR_bMSC)
 /* HCONF_SRC=src/err.c */
+#	include <windows.h>
 void err(int, const char *, ...);
 #elif defined(HCONF_mERR_bCUSTOM)
 /* HCONF_SRC=src/err.c */

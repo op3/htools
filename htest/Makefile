@@ -18,7 +18,8 @@ LD?=gcc
 
 include ../hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I../hutils/include
+CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I../hutils/include \
+	-I../hutils/$(BUILD_DIR)
 include ../hgmake/strict_cflags.mk
 
 ifeq (release,$(BUILD_MODE))
