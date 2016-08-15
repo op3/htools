@@ -32,10 +32,11 @@ HCONF_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_CACHE))
 HCONF_CFLAGS=$(shell $(SED) -n 3p $(HCONF_CACHE))
 HCONF_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_CACHE))
 HCONF_LIBS=$(shell $(SED) -n 5p $(HCONF_CACHE))
+HCONF_MVD=sh $(HCONF_CACHE).mvd $(@:.o=.d) $(@D) $(patsubst %.c,%.d,$(<F))
 
 AR_A_VERB=$(AR) rcs $@ $(filter %.o,$^)
-CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
-CC_PRINCESS_O_VERB=$(HCONF_CC) -c -o $@ $< -MMD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
+CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS) && $(HCONF_MVD)
+CC_PRINCESS_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS)) && $(HCONF_MVD)
 LD_E_VERB=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(HCONF_LIBS) $(LIBS)
 MKDIR_VERB=[ -d $(@D) ] || mkdir -p $(@D)
 
@@ -44,6 +45,7 @@ ifneq (,$(V))
  CC_O_PRE=
  CC_PRINCESS_O_PRE=
  HCONF_CONF_V=-v
+ HCONF_MVD_ECHO=
  LD_E_PRE=
  QUIET=
 else
@@ -51,6 +53,7 @@ else
  CC_O_PRE=@echo "CC    $@";
  CC_PRINCESS_O_PRE=@echo "CCP   $@";
  HCONF_CONF_V=
+ HCONF_MVD_ECHO=@echo "HMVD  $@";
  LD_E_PRE=@echo "LD    $@";
  QUIET=@
 endif
@@ -64,7 +67,7 @@ HCONF_CACHES_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_CACHES))
 CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_CACHES))
 
 export CC
-$(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC)
+$(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
 	$(MKDIR)
 	$(QUIET)(echo;echo $(CPPFLAGS);echo $(CFLAGS);echo;echo;) > $@.tmp;\
 	if [ "$(HCONF_CACHES_FILES)" ]; then\
@@ -105,3 +108,13 @@ $(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC)
 	done;\
 	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
 	if [ 0 -eq $$? ]; then touch $@; else mv -f $@.tmp $@; fi
+
+$(HCONF_CACHE).mvd:
+	$(HCONF_MVD_ECHO)
+	$(MKDIR)
+	$(QUIET)cd $(@D);\
+	[ -d mvd_ ] || mkdir mvd_;\
+	echo "int main(){return 0;}" > mvd_/main.c;\
+	gcc -MD -o mvd_/main.o mvd_/main.c
+	$(QUIET)[ -f $(@D)/main.d ] && echo 'echo -n $$2/ | cat - $$3 > $$1 && rm -f $$3' > $@;\
+	touch $@
