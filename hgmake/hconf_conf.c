@@ -404,7 +404,10 @@ try_failed:
 	branch_free(&module->branch);
 	return;
 try_passed:
-	log_("Passed.\n");
+	printf("%s: %s:%s\n", g_filename, module->name, module->branch->name);
+	if (!g_is_verbose) {
+		log_("Passed.\n");
+	}
 	module->branch->is_ok = 1;
 }
 
