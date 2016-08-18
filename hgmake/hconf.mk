@@ -67,6 +67,10 @@ HCONF_CACHES_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_CACHES))
 CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_CACHES))
 
 export CC
+export CFLAGS
+export CPPFLAGS
+export LDFLAGS
+export LIBS
 $(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
 	$(MKDIR)
 	$(QUIET)(echo;echo $(CPPFLAGS);echo $(CFLAGS);echo;echo;) > $@.tmp;\
