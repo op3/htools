@@ -30,18 +30,19 @@ TAILQ_HEAD(FlagList, Flag);
 struct Flag {
 	char	*str;
 	TAILQ_ENTRY(Flag)	next;
+	TAILQ_ENTRY(Flag)	original_next;
 };
 
 TAILQ_SORT_PROTOTYPE(FlagList, flag_sort);
-static void	add_flag(struct FlagList *, char const *, size_t, char const
-    *, size_t);
-static int	cmp(struct Flag const *, struct Flag const *);
-static void	free_flag(struct Flag **);
+static struct Flag	*add_flag(struct FlagList *, char const *, size_t,
+    char const *, size_t);
+static int		cmp(struct Flag const *, struct Flag const *);
+static void		free_flag(struct Flag **);
 
 TAILQ_SORT_DEFINE(FlagList, flag_sort, Flag, next, cmp);
 char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
 
-void
+struct Flag *
 add_flag(struct FlagList *const a_list, char const *const a_name, size_t const
     a_name_size, char const *const a_value, size_t const a_value_size)
 {
@@ -53,6 +54,7 @@ add_flag(struct FlagList *const a_list, char const *const a_name, size_t const
 	memmove(flag->str + a_name_size, a_value, a_value_size);
 	flag->str[a_name_size + a_value_size] = '\0';
 	TAILQ_INSERT_TAIL(a_list, flag, next);
+	return flag;
 }
 
 void
@@ -122,6 +124,7 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
     *const a_argv)
 {
 	struct FlagList flag_list[VAR_OUTPUT_NUM];
+	struct FlagList original_list;
 	int flag_num[VAR_OUTPUT_NUM];
 	size_t i, idx;
 
@@ -129,6 +132,7 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 		a_bucket->var[i][0] = '\0';
 		TAILQ_INIT(&flag_list[i]);
 	}
+	TAILQ_INIT(&original_list);
 	memset(flag_num, 0, sizeof flag_num);
 	/* Pop flags from files into flag lists. */
 	for (idx = 0; a_argc > idx; ++idx) {
@@ -152,6 +156,7 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 				break;
 			}
 			for (p = line;;) {
+				struct Flag *flag;
 				char const *name_start, *name_end;
 				char const *value_start, *value_end;
 				int do_no_arg;
@@ -199,9 +204,13 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 					}
 					value_end = p;
 				}
-				add_flag(&flag_list[i], name_start, name_end -
-				    name_start, value_start, value_end -
-				    value_start);
+				flag = add_flag(&flag_list[i], name_start,
+				    name_end - name_start, value_start,
+				    value_end - value_start);
+				if (VAR_CPPFLAGS == i) {
+					TAILQ_INSERT_TAIL(&original_list,
+					    flag, original_next);
+				}
 				++flag_num[i];
 			}
 		}
@@ -243,10 +252,11 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 	}
 
 	/*
-	 * CPPFLAGS: Sort, remove dups, and keep the largest -D values.
-	 * "-Da=1", "-I. -Da=0", "-I." ->
+	 * CPPFLAGS: Sort, remove dups + keep the largest -D values, and emit
+	 * in original list order.
+	 * "-I. -Da=1", "-Da=0", "-I." ->
 	 * "-Da=0 -Da=1 -I. -I." ->
-	 * "-Da=1 -I."
+	 * "-I. -Da=1"
 	 */
 	i = VAR_CPPFLAGS;
 	flag_sort(&flag_list[i], flag_num[i]);
@@ -258,7 +268,6 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 		prev_dname_len = 0;
 		do {
 			struct Flag *flag;
-			size_t dname_len;
 			int do_write_prev;
 
 			flag = FIRST;
@@ -268,6 +277,8 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 			if (END == flag) {
 				do_write_prev = 1;
 			} else if (0 == STRBCMP(flag->str, "-D")) {
+				size_t dname_len;
+
 				for (dname_len = 2;
 				    '_' == flag->str[dname_len] ||
 				    isalnum(flag->str[dname_len]);
@@ -282,17 +293,24 @@ merge(struct Bucket *const a_bucket, int const a_argc, char const *const
 				do_write_prev = END == prev ? 0 :
 				    0 != strcmp(flag->str, prev->str);
 			}
-			if (END != prev && do_write_prev) {
-				cat_str(a_bucket->var[i], prev->str, sizeof
-				    a_bucket->var[i]);
-				cat_str(a_bucket->var[i], " ", sizeof
-				    a_bucket->var[i]);
-			}
-			if (END != prev) {
+			if (END != prev && !do_write_prev) {
+				TAILQ_REMOVE(&original_list, prev,
+				    original_next);
 				FREE(prev);
 			}
 			prev = flag;
 		} while (END != prev);
+		while (!TAILQ_EMPTY(&original_list)) {
+			struct Flag *flag;
+
+			flag = TAILQ_FIRST(&original_list);
+			TAILQ_REMOVE(&original_list, flag, original_next);
+			cat_str(a_bucket->var[i], flag->str, sizeof
+			    a_bucket->var[i]);
+			cat_str(a_bucket->var[i], " ", sizeof
+			    a_bucket->var[i]);
+			FREE(flag);
+		}
 	}
 
 	/*

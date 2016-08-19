@@ -118,7 +118,7 @@ build(char const *const a_out, char const *const a_in, char const *const a_cc,
 	if (NULL == file) {
 		err_(EXIT_FAILURE, "fopen(%s)", g_filename_sh);
 	}
-	cmd = STRCTV_BEGIN a_cc, " `echo $CPPFLAGS` ", a_cppflags, " ", a_cflags, " -o ",
+	cmd = STRCTV_BEGIN a_cc, " ", a_cppflags, " ", a_cflags, " -o ",
 	    a_out, " ", a_in, " ", a_ldflags, " ", a_libs STRCTV_END;
 	fprintf(file, "%s", cmd);
 	fclose(file);
