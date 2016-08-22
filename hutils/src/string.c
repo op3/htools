@@ -135,6 +135,8 @@ strbcmp(char const *const a_big, char const *const a_pattern)
 char *
 strctv_(char const *a_s1, ...)
 {
+	char const c_NULL[] = "NULL";
+	size_t const c_NULL_len = sizeof c_NULL - 1;
 	va_list args;
 	char const *from;
 	char *dst, *to;
@@ -144,7 +146,9 @@ strctv_(char const *a_s1, ...)
 	va_start(args, a_s1);
 	from = a_s1;
 	do {
-		if (NULL != from) {
+		if (NULL == from) {
+			len += c_NULL_len;
+		} else {
 			len += strlen(from);
 		}
 		from = va_arg(args, char const *);
@@ -158,7 +162,10 @@ strctv_(char const *a_s1, ...)
 	va_start(args, a_s1);
 	from = a_s1;
 	do {
-		if (NULL != from) {
+		if (NULL == from) {
+			memmove(to, c_NULL, c_NULL_len);
+			to += c_NULL_len;
+		} else {
 			while ('\0' != *from) {
 				*to++ = *from++;
 			}

@@ -33,7 +33,7 @@ struct ConfigCollection	*config_collection_load_from_file(char const *)
 struct ConfigCollection	*config_collection_load_from_memory(char const *,
     size_t) FUNC_RETURNS;
 int			config_collection_write(struct ConfigCollection const
-    *, char const *) FUNC_RETURNS;
+    *, char const *);
 double			config_getd(struct Config const *) FUNC_PURE
 FUNC_RETURNS;
 int32_t			config_geti32(struct Config const *) FUNC_PURE

@@ -14,8 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/config.h>
 #include <htest/htest.h>
+#include <hutils/config.h>
+#include <hutils/string.h>
 
 HTEST(MissingFileOk)
 {
@@ -192,6 +193,37 @@ HTEST(Duplications)
 	config_collection_free(&coll);
 }
 
+HTEST(WriteLoad)
+{
+	char const c_cfg[] = "[section] config=1";
+	struct ConfigCollection *coll;
+	struct ConfigSection *section;
+	struct Config *config;
+	char const *tmpdir;
+	char *path;
+
+	tmpdir = getenv("TMPDIR");
+	if (NULL == tmpdir) {
+		tmpdir = "/tmp";
+	}
+	path = STRCTV_BEGIN tmpdir, "/writeload.cfg" STRCTV_END;
+
+	coll = config_collection_load_from_memory(c_cfg, 0);
+	section = config_collection_get_section(coll, "section");
+	config = config_section_geti32_config(section, "config", 0);
+	HTRY_I(1, ==, config_geti32(config));
+	HTRY_I(1, ==, config_collection_write(coll, path));
+	config_collection_free(&coll);
+
+	coll = config_collection_load_from_file(path);
+	section = config_collection_get_section(coll, "section");
+	config = config_section_geti32_config(section, "config", 0);
+	HTRY_I(1, ==, config_geti32(config));
+	config_collection_free(&coll);
+
+	free(path);
+}
+
 HTEST_SUITE(Config)
 {
 	HTEST_ADD(MissingFileOk);
@@ -202,4 +234,5 @@ HTEST_SUITE(Config)
 	HTEST_ADD(MixedConfigs);
 	HTEST_ADD(ValueConversion);
 	HTEST_ADD(Duplications);
+	HTEST_ADD(WriteLoad);
 }

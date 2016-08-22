@@ -164,6 +164,7 @@ config_collection_write(struct ConfigCollection const *const a_coll, char
 			fprintf(file, "%s=%s\n", config->name, config->str);
 		}
 	}
+	fclose(file);
 	return 1;
 }
 

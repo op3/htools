@@ -24,7 +24,7 @@ HTEST(Strctv)
 
 	cat = STRCTV_BEGIN "This ", "is ", "a", NULL, " bunch", " of",
 	    " strings." STRCTV_END;
-	HTRY_STR("This is a bunch of strings.", ==, cat);
+	HTRY_STR("This is aNULL bunch of strings.", ==, cat);
 	FREE(cat);
 }
 

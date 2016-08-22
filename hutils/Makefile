@@ -74,3 +74,6 @@ $(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
 	$(CC_O)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))
+
+GCOV_SRC:=$(SRC)
+include ../hgmake/gcov.mk

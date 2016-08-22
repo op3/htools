@@ -24,3 +24,7 @@ clean:
 	$(MAKE) -C hgmake clean
 	$(MAKE) -C hutils clean
 	$(MAKE) -C htest clean
+
+.PHONY: gcov
+gcov:
+	$(MAKE) -C hutils gcov
