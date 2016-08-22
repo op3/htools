@@ -18,6 +18,17 @@
 #include <math.h>
 #include <htest/htest.h>
 
+HTEST(Add)
+{
+	struct Vector2f const c_v1 = {5.0f, 9.0f};
+	struct Vector2f const c_v2 = {1.0f, 2.0f};
+	struct Vector2f v;
+
+	HTRY_PTR(&v, ==, vector2f_add(&v, &c_v1, &c_v2));
+	HTRY_FLT(6.0f, ==, v.x);
+	HTRY_FLT(11.0f, ==, v.y);
+}
+
 HTEST(DotAxes)
 {
 	struct Vector2f const c_x = {1.0f, 0.0f};
@@ -28,11 +39,34 @@ HTEST(DotAxes)
 	HTRY_FLT(1.0f, ==, vector2f_dot(&c_y, &c_y));
 }
 
+HTEST(Mad)
+{
+	struct Vector2f const c_v1 = {1.0f, 2.0f};
+	struct Vector2f const c_v2 = {3.0f, 4.0f};
+	struct Vector2f const c_v3 = {5.0f, 6.0f};
+	struct Vector2f v;
+
+	HTRY_PTR(&v, ==, vector2f_mad(&v, &c_v1, &c_v2, &c_v3));
+	HTRY_FLT(8.0f, ==, v.x);
+	HTRY_FLT(14.0f, ==, v.y);
+}
+
 HTEST(Magnitude)
 {
 	struct Vector2f const c_v = {3.0f, 4.0f};
 
 	HTRY_FLT(5.0f, ==, vector2f_get_magnitude(&c_v));
+}
+
+HTEST(Normalize)
+{
+	struct Vector2f const c_v = {3.0f, 4.0f};
+	struct Vector2f v;
+
+	HTRY_PTR(&v, ==, vector2f_normalize(&v, &c_v));
+	HTRY_FLT(1e-9f, >, fabs(1.0f - vector2f_get_magnitude(&v)));
+	HTRY_FLT(3.0f / 5.0f, ==, v.x);
+	HTRY_FLT(4.0f / 5.0f, ==, v.y);
 }
 
 HTEST(Negate)
@@ -68,9 +102,12 @@ HTEST(Sub)
 
 HTEST_SUITE(Vector2)
 {
+	HTEST_ADD(Add);
 	HTEST_ADD(DotAxes);
+	HTEST_ADD(Mad);
 	HTEST_ADD(Magnitude);
 	HTEST_ADD(Negate);
+	HTEST_ADD(Normalize);
 	HTEST_ADD(Scale);
 	HTEST_ADD(Sub);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,46 +14,31 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/dir.h>
+#include <hutils/time.h>
+#include <math.h>
 #include <htest/htest.h>
 
-HTEST(InvalidDir)
+HTEST(GetTime)
 {
-	struct Dir *dir;
+	double t_0, t_1;
 
-	dir = dir_open("patatos");
-	HTRY_PTR(NULL, ==, dir);
+	t_0 = time_getd();
+	t_1 = time_getd();
+	HTRY_DBL(t_1, >, t_0);
 }
 
-HTEST(ListTests)
+HTEST(Zzzzz)
 {
-	struct DirEntry entry;
-	struct Dir *dir;
-	int num, ret;
+	double t_0, t_1;
 
-	dir = dir_open("tests");
-	HTRY_PTR(NULL, !=, dir);
-	/* Check that we can find a few files. */
-	num = 0;
-	for (;;) {
-		ret = dir_get(dir, &entry);
-		if (0 == ret) {
-			break;
-		}
-		++num;
-	}
-	HTRY_I(5, <, num);
-	/* Now check that the fail status keeps coming back. */
-	for (num = 0; 5 > num; ++num) {
-		ret = dir_get(dir, &entry);
-		HTRY_I(0, ==, ret);
-	}
-	dir_close(&dir);
-	HTRY_PTR(NULL, ==, dir);
+	t_0 = time_getd();
+	time_sleep(1e-3);
+	t_1 = time_getd();
+	HTRY_DBL(1e-3, >, fabs(1e-3 - (t_1 - t_0)));
 }
 
-HTEST_SUITE(Dir)
+HTEST_SUITE(Time)
 {
-	HTEST_ADD(InvalidDir);
-	HTEST_ADD(ListTests);
+	HTEST_ADD(GetTime);
+	HTEST_ADD(Zzzzz);
 }

@@ -232,15 +232,11 @@ lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
 				if ('+' == c || '-' == c) {
 					++j;
 				}
-				if (!isdigit(peek_char(a_lexer, j))) {
-					a_token->type = LEXER_ERROR;
-					a_lexer->error =
-					    LEXER_ERROR_INVALID_NUMBER;
-					return 0;
+				if (isdigit(peek_char(a_lexer, j))) {
+					for (i = j; isdigit(peek_char(a_lexer,
+					    i)); ++i)
+						;
 				}
-				for (; isdigit(peek_char(a_lexer, j)); ++j)
-					;
-				i = j;
 			}
 			a_token->str = extract(a_lexer, i);
 			return 1;

@@ -145,10 +145,6 @@ config_collection_write(struct ConfigCollection const *const a_coll, char
 	FILE *file;
 	struct ConfigSection *section;
 
-	if (NULL == a_coll) {
-		return 0;
-	}
-
 	file = fopen(a_path, "wb");
 	if (NULL == file) {
 		return 0;
@@ -156,12 +152,15 @@ config_collection_write(struct ConfigCollection const *const a_coll, char
 	time_str = time_gets();
 	fprintf(file, "# Created %s\n", time_str);
 	FREE(time_str);
-	TAILQ_FOREACH(section, &a_coll->section_list, next) {
-		struct Config *config;
+	if (NULL != a_coll) {
+		TAILQ_FOREACH(section, &a_coll->section_list, next) {
+			struct Config *config;
 
-		fprintf(file, "\n[%s]\n", section->name);
-		TAILQ_FOREACH(config, &section->config_list, next) {
-			fprintf(file, "%s=%s\n", config->name, config->str);
+			fprintf(file, "\n[%s]\n", section->name);
+			TAILQ_FOREACH(config, &section->config_list, next) {
+				fprintf(file, "%s=%s\n", config->name,
+				    config->str);
+			}
 		}
 	}
 	fclose(file);
@@ -233,7 +232,6 @@ config_setd(struct Config *const a_config, double const a_d)
 {
 	int len, ret;
 
-puts("4-------");
 	FREE(a_config->str);
 	a_config->d = a_d;
 	a_config->i32 = a_d;
@@ -241,7 +239,6 @@ puts("4-------");
 	MALLOC(a_config->str, len);
 	ret = snprintf(a_config->str, len, "%g", a_d);
 	assert(len > ret);
-printf("%f %d %s\n", a_config->d, a_config->i32, a_config->str);
 }
 
 void

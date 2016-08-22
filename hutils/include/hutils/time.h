@@ -88,6 +88,6 @@ HCONF_TEST(uint64_t, (void))
 
 double	time_getd(void) FUNC_RETURNS;
 char	*time_gets(void) FUNC_RETURNS;
-int	time_sleep(double) FUNC_RETURNS;
+int	time_sleep(double);
 
 #endif

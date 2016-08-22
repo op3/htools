@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,9 +14,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <htest/htest.h>
 #include <hutils/config.h>
+#include <htest/htest.h>
 #include <hutils/string.h>
+
+static char *get_tmp_path(void);
+
+char *
+get_tmp_path()
+{
+	char const *tmpdir;
+
+	tmpdir = getenv("TMPDIR");
+	if (NULL == tmpdir) {
+		tmpdir = "/tmp";
+	}
+	return STRCTV_BEGIN tmpdir, "/hutils_testconfig.cfg" STRCTV_END;
+}
 
 HTEST(MissingFileOk)
 {
@@ -96,7 +110,8 @@ HTEST(MixedSections)
 {
 	char const c_cfg1[] = "[section";
 	char const c_cfg2[] = "section]";
-	char const c_cfg3[] = "[section]";
+	char const c_cfg3[] = "[]";
+	char const c_cfg4[] = "[section]";
 	struct ConfigCollection *coll;
 
 	coll = config_collection_load_from_memory(c_cfg1, 0);
@@ -106,6 +121,9 @@ HTEST(MixedSections)
 	HTRY_PTR(NULL, ==, coll);
 
 	coll = config_collection_load_from_memory(c_cfg3, 0);
+	HTRY_PTR(NULL, ==, coll);
+
+	coll = config_collection_load_from_memory(c_cfg4, 0);
 	HTRY_PTR(NULL, !=, coll);
 	config_collection_free(&coll);
 }
@@ -193,20 +211,24 @@ HTEST(Duplications)
 	config_collection_free(&coll);
 }
 
+HTEST(WriteEmpty)
+{
+	char *path;
+
+	path = get_tmp_path();
+	HTRY_BOOL(config_collection_write(NULL, path));
+	free(path);
+}
+
 HTEST(WriteLoad)
 {
 	char const c_cfg[] = "[section] config=1";
 	struct ConfigCollection *coll;
 	struct ConfigSection *section;
 	struct Config *config;
-	char const *tmpdir;
 	char *path;
 
-	tmpdir = getenv("TMPDIR");
-	if (NULL == tmpdir) {
-		tmpdir = "/tmp";
-	}
-	path = STRCTV_BEGIN tmpdir, "/writeload.cfg" STRCTV_END;
+	path = get_tmp_path();
 
 	coll = config_collection_load_from_memory(c_cfg, 0);
 	section = config_collection_get_section(coll, "section");
@@ -224,6 +246,17 @@ HTEST(WriteLoad)
 	free(path);
 }
 
+HTEST(WriteStrangePath)
+{
+	char const c_cfg[] = "[section]";
+	struct ConfigCollection *coll;
+
+	coll = config_collection_load_from_memory(c_cfg, 0);
+	HTRY_BOOL(!config_collection_write(coll,
+	    "/user_must_not_write_here.cfg"));
+	config_collection_free(&coll);
+}
+
 HTEST_SUITE(Config)
 {
 	HTEST_ADD(MissingFileOk);
@@ -234,5 +267,7 @@ HTEST_SUITE(Config)
 	HTEST_ADD(MixedConfigs);
 	HTEST_ADD(ValueConversion);
 	HTEST_ADD(Duplications);
+	HTEST_ADD(WriteEmpty);
 	HTEST_ADD(WriteLoad);
+	HTEST_ADD(WriteStrangePath);
 }

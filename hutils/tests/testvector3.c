@@ -18,6 +18,18 @@
 #include <math.h>
 #include <htest/htest.h>
 
+HTEST(Add)
+{
+	struct Vector3f const c_v1 = {5.0f, 9.0f, 11.0f};
+	struct Vector3f const c_v2 = {1.0f, 2.0f, 3.0f};
+	struct Vector3f v;
+
+	HTRY_PTR(&v, ==, vector3f_add(&v, &c_v1, &c_v2));
+	HTRY_FLT(6.0f, ==, v.x);
+	HTRY_FLT(11.0f, ==, v.y);
+	HTRY_FLT(14.0f, ==, v.z);
+}
+
 HTEST(CrossAxes)
 {
 	struct Vector3f const c_x = {1.0f, 0.0f, 0.0f};
@@ -92,6 +104,18 @@ HTEST(Negate)
 	HTRY_FLT(-3.0f, ==, v.z);
 }
 
+HTEST(Normalize)
+{
+	struct Vector3f const c_v = {1.0f, 4.0f, 8.0f};
+	struct Vector3f v;
+
+	HTRY_PTR(&v, ==, vector3f_normalize(&v, &c_v));
+	HTRY_FLT(1e-9f, >, fabs(1.0f - vector3f_get_magnitude(&v)));
+	HTRY_FLT(1.0f / 9.0f, ==, v.x);
+	HTRY_FLT(4.0f / 9.0f, ==, v.y);
+	HTRY_FLT(8.0f / 9.0f, ==, v.z);
+}
+
 HTEST(Scale)
 {
 	struct Vector3f const c_v = {1.0f, 2.0f, 3.0f};
@@ -117,12 +141,14 @@ HTEST(Sub)
 
 HTEST_SUITE(Vector3)
 {
+	HTEST_ADD(Add);
 	HTEST_ADD(CrossAxes);
 	HTEST_ADD(CrossQuadArea);
 	HTEST_ADD(CrossPointers);
 	HTEST_ADD(DotAxes);
 	HTEST_ADD(Magnitude);
 	HTEST_ADD(Negate);
+	HTEST_ADD(Normalize);
 	HTEST_ADD(Scale);
 	HTEST_ADD(Sub);
 }

@@ -21,10 +21,14 @@ all:
 
 .PHONY: clean
 clean:
-	$(MAKE) -C hgmake clean
-	$(MAKE) -C hutils clean
-	$(MAKE) -C htest clean
+	$(MAKE) -C hgmake $@
+	$(MAKE) -C hutils $@
+	$(MAKE) -C htest $@
 
 .PHONY: gcov
 gcov:
-	$(MAKE) -C hutils gcov
+	$(MAKE) -C hutils $@
+
+.PHONY: gcov
+gcov_anno:
+	$(MAKE) -C hutils $@
