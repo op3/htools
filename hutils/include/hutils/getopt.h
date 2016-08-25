@@ -28,7 +28,6 @@ extern char *optarg;
 extern int optind, optopt;
 int	getopt(int, char *const *, char const *) FUNC_RETURNS;
 #endif
-
 #if defined(HCONFING_mGETOPT)
 HCONF_TEST(int, (int argc, char **argv))
 {

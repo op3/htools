@@ -251,8 +251,8 @@ module_add(char *const a_name)
 	module = TAILQ_LAST(&g_module_list, ModuleList);
 	if (TAILQ_END(&g_module_list) != module) {
 		if (NULL == module->branch) {
-			errx_(EXIT_FAILURE, "%s: Module %s failed, check log "
-			    "%s.", g_filename, module->name, g_filename_log);
+			errx_(EXIT_FAILURE, "%s: %s failed, check log %s.",
+			    g_filename, module->name, g_filename_log);
 		}
 	}
 	if (NULL != a_name) {

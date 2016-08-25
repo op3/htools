@@ -27,7 +27,6 @@
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 /* HCONF_LIBS=-lm */
 #endif
-
 #if defined(HCONFING_mMATH)
 HCONF_TEST(double, (double const a_v))
 {

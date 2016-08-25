@@ -37,9 +37,8 @@
 		if (cond)\
 		__pragma(warning(pop))
 #endif
-#if HCONFING_mDO_WHILE
-void
-hconf_test(void)
+#if defined(HCONFING_mCONST_EXPR)
+HCONF_TEST(void, (void))
 {
 	do {} WHILE_0;
 }

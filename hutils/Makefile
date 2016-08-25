@@ -15,6 +15,7 @@
 AR?=ar
 CC?=gcc
 LD?=gcc
+HTOOLS_PATH?=..
 
 include ../hgmake/build_dir.mk
 
@@ -29,8 +30,8 @@ endif
 TARGET:=$(BUILD_DIR)/libhutils.a
 SRC:=$(wildcard src/*.c)
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr err fmtmod \
-	macros math stdint string getopt dir thread time)
+HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr err stdint fmtmod \
+	macros math string getopt dir thread time)
 HCONF_DEP:=Makefile
 
 TEST:=$(BUILD_DIR)/test
@@ -44,7 +45,7 @@ all: $(TARGET)
 
 .PHONY: test
 test: $(TEST)
-	@./$< -c
+	@TMPDIR=$(shell pwd)/$(BUILD_DIR) ./$< -c
 
 .PHONY: splint
 splint:
