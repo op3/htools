@@ -14,31 +14,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/time.h>
-#include <math.h>
-#include <htest/htest.h>
+#ifndef HUTILS_ASSERT_H
+#define HUTILS_ASSERT_H
 
-HTEST(GetTime)
-{
-	double t_0, t_1;
+#include <assert.h>
+#include <stdio.h>
+#include <hutils/macros.h>
 
-	t_0 = time_getd();
-	t_1 = time_getd();
-	HTRY_DBL(t_1, >, t_0);
-}
+#ifdef NDEBUG
+#	define ASSERT(Type, fmt, lhs, op, rhs)
+#else
+#	define ASSERT(Type, fmt, lhs, op, rhs) do {\
+	Type lhs_ = lhs;\
+	Type rhs_ = rhs;\
+	if (!(lhs_ op rhs_)) {\
+		fprintf(stderr, "%s:%d: "#lhs"=%"#fmt" "#op" "#rhs"=%"#fmt\
+		    " failed.", __FILE__, __LINE__, lhs_, rhs_);\
+		abort();\
+	}\
+} WHILE_0
+#endif
 
-HTEST(Zzzzz)
-{
-	double t_0, t_1;
-
-	t_0 = time_getd();
-	time_sleep(1e-3);
-	t_1 = time_getd();
-	HTRY_DBL(1e-1, >, fabs(1e-3 - (t_1 - t_0)));
-}
-
-HTEST_SUITE(Time)
-{
-	HTEST_ADD(GetTime);
-	HTEST_ADD(Zzzzz);
-}
+#endif

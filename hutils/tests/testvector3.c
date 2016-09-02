@@ -127,6 +127,16 @@ HTEST(Scale)
 	HTRY_FLT(6.0f, ==, v.z);
 }
 
+HTEST(Set)
+{
+	struct Vector3f v;
+
+	vector3f_set(&v, 1.0f, 2.0f, 3.0f);
+	HTRY_FLT(1.0f, ==, v.x);
+	HTRY_FLT(2.0f, ==, v.y);
+	HTRY_FLT(3.0f, ==, v.z);
+}
+
 HTEST(Sub)
 {
 	struct Vector3f const c_v1 = {5.0f, 9.0f, 11.0f};
@@ -150,5 +160,6 @@ HTEST_SUITE(Vector3)
 	HTEST_ADD(Negate);
 	HTEST_ADD(Normalize);
 	HTEST_ADD(Scale);
+	HTEST_ADD(Set);
 	HTEST_ADD(Sub);
 }

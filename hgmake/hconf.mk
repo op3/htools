@@ -110,8 +110,7 @@ $(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
 		cp $$h_tmp $$h_fin;\
 		cp $$hc_tmp $$hc_fin && cp $$hc_tmp $@.tmp;\
 	done;\
-	[ -f $@ ] && diff $@ $@.tmp > /dev/null;\
-	if [ 0 -eq $$? ]; then touch $@; else mv -f $@.tmp $@; fi
+	mv -f $@.tmp $@
 
 $(HCONF_CACHE).mvd:
 	$(HCONF_MVD_ECHO)

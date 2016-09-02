@@ -89,6 +89,15 @@ HTEST(Scale)
 	HTRY_FLT(4.0f, ==, v.y);
 }
 
+HTEST(Set)
+{
+	struct Vector2f v;
+
+	vector2f_set(&v, 1.0f, 2.0f);
+	HTRY_FLT(1.0f, ==, v.x);
+	HTRY_FLT(2.0f, ==, v.y);
+}
+
 HTEST(Sub)
 {
 	struct Vector2f const c_v1 = {5.0f, 9.0f};
@@ -109,5 +118,6 @@ HTEST_SUITE(Vector2)
 	HTEST_ADD(Negate);
 	HTEST_ADD(Normalize);
 	HTEST_ADD(Scale);
+	HTEST_ADD(Set);
 	HTEST_ADD(Sub);
 }

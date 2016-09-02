@@ -14,31 +14,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/time.h>
+#include <hutils/aabb3.h>
 #include <math.h>
-#include <htest/htest.h>
+#include <hutils/macros.h>
 
-HTEST(GetTime)
+float
+aabb3f_get_distance(struct AABB3f const *a_aabb, struct Vector3f const *a_v)
 {
-	double t_0, t_1;
-
-	t_0 = time_getd();
-	t_1 = time_getd();
-	HTRY_DBL(t_1, >, t_0);
+	return sqrt(aabb3f_get_distance_sqr(a_aabb, a_v));
 }
 
-HTEST(Zzzzz)
+float
+aabb3f_get_distance_sqr(struct AABB3f const *a_aabb, struct Vector3f const
+    *a_v)
 {
-	double t_0, t_1;
+	struct	Vector3f d, p;
 
-	t_0 = time_getd();
-	time_sleep(1e-3);
-	t_1 = time_getd();
-	HTRY_DBL(1e-1, >, fabs(1e-3 - (t_1 - t_0)));
-}
-
-HTEST_SUITE(Time)
-{
-	HTEST_ADD(GetTime);
-	HTEST_ADD(Zzzzz);
+	p.x = CLAMP(a_v->x, a_aabb->min.x, a_aabb->max.x);
+	p.y = CLAMP(a_v->y, a_aabb->min.y, a_aabb->max.y);
+	p.z = CLAMP(a_v->z, a_aabb->min.z, a_aabb->max.z);
+	vector3f_sub(&d, &p, a_v);
+	return vector3f_dot(&d, &d);
 }

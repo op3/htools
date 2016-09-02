@@ -73,6 +73,14 @@ vector2f_scale(struct Vector2f *const a_vo, struct Vector2f const *const a_v,
 }
 
 struct Vector2f *
+vector2f_set(struct Vector2f *a_v, float a_x, float a_y)
+{
+	a_v->x = a_x;
+	a_v->y = a_y;
+	return a_v;
+}
+
+struct Vector2f *
 vector2f_sub(struct Vector2f *const a_vo, struct Vector2f const *const a_v1,
     struct Vector2f const *const a_v2)
 {

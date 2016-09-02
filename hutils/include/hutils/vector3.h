@@ -38,6 +38,7 @@ struct Vector3f	*vector3f_normalize(struct Vector3f *, struct Vector3f const
     *);
 struct Vector3f	*vector3f_scale(struct Vector3f *, struct Vector3f const *,
     float);
+struct Vector3f	*vector3f_set(struct Vector3f *, float, float, float);
 struct Vector3f	*vector3f_sub(struct Vector3f *, struct Vector3f const *,
     struct Vector3f const *);
 

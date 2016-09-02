@@ -79,6 +79,15 @@ vector3f_scale(struct Vector3f *const a_vo, struct Vector3f const *a_v, float
 }
 
 struct Vector3f *
+vector3f_set(struct Vector3f *a_v, float a_x, float a_y, float a_z)
+{
+	a_v->x = a_x;
+	a_v->y = a_y;
+	a_v->z = a_z;
+	return a_v;
+}
+
+struct Vector3f *
 vector3f_sub(struct Vector3f *const a_vo, struct Vector3f const *const a_v1,
     struct Vector3f const *const a_v2)
 {

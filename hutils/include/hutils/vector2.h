@@ -37,6 +37,7 @@ struct Vector2f	*vector2f_normalize(struct Vector2f *, struct Vector2f const
     *);
 struct Vector2f	*vector2f_scale(struct Vector2f *, struct Vector2f const *,
     float);
+struct Vector2f	*vector2f_set(struct Vector2f *, float, float);
 struct Vector2f	*vector2f_sub(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *);
 

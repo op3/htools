@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,46 +14,28 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/dir.h>
+#include <hutils/aabb3.h>
+#include <math.h>
 #include <htest/htest.h>
 
-HTEST(InvalidDir)
+HTEST(Min)
 {
-	struct Dir *dir;
+	struct AABB3f const c_aabb = {
+		{1.0f, 2.0f, 3.0f},
+		{4.0f, 5.0f, 6.0f}
+	};
+	struct Vector3f const c_v0 = {2.0f, 3.0f, 4.0f};
+	struct Vector3f const c_v1 = {2.0f, 3.0f, 7.0f};
+	struct Vector3f const c_v2 = {5.0f, 3.0f, 7.0f};
+	struct Vector3f const c_v3 = {5.0f, 6.0f, 7.0f};
 
-	dir = dir_open("patatos");
-	HTRY_PTR(NULL, ==, dir);
+	HTRY_FLT(0.0f, ==, aabb3f_get_distance(&c_aabb, &c_v0));
+	HTRY_FLT(1.0f, ==, aabb3f_get_distance(&c_aabb, &c_v1));
+	HTRY_FLT(sqrt(2), ==, aabb3f_get_distance(&c_aabb, &c_v2));
+	HTRY_FLT(sqrt(3), ==, aabb3f_get_distance(&c_aabb, &c_v3));
 }
 
-HTEST(ListTests)
+HTEST_SUITE(AABB3)
 {
-	struct DirEntry entry;
-	struct Dir *dir;
-	int num, ret;
-
-	dir = dir_open("tests");
-	HTRY_PTR(NULL, !=, dir);
-	/* Check that we can find a few files. */
-	num = 0;
-	for (;;) {
-		ret = dir_get(dir, &entry);
-		if (0 == ret) {
-			break;
-		}
-		++num;
-	}
-	HTRY_I(5, <, num);
-	/* Now check that the fail status keeps coming back. */
-	for (num = 0; 5 > num; ++num) {
-		ret = dir_get(dir, &entry);
-		HTRY_I(0, ==, ret);
-	}
-	dir_close(&dir);
-	HTRY_PTR(NULL, ==, dir);
-}
-
-HTEST_SUITE(Dir)
-{
-	HTEST_ADD(InvalidDir);
-	HTEST_ADD(ListTests);
+	HTEST_ADD(Min);
 }
