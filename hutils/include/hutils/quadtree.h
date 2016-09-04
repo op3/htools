@@ -68,7 +68,7 @@ name##_node_alloc_(struct TreeType *a_tree, struct Vector2f const *a_grid,\
 	node = alloc(a_tree->user_data);\
 	COPY(node->entry.grid, *a_grid);\
 	node->entry.level = a_level;\
-	A = a_tree->world_size / a_tree->grid_size;\
+	A = a_tree->world_size / (float)a_tree->grid_size;\
 	B = -a_tree->world_size / 2;\
 	node_size = a_tree->world_size / (1 << a_level);\
 	vector3f_set(&node->entry.aabb.min,\
@@ -84,7 +84,7 @@ static void name##_node_free_(struct TreeType *, struct NodeType **);\
 static void \
 name##_node_clear_(struct TreeType *a_tree, struct NodeType *a_node)\
 {\
-	ASSERT(void *, p, NULL, !=, a_node);\
+	ASSERT(void *, "p", NULL, !=, a_node);\
 	if (NULL != a_node->entry.child[0]) {\
 		size_t i;\
 \
@@ -98,7 +98,7 @@ name##_node_free_(struct TreeType *a_tree, struct NodeType **a_node)\
 {\
 	name##_node_clear_(a_tree, *a_node);\
 	free_(a_tree->user_data, a_node);\
-	ASSERT(void *, p, NULL, ==, *a_node);\
+	ASSERT(void *, "p", NULL, ==, *a_node);\
 }\
 static void \
 name##_node_visit_(struct TreeType *a_tree, struct NodeType *a_node)\
@@ -122,7 +122,7 @@ name##_node_visit_(struct TreeType *a_tree, struct NodeType *a_node)\
 		int	level;\
 \
 		level = a_node->entry.level + 1;\
-		side2 = a_tree->grid_size / (1 << level);\
+		side2 = (float)a_tree->grid_size / (1 << level);\
 		vector2f_set(&s,\
 		    a_node->entry.grid.x,\
 		    a_node->entry.grid.y);\
@@ -159,7 +159,7 @@ name##_init(struct TreeType *a_tree, struct UserType *a_user_data, float\
 {\
 	struct	Vector2f const c_origin = {0.0f, 0.0f};\
 \
-	a_tree->grid_size = a_grid_size;\
+	a_tree->grid_size = (size_t)a_grid_size;\
 	a_tree->world_size = a_world_size;\
 	a_tree->user_data = a_user_data;\
 	a_tree->root = name##_node_alloc_(a_tree, &c_origin, 0);\
@@ -167,7 +167,7 @@ name##_init(struct TreeType *a_tree, struct UserType *a_user_data, float\
 static void \
 name##_traverse(struct TreeType *a_tree)\
 {\
-	ASSERT(void *, p, NULL, !=, a_tree->root);\
+	ASSERT(void *, "p", NULL, !=, a_tree->root);\
 	name##_node_visit_(a_tree, a_tree->root);\
 }\
 struct TreeType

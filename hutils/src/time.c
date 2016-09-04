@@ -20,9 +20,12 @@
 #if defined(HCONF_mTIME_bPOSIX_REALTIME_DRAFT9)
 #	define ASCTIME_R(tm, buf) asctime_r(tm, buf, 26)
 #	define GMTIME_R(tt, tm) gmtime_r(tm, tt)
-#else
+#elif !defined(_MSC_VER)
 #	define ASCTIME_R(tm, buf) asctime_r(tm, buf)
 #	define GMTIME_R(tt, tm) gmtime_r(tt, tm)
+#else
+#	define ASCTIME_R(tm, buf) asctime_s(buf, 26, tm)
+#	define GMTIME_R(tt, tm) gmtime_s(tm, tt)
 #endif
 
 #if defined(SLEEP_NANOSLEEP)
@@ -36,6 +39,8 @@
 #	include <stdlib.h>
 #	include <mach/mach_time.h>
 #	include <hutils/err.h>
+#elif defined(_MSC_VER)
+#	include <assert.h>
 #endif
 
 double
@@ -48,7 +53,7 @@ time_getd()
 		err(EXIT_FAILURE, "clock_gettime");
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;
-#elif TIME_PERF
+#elif defined(TIME_PERF)
 	static double time_unit = -1.0;
 	LARGE_INTEGER li;
 
@@ -95,7 +100,7 @@ time_gets()
 }
 
 int
-time_sleep(double const a_s)
+time_sleep(double a_s)
 {
 #if defined(SLEEP_SLEEP)
 	Sleep((DWORD)(1e3 * a_s));

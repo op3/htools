@@ -21,7 +21,7 @@
 float
 aabb3f_get_distance(struct AABB3f const *a_aabb, struct Vector3f const *a_v)
 {
-	return sqrt(aabb3f_get_distance_sqr(a_aabb, a_v));
+	return (float)sqrt(aabb3f_get_distance_sqr(a_aabb, a_v));
 }
 
 float

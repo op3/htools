@@ -17,8 +17,9 @@
 #ifndef HUTILS_THREAD_H
 #define HUTILS_THREAD_H
 
-#include <hconf/include/hutils/thread.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+#include <hconf/include/hutils/thread.h>
 
 #if defined(HCONF_mTHREAD_bST_OLD)
 /* HCONF_LDFLAGS=-mthreads */
@@ -47,9 +48,9 @@ HCONF_TEST(int, (void))
 	return pthread_attr_init(NULL);
 }
 #	endif
-#elif defined(HCONF_mTHREAD_bWINDOWS)
-#	include <windows.h>
 #endif
+
+CDECLS_BEGIN
 
 struct CondVar;
 struct Mutex;
@@ -69,5 +70,7 @@ struct Mutex	*thread_mutex_create(char **) FUNC_RETURNS;
 int		thread_mutex_free(struct Mutex **, char **);
 int		thread_mutex_lock(struct Mutex *, char **);
 int		thread_mutex_unlock(struct Mutex *, char **);
+
+CDECLS_END
 
 #endif

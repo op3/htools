@@ -18,10 +18,13 @@
 #define HUTILS_STRING_H
 
 #include <string.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/string.h>
 
-#if defined(HCONF_mNPRINTF_bSTDIO)
+CDECLS_BEGIN
+
+#if defined(HCONF_mNPRINTF_bSTDIO) || defined(_MSC_VER)
 #	include <stdio.h>
 #elif defined(HCONF_mNPRINTF_bPROTOTYPE)
 #	include <stdarg.h>
@@ -44,6 +47,8 @@ HCONF_TEST(int, (char *const a_s, size_t const a_n, char const *const a_fmt))
 
 #if defined(HCONF_mSTRDUP_bPOSIX_200809)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
+#elif defined(_MSC_VER)
+#	define strdup _strdup
 #endif
 #if defined(HCONFING_mSTRDUP)
 HCONF_TEST(char *, (char *const a_s))
@@ -54,7 +59,7 @@ HCONF_TEST(char *, (char *const a_s))
 
 #if defined(HCONF_mSTRL_bBSD_SOURCE)
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
-#elif defined(HCONF_mSTRL_bCUSTOM)
+#elif defined(HCONF_mSTRL_bCUSTOM) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 size_t strlcat(char *, char const *, size_t);
 size_t strlcpy(char *, char const *, size_t);
@@ -86,7 +91,7 @@ HCONF_TEST(char *, (char *const a_s, size_t const a_n))
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
 #elif defined(HCONF_mSTRSIGNAL_bPROTOTYPE)
 char *strsignal(int) FUNC_RETURNS;
-#elif defined(HCONF_mSTRSIGNAL_bCUSTOM)
+#elif defined(HCONF_mSTRSIGNAL_bCUSTOM) || defined(_MSC_VER)
 /* HCONF_SRC=src/string.c */
 #	define strsignal hutils_strsignal_
 char *hutils_strsignal_(int) FUNC_RETURNS;
@@ -106,5 +111,7 @@ extern char const *strctv_sentinel_;
 int	strbcmp(char const *, char const *) FUNC_RETURNS;
 char	*strctv_(char const *, ...) FUNC_RETURNS;
 int	strecmp(char const *, char const *) FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

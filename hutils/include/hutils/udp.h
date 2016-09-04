@@ -22,8 +22,8 @@
 #include <hutils/stdint.h>
 
 #if defined(HCONF_mUDP_bGETADDRINFO)
-#	include <netdb.h>
 #	if defined(HCONFING_mUDP)
+#		include <netdb.h>
 HCONF_TEST(int, (void))
 {
 	return getaddrinfo(0, 0, 0, 0);
@@ -52,5 +52,7 @@ void			udp_server_receive(struct UDPServer const *, struct
     UDPAddress **, struct UDPDatagram *, double);
 void			udp_server_send(struct UDPServer const *, struct
     UDPDatagram const *);
+int				udp_setup(void) FUNC_RETURNS;
+void			udp_shutdown(void);
 
 #endif

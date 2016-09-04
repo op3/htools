@@ -17,7 +17,10 @@
 #ifndef HUTILS_MATRIX4_H
 #define HUTILS_MATRIX4_H
 
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+
+CDECLS_BEGIN
 
 struct Matrix4f {
 	float	m[16];
@@ -31,5 +34,7 @@ struct Vector3f	*matrix4f_mul_vector3f(struct Vector3f *, struct Matrix4f *,
 struct Matrix4f	*matrix4f_set_identity(struct Matrix4f *);
 struct Matrix4f	*matrix4f_set_ortho(struct Matrix4f *, float, float, float,
     float, float, float);
+
+CDECLS_END
 
 #endif

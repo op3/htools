@@ -15,6 +15,7 @@
  */
 
 #include <hutils/macros.h>
+#include <hutils/stdint.h>
 #include <htest/htest.h>
 
 HTEST(Copy)

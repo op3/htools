@@ -17,7 +17,10 @@
 #ifndef HUTILS_BITMASK_H
 #define HUTILS_BITMASK_H
 
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+
+CDECLS_BEGIN
 
 struct Bitmask;
 
@@ -30,5 +33,7 @@ void		bitmask_one(struct Bitmask *);
 void		bitmask_set(struct Bitmask *, int);
 void		bitmask_unset(struct Bitmask *, int);
 void		bitmask_zero(struct Bitmask *);
+
+CDECLS_END
 
 #endif

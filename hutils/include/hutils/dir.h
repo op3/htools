@@ -17,8 +17,9 @@
 #ifndef HUTILS_DIR_H
 #define HUTILS_DIR_H
 
-#include <hconf/include/hutils/dir.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+#include <hconf/include/hutils/dir.h>
 
 #if defined(HCONF_mDIR_bDIRENT)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
@@ -39,15 +40,9 @@ HCONF_TEST(struct dirent *, (void))
 	return readdir_r(0, 0);
 }
 #	endif
-#elif defined(HCONF_mDIR_bWINDOWS)
-#	include <windows.h>
-#	if defined(HCONFING_mDIR_bWINDOWS)
-HCONF_TEST(HANDLE, (char const *const a_path))
-{
-	return FindFirstFile(a_path, NULL);
-}
-#	endif
 #endif
+
+CDECLS_BEGIN
 
 struct Dir;
 struct DirEntry {
@@ -57,5 +52,7 @@ struct DirEntry {
 struct Dir	*dir_open(char const *) FUNC_RETURNS;
 void		dir_close(struct Dir **);
 int		dir_get(struct Dir *, struct DirEntry *) FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

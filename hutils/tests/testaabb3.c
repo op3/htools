@@ -31,8 +31,8 @@ HTEST(Min)
 
 	HTRY_FLT(0.0f, ==, aabb3f_get_distance(&c_aabb, &c_v0));
 	HTRY_FLT(1.0f, ==, aabb3f_get_distance(&c_aabb, &c_v1));
-	HTRY_FLT(sqrt(2), ==, aabb3f_get_distance(&c_aabb, &c_v2));
-	HTRY_FLT(sqrt(3), ==, aabb3f_get_distance(&c_aabb, &c_v3));
+	HTRY_FLT((float)sqrt(2), ==, aabb3f_get_distance(&c_aabb, &c_v2));
+	HTRY_FLT((float)sqrt(3), ==, aabb3f_get_distance(&c_aabb, &c_v3));
 }
 
 HTEST_SUITE(AABB3)

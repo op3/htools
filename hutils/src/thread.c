@@ -54,9 +54,13 @@
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, &t->attr, run, starter)
 
-#elif defined(HCONF_mTHREAD_bWINDOWS)
+#elif defined(_MSC_VER)
 #	include <process.h>
+#	include <hutils/string.h>
 
+struct CondVar {
+	CONDITION_VARIABLE	cv;
+};
 struct Mutex {
 	CRITICAL_SECTION	cs;
 };
@@ -68,7 +72,22 @@ struct Thread {
 	HANDLE	handle;
 };
 
+static char			*dup_last_error() FUNC_RETURNS;
 static unsigned int __stdcall	run(void *);
+
+char *
+dup_last_error()
+{
+	LPTSTR str;
+	char *cstr;
+
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
+	    GetLastError(), 0, (LPTSTR)&str, 0, NULL);
+	cstr = strdup(str);
+	LocalFree(str);
+	return cstr;
+}
 
 unsigned int __stdcall
 run(void *a_data)
@@ -81,8 +100,59 @@ run(void *a_data)
 	return 0;
 }
 
+int
+thread_condvar_broadcast(struct CondVar *a_condvar, char **a_err)
+{
+	(void)a_err;
+	WakeAllConditionVariable(&a_condvar->cv);
+	return 1;
+}
+
+struct CondVar *
+thread_condvar_create(char **a_err)
+{
+	struct CondVar *condvar;
+
+	(void)a_err;
+	CALLOC(condvar, 1);
+	InitializeConditionVariable(&condvar->cv);
+	return condvar;
+}
+
+int
+thread_condvar_free(struct CondVar **a_condvar, char **a_err)
+{
+	(void)a_err;
+	if (*a_condvar) {
+		FREE(*a_condvar);
+	}
+	return 1;
+}
+
+int
+thread_condvar_signal(struct CondVar *a_condvar, char **a_err)
+{
+	(void)a_err;
+	WakeConditionVariable(&a_condvar->cv);
+	return 1;
+}
+
+int
+thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex, char
+    **a_err)
+{
+	if (!SleepConditionVariableCS(&a_condvar->cv, &a_mutex->cs, INFINITE))
+	{
+		if (NULL != a_err) {
+			*a_err = dup_last_error();
+		}
+		return 0;
+	}
+	return 1;
+}
+
 struct Thread *
-thread_create(void (*const a_func)(void *), void *const a_data)
+thread_create(void (*a_func)(void *), void *a_data, char **a_err)
 {
 	struct Starter *starter;
 	struct Thread *thread;
@@ -92,8 +162,11 @@ thread_create(void (*const a_func)(void *), void *const a_data)
 	starter->func = a_func;
 	starter->data = a_data;
 	ret = _beginthreadex(NULL, 0, run, starter, 0, NULL);
-	if (-1 == ret) {
+	if (0 == ret) {
 		FREE(starter);
+		if (NULL != a_err) {
+			*a_err = strdup(strerror(errno));
+		}
 		return NULL;
 	}
 	CALLOC(thread, 1);
@@ -102,54 +175,68 @@ thread_create(void (*const a_func)(void *), void *const a_data)
 }
 
 int
-thread_free(struct Thread **const a_thread)
+thread_free(struct Thread **a_thread, char **a_err)
 {
 	struct Thread *thread;
+	int ret;
 
 	thread = *a_thread;
 	if (NULL == thread) {
-		return;
+		return 1;
 	}
-	WaitForSingleObject(thread->handle, INFINITE);
-	CloseHandle(thread->handle);
+	ret = 1;
+	if (WAIT_FAILED == WaitForSingleObject(thread->handle, INFINITE)) {
+		*a_err = dup_last_error();
+		ret = 0;
+	}
+	if (!CloseHandle(thread->handle)) {
+		*a_err = dup_last_error();
+		ret = 0;
+	}
 	FREE(*a_thread);
+	return ret;
 }
 
 struct Mutex *
-thread_mutex_create()
+thread_mutex_create(char **a_err)
 {
 	struct Mutex *mutex;
 
+	(void)a_err;
 	CALLOC(mutex, 1);
-	if (!InitializeCriticalSectionAndSpinCount(&mutex->cs, 0x00000400)) {
-		return NULL;
-	}
+	InitializeCriticalSectionAndSpinCount(&mutex->cs, 0x00000400);
 	return mutex;
 }
 
 int
-thread_mutex_free(struct Mutex **const a_mutex)
+thread_mutex_free(struct Mutex **a_mutex, char **a_err)
 {
 	struct Mutex *mutex;
 
+	(void)a_err;
 	mutex = *a_mutex;
 	if (NULL == mutex) {
-		return;
+		return 1;
 	}
 	DeleteCriticalSection(&mutex->cs);
 	FREE(*a_mutex);
+	return 1;
 }
 
 int 
-thread_mutex_lock(struct Mutex *const a_mutex)
+thread_mutex_lock(struct Mutex *a_mutex, char **a_err)
 {
+	(void)a_err;
 	EnterCriticalSection(&a_mutex->cs);
+	return 1;
 }
 
 int
-thread_mutex_unlock(struct Mutex *const a_mutex)
+thread_mutex_unlock(struct Mutex *a_mutex, char **a_err)
 {
+	(void)a_err;
 	LeaveCriticalSection(&a_mutex->cs);
+	return 1;
 }
 
 #endif
@@ -185,7 +272,7 @@ run(void *a_data)
 }
 
 struct CondVar *
-thread_condvar_create(char **const a_err)
+thread_condvar_create(char **a_err)
 {
 	struct CondVar *condvar;
 	int ret;
@@ -202,7 +289,7 @@ thread_condvar_create(char **const a_err)
 }
 
 int
-thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
+thread_condvar_free(struct CondVar **a_condvar, char **a_err)
 {
 	struct CondVar *condvar;
 	int ret;
@@ -223,7 +310,7 @@ thread_condvar_free(struct CondVar **const a_condvar, char **const a_err)
 }
 
 int
-thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
+thread_condvar_broadcast(struct CondVar *a_condvar, char **a_err)
 {
 	int ret;
 
@@ -238,7 +325,7 @@ thread_condvar_broadcast(struct CondVar *const a_condvar, char **const a_err)
 }
 
 int
-thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
+thread_condvar_signal(struct CondVar *a_condvar, char **a_err)
 {
 	int ret;
 
@@ -253,8 +340,8 @@ thread_condvar_signal(struct CondVar *const a_condvar, char **const a_err)
 }
 
 int
-thread_condvar_wait(struct CondVar *const a_condvar, struct Mutex *const
-    a_mutex, char **const a_err)
+thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex, char
+    **a_err)
 {
 	int ret;
 
@@ -269,8 +356,7 @@ thread_condvar_wait(struct CondVar *const a_condvar, struct Mutex *const
 }
 
 struct Thread *
-thread_create(void (*const a_func)(void *), void *const a_data, char **const
-    a_err)
+thread_create(void (*a_func)(void *), void *a_data, char **a_err)
 {
 	struct Starter *starter;
 	struct Thread *thread;
@@ -299,7 +385,7 @@ thread_create_fail:
 }
 
 int
-thread_free(struct Thread **const a_thread, char **const a_err)
+thread_free(struct Thread **a_thread, char **a_err)
 {
 	struct Thread *thread;
 	int ret;
@@ -321,7 +407,7 @@ thread_free(struct Thread **const a_thread, char **const a_err)
 }
 
 struct Mutex *
-thread_mutex_create(char **const a_err)
+thread_mutex_create(char **a_err)
 {
 	struct Mutex *mutex;
 	int ret;
@@ -338,7 +424,7 @@ thread_mutex_create(char **const a_err)
 }
 
 int
-thread_mutex_free(struct Mutex **const a_mutex, char **const a_err)
+thread_mutex_free(struct Mutex **a_mutex, char **a_err)
 {
 	struct Mutex *mutex;
 	int ret;
@@ -359,7 +445,7 @@ thread_mutex_free(struct Mutex **const a_mutex, char **const a_err)
 }
 
 int 
-thread_mutex_lock(struct Mutex *const a_mutex, char **const a_err)
+thread_mutex_lock(struct Mutex *a_mutex, char **a_err)
 {
 	int ret;
 
@@ -374,7 +460,7 @@ thread_mutex_lock(struct Mutex *const a_mutex, char **const a_err)
 }
 
 int
-thread_mutex_unlock(struct Mutex *const a_mutex, char **const a_err)
+thread_mutex_unlock(struct Mutex *a_mutex, char **a_err)
 {
 	int ret;
 

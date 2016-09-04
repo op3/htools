@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <hutils/macros.h>
 
 #ifdef NDEBUG
@@ -28,8 +29,8 @@
 	Type lhs_ = lhs;\
 	Type rhs_ = rhs;\
 	if (!(lhs_ op rhs_)) {\
-		fprintf(stderr, "%s:%d: "#lhs"=%"#fmt" "#op" "#rhs"=%"#fmt\
-		    " failed.", __FILE__, __LINE__, lhs_, rhs_);\
+		fprintf(stderr, "%s:%d: "#lhs"=%"fmt" "#op" "#rhs"=%"fmt\
+		    " failed.\n", __FILE__, __LINE__, lhs_, rhs_);\
 		abort();\
 	}\
 } WHILE_0

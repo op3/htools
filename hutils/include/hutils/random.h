@@ -17,8 +17,11 @@
 #ifndef HUTILS_RANDOM_H
 #define HUTILS_RANDOM_H
 
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
+
+CDECLS_BEGIN
 
 struct RandomSeed {
 	uint32_t	seed[5];
@@ -27,5 +30,7 @@ struct RandomSeed {
 double		random_getd(struct RandomSeed *) FUNC_RETURNS;
 float		random_getf(struct RandomSeed *) FUNC_RETURNS;
 uint32_t	random_getu32(struct RandomSeed *) FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

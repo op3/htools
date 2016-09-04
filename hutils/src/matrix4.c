@@ -19,8 +19,8 @@
 #include <hutils/vector3.h>
 
 struct Matrix4f *
-matrix4f_mul(struct Matrix4f *const a_m, struct Matrix4f const *const a_l,
-    struct Matrix4f const *const a_r)
+matrix4f_mul(struct Matrix4f *a_m, struct Matrix4f const *a_l, struct Matrix4f
+    const *a_r)
 {
 	int i;
 
@@ -39,8 +39,8 @@ matrix4f_mul(struct Matrix4f *const a_m, struct Matrix4f const *const a_l,
 }
 
 struct Vector3f *
-matrix4f_mul_vector3f(struct Vector3f *const a_u, struct Matrix4f *const a_l,
-    struct Vector3f const *const a_r)
+matrix4f_mul_vector3f(struct Vector3f *a_u, struct Matrix4f *a_l, struct
+    Vector3f const *a_r)
 {
 	a_u->x = a_l->m[0] * a_r->x + a_l->m[4] * a_r->y + a_l->m[8] * a_r->z
 	    + a_l->m[12];
@@ -52,7 +52,7 @@ matrix4f_mul_vector3f(struct Vector3f *const a_u, struct Matrix4f *const a_l,
 }
 
 struct Matrix4f *
-matrix4f_set_identity(struct Matrix4f *const a_m)
+matrix4f_set_identity(struct Matrix4f *a_m)
 {
 	ZERO(a_m->m);
 	a_m->m[0] = 1.0f;
@@ -63,9 +63,8 @@ matrix4f_set_identity(struct Matrix4f *const a_m)
 }
 
 struct Matrix4f *
-matrix4f_set_ortho(struct Matrix4f *const a_m, float const a_left, float const
-    a_right, float const a_bottom, float const a_top, float const a_near,
-    float const a_far)
+matrix4f_set_ortho(struct Matrix4f *a_m, float a_left, float a_right, float
+    a_bottom, float a_top, float a_near, float a_far)
 {
 	ZERO(a_m->m);
 	a_m->m[0] = 2.0f / (a_right - a_left);

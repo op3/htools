@@ -19,9 +19,12 @@
 #include <sys/stat.h>
 #include <hutils/memory.h>
 #include <hutils/string.h>
+#if defined(_MSC_VER)
+#	include <direct.h>
+#endif
 
 int
-fs_mkdirs(char const *const a_path)
+fs_mkdirs(char const *a_path)
 {
 	char *path, *p;
 
@@ -39,13 +42,23 @@ fs_mkdirs(char const *const a_path)
 		}
 		*p = '\0';
 		if (0 == stat(path, &st)) {
-			if (!S_ISDIR(st.st_mode)) {
+#if !defined(_MSC_VER)
+			if (!S_ISDIR(st.st_mode))
+#else
+			if (S_IFDIR != (S_IFMT & st.st_mode))
+#endif
+			{
 				FREE(path);
 				return -1;
 			}
 			continue;
 		}
-		if (0 != mkdir(path, 0700)) {
+#if !defined(_MSC_VER)
+		if (0 != mkdir(path, 0700))
+#else
+		if (0 != _mkdir(path))
+#endif
+		{
 			err(EXIT_FAILURE, "mkdir(%s)", path);
 		}
 	}

@@ -22,16 +22,14 @@
 #if defined(HCONF_mERR_bERR_H)
 /* HCONF_OPT=nolink */
 #	include <err.h>
-#elif defined(HCONF_mERR_bMSC)
-/* HCONF_SRC=src/err.c */
+#elif defined(_MSC_VER)
 #	include <windows.h>
-void err(int, const char *, ...);
+void	err(int, char const *, ...);
 #elif defined(HCONF_mERR_bCUSTOM)
 /* HCONF_SRC=src/err.c */
-void err(int, const char *, ...);
+void err(int, char const *, ...);
 #endif
-
-#if defined(HCONF_TESTING)
+#if defined(HCONFING_mERR)
 void
 test(void)
 {

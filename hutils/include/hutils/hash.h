@@ -18,9 +18,14 @@
 #define HUTILS_HASH_H
 
 #include <stdlib.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
+CDECLS_BEGIN
+
 uint32_t	hutils_hash32(void const *, size_t) FUNC_PURE FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

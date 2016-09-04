@@ -18,8 +18,11 @@
 #define HUTILS_CONFIG_H
 
 #include <stdlib.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
+
+CDECLS_BEGIN
 
 struct Config;
 struct ConfigCollection;
@@ -49,5 +52,7 @@ struct Config		*config_section_gets_config(struct ConfigSection *,
 void			config_setd(struct Config *, double);
 void			config_seti32(struct Config *, int32_t);
 void			config_sets(struct Config *, char const *);
+
+CDECLS_END
 
 #endif

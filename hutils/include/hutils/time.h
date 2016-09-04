@@ -17,9 +17,10 @@
 #ifndef HUTILS_TIME_H
 #define HUTILS_TIME_H
 
-#	include <time.h>
-#include <hconf/include/hutils/time.h>
+#include <time.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+#include <hconf/include/hutils/time.h>
 
 #if defined(HCONF_mTIME_bPOSIX_MONOTONIC)
 #	define SLEEP_NANOSLEEP
@@ -66,15 +67,6 @@ HCONF_TEST(int, (void))
 	return clock_gettime(CLOCK_SOURCE, NULL);
 }
 #	endif
-#elif defined(HCONF_mTIME_bWINDOWS)
-#	define SLEEP_SLEEP
-#	define TIME_PERF 1
-#	if defined(HCONFING_mTIME_bWINDOWS)
-HCONF_TEST(BOOL, (void))
-{
-	return QueryPerformanceCounter(NULL);
-}
-#	endif
 #elif defined(HCONF_mTIME_bMAC)
 #	define SLEEP_NANOSLEEP
 #	define TIME_MACH
@@ -84,10 +76,17 @@ HCONF_TEST(uint64_t, (void))
 	return mach_absolute_time();
 }
 #	endif
+#elif defined(_MSC_VER)
+#	define SLEEP_SLEEP
+#	define TIME_PERF 1
 #endif
+
+CDECLS_BEGIN
 
 double	time_getd(void) FUNC_RETURNS;
 char	*time_gets(void) FUNC_RETURNS;
 int	time_sleep(double);
+
+CDECLS_END
 
 #endif

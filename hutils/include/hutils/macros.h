@@ -24,8 +24,7 @@
 /* HCONF_OPT=nolink */
 #	define WHILE_0 while (0)
 #	define IF_CONST(cond) if (cond)
-#elif defined(HCONF_mCONST_EXPR_bWARNING_4127)
-/* HCONF_OPT=nolink */
+#elif defined(_MSC_VER)
 #	define WHILE_0\
 		__pragma(warning(push))\
 		__pragma(warning(disable:4127))\

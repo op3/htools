@@ -34,6 +34,9 @@
 /* HCONF_OPT=nolink */
 #	define PRIz "ld"
 #	define PRIzx "lx"
+#elif defined(_MSC_VER)
+#	define PRIz "lu"
+#	define PRIzx "lx"
 #endif
 #if defined(HCONFING_mFMTMOD_SIZET)
 HCONF_TEST(int, (void))

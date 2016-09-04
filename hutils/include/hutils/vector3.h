@@ -17,7 +17,10 @@
 #ifndef HUTILS_VECTOR3_H
 #define HUTILS_VECTOR3_H
 
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+
+CDECLS_BEGIN
 
 struct Vector3f {
 	float	x;
@@ -41,5 +44,7 @@ struct Vector3f	*vector3f_scale(struct Vector3f *, struct Vector3f const *,
 struct Vector3f	*vector3f_set(struct Vector3f *, float, float, float);
 struct Vector3f	*vector3f_sub(struct Vector3f *, struct Vector3f const *,
     struct Vector3f const *);
+
+CDECLS_END
 
 #endif

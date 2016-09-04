@@ -98,7 +98,7 @@ HTEST(ConditionVariable)
 {
 	struct Thread *t;
 
-	return;
+	if (1) return;
 	/* TODO: Sometimes deadlocks! */
 	g_condvar = thread_condvar_create(NULL);
 	g_mutex = thread_mutex_create(NULL);

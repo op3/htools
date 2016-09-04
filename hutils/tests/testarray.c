@@ -19,18 +19,33 @@
 
 ARRAY_HEAD(IntArray, int);
 
-HTEST(MustBeInitedRight)
+HTEST(MustBeInited)
 {
 	struct IntArray ia = {0, NULL};
 
 	HTRY_SIGNAL(ARRAY_CALLOC(ia, 1));
+}
+
+HTEST(FreeOnlyAllocated)
+{
+	struct IntArray ia;
+
 	ARRAY_INIT(ia);
 	HTRY_SIGNAL(ARRAY_FREE(ia));
+}
+
+HTEST(Normal)
+{
+	struct IntArray ia;
+
+	ARRAY_INIT(ia);
 	HTRY_VOID(ARRAY_CALLOC(ia, 1));
 	HTRY_VOID(ARRAY_FREE(ia));
 }
 
 HTEST_SUITE(Array)
 {
-	HTEST_ADD(MustBeInitedRight);
+	HTEST_ADD(MustBeInited);
+	HTEST_ADD(FreeOnlyAllocated);
+	HTEST_ADD(Normal);
 }

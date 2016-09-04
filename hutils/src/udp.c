@@ -17,13 +17,66 @@
 #include <hutils/udp.h>
 
 #if defined(HCONF_mUDP_bGETADDRINFO)
+#	define GETADDRINFO
+#	include <sys/fcntl.h>
+#	include <sys/socket.h>
+#	include <sys/time.h>
+#	include <netdb.h>
+#	include <unistd.h>
+#	define INVALID_SOCKET -1
+#	define SOCKET int
+#	define SOCKET_ERROR -1
+static int
+set_non_blocking(SOCKET a_socket)
+{
+	return 0 == fcntl(a_socket, F_SETFL, O_NONBLOCK);
+}
+static void
+warnf(char const *a_fmt, ...)
+{
+	va_list;
 
-#include <sys/fcntl.h>
-#include <sys/socket.h>
-#include <sys/time.h>
+	va_start(args, a_fmt);
+	vwarn(a_fmt, args);
+	va_end(args);
+}
+#elif defined(_MSC_VER)
+#	define GETADDRINFO
+#	include <winsock2.h>
+#	include <ws2tcpip.h>
+#	include <stdio.h>
+#	define close closesocket
+static int
+set_non_blocking(SOCKET a_socket)
+{
+	u_long non_blocking;
+
+	non_blocking = 1;
+	return NO_ERROR == ioctlsocket(a_socket, FIONBIO, &non_blocking);
+}
+static void
+warnf(char const *a_fmt, ...)
+{
+	va_list args;
+	LPTSTR s;
+
+	va_start(args, a_fmt);
+	vfprintf(stderr, a_fmt, args);
+	va_end(args);
+	fprintf(stderr, ": ");
+	s = NULL;
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+				   NULL, WSAGetLastError(),
+				   0,
+				   (LPTSTR)&s, 0, NULL);
+	fprintf(stderr, "%s\n", s);
+	LocalFree(s);
+}
+#endif
+
+#if defined(GETADDRINFO)
+
 #include <errno.h>
-#include <netdb.h>
-#include <unistd.h>
 #include <hutils/err.h>
 #include <hutils/macros.h>
 #include <hutils/memory.h>
@@ -34,49 +87,55 @@ struct UDPAddress {
 	socklen_t	len;
 };
 struct UDPClient {
-	int	socket;
+	SOCKET	socket;
 };
 struct UDPServer {
-	int	socket;
+	SOCKET	socket;
 };
 
+static int g_is_setup;
+
 struct UDPClient *
-udp_client_create(char const *const a_hostname, uint16_t const a_port)
+udp_client_create(char const *a_hostname, uint16_t a_port)
 {
 	struct addrinfo addri;
 	char port_str[10];
 	struct addrinfo *result, *p;
 	struct UDPClient *client;
-	int sock;
+	SOCKET sock;
+
+	if (!g_is_setup) {
+		fprintf(stderr, "udp_client_create called outside udp_setup/udp_shutdown.\n");
+		return NULL;
+	}
 
 	ZERO(addri);
 	addri.ai_socktype = SOCK_DGRAM;
 	addri.ai_protocol = IPPROTO_UDP;
 	snprintf(port_str, sizeof port_str, "%d", a_port);
 	if (0 != getaddrinfo(a_hostname, port_str, &addri, &result)) {
-		warn("%s:%s", a_hostname, port_str);
+		warnf("%s:%s", a_hostname, port_str);
 		return NULL;
 	}
-	sock = -1;
+	sock = INVALID_SOCKET;
 	for (p = result; NULL != p; p = p->ai_next) {
 		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-		if (-1 == sock) {
-			warnx("socket(%s:%s)", a_hostname, port_str);
+		if (INVALID_SOCKET == sock) {
+			warnf("socket(%s:%s)", a_hostname, port_str);
 			continue;
 		}
 		if (0 != connect(sock, p->ai_addr, p->ai_addrlen)) {
-			warnx("connect(%s:%s)", a_hostname, port_str);
+			warnf("connect(%s:%s)", a_hostname, port_str);
 			continue;
 		}
 		break;
 	}
 	freeaddrinfo(result);
-	if (-1 == sock) {
+	if (INVALID_SOCKET == sock) {
 		return NULL;
 	}
-	if (-1 == fcntl(sock, F_SETFL, O_NONBLOCK)) {
-		warnx("fcntl(%s:%s, F_SETFL, O_NONBLOCK)", a_hostname,
-		    port_str);
+	if (!set_non_blocking(sock)) {
+		warnf("set_non_blocking(%s:%s)", a_hostname, port_str);
 		close(sock);
 		return NULL;
 	}
@@ -86,7 +145,7 @@ udp_client_create(char const *const a_hostname, uint16_t const a_port)
 }
 
 void
-udp_client_free(struct UDPClient **const a_client)
+udp_client_free(struct UDPClient **a_client)
 {
 	struct UDPClient *client;
 
@@ -99,34 +158,34 @@ udp_client_free(struct UDPClient **const a_client)
 }
 
 void
-udp_client_receive(struct UDPClient const *const a_client, struct UDPDatagram
-    *const a_dgram, double const a_timeout)
+udp_client_receive(struct UDPClient const *a_client, struct UDPDatagram
+    *a_dgram, double a_timeout)
 {
 	fd_set socks;
 	struct timeval timeout;
-	ssize_t size;
+	int size;
 	int ret;
 
 	a_dgram->size = 0;
 	FD_ZERO(&socks);
 	FD_SET(a_client->socket, &socks);
-	timeout.tv_sec = a_timeout;
-	timeout.tv_sec = 1e6 * (a_timeout - timeout.tv_sec);
+	timeout.tv_sec = (long)a_timeout;
+	timeout.tv_sec = (long)(1e6 * (a_timeout - timeout.tv_sec));
 	ret = select(a_client->socket + 1, &socks, NULL, NULL, &timeout);
 	if (0 == ret) {
 		return;
 	}
-	if (-1 == ret) {
+	if (SOCKET_ERROR == ret) {
 		if (EINTR == errno) {
 			return;
 		}
-		warn("select");
+		warnf("select");
 		return;
 	}
-	size = recv(a_client->socket, a_dgram->buf, LENGTH(a_dgram->buf), 0);
-	if (-1 == size) {
+	size = recv(a_client->socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf), 0);
+	if (SOCKET_ERROR == size) {
 		if (EAGAIN != errno && EWOULDBLOCK != errno) {
-			warn("recv");
+			warnf("recv");
 		}
 		return;
 	}
@@ -134,16 +193,16 @@ udp_client_receive(struct UDPClient const *const a_client, struct UDPDatagram
 }
 
 void
-udp_client_send(struct UDPClient const *const a_client, struct UDPDatagram
-    const *const a_dgram)
+udp_client_send(struct UDPClient const *a_client, struct UDPDatagram
+    const *a_dgram)
 {
-	if (-1 == send(a_client->socket, a_dgram->buf, a_dgram->size, 0)) {
-		warn("send");
+	if (SOCKET_ERROR == send(a_client->socket, (char *)a_dgram->buf, a_dgram->size, 0)) {
+		warnf("send");
 	}
 }
 
 struct UDPServer *
-udp_server_create(uint16_t const a_port)
+udp_server_create(uint16_t a_port)
 {
 	struct addrinfo addri;
 	char port_str[10];
@@ -151,34 +210,40 @@ udp_server_create(uint16_t const a_port)
 	struct UDPServer *server;
 	int sock;
 
+	if (!g_is_setup) {
+		fprintf(stderr, "udp_client_create called outside udp_setup/udp_shutdown.\n");
+		return NULL;
+	}
+
 	ZERO(addri);
 	addri.ai_socktype = SOCK_DGRAM;
 	addri.ai_flags = AI_PASSIVE;
 	addri.ai_protocol = IPPROTO_UDP;
 	snprintf(port_str, sizeof port_str, "%d", a_port);
 	if (0 != getaddrinfo(NULL, port_str, &addri, &result)) {
-		warn("NULL:%s", port_str);
+		warnf("NULL:%s", port_str);
 		return NULL;
 	}
-	sock = -1;
+	sock = INVALID_SOCKET;
 	for (p = result; NULL != p; p = p->ai_next) {
 		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-		if (-1 == sock) {
-			warnx("socket(NULL:%s)", port_str);
+		if (INVALID_SOCKET == sock) {
+			warnf("socket(NULL:%s)", port_str);
 			continue;
 		}
 		if (0 != bind(sock, p->ai_addr, p->ai_addrlen)) {
-			warnx("connect(NULL:%s)", port_str);
+			warnf("connect(NULL:%s)", port_str);
 			continue;
 		}
 		break;
 	}
 	freeaddrinfo(result);
-	if (-1 == sock) {
+	if (INVALID_SOCKET == sock) {
+		fprintf(stderr, "Could not create any socket.\n");
 		return NULL;
 	}
-	if (-1 == fcntl(sock, F_SETFL, O_NONBLOCK)) {
-		warnx("fcntl(NULL:%s, F_SETFL, O_NONBLOCK)", port_str);
+	if (!set_non_blocking(sock)) {
+		warnf("set_non_blocking(NULL:%s)", port_str);
 		close(sock);
 		return NULL;
 	}
@@ -188,7 +253,7 @@ udp_server_create(uint16_t const a_port)
 }
 
 void
-udp_server_free(struct UDPServer **const a_server)
+udp_server_free(struct UDPServer **a_server)
 {
 	struct UDPServer *server;
 
@@ -201,39 +266,38 @@ udp_server_free(struct UDPServer **const a_server)
 }
 
 void
-udp_server_receive(struct UDPServer const *const a_server, struct UDPAddress
-    **const a_addr, struct UDPDatagram *const a_dgram, double const a_timeout)
+udp_server_receive(struct UDPServer const *a_server, struct UDPAddress
+    **a_addr, struct UDPDatagram *a_dgram, double a_timeout)
 {
 	fd_set socks;
 	struct timeval timeout;
 	struct UDPAddress addr, *paddr;
-	ssize_t size;
-	int ret;
+	int ret, size;
 
 	*a_addr = NULL;
 	a_dgram->size = 0;
 	FD_ZERO(&socks);
 	FD_SET(a_server->socket, &socks);
-	timeout.tv_sec = a_timeout;
-	timeout.tv_usec = 1e6 * (a_timeout - timeout.tv_sec);
+	timeout.tv_sec = (long)a_timeout;
+	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
 	ret = select(a_server->socket + 1, &socks, NULL, NULL, &timeout);
 	if (0 == ret) {
 		return;
 	}
-	if (-1 == ret) {
+	if (SOCKET_ERROR == ret) {
 		if (EINTR == errno) {
 			return;
 		}
-		warn("select");
+		warnf("select");
 		return;
 	}
 	addr.len = sizeof addr.addr;
 	ZERO(addr.addr);
-	size = recvfrom(a_server->socket, a_dgram->buf, LENGTH(a_dgram->buf),
+	size = recvfrom(a_server->socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf),
 	    0, (struct sockaddr *)&addr.addr, &addr.len);
-	if (-1 == size) {
+	if (SOCKET_ERROR == size) {
 		if (EAGAIN != errno && EWOULDBLOCK != errno) {
-			warn("recv");
+			warnf("recv");
 		}
 		return;
 	}
@@ -244,12 +308,32 @@ udp_server_receive(struct UDPServer const *const a_server, struct UDPAddress
 }
 
 void
-udp_server_send(struct UDPServer const *const a_server, struct UDPDatagram
-    const *const a_dgram)
+udp_server_send(struct UDPServer const *a_server, struct UDPDatagram
+    const *a_dgram)
 {
-	if (-1 == send(a_server->socket, a_dgram->buf, a_dgram->size, 0)) {
-		warn("send");
+	if (SOCKET_ERROR == send(a_server->socket, (char *)a_dgram->buf, a_dgram->size, 0)) {
+		warnf("send");
 	}
+}
+
+int
+udp_setup()
+{
+	struct WSAData wsa;
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
+		warnf("WSAStartup");
+		return 0;
+	}
+	g_is_setup = 1;
+	return 1;
+}
+
+void
+udp_shutdown()
+{
+	WSACleanup();
+	g_is_setup = 0;
 }
 
 #endif

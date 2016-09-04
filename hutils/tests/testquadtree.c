@@ -52,10 +52,10 @@ node_free(struct TestData *a_user, struct TestNode **a_node)
 	struct TestNode *node;
 
 	node = *a_node;
-	ASSERT(void *, p, NULL, !=, node);
-	ASSERT(void *, p, NULL, ==, node->node.child[0]);
+	ASSERT(void *, "p", NULL, !=, node);
+	ASSERT(void *, "p", NULL, ==, node->node.child[0]);
 	FREE(*a_node);
-	ASSERT(int, d, 0, <, a_user->node_num);
+	ASSERT(int, "d", 0, <, a_user->node_num);
 	--a_user->node_num;
 }
 

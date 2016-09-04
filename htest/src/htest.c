@@ -15,75 +15,81 @@
  */
 
 #include <htest/htest.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <assert.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <hutils/getopt.h>
 #include <hutils/string.h>
 #include <src/htest.h>
 
 #if defined(HCONF_mHTEST_bPOSIX)
 #	define SUPPORT_FORK
-char const *const c_nul_path = "/dev/null";
-#elif defined(HCONF_mHTEST_bMSC)
-
-#	include <signal.h>
-#	include <hutils/getopt.h>
-
-#	define STDIN_FILENO 0
-#	define STDOUT_FILENO 1
-#	define STDERR_FILENO 2
-
-char const *const c_nul_path = "NUL";
-
-char const *
-strsignal(int const a_signum)
-{
-	switch (a_signum) {
-	case SIGABRT: return "SIGABRT";
-	case SIGBUS: return "SIGBUS";
-	case SIGFPE: return "SIGFPE";
-	case SIGILL: return "SIGILL";
-	case SIGINT: return "SIGINT";
-	case SIGSEGV: return "SIGSEGV";
-	case SIGTERM: return "SIGTERM";
-	default: return "Unknown";
-	}
-}
-
+#	define BLUE "\033[1;34m"
+#	define GREEN "\033[1;32m"
+#	define RED "\033[1;31m"
+#	define RESET "\033[0m"
+char const c_nul_path[] = "/dev/null";
+#elif defined(_MSC_VER)
+#	include <io.h>
+#	define SUPPORT_JMP
+#	define close _close
+#	define dup _dup
+#	define dup2 _dup2
+#	define fdopen _fdopen
+#	define open _open
+#	define STDERR_FILENO 1
+#	define STDOUT_FILENO 2
+#	define BLUE (FOREGROUND_BLUE | FOREGROUND_GREEN)
+#	define GREEN FOREGROUND_GREEN
+#	define RED (FOREGROUND_RED | FOREGROUND_INTENSITY)
+char const c_nul_path[] = "NUL";
+static jmp_buf g_suite_jmp_buf;
+jmp_buf g_htest_try_jmp_buf_;
+static HANDLE g_htest_console_;
+static WORD RESET;
 #endif
 
-#define BLUE "\033[1;34m"
-#define GREEN "\033[1;32m"
-#define RED "\033[1;31m"
-#define RESET "\033[0m"
-
-static void handler(int);
+static void suite_sighandler(int);
+static void try_sighandler(int);
 static void usage(FILE *, char const *, int);
 
-static FILE *g_nul, *g_new_stderr;
-static int g_old_stderr, g_old_stdout;
+static int g_nul, g_old_stderr, g_old_stdout;
 static int g_do_verbose;
-static char const *g_color_suite;
-static char const *g_color_test;
-static char const *g_color_fail;
-static char const *g_color_reset;
+static HTEST_COLOR_ g_color_suite;
+static HTEST_COLOR_ g_color_test;
+static HTEST_COLOR_ g_color_fail;
 
 extern struct HTestSuite g_htest_suite_list_[];
 void (*g_htest_dtor_)(void);
 
 void
-handler(int const a_signum)
+suite_sighandler(int a_signum)
 {
-	htest_print_("  %sFail:%sCaught signal \"%s\".\n", g_color_fail,
-	    g_color_reset, strsignal(a_signum));
+	htest_output_restore_();
+	htest_set_color_(g_color_fail);
+	printf("  Fail:");
+	htest_set_color_(RESET);
+	printf("Caught signal \"%s\".\n", strsignal(a_signum));
 	GCOV_FLUSH;
+#if defined(SUPPORT_JMP)
+	longjmp(g_suite_jmp_buf, 1);
+#else
 	_exit(EXIT_FAILURE);
+#endif
+}
+
+void
+try_sighandler(int a_signum)
+{
+	(void)a_signum;
+	g_htest_dtor_();
+	GCOV_FLUSH;
+#if defined(SUPPORT_JMP)
+	longjmp(g_htest_try_jmp_buf_, 1);
+#else
+	_exit(EXIT_FAILURE);
+#endif
 }
 
 void
@@ -97,22 +103,8 @@ htest_output_restore_()
 	if (g_do_verbose) {
 		return;
 	}
-
-	assert(NULL != g_nul);
-	assert(NULL != g_new_stderr);
-
-	fflush(stdout);
 	dup2(g_old_stdout, STDOUT_FILENO);
-	close(g_old_stdout);
-
-	fflush(stderr);
 	dup2(g_old_stderr, STDERR_FILENO);
-	close(g_old_stderr);
-
-	fclose(g_nul);
-	g_nul = NULL;
-	fclose(g_new_stderr);
-	g_new_stderr = NULL;
 }
 
 void
@@ -121,52 +113,55 @@ htest_output_suppress_()
 	if (g_do_verbose) {
 		return;
 	}
-
-	assert(NULL == g_nul);
-	assert(NULL == g_new_stderr);
-
-	g_nul = fopen(c_nul_path, "w");
-
-	g_old_stdout = dup(STDOUT_FILENO);
 	fflush(stdout);
-	dup2(fileno(g_nul), STDOUT_FILENO);
-
-	g_old_stderr = dup(STDERR_FILENO);
+	dup2(g_nul, STDOUT_FILENO);
 	fflush(stderr);
-	dup2(fileno(g_nul), STDERR_FILENO);
-
-	g_new_stderr = fdopen(g_old_stderr, "w");
+	dup2(g_nul, STDERR_FILENO);
 }
 
 void
-htest_print_(char const *const a_fmt, ...)
+htest_set_color_(HTEST_COLOR_ a_color)
 {
-	va_list args;
-
-	va_start(args, a_fmt);
-	vfprintf(NULL != g_new_stderr ? g_new_stderr : stderr, a_fmt, args);
-	va_end(args);
+#if defined(_MSC_VER)
+	SetConsoleTextAttribute(g_htest_console_, a_color);
+#else
+	printf(a_color);
+#endif
 }
 
 void
-htest_sighandler_(int const a_signum)
+htest_suite_install_sighandler_()
 {
-	(void)a_signum;
-	htest_output_restore_();
-	g_htest_dtor_();
-	GCOV_FLUSH;
-	_exit(EXIT_FAILURE);
+	signal(SIGABRT, suite_sighandler);
+#if defined(SIGBUS)
+	signal(SIGBUS, suite_sighandler);
+#endif
+	signal(SIGABRT, suite_sighandler);
+	signal(SIGFPE, suite_sighandler);
+	signal(SIGILL, suite_sighandler);
+	signal(SIGSEGV, suite_sighandler);
 }
 
 void
-usage(FILE *const a_out, char const *const a_argv0, int const a_exit_code)
+htest_try_install_sighandler_()
 {
-	fprintf(a_out, "Usage: %s [-c] [-f] [-h] [-v]\n", a_argv0);
+	signal(SIGABRT, try_sighandler);
+#if defined(SIGBUS)
+	signal(SIGBUS, try_sighandler);
+#endif
+	signal(SIGFPE, try_sighandler);
+	signal(SIGILL, try_sighandler);
+	signal(SIGSEGV, try_sighandler);
+}
+
+void
+usage(FILE *a_out, char const *a_argv0, int a_exit_code)
+{
+	fprintf(a_out, "Usage: %s [-c] [-h] [-r] [-v]\n", a_argv0);
 	fprintf(a_out, " -c  Enable colored output.\n");
-	fprintf(a_out, " -f  Disable forking of tests, nice with gdb.\n");
 	fprintf(a_out, " -h  Show this.\n");
-	fprintf(a_out, " -v  Show what tested code prints to "
-	    "stdout/stderr.\n");
+	fprintf(a_out, " -r  Disable failure recovery (fork/longjmp).\n");
+	fprintf(a_out, " -v  Show what tested code prints to stdout/stderr.\n");
 	exit(a_exit_code);
 }
 
@@ -175,61 +170,73 @@ main(int const argc, char **const argv)
 {
 	struct HTestSuite *suite;
 	int test_num, test_pass_num;
-	int do_colors, do_fork;
+	int do_colors, do_recover;
 	int opt;
 
 	do_colors = 0;
-	do_fork = 1;
+	do_recover = 1;
 	g_do_verbose = 0;
-	while (-1 != (opt = getopt(argc, argv, "cfhv"))) {
+	while (-1 != (opt = getopt(argc, argv, "chrv"))) {
 		switch (opt) {
 		case 'c':
 			do_colors = 1;
 			break;
-		case 'f':
-			do_fork = 0;
+		case 'h':
+			usage(stdout, argv[0], EXIT_SUCCESS);
+		case 'r':
+			do_recover = 0;
 			break;
 		case 'v':
 			g_do_verbose = 1;
 			break;
-		case 'h':
-			usage(stdout, argv[0], EXIT_SUCCESS);
 		default:
 			usage(stderr, argv[0], EXIT_FAILURE);
 		}
 	}
 
+		g_nul = open(c_nul_path, O_WRONLY);
+		g_old_stdout = dup(STDOUT_FILENO);
+		g_old_stderr = dup(STDERR_FILENO);
+#if defined(_MSC_VER)
+	_set_abort_behavior(0, _WRITE_ABORT_MSG);
+	{
+		CONSOLE_SCREEN_BUFFER_INFO info;
+
+		g_htest_console_ = GetStdHandle(STD_OUTPUT_HANDLE);
+		GetConsoleScreenBufferInfo(g_htest_console_, &info);
+		RESET = info.wAttributes;
+	}
+#endif
 	if (do_colors) {
 		g_color_suite = GREEN;
 		g_color_test = BLUE;
 		g_color_fail = RED;
-		g_color_reset = RESET;
-	} else {
-		g_color_suite = "";
-		g_color_test = "";
-		g_color_fail = "";
-		g_color_reset = "";
 	}
-
+	else {
+		g_color_suite = RESET;
+		g_color_test = RESET;
+		g_color_fail = RESET;
+	}
+	htest_suite_install_sighandler_();
 	test_num = 0;
 	test_pass_num = 0;
 	for (suite = g_htest_suite_list_; NULL != suite->header; ++suite) {
 		int test_enumerator;
 		int test_index;
 
-		suite->header(g_color_suite, g_color_reset);
+		suite->header(g_color_suite, RESET);
 
 		test_enumerator = 0;
-		suite->suite("", "", "", 0, &test_enumerator, NULL);
+		suite->suite(RESET, RESET, RESET, 0, &test_enumerator, NULL);
 		if (0 == test_enumerator) {
 			continue;
 		}
 		test_num += test_enumerator;
 
 		for (test_index = 1; test_enumerator >= test_index;
-		    ++test_index) {
-#ifdef SUPPORT_FORK
-			if (do_fork) {
+			++test_index) {
+#if defined(SUPPORT_FORK)
+			if (do_recover) {
 				pid_t pid;
 
 				pid = fork();
@@ -240,50 +247,77 @@ main(int const argc, char **const argv)
 				if (0 == pid) {
 					int result;
 
-					signal(SIGABRT, handler);
-					signal(SIGBUS, handler);
-					signal(SIGFPE, handler);
-					signal(SIGILL, handler);
-					signal(SIGSEGV, handler);
 					test_enumerator = 0;
 					result = 1;
 					suite->suite(g_color_test,
-					    g_color_fail, g_color_reset,
-					    test_index, &test_enumerator,
-					    &result);
+						g_color_fail, RESET,
+						test_index, &test_enumerator,
+						&result);
 					GCOV_FLUSH;
 					_exit(result ? EXIT_SUCCESS :
-					    EXIT_FAILURE);
-				} else {
+						EXIT_FAILURE);
+				}
+				else {
 					int status;
 
 					waitpid(pid, &status, 0);
 					if (EXIT_SUCCESS !=
-					    WEXITSTATUS(status)) {
-						htest_print_(
-						    "  %sFail:%sExited\n",
-						    g_color_fail,
-						    g_color_reset);
-					} else {
+						WEXITSTATUS(status)) {
+						htest_set_color_(g_color_fail);
+						printf("  Fail:");
+						htest_set_color_(RESET);
+						printf("Exited.\n");
+					}
+					else {
 						++test_pass_num;
 					}
 				}
-			} else
+			}
+			else
+#elif defined(SUPPORT_JMP)
+			/* This is rubbish, but some OS:s cannot do more... */
+			if (do_recover) {
+				int result;
+
+				if (0 == setjmp(g_suite_jmp_buf)) {
+					test_enumerator = 0;
+					result = 1;
+					suite->suite(g_color_test,
+						g_color_fail, RESET,
+						test_index, &test_enumerator,
+						&result);
+					GCOV_FLUSH;
+				}
+				else {
+					htest_set_color_(g_color_fail);
+					printf("  Fail:");
+					htest_set_color_(RESET);
+					printf("Jumped.\n");
+					result = 0;
+				}
+				if (result) {
+					++test_pass_num;
+				}
+			}
+			else
 #endif
-      {
+			{
 				int result;
 
 				test_enumerator = 0;
 				result = 1;
 				suite->suite(g_color_test, g_color_fail,
-				    g_color_reset, test_index,
-				    &test_enumerator, &result);
+					RESET, test_index,
+					&test_enumerator, &result);
 				if (result) {
 					++test_pass_num;
 				}
 			}
 		}
 	}
+		close(g_nul);
+		close(g_old_stdout);
+		close(g_old_stderr);
 
 	printf("Passed %d/%d (%.1f%%) tests.\n", test_pass_num, test_num,
 	    100.0f * test_pass_num / test_num);

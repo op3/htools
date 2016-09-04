@@ -21,7 +21,7 @@
 static size_t	my_read(void *, char *, size_t) FUNC_RETURNS;
 
 size_t
-my_read(void *const a_data, char *const a_dst, size_t const a_max)
+my_read(void *a_data, char *a_dst, size_t a_max)
 {
 	char **pp;
 	size_t len;
@@ -47,7 +47,7 @@ HTEST(BufMajeur)
 	/* Fill with cycles of capitals and '['. */
 	ofs = 0;
 	for (i = 0; c_n > i; ++i) {
-		int j;
+		char j;
 
 		for (j = 'A'; '[' >= j; ++j) {
 			text[ofs++] = j;

@@ -15,8 +15,8 @@
  */
 
 #include <hutils/config.h>
-#include <assert.h>
 #include <stdio.h>
+#include <hutils/assert.h>
 #include <hutils/lexer.h>
 #include <hutils/memory.h>
 #include <hutils/queue.h>
@@ -58,7 +58,7 @@ struct ConfigCollection	*load(struct Lexer *) FUNC_RETURNS;
 static size_t		memory_read(void *, char *, size_t) FUNC_RETURNS;
 
 void
-config_collection_free(struct ConfigCollection **const a_coll)
+config_collection_free(struct ConfigCollection **a_coll)
 {
 	struct ConfigCollection *coll;
 
@@ -87,8 +87,8 @@ config_collection_free(struct ConfigCollection **const a_coll)
 }
 
 struct ConfigSection *
-config_collection_get_section(struct ConfigCollection *const a_coll, char
-    const *const a_name)
+config_collection_get_section(struct ConfigCollection *a_coll, char const
+    *a_name)
 {
 	struct ConfigSection *section;
 
@@ -100,7 +100,7 @@ config_collection_get_section(struct ConfigCollection *const a_coll, char
 }
 
 struct ConfigCollection *
-config_collection_load_from_file(char const *const a_path)
+config_collection_load_from_file(char const *a_path)
 {
 	FILE *file;
 	struct Lexer *lexer;
@@ -122,8 +122,7 @@ config_collection_load_from_file(char const *const a_path)
 }
 
 struct ConfigCollection *
-config_collection_load_from_memory(char const *const a_buf, size_t const
-    a_len)
+config_collection_load_from_memory(char const *a_buf, size_t a_len)
 {
 	struct MemoryData memory_data;
 	struct Lexer *lexer;
@@ -138,8 +137,8 @@ config_collection_load_from_memory(char const *const a_buf, size_t const
 }
 
 int
-config_collection_write(struct ConfigCollection const *const a_coll, char
-    const *const a_path)
+config_collection_write(struct ConfigCollection const *a_coll, char const
+    *a_path)
 {
 	char *time_str;
 	FILE *file;
@@ -168,26 +167,26 @@ config_collection_write(struct ConfigCollection const *const a_coll, char
 }
 
 double
-config_getd(struct Config const *const a_config)
+config_getd(struct Config const *a_config)
 {
 	return a_config->d;
 }
 
 int32_t
-config_geti32(struct Config const *const a_config)
+config_geti32(struct Config const *a_config)
 {
 	return a_config->i32;
 }
 
 char const *
-config_gets(struct Config const *const a_config)
+config_gets(struct Config const *a_config)
 {
 	return a_config->str;
 }
 
 struct Config *
-config_section_getd_config(struct ConfigSection *const a_section, char const
-    *const a_name, double const a_default_value)
+config_section_getd_config(struct ConfigSection *a_section, char const
+    *a_name, double a_default_value)
 {
 	struct Config *config;
 
@@ -200,8 +199,8 @@ config_section_getd_config(struct ConfigSection *const a_section, char const
 }
 
 struct Config *
-config_section_geti32_config(struct ConfigSection *const a_section, char const
-    *const a_name, int32_t const a_default_value)
+config_section_geti32_config(struct ConfigSection *a_section, char const
+    *a_name, int32_t a_default_value)
 {
 	struct Config *config;
 
@@ -214,8 +213,8 @@ config_section_geti32_config(struct ConfigSection *const a_section, char const
 }
 
 struct Config *
-config_section_gets_config(struct ConfigSection *const a_section, char const
-    *const a_name, char const *a_default_value)
+config_section_gets_config(struct ConfigSection *a_section, char const
+    *a_name, char const *a_default_value)
 {
 	struct Config *config;
 
@@ -228,21 +227,21 @@ config_section_gets_config(struct ConfigSection *const a_section, char const
 }
 
 void
-config_setd(struct Config *const a_config, double const a_d)
+config_setd(struct Config *a_config, double a_d)
 {
 	int len, ret;
 
 	FREE(a_config->str);
 	a_config->d = a_d;
-	a_config->i32 = a_d;
+	a_config->i32 = (int32_t)a_d;
 	len = 24;
 	MALLOC(a_config->str, len);
 	ret = snprintf(a_config->str, len, "%g", a_d);
-	assert(len > ret);
+	ASSERT(int, "d", len, >, ret);
 }
 
 void
-config_seti32(struct Config *const a_config, int32_t const a_i32)
+config_seti32(struct Config *a_config, int32_t a_i32)
 {
 	int len, ret;
 
@@ -252,11 +251,11 @@ config_seti32(struct Config *const a_config, int32_t const a_i32)
 	len = 16;
 	MALLOC(a_config->str, len);
 	ret = snprintf(a_config->str, len, "%d", a_i32);
-	assert(len > ret);
+	ASSERT(int, "d", len, >, ret);
 }
 
 void
-config_sets(struct Config *const a_config, char const *const a_str)
+config_sets(struct Config *a_config, char const *a_str)
 {
 	FREE(a_config->str);
 	a_config->d = strtod(a_str, NULL);
@@ -265,7 +264,7 @@ config_sets(struct Config *const a_config, char const *const a_str)
 }
 
 struct Config *
-create_config(struct ConfigSection *const a_section, char const *const a_name)
+create_config(struct ConfigSection *a_section, char const *a_name)
 {
 	struct Config *config;
 
@@ -276,8 +275,7 @@ create_config(struct ConfigSection *const a_section, char const *const a_name)
 }
 
 struct ConfigSection *
-create_section(struct ConfigCollection *const a_coll, char const *const
-    a_name)
+create_section(struct ConfigCollection *a_coll, char const *a_name)
 {
 	struct ConfigSection *section;
 
@@ -290,8 +288,7 @@ create_section(struct ConfigCollection *const a_coll, char const *const
 }
 
 struct Config *
-get_config(struct ConfigSection const *const a_section, char const *const
-    a_name)
+get_config(struct ConfigSection const *a_section, char const *a_name)
 {
 	struct Config *config;
 
@@ -304,8 +301,7 @@ get_config(struct ConfigSection const *const a_section, char const *const
 }
 
 struct ConfigSection *
-get_section(struct ConfigCollection const *const a_coll, char const *const
-    a_name)
+get_section(struct ConfigCollection const *a_coll, char const *a_name)
 {
 	struct ConfigSection *section;
 
@@ -318,7 +314,7 @@ get_section(struct ConfigCollection const *const a_coll, char const *const
 }
 
 struct ConfigCollection *
-load(struct Lexer *const a_lexer)
+load(struct Lexer *a_lexer)
 {
 	struct ConfigCollection *coll;
 	struct ConfigSection *last_section;
@@ -398,7 +394,7 @@ load_error:
 }
 
 size_t
-memory_read(void *const a_user_data, char *const a_dst, size_t const a_max)
+memory_read(void *a_user_data, char *a_dst, size_t a_max)
 {
 	struct MemoryData *memory_data;
 	size_t len;

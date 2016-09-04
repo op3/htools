@@ -22,46 +22,46 @@
 #if defined(HCONF_mFUNC_NORETURN_bYES)
 /* HCONF_OPT=nolink */
 #	define FUNC_NORETURN __attribute__((noreturn))
-#elif defined(HCONF_mFUNC_NORETURN_bNO)
+#elif defined(HCONF_mFUNC_NORETURN_bNO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_NORETURN
 #endif
 #if defined(HCONFING_mFUNC_NORETURN)
-void hconf_test_noreturn(void) FUNC_NORETURN;
+void hconf_test_noreturn_(void) FUNC_NORETURN;
 #endif
 
 #if defined(HCONF_mFUNC_PRINTF_bYES)
 /* HCONF_OPT=nolink */
 #	define FUNC_PRINTF(fmt, args) \
     __attribute__((format(printf, fmt, args)))
-#elif defined(HCONF_mFUNC_PRINTF_bNO)
+#elif defined(HCONF_mFUNC_PRINTF_bNO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_PRINTF(fmt, args)
 #endif
 #if defined(HCONFING_mFUNC_PRINTF)
-void hconf_test_printf(int, char const *, ...) FUNC_PRINTF(2, 3);
+void hconf_test_printf_(int, char const *, ...) FUNC_PRINTF(2, 3);
 #endif
 
 #if defined(HCONF_mFUNC_PURE_bYES)
 /* HCONF_OPT=nolink */
 #	define FUNC_PURE __attribute__((pure))
-#elif defined(HCONF_mFUNC_PURE_bNO)
+#elif defined(HCONF_mFUNC_PURE_bNO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_PURE
 #endif
 #if defined(HCONFING_mFUNC_PURE)
-void hconf_test_pure(void) FUNC_PURE;
+void hconf_test_pure_(void) FUNC_PURE;
 #endif
 
 #if defined(HCONF_mFUNC_RETURNS_bYES)
 /* HCONF_OPT=nolink */
 #	define FUNC_RETURNS __attribute__((warn_unused_result))
-#elif defined(HCONF_mFUNC_RETURNS_bNO)
+#elif defined(HCONF_mFUNC_RETURNS_bNO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_RETURNS
 #endif
 #if defined(HCONFING_mFUNC_RETURNS)
-int hconf_test_returns(void) FUNC_RETURNS;
+int hconf_test_returns_(void) FUNC_RETURNS;
 #endif
 
 #endif

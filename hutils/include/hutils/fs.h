@@ -17,8 +17,13 @@
 #ifndef HUTILS_FS_H
 #define HUTILS_FS_H
 
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
+CDECLS_BEGIN
+
 int	fs_mkdirs(char const *) FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

@@ -17,6 +17,7 @@
 #include <hutils/udp.h>
 #include <htest/htest.h>
 #include <hutils/memory.h>
+#include <hutils/string.h>
 
 HTEST(Server)
 {
@@ -79,7 +80,9 @@ HTEST(ServerClient)
 
 HTEST_SUITE(UDP)
 {
+	udp_setup();
 	HTEST_ADD(Server);
 	HTEST_ADD(Client);
 	HTEST_ADD(ServerClient);
+	udp_shutdown();
 }

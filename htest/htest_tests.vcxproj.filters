@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{1e25c0a4-4b3a-4ff2-a619-2d1a60e8ed63}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests\fail.c">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="tests\verbose.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="htest_tests_Debug\htest\tests.c">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

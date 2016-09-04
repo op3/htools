@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3EC12100-4D0D-4E28-99B1-970D9742206C}</ProjectGuid>
-    <RootNamespace>htest_tests</RootNamespace>
+    <ProjectGuid>{39CA285F-7053-4B07-85F2-F083C6D355B5}</ProjectGuid>
+    <RootNamespace>hutils_tests</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -78,20 +78,22 @@
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(SolutionDir)hutils\include;$(SolutionDir)hutils\hutils_$(Configuration);$(SolutionDir)htest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(OutDir)hutils.lib;$(OutDir)htest.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
     <PreBuildEvent>
       <Command>Powershell -File "$(SolutionDir)htest\htest.ps1" "$(IntDir) " tests.c tests\*.c</Command>
     </PreBuildEvent>
-    <Link>
-      <AdditionalDependencies>$(SolutionDir)$(Configuration)\hutils.lib;$(SolutionDir)$(Configuration)\htest.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Console</SubSystem>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -101,6 +103,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -114,6 +117,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -121,15 +125,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="htest_tests_Debug\htest\tests.c" />
-    <ClCompile Include="tests\fail.c" />
-    <ClCompile Include="tests\fixture.c" />
-    <ClCompile Include="tests\pass.c" />
-    <ClCompile Include="tests\signal.c" />
-    <ClCompile Include="tests\string.c" />
-    <ClCompile Include="tests\verbose.c" />
+    <ClCompile Include="hutils_tests_Debug\htest\tests.c" />
+    <ClCompile Include="tests\testaabb3.c" />
+    <ClCompile Include="tests\testarray.c" />
+    <ClCompile Include="tests\testbitmask.c" />
+    <ClCompile Include="tests\testconfig.c" />
+    <ClCompile Include="tests\testdir.c" />
+    <ClCompile Include="tests\testgetopt.c" />
+    <ClCompile Include="tests\testlexer.c" />
+    <ClCompile Include="tests\testmacros.c" />
+    <ClCompile Include="tests\testmatrix4.c" />
+    <ClCompile Include="tests\testmemory.c" />
+    <ClCompile Include="tests\testpool.c" />
+    <ClCompile Include="tests\testquadtree.c" />
+    <ClCompile Include="tests\teststring.c" />
+    <ClCompile Include="tests\testtailqsort.c" />
+    <ClCompile Include="tests\testthread.c" />
+    <ClCompile Include="tests\testtime.c" />
+    <ClCompile Include="tests\testudp.c" />
+    <ClCompile Include="tests\testvector2.c" />
+    <ClCompile Include="tests\testvector3.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="AfterClean">
+    <RemoveDir Directories="$(IntDir)\htest\" />
+  </Target>
 </Project>

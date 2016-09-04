@@ -30,8 +30,9 @@
 #	define READDIR_R(a_dir, a_result) do {\
 	a_result = readdir_r(a_dir->dir, a_dir->entry);\
 } WHILE_0
-#elif defined(HCONF_mDIR_bWINDOWS)
+#elif defined(_MSC_VER)
 #	include <windows.h>
+#	include <hutils/string.h>
 
 struct Dir {
 	HANDLE	handle;
@@ -40,7 +41,7 @@ struct Dir {
 };
 
 struct Dir *
-dir_open(char const *const a_path)
+dir_open(char const *a_path)
 {
 	WIN32_FIND_DATA find_data;
 	HANDLE handle;
@@ -61,12 +62,12 @@ dir_open(char const *const a_path)
 	CALLOC(dir, 1);
 	dir->handle = handle;
 	dir->is_first = 1;
-	STRDUP(dir->name, find_data.cFileName);
+	dir->name = strdup(find_data.cFileName);
 	return dir;
 }
 
 void
-dir_close(struct Dir **const a_dir)
+dir_close(struct Dir **a_dir)
 {
 	struct Dir *dir;
 
@@ -82,7 +83,7 @@ dir_close(struct Dir **const a_dir)
 }
 
 int
-dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
+dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 {
 	WIN32_FIND_DATA find_data;
 
@@ -98,7 +99,7 @@ dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
 		}
 		return 0;
 	}
-	STRDUP(a_dir->name, find_data);
+	a_dir->name = strdup(find_data.cFileName);
 	a_entry->name = a_dir->name;
 	return 1;
 }
@@ -117,7 +118,7 @@ struct Dir {
 };
 
 struct Dir *
-dir_open(char const *const a_path)
+dir_open(char const *a_path)
 {
 	DIR *d;
 	struct Dir *dir;
@@ -140,7 +141,7 @@ dir_open(char const *const a_path)
 }
 
 void
-dir_close(struct Dir **const a_dir)
+dir_close(struct Dir **a_dir)
 {
 	struct Dir *dir;
 
@@ -154,7 +155,7 @@ dir_close(struct Dir **const a_dir)
 }
 
 int
-dir_get(struct Dir *const a_dir, struct DirEntry *const a_entry)
+dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 {
 	struct dirent *result;
 

@@ -15,22 +15,27 @@
  */
 
 #include <hutils/err.h>
+#include <hutils/string.h>
 
-#if defined(HCONF_mERR_bMSC)
+#if defined(_MSC_VER)
 
 void
-err(int const a_eval, const char *const a_fmt, ...)
+err(int a_eval, char const *a_fmt, ...)
 {
-	LPTSTR str;
-	DWORD code;
+	va_list args;
+	char msg[1024];
 
+	va_start(args, a_fmt);
+	vsnprintf(msg, sizeof msg, a_fmt, args);
+	va_end(args);
+/*	LPTSTR str;
+	DWORD code;
 	code = GetLastError();
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 	    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
-	    code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&str, 0,
-	    NULL);
-	MessageBox(NULL, str, NULL, MB_OK);
-	LocalFree(str);
+	    code, 0, (LPTSTR)&str, 0, NULL);
+	LocalFree(str);*/
+	MessageBox(NULL, msg, NULL, MB_OK);
 	exit(a_eval);
 }
 
@@ -41,7 +46,7 @@ err(int const a_eval, const char *const a_fmt, ...)
 #		include <string.h>
 
 void
-err(int const a_eval, const char *const a_fmt, ...)
+err(int a_eval, char const *a_fmt, ...)
 {
 	va_list args;
 	int errno_;

@@ -64,7 +64,7 @@ HTEST(Normalize)
 	struct Vector2f v;
 
 	HTRY_PTR(&v, ==, vector2f_normalize(&v, &c_v));
-	HTRY_FLT(1e-9f, >, fabs(1.0f - vector2f_get_magnitude(&v)));
+	HTRY_DBL(1e-9, >, fabs(1.0f - vector2f_get_magnitude(&v)));
 	HTRY_FLT(3.0f / 5.0f, ==, v.x);
 	HTRY_FLT(4.0f / 5.0f, ==, v.y);
 }

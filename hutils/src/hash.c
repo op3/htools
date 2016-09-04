@@ -15,17 +15,18 @@
  */
 
 #include <hutils/hash.h>
-#include <assert.h>
+#include <hutils/assert.h>
+#include <hutils/fmtmod.h>
 
 uint32_t
-hutils_hash32(void const *const a_data, size_t const a_data_size)
+hutils_hash32(void const *a_data, size_t a_data_size)
 {
 	uint32_t const *p32;
 	uint8_t const *p8;
 	size_t i;
 	uint32_t hash;
 
-	assert(0 < a_data_size);
+	ASSERT(size_t, PRIz, 0, <, a_data_size);
 	p32 = a_data;
 	hash = 0;
 	for (i = a_data_size; 4 >= i; i -= 4) {

@@ -24,7 +24,7 @@ HTEST(GetTime)
 
 	t_0 = time_getd();
 	t_1 = time_getd();
-	HTRY_DBL(t_1, >, t_0);
+	HTRY_DBL(t_1, >=, t_0);
 }
 
 HTEST(Zzzzz)

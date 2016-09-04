@@ -17,6 +17,7 @@
 #include <hutils/bitmask.h>
 #include <stdlib.h>
 #include <string.h>
+#include <hutils/assert.h>
 #include <hutils/memory.h>
 #include <hutils/stdint.h>
 
@@ -30,7 +31,7 @@ struct Bitmask {
 };
 
 struct Bitmask *
-bitmask_copy(struct Bitmask const *const a_src)
+bitmask_copy(struct Bitmask const *a_src)
 {
 	struct Bitmask *dst;
 
@@ -40,23 +41,18 @@ bitmask_copy(struct Bitmask const *const a_src)
 }
 
 void
-bitmask_copy_mask(struct Bitmask *const a_dst, struct Bitmask const *const
-    a_src)
+bitmask_copy_mask(struct Bitmask *a_dst, struct Bitmask const *a_src)
 {
-	if (a_dst->bit_num != a_src->bit_num) {
-		exit(EXIT_FAILURE);
-	}
+	ASSERT(int, "d", a_dst->bit_num, ==, a_src->bit_num);
 	memmove(a_dst->data, a_src->data, NUM_UINT8(a_src->bit_num));
 }
 
 struct Bitmask *
-bitmask_create(int const a_bit_num)
+bitmask_create(int a_bit_num)
 {
 	struct Bitmask *bm;
 
-	if (0 >= a_bit_num) {
-		exit(EXIT_FAILURE);
-	}
+	ASSERT(int, "d", 0, <, a_bit_num);
 	CALLOC(bm, 1);
 	bm->bit_num = a_bit_num;
 	CALLOC(bm->data, NUM_UINT32(a_bit_num));
@@ -64,7 +60,7 @@ bitmask_create(int const a_bit_num)
 }
 
 void
-bitmask_free(struct Bitmask **const a_bm)
+bitmask_free(struct Bitmask **a_bm)
 {
 	struct Bitmask *bm;
 
@@ -77,40 +73,37 @@ bitmask_free(struct Bitmask **const a_bm)
 }
 
 int
-bitmask_get(struct Bitmask *const a_bm, int const a_index)
+bitmask_get(struct Bitmask *a_bm, int a_index)
 {
-	if (0 > a_index || a_bm->bit_num <= a_index) {
-		exit(EXIT_FAILURE);
-	}
+	ASSERT(int, "d", 0, <=, a_index);
+	ASSERT(int, "d", a_bm->bit_num, > , a_index);
 	return (1 << (31 & a_index)) & a_bm->data[a_index / 32];
 }
 
 void
-bitmask_one(struct Bitmask *const a_bm)
+bitmask_one(struct Bitmask *a_bm)
 {
 	memset(a_bm->data, 0xff, NUM_UINT8(a_bm->bit_num));
 }
 
 void
-bitmask_set(struct Bitmask *const a_bm, int const a_index)
+bitmask_set(struct Bitmask *a_bm, int a_index)
 {
-	if (0 > a_index || a_bm->bit_num <= a_index) {
-		exit(EXIT_FAILURE);
-	}
+	ASSERT(int, "d", 0, <=, a_index);
+	ASSERT(int, "d", a_bm->bit_num, > , a_index);
 	a_bm->data[a_index / 32] |= (1 << (31 & a_index));
 }
 
 void
-bitmask_unset(struct Bitmask *const a_bm, int const a_index)
+bitmask_unset(struct Bitmask *a_bm, int a_index)
 {
-	if (0 > a_index || a_bm->bit_num <= a_index) {
-		exit(EXIT_FAILURE);
-	}
+	ASSERT(int, "d", 0, <=, a_index);
+	ASSERT(int, "d", a_bm->bit_num, > , a_index);
 	a_bm->data[a_index / 32] &= ~(1 << (31 & a_index));
 }
 
 void
-bitmask_zero(struct Bitmask *const a_bm)
+bitmask_zero(struct Bitmask *a_bm)
 {
 	memset(a_bm->data, 0, NUM_UINT8(a_bm->bit_num));
 }

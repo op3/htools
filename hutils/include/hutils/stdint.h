@@ -31,6 +31,8 @@ typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
 typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
+#elif defined(_MSC_VER)
+#	include <stdint.h>
 #endif
 #if defined(HCONFING_mSTDINT)
 HCONF_TEST(void, (void))

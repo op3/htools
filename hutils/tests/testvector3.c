@@ -60,7 +60,7 @@ HTEST(CrossQuadArea)
 	struct Vector3f v;
 
 	vector3f_cross(&v, &c_v1, &c_v2);
-	HTRY_FLT(1e-3f, >, abs(sqrt(12) - vector3f_get_magnitude(&v)));
+	HTRY_DBL(1e-9, >, fabs(sqrtf(12) - vector3f_get_magnitude(&v)));
 }
 
 HTEST(CrossPointers)
@@ -110,7 +110,7 @@ HTEST(Normalize)
 	struct Vector3f v;
 
 	HTRY_PTR(&v, ==, vector3f_normalize(&v, &c_v));
-	HTRY_FLT(1e-9f, >, fabs(1.0f - vector3f_get_magnitude(&v)));
+	HTRY_DBL(1e-9, >, fabs(1.0f - vector3f_get_magnitude(&v)));
 	HTRY_FLT(1.0f / 9.0f, ==, v.x);
 	HTRY_FLT(4.0f / 9.0f, ==, v.y);
 	HTRY_FLT(8.0f / 9.0f, ==, v.z);

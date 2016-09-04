@@ -26,22 +26,22 @@ HTEST(Identity)
 
 	matrix4f_set_identity(&eye);
 	for (i = 0; 16 > i; ++i) {
-		a.m[i] = i;
+		a.m[i] = (float)i;
 	}
 
 	matrix4f_mul(&b, &eye, &eye);
 	for (i = 0; 16 > i; ++i) {
-		HTRY_FLT(1e-9, >, fabs(b.m[i] - eye.m[i]));
+		HTRY_DBL(1e-9, >, fabs(b.m[i] - eye.m[i]));
 	}
 
 	matrix4f_mul(&b, &a, &eye);
 	for (i = 0; 16 > i; ++i) {
-		HTRY_FLT(1e-9, >, fabs(b.m[i] - a.m[i]));
+		HTRY_DBL(1e-9, >, fabs(b.m[i] - a.m[i]));
 	}
 
 	matrix4f_mul(&b, &eye, &a);
 	for (i = 0; 16 > i; ++i) {
-		HTRY_FLT(1e-9, >, fabs(b.m[i] - a.m[i]));
+		HTRY_DBL(1e-9, >, fabs(b.m[i] - a.m[i]));
 	}
 }
 

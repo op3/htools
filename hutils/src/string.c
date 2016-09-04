@@ -22,8 +22,7 @@
 #	include <stdarg.h>
 #	include <stdio.h>
 int
-hutils_snprintf_(char *const a_dst, size_t const a_dst_size, char const *const
-    a_fmt, ...)
+snprintf(char *a_dst, size_t a_dst_size, char const *a_fmt, ...)
 {
 	va_list args;
 	int len;
@@ -35,8 +34,7 @@ hutils_snprintf_(char *const a_dst, size_t const a_dst_size, char const *const
 }
 
 int
-hutils_vsnprintf_(char *const a_dst, size_t const a_dst_size, char const
-    *const a_fmt, va_list a_args)
+vsnprintf(char *a_dst, size_t a_dst_size, char const *a_fmt, va_list a_args)
 {
 	int len;
 
@@ -51,7 +49,7 @@ hutils_vsnprintf_(char *const a_dst, size_t const a_dst_size, char const
 
 #if defined(HCONF_mSTRNDUP_bCUSTOM)
 char *
-hutils_strndup_(char const *const a_s, size_t const a_maxlen)
+hutils_strndup_(char const *a_s, size_t a_maxlen)
 {
 	char *s;
 	size_t len;
@@ -74,7 +72,7 @@ hutils_strndup_(char const *const a_s, size_t const a_maxlen)
 #	include <sigcodes.h>
 
 char *
-hutils_strsignal_(int const a_signum)
+hutils_strsignal_(int a_signum)
 {
 #	define TRANSLATE(name) case SIG##name: return #name
 	switch (a_signum) {
@@ -108,6 +106,23 @@ hutils_strsignal_(int const a_signum)
 	}
 	return "Unknown";
 }
+#elif defined(_MSC_VER)
+#	include <signal.h>
+
+char *
+hutils_strsignal_(int a_signum)
+{
+#	define TRANSLATE(name) case SIG##name: return #name
+	switch (a_signum) {
+		TRANSLATE(ABRT);
+		TRANSLATE(FPE);
+		TRANSLATE(ILL);
+		TRANSLATE(INT);
+		TRANSLATE(SEGV);
+		TRANSLATE(TERM);
+	}
+	return "Unknown";
+}
 #endif
 
 char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
@@ -119,7 +134,7 @@ char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
  *  Returns: Similar to strcmp.
  */
 int
-strbcmp(char const *const a_big, char const *const a_pattern)
+strbcmp(char const *a_big, char const *a_pattern)
 {
 	size_t pattern_len;
 
@@ -184,7 +199,7 @@ strctv_(char const *a_s1, ...)
  *  Returns: Similar to strcmp.
  */
 int
-strecmp(char const *const a_big, char const *const a_pattern)
+strecmp(char const *a_big, char const *a_pattern)
 {
 	size_t big_len, pattern_len;
 

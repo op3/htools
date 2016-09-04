@@ -44,7 +44,7 @@ static int	peek_char(struct Lexer *, size_t) FUNC_RETURNS;
 static size_t	stdio_read(void *, char *, size_t) FUNC_RETURNS;
 
 char *
-extract(struct Lexer *const a_lexer, size_t const a_len)
+extract(struct Lexer *a_lexer, size_t a_len)
 {
 	char *str;
 	size_t i;
@@ -54,10 +54,10 @@ extract(struct Lexer *const a_lexer, size_t const a_len)
 		int c;
 
 		c = peek_char(a_lexer, 0);
-		str[i] = c;
 		if (PEEK_EOF == c) {
 			break;
 		}
+		str[i] = (char)c;
 		++a_lexer->ofs;
 		if ('\n' == c) {
 			++a_lexer->line_no;
@@ -66,12 +66,12 @@ extract(struct Lexer *const a_lexer, size_t const a_len)
 			++a_lexer->col;
 		}
 	}
-	str[a_len] = '\0';
+	str[i] = '\0';
 	return str;
 }
 
 struct Lexer *
-lexer_create(LexerCallback const a_callback, void *const a_callback_data)
+lexer_create(LexerCallback a_callback, void *a_callback_data)
 {
 	struct Lexer *lexer;
 
@@ -85,7 +85,7 @@ lexer_create(LexerCallback const a_callback, void *const a_callback_data)
 }
 
 void
-lexer_free(struct Lexer **const a_lexer)
+lexer_free(struct Lexer **a_lexer)
 {
 	struct Lexer *lexer;
 
@@ -97,25 +97,25 @@ lexer_free(struct Lexer **const a_lexer)
 }
 
 int
-lexer_get_col_no(struct Lexer const *const a_lexer)
+lexer_get_col_no(struct Lexer const *a_lexer)
 {
 	return a_lexer->col;
 }
 
 enum LexerError
-lexer_get_error(struct Lexer const *const a_lexer)
+lexer_get_error(struct Lexer const *a_lexer)
 {
 	return a_lexer->error;
 }
 
 int
-lexer_get_line_no(struct Lexer const *const a_lexer)
+lexer_get_line_no(struct Lexer const *a_lexer)
 {
 	return a_lexer->line_no;
 }
 
 int
-lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
+lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 {
 	a_lexer->error = LEXER_ERROR_NONE;
 	for (;;) {
@@ -248,7 +248,7 @@ lexer_token_get(struct Lexer *const a_lexer, struct LexerToken *const a_token)
 }
 
 int
-peek_char(struct Lexer *const a_lexer, size_t const a_ofs)
+peek_char(struct Lexer *a_lexer, size_t a_ofs)
 {
 	size_t ofs;
 
@@ -288,7 +288,7 @@ peek_char(struct Lexer *const a_lexer, size_t const a_ofs)
 }
 
 size_t
-stdio_read(void *const a_user_data, char *const a_dst, size_t const a_max)
+stdio_read(void *a_user_data, char *a_dst, size_t a_max)
 {
 	return fread(a_dst, 1, a_max, a_user_data);
 }
