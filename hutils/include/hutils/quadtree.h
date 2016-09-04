@@ -29,53 +29,52 @@ enum QuadtreeTraversal {
 
 #define QUADTREE_ENTRY(NodeType)\
 struct {\
-	struct	Vector2f grid;\
 	int	level;\
+	int	x, y;\
 	struct	AABB3f aabb;\
 	struct	NodeType *child[4];\
 }
 
-#define QUADTREE_HEAD(TreeType, NodeType, UserData)\
+#define QUADTREE_HEAD(TreeType, NodeType, UserType)\
 struct TreeType {\
-	size_t	grid_size;\
 	float	world_size;\
-	struct	UserData *user_data;\
+	struct	UserType *user_data;\
 	struct	NodeType *root;\
 }
 
-#define QUADTREE_PROTOTYPE(name, TreeType, NodeType)\
-static struct NodeType *name##_node_alloc_(struct TreeType *, struct Vector2f\
-    const *, int);\
+#define QUADTREE_PROTOTYPE(name, TreeType, NodeType, UserType)\
+static struct NodeType *name##_node_alloc_(struct TreeType *, int, int, int);\
 static void name##_node_clear_(struct TreeType *, struct NodeType *);\
 static void name##_node_free_(struct TreeType *, struct NodeType **);\
 static void name##_node_visit_(struct TreeType *, struct NodeType *);\
-static void name##_free(struct TreeType *);\
-static void name##_init(struct TreeType *, float, float);\
+static void name##_shutdown(struct TreeType *);\
+static void name##_init(struct TreeType *, struct UserType *, float);\
 static void name##_traverse(struct TreeType *)
 
 #define QUADTREE_IMPLEMENT(name, TreeType, NodeType, UserType, alloc, free_,\
-    visitor, entry)\
-struct NodeType		*alloc(struct TestData *);\
-void			free_(struct TestData *, struct NodeType **);\
-enum QuadtreeTraversal	visitor(struct TestData *, struct NodeType *);\
+    visit, entry)\
+struct NodeType		*alloc(struct UserType *);\
+void			free_(struct UserType *, struct NodeType **);\
+enum QuadtreeTraversal	visit(struct UserType *, struct NodeType *);\
 static struct NodeType *\
-name##_node_alloc_(struct TreeType *a_tree, struct Vector2f const *a_grid,\
-    int a_level)\
+name##_node_alloc_(struct TreeType *a_tree, int a_level, int a_x, int a_y)\
 {\
 	struct	NodeType *node;\
-	float	A, B, node_size;\
+	float	node_size;\
 \
 	node = alloc(a_tree->user_data);\
-	COPY(node->entry.grid, *a_grid);\
 	node->entry.level = a_level;\
-	A = a_tree->world_size / (float)a_tree->grid_size;\
-	B = -a_tree->world_size / 2;\
-	node_size = a_tree->world_size / (1 << a_level);\
+	node->entry.x = a_x;\
+	node->entry.y = a_y;\
+	node_size = 0.5f * (1 << a_level);\
 	vector3f_set(&node->entry.aabb.min,\
-	    A * a_grid->x + B, 0.0f,\
-	    A * a_grid->y + B);\
+	    a_tree->world_size * (a_x - node_size),\
+	    0.0f,\
+	    a_tree->world_size * (a_y - node_size));\
+	node_size = a_tree->world_size / (1 << a_level);\
 	vector3f_set(&node->entry.aabb.max,\
-	    node->entry.aabb.min.x + node_size, 2.0e3f,\
+	    node->entry.aabb.min.x + node_size,\
+	    node->entry.aabb.min.y + 2e3f,\
 	    node->entry.aabb.min.z + node_size);\
 	node->entry.child[0] = NULL;\
 	return node;\
@@ -106,63 +105,47 @@ name##_node_visit_(struct TreeType *a_tree, struct NodeType *a_node)\
 	enum QuadtreeTraversal trav;\
 	size_t i;\
 \
-	trav = visitor(a_tree->user_data, a_node);\
+	trav = visit(a_tree->user_data, a_node);\
 	switch (trav) {\
-	case QUADTREE_CONTINUE:\
-		break;\
 	case QUADTREE_CLEAR:\
 		name##_node_clear_(a_tree, a_node);\
 		return;\
+	case QUADTREE_CONTINUE:\
+		break;\
 	case QUADTREE_STOP:\
 		return;\
 	}\
 	if (NULL == a_node->entry.child[0]) {\
-		struct	Vector2f s;\
-		float	side2;\
+		float	side_half;\
 		int	level;\
 \
 		level = a_node->entry.level + 1;\
-		side2 = (float)a_tree->grid_size / (1 << level);\
-		vector2f_set(&s,\
-		    a_node->entry.grid.x,\
-		    a_node->entry.grid.y);\
-		a_node->entry.child[0] = name##_node_alloc_(a_tree, &s,\
-		    level);\
-		vector2f_set(&s,\
-		    a_node->entry.grid.x + side2,\
-		    a_node->entry.grid.y);\
-		a_node->entry.child[1] = name##_node_alloc_(a_tree, &s,\
-		    level);\
-		vector2f_set(&s,\
-		    a_node->entry.grid.x,\
-		    a_node->entry.grid.y + side2);\
-		a_node->entry.child[2] = name##_node_alloc_(a_tree, &s,\
-		    level);\
-		vector2f_set(&s,\
-		    a_node->entry.grid.x + side2,\
-		    a_node->entry.grid.y + side2);\
-		a_node->entry.child[3] = name##_node_alloc_(a_tree, &s,\
-		    level);\
+		side_half = 1.0f / (1 << level);\
+		a_node->entry.child[0] = name##_node_alloc_(a_tree, level,\
+		    a_node->entry.x, a_node->entry.y);\
+		a_node->entry.child[1] = name##_node_alloc_(a_tree, level,\
+		    a_node->entry.x + 1, a_node->entry.y);\
+		a_node->entry.child[2] = name##_node_alloc_(a_tree, level,\
+		    a_node->entry.x, a_node->entry.y + 1);\
+		a_node->entry.child[3] = name##_node_alloc_(a_tree, level,\
+		    a_node->entry.x + 1, a_node->entry.y + 1);\
 	}\
 	for (i = 0; LENGTH(a_node->entry.child) > i; ++i) {\
 		name##_node_visit_(a_tree, a_node->entry.child[i]);\
 	}\
 }\
 static void \
-name##_free(struct TreeType *a_tree)\
+name##_shutdown(struct TreeType *a_tree)\
 {\
 	name##_node_free_(a_tree, &a_tree->root);\
 }\
 static void \
 name##_init(struct TreeType *a_tree, struct UserType *a_user_data, float\
-    a_grid_size, float a_world_size)\
+    a_world_size)\
 {\
-	struct	Vector2f const c_origin = {0.0f, 0.0f};\
-\
-	a_tree->grid_size = (size_t)a_grid_size;\
 	a_tree->world_size = a_world_size;\
 	a_tree->user_data = a_user_data;\
-	a_tree->root = name##_node_alloc_(a_tree, &c_origin, 0);\
+	a_tree->root = name##_node_alloc_(a_tree, 0, 0, 0);\
 }\
 static void \
 name##_traverse(struct TreeType *a_tree)\

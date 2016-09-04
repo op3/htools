@@ -47,7 +47,7 @@ struct LexerToken {
 	char	*str;
 };
 
-struct Lexer	*lexer_create(LexerCallback, void const *) FUNC_RETURNS;
+struct Lexer	*lexer_create(LexerCallback, void *) FUNC_RETURNS;
 void		lexer_free(struct Lexer **);
 int		lexer_get_col_no(struct Lexer const *) FUNC_PURE FUNC_RETURNS;
 enum LexerError	lexer_get_error(struct Lexer const *) FUNC_RETURNS;

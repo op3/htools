@@ -80,7 +80,9 @@ HTEST(ServerClient)
 
 HTEST_SUITE(UDP)
 {
-	udp_setup();
+	if (!udp_setup()) {
+		fprintf(stderr, "Could not setup UDP.\n");
+	}
 	HTEST_ADD(Server);
 	HTEST_ADD(Client);
 	HTEST_ADD(ServerClient);

@@ -30,8 +30,7 @@ void	err(int, char const *, ...);
 void err(int, char const *, ...);
 #endif
 #if defined(HCONFING_mERR)
-void
-test(void)
+HCONF_TEST(void, (void))
 {
 	err(0, "a");
 }

@@ -18,6 +18,7 @@
 #define HUTILS_UDP_H
 
 #include <hconf/include/hutils/udp.h>
+#include <stdlib.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 

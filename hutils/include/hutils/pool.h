@@ -17,60 +17,93 @@
 #ifndef HUTILS_POOL_H
 #define HUTILS_POOL_H
 
+#include <hutils/assert.h>
 #include <hutils/memory.h>
 #include <hutils/queue.h>
 
-#define POOL_HEAD(Name, Type) \
-TAILQ_HEAD(Pool##Type##List_, Type);\
-TAILQ_HEAD(Pool##Type##PageList_, Pool##Type##Page_);\
-struct Pool##Type##Page_ {\
-	struct	Type *p;\
-	TAILQ_ENTRY(Pool##Type##Page_)	page_list;\
-};\
-struct Name {\
-	struct	Pool##Type##PageList_ page_list;\
+#define POOL_ENTRY(PoolType, Type) struct {\
+	struct	Pool##PoolType##Page_ *page;\
+	TAILQ_ENTRY(Type)	next;\
 }
+#define POOL_HEAD(PoolType, Type, num) \
+TAILQ_HEAD(Pool##PoolType##List_, Type);\
+struct Pool##PoolType##Page_ {\
+	struct	Type node_array[num];\
+	struct	Pool##PoolType##List_	node_list;\
+	size_t	used_num;\
+	TAILQ_ENTRY(Pool##PoolType##Page_)	next;\
+};\
+TAILQ_HEAD(PoolType, Pool##PoolType##Page_)
 
-#define POOL_PROTOTYPE_STATIC(Name, Type) \
-static void		Name##_free(struct Name *);\
-static struct Type	*Name##_get(struct Name *);\
-static void		Name##_init(struct Name *)
+#define POOL_PROTOTYPE(name, PoolType, Type) \
+static struct Type	*name##_alloc(struct PoolType *);\
+static void		name##_free(struct PoolType *, struct Type **);\
+static void		name##_init(struct PoolType *);\
+static void		name##_shutdown(struct PoolType *)
 
-#define POOL_IMPLEMENT(Name, Type, page_size) \
-void \
-Name##_free(struct Name *a_name)\
+#define POOL_IMPLEMENT(name, PoolType, Type, entry) \
+static struct Type *\
+name##_alloc(struct PoolType *a_pool)\
 {\
-	while (!TAILQ_EMPTY(&a_name->page_list)) {\
-		struct Pool##Type##Page_ *page;\
+	struct Pool##PoolType##Page_ *page;\
+	struct Type *node;\
 \
-		page = TAILQ_FIRST(&a_name->page_list);\
-		TAILQ_REMOVE(&a_name->page_list, page, page_list);\
+	TAILQ_FOREACH(page, a_pool, next) {\
+		if (!TAILQ_EMPTY(&page->node_list)) {\
+			break;\
+		}\
+	}\
+	if (TAILQ_END(a_pool) == page) {\
+		size_t i;\
+\
+		MALLOC(page, sizeof *page);\
+		TAILQ_INIT(&page->node_list);\
+		for (i = 0; LENGTH(page->node_array) > i; ++i) {\
+			page->node_array[i].entry.page = page;\
+			TAILQ_INSERT_TAIL(&page->node_list,\
+			    &page->node_array[i], entry.next);\
+		}\
+		page->used_num = 0;\
+		TAILQ_INSERT_TAIL(a_pool, page, next);\
+	}\
+	node = TAILQ_FIRST(&page->node_list);\
+	TAILQ_REMOVE(&page->node_list, node, entry.next);\
+	++page->used_num;\
+	return node;\
+}\
+static void \
+name##_free(struct PoolType *a_pool, struct Type **a_node)\
+{\
+	struct Type *node;\
+	struct Pool##PoolType##Page_ *page;\
+\
+	node = *a_node;\
+	page = node->entry.page;\
+	ASSERT(void *, "p", (void *)&page->node_array, <=, (void *)node);\
+	ASSERT(void *, "p", (void *)node, <, (void *)&page->node_list);\
+	TAILQ_INSERT_TAIL(&page->node_list, node, entry.next);\
+	--page->used_num;\
+	if (0 == page->used_num) {\
+		TAILQ_REMOVE(a_pool, page, next);\
+	}\
+	*a_node = NULL;\
+}\
+static void \
+name##_init(struct PoolType *a_pool)\
+{\
+	TAILQ_INIT(a_pool);\
+}\
+static void \
+name##_shutdown(struct PoolType *a_pool)\
+{\
+	while (!TAILQ_EMPTY(a_pool)) {\
+		struct Pool##PoolType##Page_ *page;\
+\
+		page = TAILQ_FIRST(a_pool);\
+		TAILQ_REMOVE(a_pool, page, next);\
 		FREE(page);\
 	}\
 }\
-struct Type *\
-Name##_get(struct Name *a_name)\
-{\
-	struct Pool##Type##Page_ *page;\
-\
-	page = TAILQ_LAST(&a_name->page_list, Pool##Type##PageList_);\
-	if (TAILQ_END(&a_name->page_list) == page ||\
-	    (struct Type *)(page + 1) + page_size == page->p) {\
-		MALLOC(page, sizeof *page + sizeof *page->p * page_size);\
-		page->p = (struct Type *)(page + 1);\
-		TAILQ_INSERT_TAIL(&a_name->page_list, page, page_list);\
-	}\
-	return page->p++;\
-}\
-void \
-Name##_init(struct Name *a_name)\
-{\
-	TAILQ_INIT(&a_name->page_list);\
-}\
-struct Pool##Type##SemicolonDummy_
-
-#define POOL_FREE(Name, name) Name##_free(name)
-#define POOL_GET(Name, name) Name##_get(name)
-#define POOL_INIT(Name, name) Name##_init(name)
+struct PoolType
 
 #endif

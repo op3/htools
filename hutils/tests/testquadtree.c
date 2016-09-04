@@ -32,8 +32,9 @@ static void			node_free(struct TestData *, struct TestNode
     **);
 static enum QuadtreeTraversal	node_visitor(struct TestData *, struct
     TestNode *) FUNC_RETURNS;
+QUADTREE_PROTOTYPE(testtree, TestTree, TestNode, TestData);
 
-QUADTREE_IMPLEMENT(test_tree, TestTree, TestNode, TestData, node_alloc,
+QUADTREE_IMPLEMENT(testtree, TestTree, TestNode, TestData, node_alloc,
     node_free, node_visitor, node);
 
 struct TestNode *
@@ -73,22 +74,24 @@ HTEST(Root)
 	struct TestData data;
 	struct TestTree tree;
 
-	HTRY_SIGNAL(test_tree_traverse(&tree));
+	HTRY_SIGNAL(testtree_traverse(&tree));
 
 	ZERO(data);
-	test_tree_init(&tree, &data, 4, 8.0f);
+	testtree_init(&tree, &data, 8.0f);
+	HTRY_I(1, ==, data.node_num);
+	HTRY_PTR(NULL, !=, tree.root);
+	HTRY_FLT(0, ==, tree.root->node.x);
+	HTRY_FLT(0, ==, tree.root->node.y);
+
+	HTRY_VOID(testtree_traverse(&tree));
 	HTRY_I(1, ==, data.node_num);
 	HTRY_PTR(NULL, !=, tree.root);
 
-	HTRY_VOID(test_tree_traverse(&tree));
-	HTRY_I(1, ==, data.node_num);
-	HTRY_PTR(NULL, !=, tree.root);
-
-	test_tree_free(&tree);
+	testtree_shutdown(&tree);
 	HTRY_I(0, ==, data.node_num);
 	HTRY_PTR(NULL, ==, tree.root);
 
-	HTRY_SIGNAL(test_tree_traverse(&tree));
+	HTRY_SIGNAL(testtree_traverse(&tree));
 }
 
 HTEST(Creating)
@@ -97,25 +100,33 @@ HTEST(Creating)
 	struct TestTree tree;
 
 	ZERO(data);
-	test_tree_init(&tree, &data, 4, 8.0f);
+	testtree_init(&tree, &data, 8.0f);
 
 	data.creation_level = 1;
-	test_tree_traverse(&tree);
+	testtree_traverse(&tree);
 	HTRY_I(1 + 4, ==, data.node_num);
+	HTRY_FLT(0, ==, tree.root->node.child[0]->node.x);
+	HTRY_FLT(0, ==, tree.root->node.child[0]->node.y);
+	HTRY_FLT(1, ==, tree.root->node.child[1]->node.x);
+	HTRY_FLT(0, ==, tree.root->node.child[1]->node.y);
+	HTRY_FLT(0, ==, tree.root->node.child[2]->node.x);
+	HTRY_FLT(1, ==, tree.root->node.child[2]->node.y);
+	HTRY_FLT(1, ==, tree.root->node.child[3]->node.x);
+	HTRY_FLT(1, ==, tree.root->node.child[3]->node.y);
 
 	data.creation_level = 2;
-	test_tree_traverse(&tree);
+	testtree_traverse(&tree);
 	HTRY_I(1 + 4 + 16, ==, data.node_num);
 
 	data.creation_level = 3;
-	test_tree_traverse(&tree);
+	testtree_traverse(&tree);
 	HTRY_I(1 + 4 + 16 + 64, ==, data.node_num);
 
 	data.creation_level = 1;
-	test_tree_traverse(&tree);
+	testtree_traverse(&tree);
 	HTRY_I(1 + 4, ==, data.node_num);
 
-	test_tree_free(&tree);
+	testtree_shutdown(&tree);
 	HTRY_I(0, ==, data.node_num);
 }
 

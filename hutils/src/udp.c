@@ -22,7 +22,9 @@
 #	include <sys/socket.h>
 #	include <sys/time.h>
 #	include <netdb.h>
+#	include <stdarg.h>
 #	include <unistd.h>
+#	include <hutils/err.h>
 #	define INVALID_SOCKET -1
 #	define SOCKET int
 #	define SOCKET_ERROR -1
@@ -34,7 +36,7 @@ set_non_blocking(SOCKET a_socket)
 static void
 warnf(char const *a_fmt, ...)
 {
-	va_list;
+	va_list args;
 
 	va_start(args, a_fmt);
 	vwarn(a_fmt, args);
@@ -319,12 +321,14 @@ udp_server_send(struct UDPServer const *a_server, struct UDPDatagram
 int
 udp_setup()
 {
+#if defined(_MSC_VER)
 	struct WSAData wsa;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
 		warnf("WSAStartup");
 		return 0;
 	}
+#endif
 	g_is_setup = 1;
 	return 1;
 }
@@ -332,7 +336,9 @@ udp_setup()
 void
 udp_shutdown()
 {
+#if defined(_MSC_VER)
 	WSACleanup();
+#endif
 	g_is_setup = 0;
 }
 
