@@ -32,6 +32,11 @@ HCONF_TEST(int, (void))
 #	endif
 #endif
 
+enum {
+	UDP_IPV4 = 0x0,
+	UDP_IPV6 = 0x1
+};
+
 struct UDPAddress;
 struct UDPClient;
 struct UDPServer;
@@ -40,14 +45,14 @@ struct UDPDatagram {
 	size_t	size;
 };
 
-struct UDPClient	*udp_client_create(char const *, uint16_t)
+struct UDPClient	*udp_client_create(int, char const *, uint16_t)
 	FUNC_RETURNS;
 void			udp_client_free(struct UDPClient **);
 void			udp_client_receive(struct UDPClient const *, struct
     UDPDatagram *, double);
 void			udp_client_send(struct UDPClient const *, struct
     UDPDatagram const *);
-struct UDPServer	*udp_server_create(uint16_t) FUNC_RETURNS;
+struct UDPServer	*udp_server_create(int, uint16_t) FUNC_RETURNS;
 void			udp_server_free(struct UDPServer **);
 void			udp_server_receive(struct UDPServer const *, struct
     UDPAddress **, struct UDPDatagram *, double);

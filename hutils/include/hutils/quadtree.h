@@ -116,11 +116,9 @@ name##_node_visit_(struct TreeType *a_tree, struct NodeType *a_node)\
 		return;\
 	}\
 	if (NULL == a_node->entry.child[0]) {\
-		float	side_half;\
 		int	level;\
 \
 		level = a_node->entry.level + 1;\
-		side_half = 1.0f / (1 << level);\
 		a_node->entry.child[0] = name##_node_alloc_(a_tree, level,\
 		    a_node->entry.x, a_node->entry.y);\
 		a_node->entry.child[1] = name##_node_alloc_(a_tree, level,\

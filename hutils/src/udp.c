@@ -95,10 +95,19 @@ struct UDPServer {
 	SOCKET	socket;
 };
 
+static int	get_family(int) FUNC_RETURNS;
+
 static int g_is_setup;
 
+int
+get_family(int a_flags)
+{
+	return UDP_IPV4 == ((UDP_IPV4 | UDP_IPV6) & a_flags) ? AF_INET :
+	    AF_INET6;
+}
+
 struct UDPClient *
-udp_client_create(char const *a_hostname, uint16_t a_port)
+udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 {
 	struct addrinfo addri;
 	char port_str[10];
@@ -107,11 +116,13 @@ udp_client_create(char const *a_hostname, uint16_t a_port)
 	SOCKET sock;
 
 	if (!g_is_setup) {
-		fprintf(stderr, "udp_client_create called outside udp_setup/udp_shutdown.\n");
+		fprintf(stderr, "udp_client_create called outside "
+		    "udp_setup/udp_shutdown.\n");
 		return NULL;
 	}
 
 	ZERO(addri);
+	addri.ai_family = get_family(a_flags);
 	addri.ai_socktype = SOCK_DGRAM;
 	addri.ai_protocol = IPPROTO_UDP;
 	snprintf(port_str, sizeof port_str, "%d", a_port);
@@ -128,6 +139,8 @@ udp_client_create(char const *a_hostname, uint16_t a_port)
 		}
 		if (0 != connect(sock, p->ai_addr, p->ai_addrlen)) {
 			warnf("connect(%s:%s)", a_hostname, port_str);
+			close(sock);
+			sock = INVALID_SOCKET;
 			continue;
 		}
 		break;
@@ -204,7 +217,7 @@ udp_client_send(struct UDPClient const *a_client, struct UDPDatagram
 }
 
 struct UDPServer *
-udp_server_create(uint16_t a_port)
+udp_server_create(int a_flags, uint16_t a_port)
 {
 	struct addrinfo addri;
 	char port_str[10];
@@ -218,6 +231,7 @@ udp_server_create(uint16_t a_port)
 	}
 
 	ZERO(addri);
+	addri.ai_family = get_family(a_flags);
 	addri.ai_socktype = SOCK_DGRAM;
 	addri.ai_flags = AI_PASSIVE;
 	addri.ai_protocol = IPPROTO_UDP;
@@ -235,6 +249,8 @@ udp_server_create(uint16_t a_port)
 		}
 		if (0 != bind(sock, p->ai_addr, p->ai_addrlen)) {
 			warnf("connect(NULL:%s)", port_str);
+			close(sock);
+			sock = INVALID_SOCKET;
 			continue;
 		}
 		break;

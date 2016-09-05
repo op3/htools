@@ -19,22 +19,40 @@
 #include <hutils/memory.h>
 #include <hutils/string.h>
 
-HTEST(Server)
+HTEST(ServerPreSetup)
 {
 	struct UDPServer *server;
 
-	server = udp_server_create(12345);
-	HTRY_PTR(NULL, !=, server);
-	udp_server_free(&server);
+	server = udp_server_create(UDP_IPV4, 12345);
+	HTRY_PTR(NULL, ==, server);
 }
 
-HTEST(Client)
+HTEST(ClientPreSetup)
 {
 	struct UDPClient *client;
 
-	client = udp_client_create("localhost", 12345);
+	client = udp_client_create(UDP_IPV4, "localhost", 12345);
+	HTRY_PTR(NULL, ==, client);
+}
+
+HTEST(ServerPostSetup)
+{
+	struct UDPServer *server;
+
+	server = udp_server_create(UDP_IPV4, 12345);
+	HTRY_PTR(NULL, !=, server);
+	udp_server_free(&server);
+	HTRY_PTR(NULL, ==, server);
+}
+
+HTEST(ClientPostSetup)
+{
+	struct UDPClient *client;
+
+	client = udp_client_create(UDP_IPV4, "localhost", 12345);
 	HTRY_PTR(NULL, !=, client);
 	udp_client_free(&client);
+	HTRY_PTR(NULL, ==, client);
 }
 
 HTEST(ServerClient)
@@ -46,17 +64,20 @@ HTEST(ServerClient)
 	char *s;
 
 	/*
-	 * NOTE: One cannot reliably test UDP, but localhost should generally
-	 * be ok.
+	 * NOTE:
+	 * One cannot really test UDP, but localhost should generally be ok.
+	 * IPv4-v6 interoperability is tricky, let's assume v4, also makes
+	 * little practical sense to ask server/client what they are since
+	 * they should be on different hosts.
 	 */
 
 	s = (char *)datagram.buf;
-	server = udp_server_create(12345);
+	server = udp_server_create(UDP_IPV4, 12345);
 
 	{
 		struct UDPClient *client;
 
-		client = udp_client_create("localhost", 12345);
+		client = udp_client_create(UDP_IPV4, "localhost", 12345);
 		strlcpy(s, STRING, sizeof datagram.buf);
 		datagram.size = sizeof(STRING);
 		udp_client_send(client, &datagram);
@@ -80,11 +101,13 @@ HTEST(ServerClient)
 
 HTEST_SUITE(UDP)
 {
+	HTEST_ADD(ServerPreSetup);
+	HTEST_ADD(ClientPreSetup);
 	if (!udp_setup()) {
 		fprintf(stderr, "Could not setup UDP.\n");
 	}
-	HTEST_ADD(Server);
-	HTEST_ADD(Client);
+	HTEST_ADD(ServerPostSetup);
+	HTEST_ADD(ClientPostSetup);
 	HTEST_ADD(ServerClient);
 	udp_shutdown();
 }

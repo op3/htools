@@ -52,8 +52,9 @@ htest_test_header_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_\
     a_color_reset_)\
 {\
 	htest_set_color_(a_color_header_);\
-	printf(" Test("__FILE__":%d:"#name")\n", __LINE__);\
+	printf(" Test("__FILE__":%d:"#name")", __LINE__);\
 	htest_set_color_(a_color_reset_);\
+	printf("\n");\
 }\
 static void \
 htest_test_##name##_(HTEST_COLOR_ a_color_fail_, HTEST_COLOR_ a_color_reset_,\
@@ -72,8 +73,9 @@ htest_suite_header_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_\
     a_color_reset_)\
 {\
 	htest_set_color_(a_color_header_);\
-	printf("Suite("__FILE__":%d:"#name")\n", __LINE__);\
+	printf("Suite("__FILE__":%d:"#name")", __LINE__);\
 	htest_set_color_(a_color_reset_);\
+	printf("\n");\
 }\
 void \
 htest_suite_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_ a_color_fail_,\
