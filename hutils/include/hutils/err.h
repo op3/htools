@@ -17,23 +17,23 @@
 #ifndef HUTILS_ERR_H
 #define HUTILS_ERR_H
 
-#include <hconf/include/hutils/err.h>
+#include <stdarg.h>
+#include <hutils/funcattr.h>
 
-#if defined(HCONF_mERR_bERR_H)
-/* HCONF_OPT=nolink */
-#	include <err.h>
-#elif defined(_MSC_VER)
-#	include <windows.h>
-void	err(int, char const *, ...);
-#elif defined(HCONF_mERR_bCUSTOM)
-/* HCONF_SRC=src/err.c */
-void err(int, char const *, ...);
-#endif
-#if defined(HCONFING_mERR)
-HCONF_TEST(void, (void))
-{
-	err(0, "a");
-}
-#endif
+typedef int (*HutilsPrinter)(char const *, va_list);
+
+void	hutils_err(int, char const *, ...) FUNC_PRINTF(2, 3);
+void	hutils_errc(int, int, char const *, ...) FUNC_PRINTF(3, 4);
+void	hutils_errx(int, char const *, ...) FUNC_PRINTF(2, 3);
+void	hutils_err_set_printer(HutilsPrinter);
+void	hutils_verr(int, char const *, va_list);
+void	hutils_verrc(int, int, char const *, va_list);
+void	hutils_verrx(int, char const *, va_list);
+void	hutils_vwarn(char const *, va_list);
+void	hutils_vwarnc(int, char const *, va_list);
+void	hutils_vwarnx(char const *, va_list);
+void	hutils_warn(char const *, ...) FUNC_PRINTF(1, 2);
+void	hutils_warnc(int, char const *, ...) FUNC_PRINTF(2, 3);
+void	hutils_warnx(char const *, ...) FUNC_PRINTF(1, 2);
 
 #endif

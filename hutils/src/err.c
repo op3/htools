@@ -15,48 +15,145 @@
  */
 
 #include <hutils/err.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <hutils/string.h>
 
-#if defined(_MSC_VER)
+static int	printer(char const *, ...);
+static int	stdio(char const *, va_list);
+
+static HutilsPrinter g_printer = stdio;
 
 void
-err(int a_eval, char const *a_fmt, ...)
-{
-	va_list args;
-	char msg[1024];
-
-	va_start(args, a_fmt);
-	vsnprintf(msg, sizeof msg, a_fmt, args);
-	va_end(args);
-/*	LPTSTR str;
-	DWORD code;
-	code = GetLastError();
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-	    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
-	    code, 0, (LPTSTR)&str, 0, NULL);
-	LocalFree(str);*/
-	MessageBox(NULL, msg, NULL, MB_OK);
-	exit(a_eval);
-}
-
-#elif defined(HCONF_mERR_bCUSTOM)
-#		include <errno.h>
-#		include <stdarg.h>
-#		include <stdio.h>
-#		include <string.h>
-
-void
-err(int a_eval, char const *a_fmt, ...)
+hutils_err(int a_eval, char const *a_fmt, ...)
 {
 	va_list args;
 	int errno_;
 
 	errno_ = errno;
 	va_start(args, a_fmt);
-	vfprintf(stderr, a_fmt, args);
-	fprintf(stderr, ": %s.\n", strerror(errno_));
+	hutils_vwarnc(errno_, a_fmt, args);
 	va_end(args);
 	exit(a_eval);
 }
 
-#endif
+void
+hutils_errc(int a_eval, int a_code, char const *a_fmt, ...)
+{
+	va_list args;
+
+	va_start(args, a_fmt);
+	hutils_vwarnc(a_code, a_fmt, args);
+	va_end(args);
+	exit(a_eval);
+}
+
+void
+hutils_errx(int a_eval, char const *a_fmt, ...)
+{
+	va_list args;
+
+	va_start(args, a_fmt);
+	hutils_vwarnx(a_fmt, args);
+	va_end(args);
+	exit(a_eval);
+}
+
+void
+hutils_err_set_printer(HutilsPrinter a_printer)
+{
+	g_printer = NULL == a_printer ? stdio : a_printer;
+}
+
+void
+hutils_verr(int a_eval, char const *a_fmt, va_list a_args)
+{
+	hutils_vwarnc(errno, a_fmt, a_args);
+	exit(a_eval);
+}
+
+void
+hutils_verrc(int a_eval, int a_code, char const *a_fmt, va_list a_args)
+{
+	hutils_vwarnc(a_code, a_fmt, a_args);
+	exit(a_eval);
+}
+
+void
+hutils_verrx(int a_eval, char const *a_fmt, va_list a_args)
+{
+	hutils_vwarnx(a_fmt, a_args);
+	exit(a_eval);
+}
+
+void
+hutils_vwarn(char const *a_fmt, va_list a_args)
+{
+	hutils_vwarnc(errno, a_fmt, a_args);
+}
+
+void
+hutils_vwarnc(int a_code, char const *a_fmt, va_list a_args)
+{
+	g_printer(a_fmt, a_args);
+	printer(": %s\n", strerror(a_code));
+}
+
+void
+hutils_vwarnx(char const *a_fmt, va_list a_args)
+{
+	g_printer(a_fmt, a_args);
+	printer("\n");
+}
+
+void
+hutils_warn(char const *a_fmt, ...)
+{
+	va_list args;
+	int errno_;
+
+	errno_ = errno;
+	va_start(args, a_fmt);
+	hutils_vwarnc(errno_, a_fmt, args);
+	va_end(args);
+}
+
+void
+hutils_warnc(int a_code, char const *a_fmt, ...)
+{
+	va_list args;
+
+	va_start(args, a_fmt);
+	hutils_vwarnc(a_code, a_fmt, args);
+	va_end(args);
+}
+
+void
+hutils_warnx(char const *a_fmt, ...)
+{
+	va_list args;
+	int errno_;
+
+	errno_ = errno;
+	va_start(args, a_fmt);
+	hutils_vwarnc(errno_, a_fmt, args);
+	va_end(args);
+}
+
+int
+printer(char const *a_fmt, ...)
+{
+	va_list args;
+	int ret;
+
+	va_start(args, a_fmt);
+	ret = g_printer(a_fmt, args);
+	va_end(args);
+	return ret;
+}
+
+int
+stdio(char const *a_fmt, va_list args)
+{
+	return fprintf(stderr, a_fmt, args);
+}

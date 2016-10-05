@@ -39,7 +39,7 @@ warnf(char const *a_fmt, ...)
 	va_list args;
 
 	va_start(args, a_fmt);
-	vwarn(a_fmt, args);
+	hutils_vwarn(a_fmt, args);
 	va_end(args);
 }
 #elif defined(_MSC_VER)
@@ -67,10 +67,9 @@ warnf(char const *a_fmt, ...)
 	va_end(args);
 	fprintf(stderr, ": ");
 	s = NULL;
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-				   NULL, WSAGetLastError(),
-				   0,
-				   (LPTSTR)&s, 0, NULL);
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	    FORMAT_MESSAGE_FROM_SYSTEM, NULL, WSAGetLastError(), 0,
+	    (LPTSTR)&s, 0, NULL);
 	fprintf(stderr, "%s\n", s);
 	LocalFree(s);
 }
@@ -96,6 +95,9 @@ struct UDPServer {
 };
 
 static int	get_family(int) FUNC_RETURNS;
+static int	receive_datagram(SOCKET, struct UDPDatagram *, struct
+    UDPAddress *, double);
+static int	send_datagram(SOCKET, struct UDPDatagram const *);
 
 static int g_is_setup;
 
@@ -104,6 +106,56 @@ get_family(int a_flags)
 {
 	return UDP_IPV4 == ((UDP_IPV4 | UDP_IPV6) & a_flags) ? AF_INET :
 	    AF_INET6;
+}
+
+int
+receive_datagram(SOCKET a_socket, struct UDPDatagram *a_dgram, struct
+    UDPAddress *a_addr, double a_timeout)
+{
+	fd_set socks;
+	struct timeval timeout;
+	int ret;
+
+	a_dgram->size = 0;
+	FD_ZERO(&socks);
+	FD_SET(a_socket, &socks);
+	timeout.tv_sec = (long)a_timeout;
+	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
+	ret = select(a_socket + 1, &socks, NULL, NULL, &timeout);
+	if (0 == ret) {
+		return 1;
+	}
+	if (SOCKET_ERROR == ret) {
+		if (EINTR == errno) {
+			return 1;
+		}
+		warnf("select");
+		return 0;
+	}
+	a_addr->len = sizeof a_addr->addr;
+	ZERO(a_addr->addr);
+	ret = recvfrom(a_socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf),
+	    0, (struct sockaddr *)&a_addr->addr, &a_addr->len);
+	if (SOCKET_ERROR == ret) {
+		if (EAGAIN == errno || EWOULDBLOCK != errno) {
+			return 1;
+		}
+		warnf("recv");
+		return 0;
+	}
+	a_dgram->size = ret;
+	return 1;
+}
+
+int
+send_datagram(SOCKET a_socket, struct UDPDatagram const *a_dgram)
+{
+	if (SOCKET_ERROR == send(a_socket, (char *)a_dgram->buf,
+	    a_dgram->size, 0)) {
+		warnf("send");
+		return 0;
+	}
+	return 1;
 }
 
 struct UDPClient *
@@ -172,48 +224,20 @@ udp_client_free(struct UDPClient **a_client)
 	FREE(*a_client);
 }
 
-void
+int
 udp_client_receive(struct UDPClient const *a_client, struct UDPDatagram
     *a_dgram, double a_timeout)
 {
-	fd_set socks;
-	struct timeval timeout;
-	int size;
-	int ret;
+	struct UDPAddress addr;
 
-	a_dgram->size = 0;
-	FD_ZERO(&socks);
-	FD_SET(a_client->socket, &socks);
-	timeout.tv_sec = (long)a_timeout;
-	timeout.tv_sec = (long)(1e6 * (a_timeout - timeout.tv_sec));
-	ret = select(a_client->socket + 1, &socks, NULL, NULL, &timeout);
-	if (0 == ret) {
-		return;
-	}
-	if (SOCKET_ERROR == ret) {
-		if (EINTR == errno) {
-			return;
-		}
-		warnf("select");
-		return;
-	}
-	size = recv(a_client->socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf), 0);
-	if (SOCKET_ERROR == size) {
-		if (EAGAIN != errno && EWOULDBLOCK != errno) {
-			warnf("recv");
-		}
-		return;
-	}
-	a_dgram->size = size;
+	return receive_datagram(a_client->socket, a_dgram, &addr, a_timeout);
 }
 
-void
+int
 udp_client_send(struct UDPClient const *a_client, struct UDPDatagram
     const *a_dgram)
 {
-	if (SOCKET_ERROR == send(a_client->socket, (char *)a_dgram->buf, a_dgram->size, 0)) {
-		warnf("send");
-	}
+	return send_datagram(a_client->socket, a_dgram);
 }
 
 struct UDPServer *
@@ -226,7 +250,8 @@ udp_server_create(int a_flags, uint16_t a_port)
 	int sock;
 
 	if (!g_is_setup) {
-		fprintf(stderr, "udp_client_create called outside udp_setup/udp_shutdown.\n");
+		fprintf(stderr, "udp_client_create called outside "
+		    "udp_setup/udp_shutdown.\n");
 		return NULL;
 	}
 
@@ -283,55 +308,28 @@ udp_server_free(struct UDPServer **a_server)
 	FREE(*a_server);
 }
 
-void
+int
 udp_server_receive(struct UDPServer const *a_server, struct UDPAddress
     **a_addr, struct UDPDatagram *a_dgram, double a_timeout)
 {
-	fd_set socks;
-	struct timeval timeout;
 	struct UDPAddress addr, *paddr;
-	int ret, size;
 
-	*a_addr = NULL;
-	a_dgram->size = 0;
-	FD_ZERO(&socks);
-	FD_SET(a_server->socket, &socks);
-	timeout.tv_sec = (long)a_timeout;
-	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
-	ret = select(a_server->socket + 1, &socks, NULL, NULL, &timeout);
-	if (0 == ret) {
-		return;
+	if (!receive_datagram(a_server->socket, a_dgram, &addr, a_timeout)) {
+		return 0;
 	}
-	if (SOCKET_ERROR == ret) {
-		if (EINTR == errno) {
-			return;
-		}
-		warnf("select");
-		return;
+	if (0 != a_dgram->size) {
+		CALLOC(paddr, 1);
+		COPY(*paddr, addr);
+		*a_addr = paddr;
 	}
-	addr.len = sizeof addr.addr;
-	ZERO(addr.addr);
-	size = recvfrom(a_server->socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf),
-	    0, (struct sockaddr *)&addr.addr, &addr.len);
-	if (SOCKET_ERROR == size) {
-		if (EAGAIN != errno && EWOULDBLOCK != errno) {
-			warnf("recv");
-		}
-		return;
-	}
-	CALLOC(paddr, 1);
-	COPY(*paddr, addr);
-	*a_addr = paddr;
-	a_dgram->size = size;
+	return 1;
 }
 
-void
+int
 udp_server_send(struct UDPServer const *a_server, struct UDPDatagram
     const *a_dgram)
 {
-	if (SOCKET_ERROR == send(a_server->socket, (char *)a_dgram->buf, a_dgram->size, 0)) {
-		warnf("send");
-	}
+	return send_datagram(a_server->socket, a_dgram);
 }
 
 int

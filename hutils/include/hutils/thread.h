@@ -56,20 +56,18 @@ struct CondVar;
 struct Mutex;
 struct Thread;
 
-/* TODO: How to handle errors? */
-int		thread_condvar_broadcast(struct CondVar *, char **);
-struct CondVar	*thread_condvar_create(char **) FUNC_RETURNS;
-int		thread_condvar_free(struct CondVar **, char **);
-int		thread_condvar_signal(struct CondVar *, char **);
-int		thread_condvar_wait(struct CondVar *, struct Mutex *, char
-    **);
-struct Thread	*thread_create(void (*)(void *), void *, char **)
+int		thread_condvar_broadcast(struct CondVar *);
+struct CondVar	*thread_condvar_create(void) FUNC_RETURNS;
+int		thread_condvar_free(struct CondVar **);
+int		thread_condvar_signal(struct CondVar *);
+int		thread_condvar_wait(struct CondVar *, struct Mutex *);
+struct Thread	*thread_create(void (*)(void *), void *)
 	FUNC_RETURNS;
-int		thread_free(struct Thread **, char **);
-struct Mutex	*thread_mutex_create(char **) FUNC_RETURNS;
-int		thread_mutex_free(struct Mutex **, char **);
-int		thread_mutex_lock(struct Mutex *, char **);
-int		thread_mutex_unlock(struct Mutex *, char **);
+int		thread_free(struct Thread **);
+struct Mutex	*thread_mutex_create(void) FUNC_RETURNS;
+int		thread_mutex_free(struct Mutex **);
+int		thread_mutex_lock(struct Mutex *);
+int		thread_mutex_unlock(struct Mutex *);
 
 CDECLS_END
 

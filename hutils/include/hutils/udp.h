@@ -48,17 +48,17 @@ struct UDPDatagram {
 struct UDPClient	*udp_client_create(int, char const *, uint16_t)
 	FUNC_RETURNS;
 void			udp_client_free(struct UDPClient **);
-void			udp_client_receive(struct UDPClient const *, struct
+int			udp_client_receive(struct UDPClient const *, struct
     UDPDatagram *, double);
-void			udp_client_send(struct UDPClient const *, struct
+int			udp_client_send(struct UDPClient const *, struct
     UDPDatagram const *);
 struct UDPServer	*udp_server_create(int, uint16_t) FUNC_RETURNS;
 void			udp_server_free(struct UDPServer **);
-void			udp_server_receive(struct UDPServer const *, struct
+int			udp_server_receive(struct UDPServer const *, struct
     UDPAddress **, struct UDPDatagram *, double);
-void			udp_server_send(struct UDPServer const *, struct
+int			udp_server_send(struct UDPServer const *, struct
     UDPDatagram const *);
-int				udp_setup(void) FUNC_RETURNS;
+int			udp_setup(void) FUNC_RETURNS;
 void			udp_shutdown(void);
 
 #endif

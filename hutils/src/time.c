@@ -50,7 +50,7 @@ time_getd()
 	struct timespec tp;
 
 	if (0 != clock_gettime(CLOCK_SOURCE, &tp)) {
-		err(EXIT_FAILURE, "clock_gettime");
+		hutils_err(EXIT_FAILURE, "clock_gettime");
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;
 #elif defined(TIME_PERF)
@@ -74,7 +74,7 @@ time_getd()
 
 		ret = mach_timebase_info(&timebase_info);
 		if (0 != ret) {
-			err(EXIT_FAILURE, "mach_timebase_info");
+			hutils_err(EXIT_FAILURE, "mach_timebase_info");
 		}
 
 		scaling_factor = 1e-9 * timebase_info.numer /

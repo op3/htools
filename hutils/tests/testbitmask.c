@@ -32,6 +32,8 @@ HTEST(DefaultValue)
 
 	bitmask_free(&bitmask);
 	HTRY_PTR(NULL, ==, bitmask);
+	bitmask_free(&bitmask);
+	HTRY_PTR(NULL, ==, bitmask);
 }
 
 HTEST(ZeroSizeFails)

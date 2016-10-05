@@ -50,6 +50,8 @@ HTEST(ListTests)
 	}
 	dir_close(&dir);
 	HTRY_PTR(NULL, ==, dir);
+	dir_close(&dir);
+	HTRY_PTR(NULL, ==, dir);
 }
 
 HTEST_SUITE(Dir)

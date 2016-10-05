@@ -101,28 +101,25 @@ run(void *a_data)
 }
 
 int
-thread_condvar_broadcast(struct CondVar *a_condvar, char **a_err)
+thread_condvar_broadcast(struct CondVar *a_condvar)
 {
-	(void)a_err;
 	WakeAllConditionVariable(&a_condvar->cv);
 	return 1;
 }
 
 struct CondVar *
-thread_condvar_create(char **a_err)
+thread_condvar_create()
 {
 	struct CondVar *condvar;
 
-	(void)a_err;
 	CALLOC(condvar, 1);
 	InitializeConditionVariable(&condvar->cv);
 	return condvar;
 }
 
 int
-thread_condvar_free(struct CondVar **a_condvar, char **a_err)
+thread_condvar_free(struct CondVar **a_condvar)
 {
-	(void)a_err;
 	if (*a_condvar) {
 		FREE(*a_condvar);
 	}
@@ -130,29 +127,25 @@ thread_condvar_free(struct CondVar **a_condvar, char **a_err)
 }
 
 int
-thread_condvar_signal(struct CondVar *a_condvar, char **a_err)
+thread_condvar_signal(struct CondVar *a_condvar)
 {
-	(void)a_err;
 	WakeConditionVariable(&a_condvar->cv);
 	return 1;
 }
 
 int
-thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex, char
-    **a_err)
+thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex)
 {
 	if (!SleepConditionVariableCS(&a_condvar->cv, &a_mutex->cs, INFINITE))
 	{
-		if (NULL != a_err) {
-			*a_err = dup_last_error();
-		}
+		print_last_error();
 		return 0;
 	}
 	return 1;
 }
 
 struct Thread *
-thread_create(void (*a_func)(void *), void *a_data, char **a_err)
+thread_create(void (*a_func)(void *), void *a_data)
 {
 	struct Starter *starter;
 	struct Thread *thread;
@@ -164,9 +157,7 @@ thread_create(void (*a_func)(void *), void *a_data, char **a_err)
 	ret = _beginthreadex(NULL, 0, run, starter, 0, NULL);
 	if (0 == ret) {
 		FREE(starter);
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(errno));
-		}
+		hutils_warn("_beginthreadex");
 		return NULL;
 	}
 	CALLOC(thread, 1);
@@ -175,7 +166,7 @@ thread_create(void (*a_func)(void *), void *a_data, char **a_err)
 }
 
 int
-thread_free(struct Thread **a_thread, char **a_err)
+thread_free(struct Thread **a_thread)
 {
 	struct Thread *thread;
 	int ret;
@@ -186,11 +177,11 @@ thread_free(struct Thread **a_thread, char **a_err)
 	}
 	ret = 1;
 	if (WAIT_FAILED == WaitForSingleObject(thread->handle, INFINITE)) {
-		*a_err = dup_last_error();
+		print_last_error();
 		ret = 0;
 	}
 	if (!CloseHandle(thread->handle)) {
-		*a_err = dup_last_error();
+		print_last_error();
 		ret = 0;
 	}
 	FREE(*a_thread);
@@ -198,22 +189,20 @@ thread_free(struct Thread **a_thread, char **a_err)
 }
 
 struct Mutex *
-thread_mutex_create(char **a_err)
+thread_mutex_create()
 {
 	struct Mutex *mutex;
 
-	(void)a_err;
 	CALLOC(mutex, 1);
 	InitializeCriticalSectionAndSpinCount(&mutex->cs, 0x00000400);
 	return mutex;
 }
 
 int
-thread_mutex_free(struct Mutex **a_mutex, char **a_err)
+thread_mutex_free(struct Mutex **a_mutex)
 {
 	struct Mutex *mutex;
 
-	(void)a_err;
 	mutex = *a_mutex;
 	if (NULL == mutex) {
 		return 1;
@@ -224,17 +213,15 @@ thread_mutex_free(struct Mutex **a_mutex, char **a_err)
 }
 
 int 
-thread_mutex_lock(struct Mutex *a_mutex, char **a_err)
+thread_mutex_lock(struct Mutex *a_mutex)
 {
-	(void)a_err;
 	EnterCriticalSection(&a_mutex->cs);
 	return 1;
 }
 
 int
-thread_mutex_unlock(struct Mutex *a_mutex, char **a_err)
+thread_mutex_unlock(struct Mutex *a_mutex)
 {
-	(void)a_err;
 	LeaveCriticalSection(&a_mutex->cs);
 	return 1;
 }
@@ -242,6 +229,8 @@ thread_mutex_unlock(struct Mutex *a_mutex, char **a_err)
 #endif
 
 #if DO_PTHREADS
+
+#include <errno.h>
 
 struct CondVar {
 	pthread_cond_t	cond;
@@ -272,7 +261,7 @@ run(void *a_data)
 }
 
 struct CondVar *
-thread_condvar_create(char **a_err)
+thread_condvar_create()
 {
 	struct CondVar *condvar;
 	int ret;
@@ -280,83 +269,73 @@ thread_condvar_create(char **a_err)
 	CALLOC(condvar, 1);
 	ret = pthread_cond_init(&condvar->cond, NULL);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_cond_init");
 		FREE(condvar);
 	}
 	return condvar;
 }
 
 int
-thread_condvar_free(struct CondVar **a_condvar, char **a_err)
+thread_condvar_free(struct CondVar **a_condvar)
 {
 	struct CondVar *condvar;
-	int ret;
+	int ret, errno_;
 
 	condvar = *a_condvar;
 	if (NULL == condvar) {
 		return 1;
 	}
 	ret = pthread_cond_destroy(&condvar->cond);
+	errno_ = errno;
 	FREE(*a_condvar);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warnc(errno_, "pthread_cond_destroy");
 		return 0;
 	}
 	return 1;
 }
 
 int
-thread_condvar_broadcast(struct CondVar *a_condvar, char **a_err)
+thread_condvar_broadcast(struct CondVar *a_condvar)
 {
 	int ret;
 
 	ret = pthread_cond_broadcast(&a_condvar->cond);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_cond_broadcast");
 		return 0;
 	}
 	return 1;
 }
 
 int
-thread_condvar_signal(struct CondVar *a_condvar, char **a_err)
+thread_condvar_signal(struct CondVar *a_condvar)
 {
 	int ret;
 
 	ret = pthread_cond_signal(&a_condvar->cond);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_cond_signal");
 		return 0;
 	}
 	return 1;
 }
 
 int
-thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex, char
-    **a_err)
+thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex)
 {
 	int ret;
 
 	ret = pthread_cond_wait(&a_condvar->cond, &a_mutex->mutex);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_cond_wait");
 		return 0;
 	}
 	return 1;
 }
 
 struct Thread *
-thread_create(void (*a_func)(void *), void *a_data, char **a_err)
+thread_create(void (*a_func)(void *), void *a_data)
 {
 	struct Starter *starter;
 	struct Thread *thread;
@@ -376,38 +355,35 @@ thread_create(void (*a_func)(void *), void *a_data, char **a_err)
 	}
 	return thread;
 thread_create_fail:
-	if (NULL != a_err) {
-		*a_err = strdup(strerror(ret));
-	}
+	hutils_warn("pthread_create");
 	FREE(starter);
 	FREE(thread);
 	return NULL;
 }
 
 int
-thread_free(struct Thread **a_thread, char **a_err)
+thread_free(struct Thread **a_thread)
 {
 	struct Thread *thread;
-	int ret;
+	int ret, errno_;
 
 	thread = *a_thread;
 	if (NULL == thread) {
 		return 1;
 	}
 	ret = pthread_join(thread->thread, NULL);
+	errno_ = errno;
 	ATTR_DESTROY(thread);
 	FREE(*a_thread);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warnc(errno_, "pthread_destroy");
 		return 0;
 	}
 	return 1;
 }
 
 struct Mutex *
-thread_mutex_create(char **a_err)
+thread_mutex_create()
 {
 	struct Mutex *mutex;
 	int ret;
@@ -415,60 +391,53 @@ thread_mutex_create(char **a_err)
 	CALLOC(mutex, 1);
 	ret = pthread_mutex_init(&mutex->mutex, NULL);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_mutex_init");
 		FREE(mutex);
 	}
 	return mutex;
 }
 
 int
-thread_mutex_free(struct Mutex **a_mutex, char **a_err)
+thread_mutex_free(struct Mutex **a_mutex)
 {
 	struct Mutex *mutex;
-	int ret;
+	int ret, errno_;
 
 	mutex = *a_mutex;
 	if (NULL == mutex) {
 		return 1;
 	}
 	ret = pthread_mutex_destroy(&mutex->mutex);
+	errno_ = errno;
 	FREE(*a_mutex);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warnc(errno_, "pthread_mutex_destroy");
 		return 0;
 	}
 	return 1;
 }
 
 int 
-thread_mutex_lock(struct Mutex *a_mutex, char **a_err)
+thread_mutex_lock(struct Mutex *a_mutex)
 {
 	int ret;
 
 	ret = pthread_mutex_lock(&a_mutex->mutex);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_mutex_lock");
 		return 1;
 	}
 	return 0;
 }
 
 int
-thread_mutex_unlock(struct Mutex *a_mutex, char **a_err)
+thread_mutex_unlock(struct Mutex *a_mutex)
 {
 	int ret;
 
 	ret = pthread_mutex_unlock(&a_mutex->mutex);
 	if (0 != ret) {
-		if (NULL != a_err) {
-			*a_err = strdup(strerror(ret));
-		}
+		hutils_warn("pthread_mutex_unlock");
 		return 1;
 	}
 	return 0;

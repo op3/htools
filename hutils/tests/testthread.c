@@ -25,7 +25,7 @@ static void	runner_mutex(void *);
 
 static struct Mutex *g_mutex;
 static struct CondVar *g_condvar;
-static int g_messenger, g_task_exists;
+static int g_messenger;
 
 void
 runner(void *const a_data)
@@ -38,13 +38,10 @@ runner_condvar(void *const a_dummy)
 {
 	(void)a_dummy;
 	while (N > g_messenger) {
-		thread_mutex_lock(g_mutex, NULL);
-		while (g_task_exists) {
-			thread_condvar_wait(g_condvar, g_mutex, NULL);
-		}
-		g_task_exists = 1;
-		thread_condvar_broadcast(g_condvar, NULL);
-		thread_mutex_unlock(g_mutex, NULL);
+		thread_mutex_lock(g_mutex);
+		++g_messenger;
+		thread_condvar_broadcast(g_condvar);
+		thread_mutex_unlock(g_mutex);
 	}
 }
 
@@ -55,9 +52,9 @@ runner_mutex(void *const a_dummy)
 
 	(void)a_dummy;
 	for (i = 0; N > i; ++i) {
-		thread_mutex_lock(g_mutex, NULL);
+		thread_mutex_lock(g_mutex);
 		++g_messenger;
-		thread_mutex_unlock(g_mutex, NULL);
+		thread_mutex_unlock(g_mutex);
 	}
 }
 
@@ -66,9 +63,9 @@ HTEST(Runner)
 	struct Thread *t;
 
 	g_messenger = 0;
-	t = thread_create(runner, (void *)31415, NULL);
+	t = thread_create(runner, (void *)31415);
 	HTRY_PTR(NULL, !=, t);
-	thread_free(&t, NULL);
+	thread_free(&t);
 	HTRY_PTR(NULL, ==, t);
 	HTRY_I(31415, ==, g_messenger);
 }
@@ -78,45 +75,43 @@ HTEST(Mutex)
 	struct Thread *t;
 	int i;
 
-	g_mutex = thread_mutex_create(NULL);
+	g_mutex = thread_mutex_create();
 	g_messenger = 0;
-	t = thread_create(runner_mutex, NULL, NULL);
+	t = thread_create(runner_mutex, NULL);
 	for (i = 0; N > i; ++i) {
 		int prev;
 
-		thread_mutex_lock(g_mutex, NULL);
+		thread_mutex_lock(g_mutex);
 		prev = g_messenger;
 		++g_messenger;
 		HTRY_I(g_messenger, ==, prev + 1);
-		thread_mutex_unlock(g_mutex, NULL);
+		thread_mutex_unlock(g_mutex);
 	}
-	thread_free(&t, NULL);
-	thread_mutex_free(&g_mutex, NULL);
+	thread_free(&t);
+	thread_mutex_free(&g_mutex);
 }
 
 HTEST(ConditionVariable)
 {
 	struct Thread *t;
+	int previous_messenger;
 
-	if (1) return;
-	/* TODO: Sometimes deadlocks! */
-	g_condvar = thread_condvar_create(NULL);
-	g_mutex = thread_mutex_create(NULL);
-	g_task_exists = 0;
-	t = thread_create(runner_condvar, NULL, NULL);
-	for (g_messenger = 0; N > g_messenger; ++g_messenger) {
-		thread_mutex_lock(g_mutex, NULL);
-		while (!g_task_exists) {
-			thread_condvar_wait(g_condvar, g_mutex, NULL);
+	g_condvar = thread_condvar_create();
+	g_mutex = thread_mutex_create();
+	thread_mutex_lock(g_mutex);
+	g_messenger = 0;
+	t = thread_create(runner_condvar, NULL);
+	while (N > g_messenger) {
+		previous_messenger = g_messenger;
+		while (g_messenger == previous_messenger) {
+			thread_condvar_wait(g_condvar, g_mutex);
 		}
-		HTRY_I(1, ==, g_task_exists);
-		g_task_exists = 0;
-		thread_condvar_broadcast(g_condvar, NULL);
-		thread_mutex_unlock(g_mutex, NULL);
+		HTRY_I(previous_messenger, <, g_messenger);
 	}
-	thread_free(&t, NULL);
-	thread_mutex_free(&g_mutex, NULL);
-	thread_condvar_free(&g_condvar, NULL);
+	thread_mutex_unlock(g_mutex);
+	thread_free(&t);
+	thread_mutex_free(&g_mutex);
+	thread_condvar_free(&g_condvar);
 }
 
 HTEST_SUITE(Thread)

@@ -190,7 +190,7 @@ extern jmp_buf g_htest_try_jmp_buf_;
 	int status_;\
 	pid_ = fork();\
 	if (0 > pid_) {\
-		err(EXIT_FAILURE, "fork");\
+		hutils_err(EXIT_FAILURE, "fork");\
 	} else if (0 == pid_) {\
 		g_htest_dtor_ = dtor;\
 		htest_try_install_sighandler_();\

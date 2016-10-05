@@ -25,7 +25,8 @@
 	int n_ = num;\
 	ptr = calloc(n_, sizeof *ptr);\
 	if (NULL == ptr) {\
-		err(EXIT_FAILURE, "calloc(%d,%d)", n_, (int)sizeof *ptr);\
+		hutils_err(EXIT_FAILURE, "calloc(%d,%d)", n_, \
+		    (int)sizeof *ptr);\
 	}\
 } WHILE_0
 #define DUP(dst, src) do {\
@@ -40,7 +41,7 @@
 	size_t s_ = size;\
 	ptr = malloc(s_);\
 	if (NULL == ptr) {\
-		err(EXIT_FAILURE, "malloc(%d)", (int)s_);\
+		hutils_err(EXIT_FAILURE, "malloc(%d)", (int)s_);\
 	}\
 } WHILE_0
 

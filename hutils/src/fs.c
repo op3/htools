@@ -59,7 +59,7 @@ fs_mkdirs(char const *a_path)
 		if (0 != _mkdir(path))
 #endif
 		{
-			err(EXIT_FAILURE, "mkdir(%s)", path);
+			hutils_err(EXIT_FAILURE, "mkdir(%s)", path);
 		}
 	}
 }
