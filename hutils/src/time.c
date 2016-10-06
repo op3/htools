@@ -17,25 +17,10 @@
 #include <hutils/time.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_mTIME_bPOSIX_REALTIME_DRAFT9)
-#	define ASCTIME_R(tm, buf) asctime_r(tm, buf, 26)
-#	define GMTIME_R(tt, tm) gmtime_r(tm, tt)
-#elif !defined(_MSC_VER)
-#	define ASCTIME_R(tm, buf) asctime_r(tm, buf)
-#	define GMTIME_R(tt, tm) gmtime_r(tt, tm)
-#else
-#	define ASCTIME_R(tm, buf) asctime_s(buf, 26, tm)
-#	define GMTIME_R(tt, tm) gmtime_s(tm, tt)
-#endif
-
-#if defined(SLEEP_NANOSLEEP)
-#	include <errno.h>
-#	include <time.h>
-#endif
-#if defined(TIME_CLOCK)
+#if defined(CLOCK_GETTIME)
 #	include <stdlib.h>
 #	include <hutils/err.h>
-#elif defined(TIME_MACH)
+#elif defined(HCONF_mTIME_GET_bMACH)
 #	include <stdlib.h>
 #	include <mach/mach_time.h>
 #	include <hutils/err.h>
@@ -43,26 +28,41 @@
 #	include <assert.h>
 #endif
 
+#if defined(HCONF_mTIME_DRAFT9_bNO)
+#	define ASCTIME_R(tm, buf) asctime_r(tm, buf)
+#	define GMTIME_R(tt, tm) gmtime_r(tt, tm)
+#elif defined(HCONF_mTIME_DRAFT9_bYES)
+#	define ASCTIME_R(tm, buf) asctime_r(tm, buf, 26)
+#	define GMTIME_R(tt, tm) gmtime_r(tm, tt)
+#elif defined(_MSC_VER)
+#	define ASCTIME_R(tm, buf) asctime_s(buf, 26, tm)
+#	define GMTIME_R(tt, tm) gmtime_s(tm, tt)
+#endif
+
 double
 time_getd()
 {
-#if defined(TIME_CLOCK)
+#if defined(HUTILS_CLOCK_GETTIME)
+	clockid_t const c_clockid[] = {
+#	if defined(CLOCK_MONOTONIC_RAW)
+		CLOCK_MONOTONIC_RAW,
+#	endif
+		CLOCK_MONOTONIC,
+		CLOCK_REALTIME
+	};
+	static int s_clocki = 0;
 	struct timespec tp;
 
-	if (0 != clock_gettime(CLOCK_SOURCE, &tp)) {
-		hutils_err(EXIT_FAILURE, "clock_gettime");
+	for (;;) {
+		if (0 == clock_gettime(c_clockid[s_clocki], &tp)) {
+			break;
+		}
+		++s_clocki;
+		if (LENGTH(c_clockid) <= s_clocki) {
+			hutils_err(EXIT_FAILURE, "clock_gettime");
+		}
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;
-#elif defined(TIME_PERF)
-	static double time_unit = -1.0;
-	LARGE_INTEGER li;
-
-	if (0.0 > time_unit) {
-		assert(QueryPerformanceFrequency(&li));
-		time_unit = 1.0 / li.QuadPart;
-	}
-	QueryPerformanceCounter(&li);
-	return li.QuadPart * time_unit;
 #elif defined(TIME_MACH)
 	uint64_t mach_time;
 	static double scaling_factor = -1.0;
@@ -76,12 +76,21 @@ time_getd()
 		if (0 != ret) {
 			hutils_err(EXIT_FAILURE, "mach_timebase_info");
 		}
-
 		scaling_factor = 1e-9 * timebase_info.numer /
 		    timebase_info.denom;
 	}
 
 	return mach_time * scaling_factor;
+#elif defined(_MSC_VER)
+	static double time_unit = -1.0;
+	LARGE_INTEGER li;
+
+	if (0.0 > time_unit) {
+		assert(QueryPerformanceFrequency(&li));
+		time_unit = 1.0 / li.QuadPart;
+	}
+	QueryPerformanceCounter(&li);
+	return li.QuadPart * time_unit;
 #endif
 }
 
@@ -102,16 +111,17 @@ time_gets()
 int
 time_sleep(double a_s)
 {
-#if defined(SLEEP_SLEEP)
-	Sleep((DWORD)(1e3 * a_s));
-#elif defined(SLEEP_NANOSLEEP)
+#if defined(HCONF_mTIME_SLEEP_bNANOSLEEP)
 	struct timespec ts;
 
 	ts.tv_sec = 0;
 	ts.tv_nsec = 1e9 * a_s;
 	if (0 != nanosleep(&ts, NULL)) {
-		return errno;
+		hutils_warn("nanosleep");
+		return 0;
 	}
+#elif defined(_MSC_VER)
+	Sleep((DWORD)(1e3 * a_s));
 #endif
-	return 0;
+	return 1;
 }

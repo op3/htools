@@ -17,71 +17,59 @@
 #ifndef HUTILS_TIME_H
 #define HUTILS_TIME_H
 
-#include <time.h>
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/time.h>
 
-#if defined(HCONF_mTIME_bPOSIX_MONOTONIC)
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_MONOTONIC
-#	if defined(HCONFING_mTIME_bPOSIX_MONOTONIC)
-HCONF_TEST(int, (void))
-{
-	asctime_r(NULL, NULL);
-	return clock_gettime(CLOCK_SOURCE, NULL);
-}
-#	endif
-#elif defined(HCONF_mTIME_bPOSIX_MONOTONIC_LRT)
+CDECLS_BEGIN
+
+#if defined(HCONF_mTIME_GET_bCLOCK_GETTIME)
+#	define HUTILS_CLOCK_GETTIME
+#elif defined(HCONF_mTIME_GET_bCLOCK_GETTIME_LRT)
 /* HCONF_LIBS=-lrt */
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_MONOTONIC
-#	if defined(HCONFING_mTIME_bPOSIX_MONOTONIC_LRT)
-HCONF_TEST(int, (void))
-{
-	asctime_r(NULL, NULL);
-	return clock_gettime(CLOCK_SOURCE, NULL);
-}
-#	endif
-#elif defined(HCONF_mTIME_bPOSIX_REALTIME)
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_REALTIME
-#	if defined(HCONFING_mTIME_bPOSIX_REALTIME)
-HCONF_TEST(int, (void))
-{
-	asctime_r(NULL, NULL);
-	return clock_gettime(CLOCK_SOURCE, NULL);
-}
-#	endif
-#elif defined(HCONF_mTIME_bPOSIX_REALTIME_DRAFT9)
-#	define SLEEP_NANOSLEEP
-#	define TIME_CLOCK
-#	define CLOCK_SOURCE CLOCK_REALTIME
-#	if defined(HCONFING_mTIME_bPOSIX_REALTIME_DRAFT9)
-HCONF_TEST(int, (void))
-{
-	asctime_r(NULL, NULL, 0);
-	return clock_gettime(CLOCK_SOURCE, NULL);
-}
-#	endif
-#elif defined(HCONF_mTIME_bMAC)
-#	define SLEEP_NANOSLEEP
-#	define TIME_MACH
-#	if defined(HCONFING_mTIME_bMAC)
+#	define HUTILS_CLOCK_GETTIME
+#elif defined(HCONF_mTIME_GET_bMACH)
+#	if defined(HCONFING_mTIME_GET)
 HCONF_TEST(uint64_t, (void))
 {
 	return mach_absolute_time();
 }
 #	endif
-#elif defined(_MSC_VER)
-#	define SLEEP_SLEEP
-#	define TIME_PERF 1
+#endif
+#if defined(HCONFING_mTIME_GET) && defined(CLOCK_GETTIME)
+HCONF_TEST(int, (void))
+{
+	return clock_gettime(0, NULL);
+}
 #endif
 
-CDECLS_BEGIN
+#if defined(HCONF_mTIME_SLEEP_bNANOSLEEP)
+#	if defined(HCONFING_mTIME_SLEEP)
+#		include <time.h>
+HCONF_TEST(int, (struct timespec ts))
+{
+	return nanosleep(&ts, NULL);
+}
+#	endif
+#endif
+
+#if defined(HCONF_mTIME_DRAFT9_bNO)
+#	if defined(HCONFING_mTIME_DRAFT9)
+#		include <time.h>
+HCONF_TEST(char *, (void))
+{
+	return asctime_r(NULL, NULL);
+}
+#	endif
+#elif defined(HCONF_mTIME_DRAFT9_bYES)
+#	if defined(HCONFING_mTIME_DRAFT9)
+#		include <time.h>
+HCONF_TEST(char *, (void))
+{
+	return asctime_r(NULL, NULL, 0);
+}
+#	endif
+#endif
 
 double	time_getd(void) FUNC_RETURNS;
 char	*time_gets(void) FUNC_RETURNS;
