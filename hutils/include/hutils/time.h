@@ -24,8 +24,10 @@
 CDECLS_BEGIN
 
 #if defined(HCONF_mTIME_GET_bCLOCK_GETTIME)
+/* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 #	define HUTILS_CLOCK_GETTIME
 #elif defined(HCONF_mTIME_GET_bCLOCK_GETTIME_LRT)
+/* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 /* HCONF_LIBS=-lrt */
 #	define HUTILS_CLOCK_GETTIME
 #elif defined(HCONF_mTIME_GET_bMACH)
@@ -36,7 +38,8 @@ HCONF_TEST(uint64_t, (void))
 }
 #	endif
 #endif
-#if defined(HCONFING_mTIME_GET) && defined(CLOCK_GETTIME)
+#if defined(HCONFING_mTIME_GET) && defined(HUTILS_CLOCK_GETTIME)
+#	include <time.h>
 HCONF_TEST(int, (void))
 {
 	return clock_gettime(0, NULL);

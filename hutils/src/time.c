@@ -17,8 +17,9 @@
 #include <hutils/time.h>
 #include <hutils/memory.h>
 
-#if defined(CLOCK_GETTIME)
+#if defined(HUTILS_CLOCK_GETTIME)
 #	include <stdlib.h>
+#	include <time.h>
 #	include <hutils/err.h>
 #elif defined(HCONF_mTIME_GET_bMACH)
 #	include <stdlib.h>
@@ -50,7 +51,7 @@ time_getd()
 		CLOCK_MONOTONIC,
 		CLOCK_REALTIME
 	};
-	static int s_clocki = 0;
+	static size_t s_clocki = 0;
 	struct timespec tp;
 
 	for (;;) {
