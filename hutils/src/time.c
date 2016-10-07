@@ -21,12 +21,11 @@
 #	include <stdlib.h>
 #	include <time.h>
 #	include <hutils/err.h>
+#	include <hutils/thread.h>
 #elif defined(HCONF_mTIME_GET_bMACH)
 #	include <stdlib.h>
 #	include <mach/mach_time.h>
 #	include <hutils/err.h>
-#elif defined(_MSC_VER)
-#	include <assert.h>
 #endif
 
 #if defined(HCONF_mTIME_DRAFT9_bNO)
@@ -44,27 +43,54 @@ double
 time_getd()
 {
 #if defined(HUTILS_CLOCK_GETTIME)
-	clockid_t const c_clockid[] = {
-#	if defined(CLOCK_MONOTONIC_RAW)
-		CLOCK_MONOTONIC_RAW,
-#	endif
-		CLOCK_MONOTONIC,
-		CLOCK_REALTIME
+	enum MutexState {
+		MUTEX_UNINITED,
+		MUTEX_OK,
+		MUTEX_FAIL
 	};
-	static size_t s_clocki = 0;
+	static enum MutexState s_mutex_state = MUTEX_UNINITED;
+	static struct Mutex s_mutex;
+	clockid_t s_clockid =
+#	if defined(CLOCK_MONOTONIC_RAW)
+	    CLOCK_MONOTONIC_RAW;
+#	else
+	    CLOCK_MONOTONIC;
+#	endif
 	struct timespec tp;
 
+	if (MUTEX_UNINITED == s_mutex_state) {
+		s_mutex_state = thread_mutex_init(&s_mutex) ? MUTEX_OK :
+		    MUTEX_FAIL;
+		/*
+		 * If the mutex init failed, then we shouldn't see more than
+		 * one thread entering here, so let's keep going without using
+		 * the mutex.
+		 */
+	}
+	if (MUTEX_OK == s_mutex_state) {
+		thread_mutex_lock(&s_mutex);
+	}
 	for (;;) {
-		if (0 == clock_gettime(c_clockid[s_clocki], &tp)) {
+		if (0 == clock_gettime(s_clockid, &tp)) {
 			break;
 		}
-		++s_clocki;
-		if (LENGTH(c_clockid) <= s_clocki) {
-			hutils_err(EXIT_FAILURE, "clock_gettime");
-		}
+#define TRANSITION(from, to) do {\
+	if (from == s_clockid) {\
+		s_clockid = to;\
+		continue;\
+	}\
+} WHILE_0
+#	if defined(CLOCK_MONOTONIC_RAW)
+		TRANSITION(CLOCK_MONOTONIC_RAW, CLOCK_MONOTONIC);
+#	endif
+		TRANSITION(CLOCK_MONOTONIC, CLOCK_REALTIME);
+		hutils_err(EXIT_FAILURE, "clock_gettime");
+	}
+	if (MUTEX_OK == s_mutex_state) {
+		thread_mutex_unlock(&s_mutex);
 	}
 	return tp.tv_sec + 1e-9 * tp.tv_nsec;
-#elif defined(TIME_MACH)
+#elif defined(HCONF_mTIME_GET_bMACH)
 	uint64_t mach_time;
 	static double scaling_factor = -1.0;
 
@@ -87,7 +113,10 @@ time_getd()
 	LARGE_INTEGER li;
 
 	if (0.0 > time_unit) {
-		assert(QueryPerformanceFrequency(&li));
+		if (!QueryPerformanceFrequency(&li)) {
+			hutils_errx(EXIT_FAILURE,
+			    "QueryPerformanceFrequency");
+		}
 		time_unit = 1.0 / li.QuadPart;
 	}
 	QueryPerformanceCounter(&li);

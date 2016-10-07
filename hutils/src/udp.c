@@ -23,11 +23,22 @@
 #	include <sys/time.h>
 #	include <netdb.h>
 #	include <stdarg.h>
+#	include <stdio.h>
 #	include <unistd.h>
 #	include <hutils/err.h>
 #	define INVALID_SOCKET -1
 #	define SOCKET int
 #	define SOCKET_ERROR -1
+static void
+gaif(int a_error, char const *a_fmt, ...)
+{
+	va_list args;
+
+	va_start(args, a_fmt);
+	vfprintf(stderr, a_fmt, args);
+	va_end(args);
+	fprintf(stderr, ": %s\n", gai_strerror(a_error));
+}
 static int
 set_non_blocking(SOCKET a_socket)
 {
@@ -166,6 +177,7 @@ udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 	struct addrinfo *result, *p;
 	struct UDPClient *client;
 	SOCKET sock;
+	int ret;
 
 	if (!g_is_setup) {
 		fprintf(stderr, "udp_client_create called outside "
@@ -178,8 +190,9 @@ udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 	addri.ai_socktype = SOCK_DGRAM;
 	addri.ai_protocol = IPPROTO_UDP;
 	snprintf(port_str, sizeof port_str, "%d", a_port);
-	if (0 != getaddrinfo(a_hostname, port_str, &addri, &result)) {
-		warnf("%s:%s", a_hostname, port_str);
+	ret = getaddrinfo(a_hostname, port_str, &addri, &result);
+	if (0 != ret) {
+		gaif(ret, "%s:%s", a_hostname, port_str);
 		return NULL;
 	}
 	sock = INVALID_SOCKET;

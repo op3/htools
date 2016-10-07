@@ -31,7 +31,7 @@ HTEST(ClientPreSetup)
 {
 	struct UDPClient *client;
 
-	client = udp_client_create(UDP_IPV4, "localhost", 12345);
+	client = udp_client_create(UDP_IPV4, "127.0.0.1", 12345);
 	HTRY_PTR(NULL, ==, client);
 }
 
@@ -49,7 +49,7 @@ HTEST(ClientPostSetup)
 {
 	struct UDPClient *client;
 
-	client = udp_client_create(UDP_IPV4, "localhost", 12345);
+	client = udp_client_create(UDP_IPV4, "127.0.0.1", 12345);
 	HTRY_PTR(NULL, !=, client);
 	udp_client_free(&client);
 	HTRY_PTR(NULL, ==, client);
@@ -65,7 +65,7 @@ HTEST(ServerClient)
 
 	/*
 	 * NOTE:
-	 * One cannot really test UDP, but localhost should generally be ok.
+	 * One cannot really test UDP, but 127.0.0.1 should generally be ok.
 	 * IPv4-v6 interoperability is tricky, let's assume v4, also makes
 	 * little practical sense to ask server/client what they are since
 	 * they should be on different hosts.
@@ -77,7 +77,7 @@ HTEST(ServerClient)
 	{
 		struct UDPClient *client;
 
-		client = udp_client_create(UDP_IPV4, "localhost", 12345);
+		client = udp_client_create(UDP_IPV4, "127.0.0.1", 12345);
 		strlcpy(s, STRING, sizeof datagram.buf);
 		datagram.size = sizeof(STRING);
 		udp_client_send(client, &datagram);
