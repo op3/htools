@@ -24,6 +24,7 @@
 #if defined(HCONF_mTHREAD_bST_OLD)
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
+#	define PTHREADS
 #	if defined(HCONFING_mTHREAD_bST_OLD)
 HCONF_TEST(int, (void))
 {
@@ -33,6 +34,7 @@ HCONF_TEST(int, (void))
 #elif defined(HCONF_mTHREAD_bST_NEW)
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
+#	define PTHREADS
 #	if defined(HCONFING_mTHREAD_bST_NEW)
 HCONF_TEST(int, (void))
 {
@@ -42,6 +44,7 @@ HCONF_TEST(int, (void))
 #elif defined(HCONF_mTHREAD_bPHTREAD)
 /* HCONF_LIBS=-lpthread */
 #	include <pthread.h>
+#	define PTHREADS
 #	if defined(HCONFING_mTHREAD_bPTHREAD)
 HCONF_TEST(int, (void))
 {
@@ -52,22 +55,31 @@ HCONF_TEST(int, (void))
 
 CDECLS_BEGIN
 
-struct CondVar;
-struct Mutex;
-struct Thread;
+#if defined(PTHREADS)
+struct CondVar {
+	pthread_cond_t	cond;
+};
+struct Mutex {
+	pthread_mutex_t	mutex;
+};
+struct Thread {
+	pthread_attr_t	attr;
+	pthread_t	thread;
+};
+#elif defined(_MSC_VER)
+#endif
 
-int		thread_condvar_broadcast(struct CondVar *);
-struct CondVar	*thread_condvar_create(void) FUNC_RETURNS;
-int		thread_condvar_free(struct CondVar **);
-int		thread_condvar_signal(struct CondVar *);
-int		thread_condvar_wait(struct CondVar *, struct Mutex *);
-struct Thread	*thread_create(void (*)(void *), void *)
-	FUNC_RETURNS;
-int		thread_free(struct Thread **);
-struct Mutex	*thread_mutex_create(void) FUNC_RETURNS;
-int		thread_mutex_free(struct Mutex **);
-int		thread_mutex_lock(struct Mutex *);
-int		thread_mutex_unlock(struct Mutex *);
+int	thread_condvar_broadcast(struct CondVar *);
+int	thread_condvar_clean(struct CondVar *);
+int	thread_condvar_init(struct CondVar *) FUNC_RETURNS;
+int	thread_condvar_signal(struct CondVar *);
+int	thread_condvar_wait(struct CondVar *, struct Mutex *);
+int	thread_mutex_clean(struct Mutex *);
+int	thread_mutex_init(struct Mutex *) FUNC_RETURNS;
+int	thread_mutex_lock(struct Mutex *);
+int	thread_mutex_unlock(struct Mutex *);
+int	thread_clean(struct Thread *);
+int	thread_start(struct Thread *, void (*)(void *), void *) FUNC_RETURNS;
 
 CDECLS_END
 

@@ -23,8 +23,8 @@ static void	runner(void *);
 static void	runner_condvar(void *);
 static void	runner_mutex(void *);
 
-static struct Mutex *g_mutex;
-static struct CondVar *g_condvar;
+static struct Mutex g_mutex;
+static struct CondVar g_condvar;
 static int g_messenger;
 
 void
@@ -38,10 +38,10 @@ runner_condvar(void *const a_dummy)
 {
 	(void)a_dummy;
 	while (N > g_messenger) {
-		thread_mutex_lock(g_mutex);
+		thread_mutex_lock(&g_mutex);
 		++g_messenger;
-		thread_condvar_broadcast(g_condvar);
-		thread_mutex_unlock(g_mutex);
+		thread_condvar_broadcast(&g_condvar);
+		thread_mutex_unlock(&g_mutex);
 	}
 }
 
@@ -52,66 +52,64 @@ runner_mutex(void *const a_dummy)
 
 	(void)a_dummy;
 	for (i = 0; N > i; ++i) {
-		thread_mutex_lock(g_mutex);
+		thread_mutex_lock(&g_mutex);
 		++g_messenger;
-		thread_mutex_unlock(g_mutex);
+		thread_mutex_unlock(&g_mutex);
 	}
 }
 
 HTEST(Runner)
 {
-	struct Thread *t;
+	struct Thread t;
 
 	g_messenger = 0;
-	t = thread_create(runner, (void *)31415);
-	HTRY_PTR(NULL, !=, t);
-	thread_free(&t);
-	HTRY_PTR(NULL, ==, t);
+	HTRY_BOOL(thread_start(&t, runner, (void *)31415));
+	thread_clean(&t);
 	HTRY_I(31415, ==, g_messenger);
 }
 
 HTEST(Mutex)
 {
-	struct Thread *t;
+	struct Thread t;
 	int i;
 
-	g_mutex = thread_mutex_create();
+	HTRY_BOOL(thread_mutex_init(&g_mutex));
 	g_messenger = 0;
-	t = thread_create(runner_mutex, NULL);
+	HTRY_BOOL(thread_start(&t, runner_mutex, NULL));
 	for (i = 0; N > i; ++i) {
 		int prev;
 
-		thread_mutex_lock(g_mutex);
+		thread_mutex_lock(&g_mutex);
 		prev = g_messenger;
 		++g_messenger;
 		HTRY_I(g_messenger, ==, prev + 1);
-		thread_mutex_unlock(g_mutex);
+		thread_mutex_unlock(&g_mutex);
 	}
-	thread_free(&t);
-	thread_mutex_free(&g_mutex);
+	thread_clean(&t);
+	thread_mutex_clean(&g_mutex);
 }
 
 HTEST(ConditionVariable)
 {
-	struct Thread *t;
+	struct Thread t;
 	int previous_messenger;
 
-	g_condvar = thread_condvar_create();
-	g_mutex = thread_mutex_create();
-	thread_mutex_lock(g_mutex);
+	HTRY_BOOL(thread_condvar_init(&g_condvar));
+	HTRY_BOOL(thread_mutex_init(&g_mutex));
+	thread_mutex_lock(&g_mutex);
 	g_messenger = 0;
-	t = thread_create(runner_condvar, NULL);
+	HTRY_BOOL(thread_start(&t, runner_condvar, NULL));
 	while (N > g_messenger) {
 		previous_messenger = g_messenger;
 		while (g_messenger == previous_messenger) {
-			thread_condvar_wait(g_condvar, g_mutex);
+			thread_condvar_wait(&g_condvar, &g_mutex);
 		}
 		HTRY_I(previous_messenger, <, g_messenger);
 	}
-	thread_mutex_unlock(g_mutex);
-	thread_free(&t);
-	thread_mutex_free(&g_mutex);
-	thread_condvar_free(&g_condvar);
+	thread_mutex_unlock(&g_mutex);
+	thread_clean(&t);
+	thread_mutex_clean(&g_mutex);
+	thread_condvar_clean(&g_condvar);
 }
 
 HTEST_SUITE(Thread)

@@ -21,8 +21,8 @@
 #if defined(HCONF_mTHREAD_bST_OLD)
 #	define DO_PTHREADS 1
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
-#	define ATTR_CREATE(ret, t) ret = pthread_attr_create(&t->attr)
-#	define ATTR_DESTROY(t)
+#	define ATTR_CREATE(ret, a) ret = pthread_attr_create(&a)
+#	define ATTR_DESTROY(a)
 #	define STACK_GET_SIZE(ret, stack_size, t) do {\
 	ret = 0;\
 	stack_size = pthread_attr_getstacksize(&t->attr);\
@@ -33,8 +33,8 @@
 #elif defined(HCONF_mTHREAD_bST_NEW)
 #	define DO_PTHREADS 1
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
-#	define ATTR_CREATE(ret, t) ret = pthread_attr_init(&t->attr)
-#	define ATTR_DESTROY(t) pthread_attr_destroy(&t->attr)
+#	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
+#	define ATTR_DESTROY(a) pthread_attr_destroy(&a)
 #	define STACK_GET_SIZE(ret, stack_size, t) do {\
 	stack_size = 0;\
 	ret = pthread_attr_getstacksize(&t->attr, &stack_size);\
@@ -45,8 +45,8 @@
 #elif defined(HCONF_mTHREAD_bPHTREAD)
 #	define DO_PTHREADS 1
 #	include <limits.h>
-#	define ATTR_CREATE(ret, t) ret = pthread_attr_init(&t->attr)
-#	define ATTR_DESTROY(t) pthread_attr_destroy(&t->attr)
+#	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
+#	define ATTR_DESTROY(a) pthread_attr_destroy(&a)
 #	define STACK_GET_SIZE(ret, stack_size, t) do {\
 	stack_size = 0;\
 	ret = pthread_attr_getstacksize(&t->attr, &stack_size);\
@@ -232,19 +232,9 @@ thread_mutex_unlock(struct Mutex *a_mutex)
 
 #include <errno.h>
 
-struct CondVar {
-	pthread_cond_t	cond;
-};
-struct Mutex {
-	pthread_mutex_t	mutex;
-};
 struct Starter {
 	void	(*func)(void *);
 	void	*data;
-};
-struct Thread {
-	pthread_attr_t	attr;
-	pthread_t	thread;
 };
 
 static void	*run(void *);
@@ -260,49 +250,31 @@ run(void *a_data)
 	return NULL;
 }
 
-struct CondVar *
-thread_condvar_create()
-{
-	struct CondVar *condvar;
-	int ret;
-
-	CALLOC(condvar, 1);
-	ret = pthread_cond_init(&condvar->cond, NULL);
-	if (0 != ret) {
-		hutils_warn("pthread_cond_init");
-		FREE(condvar);
-	}
-	return condvar;
-}
-
 int
-thread_condvar_free(struct CondVar **a_condvar)
+thread_condvar_broadcast(struct CondVar *a_condvar)
 {
-	struct CondVar *condvar;
-	int ret, errno_;
-
-	condvar = *a_condvar;
-	if (NULL == condvar) {
-		return 1;
-	}
-	ret = pthread_cond_destroy(&condvar->cond);
-	errno_ = errno;
-	FREE(*a_condvar);
-	if (0 != ret) {
-		hutils_warnc(errno_, "pthread_cond_destroy");
+	if (0 != pthread_cond_broadcast(&a_condvar->cond)) {
+		hutils_warn("pthread_cond_broadcast");
 		return 0;
 	}
 	return 1;
 }
 
 int
-thread_condvar_broadcast(struct CondVar *a_condvar)
+thread_condvar_clean(struct CondVar *a_condvar)
 {
-	int ret;
+	if (0 != pthread_cond_destroy(&a_condvar->cond)) {
+		hutils_warn("pthread_cond_destroy");
+		return 0;
+	}
+	return 1;
+}
 
-	ret = pthread_cond_broadcast(&a_condvar->cond);
-	if (0 != ret) {
-		hutils_warn("pthread_cond_broadcast");
+int
+thread_condvar_init(struct CondVar *a_condvar)
+{
+	if (0 != pthread_cond_init(&a_condvar->cond, NULL)) {
+		hutils_warn("pthread_cond_init");
 		return 0;
 	}
 	return 1;
@@ -311,10 +283,7 @@ thread_condvar_broadcast(struct CondVar *a_condvar)
 int
 thread_condvar_signal(struct CondVar *a_condvar)
 {
-	int ret;
-
-	ret = pthread_cond_signal(&a_condvar->cond);
-	if (0 != ret) {
+	if (0 != pthread_cond_signal(&a_condvar->cond)) {
 		hutils_warn("pthread_cond_signal");
 		return 0;
 	}
@@ -324,94 +293,28 @@ thread_condvar_signal(struct CondVar *a_condvar)
 int
 thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex)
 {
-	int ret;
-
-	ret = pthread_cond_wait(&a_condvar->cond, &a_mutex->mutex);
-	if (0 != ret) {
+	if (0 != pthread_cond_wait(&a_condvar->cond, &a_mutex->mutex)) {
 		hutils_warn("pthread_cond_wait");
 		return 0;
 	}
 	return 1;
 }
 
-struct Thread *
-thread_create(void (*a_func)(void *), void *a_data)
-{
-	struct Starter *starter;
-	struct Thread *thread;
-	int ret;
-
-	CALLOC(starter, 1);
-	starter->func = a_func;
-	starter->data = a_data;
-	CALLOC(thread, 1);
-	ATTR_CREATE(ret, thread);
-	if (0 != ret) {
-		goto thread_create_fail;
-	}
-	THREAD_CREATE(ret, thread);
-	if (0 != ret) {
-		goto thread_create_fail;
-	}
-	return thread;
-thread_create_fail:
-	hutils_warn("pthread_create");
-	FREE(starter);
-	FREE(thread);
-	return NULL;
-}
-
 int
-thread_free(struct Thread **a_thread)
+thread_mutex_clean(struct Mutex *a_mutex)
 {
-	struct Thread *thread;
-	int ret, errno_;
-
-	thread = *a_thread;
-	if (NULL == thread) {
-		return 1;
-	}
-	ret = pthread_join(thread->thread, NULL);
-	errno_ = errno;
-	ATTR_DESTROY(thread);
-	FREE(*a_thread);
-	if (0 != ret) {
-		hutils_warnc(errno_, "pthread_destroy");
+	if (0 != pthread_mutex_destroy(&a_mutex->mutex)) {
+		hutils_warn("pthread_mutex_destroy");
 		return 0;
 	}
 	return 1;
 }
 
-struct Mutex *
-thread_mutex_create()
-{
-	struct Mutex *mutex;
-	int ret;
-
-	CALLOC(mutex, 1);
-	ret = pthread_mutex_init(&mutex->mutex, NULL);
-	if (0 != ret) {
-		hutils_warn("pthread_mutex_init");
-		FREE(mutex);
-	}
-	return mutex;
-}
-
 int
-thread_mutex_free(struct Mutex **a_mutex)
+thread_mutex_init(struct Mutex *a_mutex)
 {
-	struct Mutex *mutex;
-	int ret, errno_;
-
-	mutex = *a_mutex;
-	if (NULL == mutex) {
-		return 1;
-	}
-	ret = pthread_mutex_destroy(&mutex->mutex);
-	errno_ = errno;
-	FREE(*a_mutex);
-	if (0 != ret) {
-		hutils_warnc(errno_, "pthread_mutex_destroy");
+	if (0 != pthread_mutex_init(&a_mutex->mutex, NULL)) {
+		hutils_warn("pthread_mutex_init");
 		return 0;
 	}
 	return 1;
@@ -420,10 +323,7 @@ thread_mutex_free(struct Mutex **a_mutex)
 int 
 thread_mutex_lock(struct Mutex *a_mutex)
 {
-	int ret;
-
-	ret = pthread_mutex_lock(&a_mutex->mutex);
-	if (0 != ret) {
+	if (0 != pthread_mutex_lock(&a_mutex->mutex)) {
 		hutils_warn("pthread_mutex_lock");
 		return 1;
 	}
@@ -433,13 +333,48 @@ thread_mutex_lock(struct Mutex *a_mutex)
 int
 thread_mutex_unlock(struct Mutex *a_mutex)
 {
-	int ret;
-
-	ret = pthread_mutex_unlock(&a_mutex->mutex);
-	if (0 != ret) {
+	if (0 != pthread_mutex_unlock(&a_mutex->mutex)) {
 		hutils_warn("pthread_mutex_unlock");
 		return 1;
 	}
+	return 0;
+}
+
+int
+thread_clean(struct Thread *a_thread)
+{
+	int ret;
+
+	ret = 1;
+	if (0 != pthread_join(a_thread->thread, NULL)) {
+		hutils_warn("pthread_destroy");
+		ret = 0;
+	}
+	ATTR_DESTROY(a_thread->attr);
+	return ret;
+}
+
+int
+thread_start(struct Thread *a_thread, void (*a_func)(void *), void *a_data)
+{
+	struct Starter *starter;
+	int ret;
+
+	CALLOC(starter, 1);
+	starter->func = a_func;
+	starter->data = a_data;
+	ATTR_CREATE(ret, a_thread->attr);
+	if (0 != ret) {
+		goto thread_create_fail;
+	}
+	THREAD_CREATE(ret, a_thread);
+	if (0 != ret) {
+		goto thread_create_fail;
+	}
+	return 1;
+thread_create_fail:
+	hutils_warn("pthread_create");
+	FREE(starter);
 	return 0;
 }
 
