@@ -33,7 +33,7 @@ static struct HWTWidgetType const *g_type;
 HWT_CASTER(MockWidget, g_type);
 
 void
-destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+destroy(struct HWT *a_hwt, struct HWTWidget *a_widget)
 {
 	struct MockWidget *mock;
 
@@ -45,15 +45,15 @@ destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+draw(struct HWT *a_hwt, struct HWTWidget *a_widget)
 {
 	(void)a_hwt;
 	(void)a_widget;
 }
 
 struct HWTWidget *
-mockwidget_create(struct HWT *const a_hwt, struct MockWidgetCallback const
-    *const a_user_callback)
+mockwidget_create(struct HWT *a_hwt, struct MockWidgetCallback const
+    *a_user_callback)
 {
 	struct MockWidget *mock;
 	struct HWTWidget *widget;
@@ -67,14 +67,13 @@ mockwidget_create(struct HWT *const a_hwt, struct MockWidgetCallback const
 }
 
 void
-mockwidget_setup(struct HWT *const a_hwt)
+mockwidget_setup(struct HWT *a_hwt)
 {
 	HWT_WIDGET_REGISTER(a_hwt, MockWidget, g_type);
 }
 
 void
-pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
-    HWTSize *const a_min)
+pull_min(struct HWT *a_hwt, struct HWTWidget *a_widget, struct HWTSize *a_min)
 {
 	struct MockWidget *mock;
 
@@ -89,7 +88,7 @@ pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
 }
 
 void
-push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+push_rect(struct HWT *a_hwt, struct HWTWidget *a_widget)
 {
 	struct MockWidget *mock;
 
@@ -102,8 +101,8 @@ push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 enum HWTEventFlow
-respond(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
-    HWTEvent const *const a_event)
+respond(struct HWT *a_hwt, struct HWTWidget *a_widget, struct HWTEvent const
+    *a_event)
 {
 	struct MockWidget *mock;
 

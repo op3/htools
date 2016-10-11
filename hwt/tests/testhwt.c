@@ -23,7 +23,7 @@ static void	destroy(void *);
 static int g_was_destroyed;
 
 void
-destroy(void *const a_data)
+destroy(void *a_data)
 {
 	(void)a_data;
 	g_was_destroyed = 1;

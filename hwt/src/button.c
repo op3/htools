@@ -36,7 +36,7 @@ static struct HWTWidgetType const *g_type;
 HWT_CASTER(Button, g_type);
 
 void
-destroy(struct HWT *const a_hwt, struct HWTWidget *const a_button)
+destroy(struct HWT *a_hwt, struct HWTWidget *a_button)
 {
 	struct Button *button;
 
@@ -45,15 +45,14 @@ destroy(struct HWT *const a_hwt, struct HWTWidget *const a_button)
 }
 
 void
-draw(struct HWT *const a_hwt, struct HWTWidget *const a_button)
+draw(struct HWT *a_hwt, struct HWTWidget *a_button)
 {
 	(void)a_hwt;
 	(void)a_button;
 }
 
 void
-pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_button, struct
-    HWTSize *const a_min)
+pull_min(struct HWT *a_hwt, struct HWTWidget *a_button, struct HWTSize *a_min)
 {
 	struct Button *button;
 
@@ -62,7 +61,7 @@ pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_button, struct
 }
 
 void
-push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_button)
+push_rect(struct HWT *a_hwt, struct HWTWidget *a_button)
 {
 	struct Button *button;
 
@@ -72,8 +71,8 @@ push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_button)
 }
 
 enum HWTEventFlow
-respond(struct HWT *const a_hwt, struct HWTWidget *const a_button, struct
-    HWTEvent const *const a_event)
+respond(struct HWT *a_hwt, struct HWTWidget *a_button, struct HWTEvent const
+    *a_event)
 {
 	struct Button *button;
 	struct HWTRect const *rect;
@@ -105,14 +104,14 @@ respond(struct HWT *const a_hwt, struct HWTWidget *const a_button, struct
 }
 
 struct HWTWidget *
-hwt_button_create(struct HWT *const a_hwt)
+hwt_button_create(struct HWT *a_hwt)
 {
 	return hwt_widget_create(a_hwt, g_type);
 }
 
 void
-hwt_button_set_callback(struct HWTWidget *const a_button, void
-    (*a_callback)(struct HWTWidget *))
+hwt_button_set_callback(struct HWTWidget *a_button, void (*a_callback)(struct
+    HWTWidget *))
 {
 	struct Button *button;
 
@@ -121,14 +120,13 @@ hwt_button_set_callback(struct HWTWidget *const a_button, void
 }
 
 void
-hwt_button_set_child(struct HWTWidget *const a_button, struct HWTWidget
-    **const a_child)
+hwt_button_set_child(struct HWTWidget *a_button, struct HWTWidget **a_child)
 {
 	hwt_widget_assign(&hwt_cast_Button(a_button)->child, a_child);
 }
 
 void
-hwt_button_setup_(struct HWT *const a_hwt)
+hwt_button_setup_(struct HWT *a_hwt)
 {
 	HWT_WIDGET_REGISTER(a_hwt, Button, g_type);
 }

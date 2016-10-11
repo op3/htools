@@ -39,7 +39,7 @@ dtor()
 }
 
 void
-pull_min(struct HWTSize *const a_min, void *const a_data)
+pull_min(struct HWTSize *a_min, void *a_data)
 {
 	struct Child *child;
 
@@ -48,7 +48,7 @@ pull_min(struct HWTSize *const a_min, void *const a_data)
 }
 
 void
-push_rect(struct HWTRect const *const a_rect, void *const a_data)
+push_rect(struct HWTRect const *a_rect, void *a_data)
 {
 	struct Child *child;
 

@@ -35,7 +35,7 @@ static struct HWTWidgetType const *g_type;
 HWT_CASTER(Label, g_type);
 
 struct HWTWidget *
-hwt_label_create(struct HWT *const a_hwt, char const *const a_text)
+hwt_label_create(struct HWT *a_hwt, char const *a_text)
 {
 	struct Label *label;
 	struct HWTWidget *widget;
@@ -47,13 +47,13 @@ hwt_label_create(struct HWT *const a_hwt, char const *const a_text)
 }
 
 void
-hwt_label_setup_(struct HWT *const a_hwt)
+hwt_label_setup_(struct HWT *a_hwt)
 {
 	HWT_WIDGET_REGISTER(a_hwt, Label, g_type);
 }
 
 void
-destroy(struct HWT *const a_hwt, struct HWTWidget *const a_label)
+destroy(struct HWT *a_hwt, struct HWTWidget *a_label)
 {
 	struct Label *label;
 
@@ -63,15 +63,14 @@ destroy(struct HWT *const a_hwt, struct HWTWidget *const a_label)
 }
 
 void
-draw(struct HWT *const a_hwt, struct HWTWidget *const a_label)
+draw(struct HWT *a_hwt, struct HWTWidget *a_label)
 {
 	(void)a_hwt;
 	(void)a_label;
 }
 
 void
-pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
-    HWTSize *const a_min)
+pull_min(struct HWT *a_hwt, struct HWTWidget *a_label, struct HWTSize *a_min)
 {
 	(void)a_hwt;
 	(void)a_label;
@@ -79,15 +78,15 @@ pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
 }
 
 void
-push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_label)
+push_rect(struct HWT *a_hwt, struct HWTWidget *a_label)
 {
 	(void)a_hwt;
 	(void)a_label;
 }
 
 enum HWTEventFlow
-respond(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
-    HWTEvent const *const a_event)
+respond(struct HWT *a_hwt, struct HWTWidget *a_label, struct HWTEvent const
+    *a_event)
 {
 	(void)a_hwt;
 	(void)a_label;

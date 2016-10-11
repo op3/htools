@@ -48,10 +48,10 @@ TAILQ_HEAD(ModuleList, Module);
 
 static void		branch_free(struct Branch **);
 static int		build(char const *, char const *, char const *, char
-    const *, char const *, char const *, char const *);
+    const *, char const *, char const *, char const *) FUNC_RETURNS;
 static void		get_branch(char const *, char **, char **);
 static void		log_(char const *, ...);
-static struct Module	*module_add(char *);
+static struct Module	*module_add(char *) FUNC_RETURNS;
 static void		my_exit(void);
 static void		resolve_variables(struct Branch *);
 static void		try(void);
@@ -77,7 +77,7 @@ static struct	ModuleList g_module_list =
 	TAILQ_HEAD_INITIALIZER(g_module_list);
 
 void
-branch_free(struct Branch **const a_branch)
+branch_free(struct Branch **a_branch)
 {
 	struct Branch *branch;
 
@@ -99,9 +99,9 @@ branch_free(struct Branch **const a_branch)
 }
 
 int
-build(char const *const a_out, char const *const a_in, char const *const a_cc,
-    char const *const a_cppflags, char const *const a_cflags, char const
-    *const a_ldflags, char const *const a_libs)
+build(char const *a_out, char const *a_in, char const *a_cc, char const
+    *a_cppflags, char const *a_cflags, char const *a_ldflags, char const
+    *a_libs)
 {
 	FILE *file;
 	int pipefd[2];
@@ -168,8 +168,7 @@ build(char const *const a_out, char const *const a_in, char const *const a_cc,
 }
 
 void
-get_branch(char const *const a_str, char **const a_module, char **const
-    a_branch)
+get_branch(char const *a_str, char **a_module, char **a_branch)
 {
 	char const *p;
 	char const *module_start, *module_end;
@@ -229,7 +228,7 @@ get_branch(char const *const a_str, char **const a_module, char **const
 }
 
 void
-log_(char const *const a_fmt, ...)
+log_(char const *a_fmt, ...)
 {
 	va_list args;
 
@@ -244,7 +243,7 @@ log_(char const *const a_fmt, ...)
 }
 
 struct Module *
-module_add(char *const a_name)
+module_add(char *a_name)
 {
 	struct Module *module;
 
@@ -279,7 +278,7 @@ my_exit()
 }
 
 void
-resolve_variables(struct Branch *const a_branch)
+resolve_variables(struct Branch *a_branch)
 {
 	FILE *file, *pip;
 	struct Bucket *bucket;
@@ -412,7 +411,7 @@ try_passed:
 }
 
 void
-usage(int const a_exit_code)
+usage(int a_exit_code)
 {
 	FILE *str;
 
@@ -426,7 +425,7 @@ usage(int const a_exit_code)
 }
 
 void
-write_files(int const a_write_final)
+write_files(int a_write_final)
 {
 	FILE *f;
 	struct Module *module;

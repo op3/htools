@@ -28,7 +28,7 @@
 /* HCONF_LIBS=-lm */
 #endif
 #if defined(HCONFING_mMATH)
-HCONF_TEST(double, (double const a_v))
+HCONF_TEST(double, (double a_v))
 {
 	return sqrt(M_PI * a_v);
 }

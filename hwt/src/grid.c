@@ -41,7 +41,7 @@ static struct HWTWidgetType const *g_type;
 HWT_CASTER(Grid, g_type);
 
 void
-destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+destroy(struct HWT *a_hwt, struct HWTWidget *a_widget)
 {
 	struct Grid *grid;
 	size_t i;
@@ -56,15 +56,14 @@ destroy(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 void
-draw(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+draw(struct HWT *a_hwt, struct HWTWidget *a_widget)
 {
 	(void)a_hwt;
 	(void)a_widget;
 }
 
 void
-pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTSize *const a_min)
+pull_min(struct HWT *a_hwt, struct HWTWidget *a_widget, struct HWTSize *a_min)
 {
 	struct Grid *grid;
 	struct HWTWidget **p;
@@ -100,7 +99,7 @@ pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
 }
 
 void
-push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
+push_rect(struct HWT *a_hwt, struct HWTWidget *a_widget)
 {
 	struct HWTRect r;
 	struct HWTSize fill;
@@ -132,8 +131,8 @@ push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_widget)
 }
 
 enum HWTEventFlow
-respond(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
-    HWTEvent const *const a_event)
+respond(struct HWT *a_hwt, struct HWTWidget *a_widget, struct HWTEvent const
+    *a_event)
 {
 	struct Grid *grid;
 	size_t i;
@@ -146,8 +145,7 @@ respond(struct HWT *const a_hwt, struct HWTWidget *const a_widget, struct
 }
 
 struct HWTWidget *
-hwt_grid_create(struct HWT *const a_hwt, size_t const a_row_num, size_t const
-    a_col_num)
+hwt_grid_create(struct HWT *a_hwt, size_t a_row_num, size_t a_col_num)
 {
 	struct Grid *grid;
 	struct HWTWidget *widget;
@@ -169,8 +167,8 @@ hwt_grid_create(struct HWT *const a_hwt, size_t const a_row_num, size_t const
 }
 
 void
-hwt_grid_set_child(struct HWTWidget *const a_grid, size_t const a_row, size_t
-    const a_col, struct HWTWidget **const a_child)
+hwt_grid_set_child(struct HWTWidget *a_grid, size_t a_row, size_t a_col,
+    struct HWTWidget **a_child)
 {
 	struct Grid *grid;
 
@@ -186,7 +184,7 @@ hwt_grid_set_child(struct HWTWidget *const a_grid, size_t const a_row, size_t
 }
 
 void
-hwt_grid_setup_(struct HWT *const a_hwt)
+hwt_grid_setup_(struct HWT *a_hwt)
 {
 	HWT_WIDGET_REGISTER(a_hwt, Grid, g_type);
 }

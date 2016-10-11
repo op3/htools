@@ -25,7 +25,7 @@ static void	push_rect(struct HWTRect const *, void *);
 static struct HWT *g_hwt;
 
 void
-destroy(void *const a_data)
+destroy(void *a_data)
 {
 	int *was_destroyed;
 
@@ -34,7 +34,7 @@ destroy(void *const a_data)
 }
 
 void
-push_rect(struct HWTRect const *const a_rect, void *const a_data)
+push_rect(struct HWTRect const *a_rect, void *a_data)
 {
 	struct HWTRect *rect;
 

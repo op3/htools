@@ -28,13 +28,13 @@ static struct CondVar g_condvar;
 static int g_messenger;
 
 void
-runner(void *const a_data)
+runner(void *a_data)
 {
 	g_messenger = (intptr_t)a_data;
 }
 
 void
-runner_condvar(void *const a_dummy)
+runner_condvar(void *a_dummy)
 {
 	(void)a_dummy;
 	while (N > g_messenger) {
@@ -46,7 +46,7 @@ runner_condvar(void *const a_dummy)
 }
 
 void
-runner_mutex(void *const a_dummy)
+runner_mutex(void *a_dummy)
 {
 	int i;
 

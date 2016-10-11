@@ -35,16 +35,17 @@ struct Flag {
 
 TAILQ_SORT_PROTOTYPE(FlagList, flag_sort);
 static struct Flag	*add_flag(struct FlagList *, char const *, size_t,
-    char const *, size_t);
-static int		cmp(struct Flag const *, struct Flag const *);
+    char const *, size_t) FUNC_RETURNS;
+static int		cmp(struct Flag const *, struct Flag const *)
+	FUNC_RETURNS;
 static void		free_flag(struct Flag **);
 
 TAILQ_SORT_DEFINE(FlagList, flag_sort, Flag, next, cmp);
 char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
 
 struct Flag *
-add_flag(struct FlagList *const a_list, char const *const a_name, size_t const
-    a_name_size, char const *const a_value, size_t const a_value_size)
+add_flag(struct FlagList *a_list, char const *a_name, size_t a_name_size, char
+    const *a_value, size_t a_value_size)
 {
 	struct Flag *flag;
 
@@ -58,7 +59,7 @@ add_flag(struct FlagList *const a_list, char const *const a_name, size_t const
 }
 
 void
-cat_str(char *const a_dst, char const *const a_src, size_t const a_dst_len)
+cat_str(char *a_dst, char const *a_src, size_t a_dst_len)
 {
 	char const *from;
 	char *to;
@@ -72,14 +73,14 @@ cat_str(char *const a_dst, char const *const a_src, size_t const a_dst_len)
 }
 
 int
-cmp(struct Flag const *const a_l, struct Flag const *const a_r)
+cmp(struct Flag const *a_l, struct Flag const *a_r)
 {
 	return strcmp(a_l->str, a_r->str);
 }
 
 /* Ugh, reimplemented for silly platforms. */
 void
-err_(int const a_code, char const *const a_fmt, ...)
+err_(int a_code, char const *a_fmt, ...)
 {
 	va_list args;
 
@@ -91,7 +92,7 @@ err_(int const a_code, char const *const a_fmt, ...)
 }
 
 void
-errx_(int const a_code, char const *const a_fmt, ...)
+errx_(int a_code, char const *a_fmt, ...)
 {
 	va_list args;
 
@@ -103,7 +104,7 @@ errx_(int const a_code, char const *const a_fmt, ...)
 }
 
 void
-free_flag(struct Flag **const a_flag)
+free_flag(struct Flag **a_flag)
 {
 	struct Flag *flag;
 
@@ -120,8 +121,7 @@ free_flag(struct Flag **const a_flag)
  *  a_argv - Array of filenames.
  */
 void
-merge(struct Bucket *const a_bucket, int const a_argc, char const *const
-    *const a_argv)
+merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 {
 	struct FlagList flag_list[VAR_OUTPUT_NUM];
 	struct FlagList original_list;
@@ -380,7 +380,7 @@ strctv_(char const *a_s1, ...)
 }
 
 char *
-strndup_(char const *const a_s, size_t a_maxlen)
+strndup_(char const *a_s, size_t a_maxlen)
 {
 	char *s;
 	size_t len;

@@ -38,7 +38,7 @@ struct HWT {
 };
 
 struct HWT *
-hwt_create(struct HWTRenderer const *const a_renderer)
+hwt_create(struct HWTRenderer const *a_renderer)
 {
 	struct HWT *hwt;
 
@@ -54,7 +54,7 @@ hwt_create(struct HWTRenderer const *const a_renderer)
 }
 
 void
-hwt_free(struct HWT **const a_hwt)
+hwt_free(struct HWT **a_hwt)
 {
 	struct HWT *hwt;
 
@@ -74,7 +74,7 @@ hwt_free(struct HWT **const a_hwt)
 }
 
 void
-hwt_send_event(struct HWT *const a_hwt, struct HWTEvent const *const a_event)
+hwt_send_event(struct HWT *a_hwt, struct HWTEvent const *a_event)
 {
 	if (HWT_EVENT_RESIZE == a_event->type) {
 		struct HWTRect rect;
@@ -95,14 +95,13 @@ hwt_send_event(struct HWT *const a_hwt, struct HWTEvent const *const a_event)
 }
 
 void
-hwt_set_root(struct HWT *const a_hwt, struct HWTWidget *a_root)
+hwt_set_root(struct HWT *a_hwt, struct HWTWidget *a_root)
 {
 	hwt_widget_assign(&a_hwt->root, &a_root);
 }
 
 void
-hwt_widget_assign(struct HWTWidget **const a_parent, struct HWTWidget **const
-    a_child)
+hwt_widget_assign(struct HWTWidget **a_parent, struct HWTWidget **a_child)
 {
 	if (NULL != *a_parent) {
 		fprintf(stderr, "Parent already has a widget.\n");
@@ -121,13 +120,13 @@ hwt_widget_assign(struct HWTWidget **const a_parent, struct HWTWidget **const
 }
 
 void *
-hwt_widget_cast_(struct HWTWidget *const a_widget)
+hwt_widget_cast_(struct HWTWidget *a_widget)
 {
 	return a_widget + 1;
 }
 
 struct HWTWidget *
-hwt_widget_create(struct HWT *a_hwt, struct HWTWidgetType const *const a_type)
+hwt_widget_create(struct HWT *a_hwt, struct HWTWidgetType const *a_type)
 {
 	struct HWTWidgetType *type;
 
@@ -148,7 +147,7 @@ hwt_widget_create(struct HWT *a_hwt, struct HWTWidgetType const *const a_type)
 }
 
 void
-hwt_widget_free(struct HWT *const a_hwt, struct HWTWidget **const a_widget)
+hwt_widget_free(struct HWT *a_hwt, struct HWTWidget **a_widget)
 {
 	struct HWTWidget *widget;
 
@@ -165,20 +164,20 @@ hwt_widget_free(struct HWT *const a_hwt, struct HWTWidget **const a_widget)
 }
 
 struct HWTRect const *
-hwt_widget_get_rect(struct HWTWidget const *const a_widget)
+hwt_widget_get_rect(struct HWTWidget const *a_widget)
 {
 	return &a_widget->rect;
 }
 
 struct HWTWidgetType const *
-hwt_widget_get_type(struct HWTWidget const *const a_widget)
+hwt_widget_get_type(struct HWTWidget const *a_widget)
 {
 	return a_widget->type;
 }
 
 void
-hwt_widget_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTSize *const a_min)
+hwt_widget_pull_min(struct HWT *a_hwt, struct HWTWidget *a_widget, struct
+    HWTSize *a_min)
 {
 	if (NULL == a_widget) {
 		ZERO(*a_min);
@@ -188,8 +187,8 @@ hwt_widget_pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
 }
 
 void
-hwt_widget_push_rect(struct HWT *const a_hwt, struct HWTWidget *const
-    a_widget, struct HWTRect const *const a_rect)
+hwt_widget_push_rect(struct HWT *a_hwt, struct HWTWidget *a_widget, struct
+    HWTRect const *a_rect)
 {
 	if (NULL != a_widget) {
 		COPY(a_widget->rect, *a_rect);
@@ -198,8 +197,8 @@ hwt_widget_push_rect(struct HWT *const a_hwt, struct HWTWidget *const
 }
 
 struct HWTWidgetType const *
-hwt_widget_register_(struct HWT *const a_hwt, size_t const a_size, struct
-    HWTWidgetCallback const *const a_callback)
+hwt_widget_register_(struct HWT *a_hwt, size_t a_size, struct
+    HWTWidgetCallback const *a_callback)
 {
 	struct HWTWidgetType *type;
 
@@ -211,8 +210,8 @@ hwt_widget_register_(struct HWT *const a_hwt, size_t const a_size, struct
 }
 
 enum HWTEventFlow
-hwt_widget_respond(struct HWT *const a_hwt, struct HWTWidget *const a_widget,
-    struct HWTEvent const *const a_event)
+hwt_widget_respond(struct HWT *a_hwt, struct HWTWidget *a_widget, struct
+    HWTEvent const *a_event)
 {
 	if (NULL == a_widget) {
 		return HWT_CONTINUE;

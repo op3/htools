@@ -26,7 +26,7 @@
 
 #define HWT_CASTER(Type, typ) \
 static struct Type *\
-hwt_cast_##Type(struct HWTWidget *const a_widget)\
+hwt_cast_##Type(struct HWTWidget *a_widget)\
 {\
 	return hwt_widget_cast_(a_widget);\
 }\

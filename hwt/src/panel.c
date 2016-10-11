@@ -35,26 +35,25 @@ static struct HWTWidgetType const *g_type;
 HWT_CASTER(Panel, g_type);
 
 struct HWTWidget *
-hwt_panel_create(struct HWT *const a_hwt)
+hwt_panel_create(struct HWT *a_hwt)
 {
 	return hwt_widget_create(a_hwt, g_type);
 }
 
 void
-hwt_panel_set_child(struct HWTWidget *const a_panel, struct HWTWidget **const
-    a_child)
+hwt_panel_set_child(struct HWTWidget *a_panel, struct HWTWidget **a_child)
 {
 	hwt_widget_assign(&hwt_cast_Panel(a_panel)->child, a_child);
 }
 
 void
-hwt_panel_setup_(struct HWT *const a_hwt)
+hwt_panel_setup_(struct HWT *a_hwt)
 {
 	HWT_WIDGET_REGISTER(a_hwt, Panel, g_type);
 }
 
 void
-destroy(struct HWT *const a_hwt, struct HWTWidget *const a_label)
+destroy(struct HWT *a_hwt, struct HWTWidget *a_label)
 {
 	struct Panel *panel;
 
@@ -63,15 +62,14 @@ destroy(struct HWT *const a_hwt, struct HWTWidget *const a_label)
 }
 
 void
-draw(struct HWT *const a_hwt, struct HWTWidget *const a_label)
+draw(struct HWT *a_hwt, struct HWTWidget *a_label)
 {
 	(void)a_hwt;
 	(void)a_label;
 }
 
 void
-pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
-    HWTSize *const a_min)
+pull_min(struct HWT *a_hwt, struct HWTWidget *a_label, struct HWTSize *a_min)
 {
 	struct Panel *panel;
 
@@ -80,7 +78,7 @@ pull_min(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
 }
 
 void
-push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_label)
+push_rect(struct HWT *a_hwt, struct HWTWidget *a_label)
 {
 	struct Panel *panel;
 
@@ -90,8 +88,8 @@ push_rect(struct HWT *const a_hwt, struct HWTWidget *const a_label)
 }
 
 enum HWTEventFlow
-respond(struct HWT *const a_hwt, struct HWTWidget *const a_label, struct
-    HWTEvent const *const a_event)
+respond(struct HWT *a_hwt, struct HWTWidget *a_label, struct HWTEvent const
+    *a_event)
 {
 	struct Panel *panel;
 
