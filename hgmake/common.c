@@ -35,9 +35,8 @@ struct Flag {
 
 TAILQ_SORT_PROTOTYPE(FlagList, flag_sort);
 static struct Flag	*add_flag(struct FlagList *, char const *, size_t,
-    char const *, size_t) FUNC_RETURNS;
-static int		cmp(struct Flag const *, struct Flag const *)
-	FUNC_RETURNS;
+    char const *, size_t);
+static int		cmp(struct Flag const *, struct Flag const *);
 static void		free_flag(struct Flag **);
 
 TAILQ_SORT_DEFINE(FlagList, flag_sort, Flag, next, cmp);

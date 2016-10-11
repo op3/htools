@@ -48,10 +48,10 @@ TAILQ_HEAD(ModuleList, Module);
 
 static void		branch_free(struct Branch **);
 static int		build(char const *, char const *, char const *, char
-    const *, char const *, char const *, char const *) FUNC_RETURNS;
+    const *, char const *, char const *, char const *);
 static void		get_branch(char const *, char **, char **);
 static void		log_(char const *, ...);
-static struct Module	*module_add(char *) FUNC_RETURNS;
+static struct Module	*module_add(char *);
 static void		my_exit(void);
 static void		resolve_variables(struct Branch *);
 static void		try(void);
