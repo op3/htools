@@ -38,12 +38,14 @@ HTEST(ListTests)
 	for (;;) {
 		ret = dir_get(dir, &entry);
 		if (0 == ret) {
+			HTRY_PTR(NULL, ==, entry.name);
 			break;
 		}
+		HTRY_PTR(NULL, !=, entry.name);
 		++num;
 	}
 	HTRY_I(5, <, num);
-	/* Now check that the fail status keeps coming back. */
+	/* Check that the fail status keeps coming back. */
 	for (num = 0; 5 > num; ++num) {
 		ret = dir_get(dir, &entry);
 		HTRY_I(0, ==, ret);

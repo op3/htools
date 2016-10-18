@@ -18,9 +18,8 @@
 
 #if defined(HCONF_mUDP_bGETADDRINFO)
 #	define GETADDRINFO
-#	include <sys/fcntl.h>
-#	include <sys/socket.h>
-#	include <sys/time.h>
+#	include <fcntl.h>
+#	include <time.h>
 #	include <netdb.h>
 #	include <stdarg.h>
 #	include <stdio.h>

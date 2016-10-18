@@ -15,7 +15,7 @@
 AR?=ar
 CC?=gcc
 LD?=gcc
-HTOOLS_PATH?=..
+HTOOLS_PATH=..
 
 include ../hgmake/build_dir.mk
 

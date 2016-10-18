@@ -24,17 +24,16 @@
 #if defined(HCONF_mDIR_bDIRENT)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
 #	include <dirent.h>
-#	if defined(HCONFING_mDIR_bDIRENT)
-HCONF_TEST(int, (void))
+#	if defined(HCONFING_mDIR)
+HCONF_TEST(int, (void *a_p))
 {
-	void *p = 0;
-	return readdir_r(p, p, p);
+	return readdir_r(a_p, a_p, a_p);
 }
 #	endif
-#elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
+#elif defined(HCONF_mDIR_bDIRENT_ANCIENT)
 #	include <sys/types.h>
 #	include <dirent.h>
-#	if defined(HCONFING_mDIR_bDIRENT_POSIX_DRAFT9)
+#	if defined(HCONFING_mDIR)
 HCONF_TEST(struct dirent *, (void))
 {
 	return readdir_r(0, 0);

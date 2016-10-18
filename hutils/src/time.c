@@ -53,8 +53,10 @@ time_getd()
 	clockid_t s_clockid =
 #	if defined(CLOCK_MONOTONIC_RAW)
 	    CLOCK_MONOTONIC_RAW;
-#	else
+#	elif defined(CLOCK_MONOTONIC)
 	    CLOCK_MONOTONIC;
+#	else
+	    CLOCK_REALTIME;
 #	endif
 	struct timespec tp;
 
@@ -82,8 +84,9 @@ time_getd()
 } WHILE_0
 #	if defined(CLOCK_MONOTONIC_RAW)
 		TRANSITION(CLOCK_MONOTONIC_RAW, CLOCK_MONOTONIC);
-#	endif
+#	elif defined(CLOCK_MONOTONIC)
 		TRANSITION(CLOCK_MONOTONIC, CLOCK_REALTIME);
+#	endif
 		hutils_err(EXIT_FAILURE, "clock_gettime");
 	}
 	if (MUTEX_OK == s_mutex_state) {

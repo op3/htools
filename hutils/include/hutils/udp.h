@@ -22,6 +22,25 @@
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
+#if defined(HCONF_mSOCKET_H_bSOCKET_H)
+#	include <socket.h>
+#elif defined(HCONF_mSOCKET_H_bSYS_SOCKET_H)
+#	include <sys/socket.h>
+#elif defined(HCONF_mSOCKET_H_bNONE)
+#endif
+
+#if defined(HCONF_mIPPROTO_UDP_bNETINET_IN_H)
+#	include <netinet/in.h>
+#elif defined(HCONF_mIPPROTO_UDP_bZERO)
+#	define IPPROTO_UDP 0
+#endif
+#if defined(HCONFING_mIPPROTO_UDP)
+HCONF_TEST(int, (void))
+{
+	return IPPROTO_UDP;
+}
+#endif
+
 #if defined(HCONF_mUDP_bGETADDRINFO)
 #	if defined(HCONFING_mUDP)
 #		include <netdb.h>
