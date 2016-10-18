@@ -158,6 +158,45 @@ HTEST(MixedConfigs)
 	config_collection_free(&coll);
 }
 
+HTEST(MixedValues)
+{
+	char const c_cfgp0[] = "[p0] a0=0 a1=0. a2=.0 a3=+0 a4=-0";
+	char const c_cfgp1[] = "[p1] a0=0e0 a1=0.e0 a2=.0e0 a3=0e+0 a4=0e-0";
+	char const c_cfgp2[] = "[p2] s=\"a\"";
+	char const c_cfgf0[] = "[f0] a=++0";
+	char const c_cfgf1[] = "[f1] a=--0";
+	char const c_cfgf2[] = "[f3] a=0e";
+	char const c_cfgf3[] = "[f4] s=a\"";
+	char const c_cfgf4[] = "[f5] s=\"a";
+	struct ConfigCollection *coll;
+
+	coll = config_collection_load_from_memory(c_cfgp0, 0);
+	HTRY_PTR(NULL, !=, coll);
+
+	coll = config_collection_load_from_memory(c_cfgp1, 0);
+	HTRY_PTR(NULL, !=, coll);
+
+	coll = config_collection_load_from_memory(c_cfgp2, 0);
+	HTRY_PTR(NULL, !=, coll);
+
+	coll = config_collection_load_from_memory(c_cfgf0, 0);
+	HTRY_PTR(NULL, ==, coll);
+
+	coll = config_collection_load_from_memory(c_cfgf1, 0);
+	HTRY_PTR(NULL, ==, coll);
+
+	coll = config_collection_load_from_memory(c_cfgf2, 0);
+	HTRY_PTR(NULL, ==, coll);
+
+	coll = config_collection_load_from_memory(c_cfgf3, 0);
+	HTRY_PTR(NULL, ==, coll);
+
+	coll = config_collection_load_from_memory(c_cfgf4, 0);
+	HTRY_PTR(NULL, ==, coll);
+
+	config_collection_free(&coll);
+}
+
 HTEST(ValueConversion)
 {
 	struct ConfigCollection *coll;
@@ -265,6 +304,7 @@ HTEST_SUITE(Config)
 	HTEST_ADD(MissingSection);
 	HTEST_ADD(MixedSections);
 	HTEST_ADD(MixedConfigs);
+	HTEST_ADD(MixedValues);
 	HTEST_ADD(ValueConversion);
 	HTEST_ADD(Duplications);
 	HTEST_ADD(WriteEmpty);
