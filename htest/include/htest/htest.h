@@ -130,7 +130,10 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY_FLT(a, op, b) HTRY(float, e, a, op, b)
 #define HTRY_I(a, op, b) HTRY(int, d, a, op, b)
 #define HTRY_PTR(a, op, b) HTRY(void const *, p, a, op, b)
+#define HTRY_C(a, op, b) HTRY(char, c, a, op, b)
+#define HTRY_UC(a, op, b) HTRY(unsigned char, u, a, op, b)
 #define HTRY_U(a, op, b) HTRY(unsigned int, u, a, op, b)
+#define HTRY_UL(a, op, b) HTRY(unsigned long int, lu, a, op, b)
 
 #define HTRY_BOOL(expr) do {\
 	IF_CONST(!(expr)) {\
