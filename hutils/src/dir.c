@@ -25,7 +25,13 @@
 		a_result = NULL;\
 	}\
 } WHILE_0
+#elif defined(HCONF_mDIR_bDIRENT_READDIR)
+#	define DO_DIRENT
+#	define READDIR_R(a_dir, a_result) do {\
+	a_result = readdir(a_dir->dir);\
+} WHILE_0
 #elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
+
 #	define DO_DIRENT
 #	define READDIR_R(a_dir, a_result) do {\
 	a_result = readdir_r(a_dir->dir, a_dir->entry);\
