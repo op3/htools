@@ -23,6 +23,9 @@
 #if defined(HCONF_mMATH_bNOTHING)
 #elif defined(HCONF_mMATH_bLM)
 /* HCONF_LIBS=-lm */
+#elif defined(HCONF_mMATH_bDEFAULT_SOURCE_LM)
+/* HCONF_CPPFLAGS=-D_DEFAULT_SOURCE */
+/* HCONF_LIBS=-lm */
 #elif defined(HCONF_mMATH_bBSD_SOURCE_LM)
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 /* HCONF_LIBS=-lm */
