@@ -42,11 +42,21 @@ HCONF_TEST(int, (void))
 #endif
 
 #if defined(HCONF_mUDP_bGETADDRINFO)
+#	include <netdb.h>
 #	if defined(HCONFING_mUDP)
-#		include <netdb.h>
 HCONF_TEST(int, (void))
 {
 	return getaddrinfo(0, 0, 0, 0);
+}
+#	endif
+#elif defined(HCONF_mUDP_bGETHOSTBYNAME_SOCKLEN)
+/* HCONF_LIBS=-lnetinet */
+#	include <netdb.h>
+#	define socklen_t int
+#	if defined(HCONFING_mUDP)
+HCONF_TEST(struct hostent *, (socklen_t *a_len))
+{
+	return gethostbyname(0) + recvfrom(0, 0, 0, 0, 0, a_len);
 }
 #	endif
 #endif
