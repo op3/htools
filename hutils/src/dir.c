@@ -25,13 +25,7 @@
 		a_result = NULL;\
 	}\
 } WHILE_0
-#elif defined(HCONF_mDIR_bDIRENT_READDIR)
-#	define DO_DIRENT
-#	define READDIR_R(a_dir, a_result) do {\
-	a_result = readdir(a_dir->dir);\
-} WHILE_0
-#elif defined(HCONF_mDIR_bDIRENT_POSIX_DRAFT9)
-
+#elif defined(HCONF_mDIR_bDIRENT_ANCIENT)
 #	define DO_DIRENT
 #	define READDIR_R(a_dir, a_result) do {\
 	a_result = readdir_r(a_dir->dir, a_dir->entry);\
@@ -121,6 +115,11 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 struct Dir {
 	DIR	*dir;
 	struct	dirent *entry;
+	/*
+	 * Some platforms automatically rewind after all entries have been
+	 * touched, let's not do that.
+	 */
+	int	is_done;
 };
 
 struct Dir *
@@ -165,8 +164,13 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 {
 	struct dirent *result;
 
+	if (a_dir->is_done) {
+		return 0;
+	}
 	READDIR_R(a_dir, result);
 	if (NULL == result) {
+		a_dir->is_done = 1;
+		a_entry->name = NULL;
 		return 0;
 	}
 	a_entry->name = a_dir->entry->d_name;

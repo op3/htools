@@ -18,15 +18,14 @@
 
 #if defined(HCONF_mUDP_bGETADDRINFO)
 #	define GETADDRINFO
-#	include <sys/fcntl.h>
-#	include <sys/socket.h>
-#	include <sys/time.h>
-#	include <netdb.h>
+#	include <fcntl.h>
+#	include <time.h>
 #	include <stdarg.h>
 #	include <stdio.h>
 #	include <unistd.h>
 #	include <hutils/err.h>
 #	define INVALID_SOCKET -1
+#	define SOCKADDR_STORAGE sockaddr_storage
 #	define SOCKET int
 #	define SOCKET_ERROR -1
 static void
@@ -58,6 +57,7 @@ warnf(char const *a_fmt, ...)
 #	include <winsock2.h>
 #	include <ws2tcpip.h>
 #	include <stdio.h>
+#	define SOCKADDR_STORAGE sockaddr_storage
 #	define close closesocket
 static int
 set_non_blocking(SOCKET a_socket)
@@ -84,9 +84,32 @@ warnf(char const *a_fmt, ...)
 	fprintf(stderr, "%s\n", s);
 	LocalFree(s);
 }
-#endif
+#else
+#	define GETHOSTBYNAME
+#	include <fcntl.h>
+#	include <stdarg.h>
+#	include <stdio.h>
+#	include <unistd.h>
+#	include <hutils/err.h>
+#	define INVALID_SOCKET -1
+#	define SOCKADDR_STORAGE sockaddr_in
+#	define SOCKET int
+#	define SOCKET_ERROR -1
+static int
+set_non_blocking(SOCKET a_socket)
+{
+	return 0 == fcntl(a_socket, F_SETFL, O_NONBLOCK);
+}
+static void
+warnf(char const *a_fmt, ...)
+{
+	va_list args;
 
-#if defined(GETADDRINFO)
+	va_start(args, a_fmt);
+	hutils_vwarn(a_fmt, args);
+	va_end(args);
+}
+#endif
 
 #include <errno.h>
 #include <hutils/err.h>
@@ -95,7 +118,7 @@ warnf(char const *a_fmt, ...)
 #include <hutils/string.h>
 
 struct UDPAddress {
-	struct	sockaddr_storage addr;
+	struct	SOCKADDR_STORAGE addr;
 	socklen_t	len;
 };
 struct UDPClient {
@@ -115,8 +138,16 @@ static int g_is_setup;
 int
 get_family(int a_flags)
 {
+#if defined(AF_INET6)
 	return UDP_IPV4 == ((UDP_IPV4 | UDP_IPV6) & a_flags) ? AF_INET :
 	    AF_INET6;
+#else
+	if (UDP_IPV4 != a_flags) {
+		hutils_warnx("Platform only support IPv4, something else "
+		    "requested.");
+	}
+	return AF_INET;
+#endif
 }
 
 int
@@ -172,12 +203,8 @@ send_datagram(SOCKET a_socket, struct UDPDatagram const *a_dgram)
 struct UDPClient *
 udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 {
-	struct addrinfo addri;
-	char port_str[10];
-	struct addrinfo *result, *p;
 	struct UDPClient *client;
 	SOCKET sock;
-	int ret;
 
 	if (!g_is_setup) {
 		fprintf(stderr, "udp_client_create called outside "
@@ -185,37 +212,73 @@ udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 		return NULL;
 	}
 
-	ZERO(addri);
-	addri.ai_family = get_family(a_flags);
-	addri.ai_socktype = SOCK_DGRAM;
-	addri.ai_protocol = IPPROTO_UDP;
-	snprintf(port_str, sizeof port_str, "%d", a_port);
-	ret = getaddrinfo(a_hostname, port_str, &addri, &result);
-	if (0 != ret) {
-		gaif(ret, "%s:%s", a_hostname, port_str);
-		return NULL;
-	}
-	sock = INVALID_SOCKET;
-	for (p = result; NULL != p; p = p->ai_next) {
-		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+#if defined(GETADDRINFO)
+	{
+		struct addrinfo addri;
+		char port_str[10];
+		struct addrinfo *result, *p;
+		int ret;
+
+		ZERO(addri);
+		addri.ai_family = get_family(a_flags);
+		addri.ai_socktype = SOCK_DGRAM;
+		addri.ai_protocol = IPPROTO_UDP;
+		snprintf(port_str, sizeof port_str, "%d", a_port);
+		ret = getaddrinfo(a_hostname, port_str, &addri, &result);
+		if (0 != ret) {
+			gaif(ret, "%s:%s", a_hostname, port_str);
+			return NULL;
+		}
+		sock = INVALID_SOCKET;
+		for (p = result; NULL != p; p = p->ai_next) {
+			sock = socket(p->ai_family, p->ai_socktype,
+			    p->ai_protocol);
+			if (INVALID_SOCKET == sock) {
+				warnf("socket(%s:%s)", a_hostname, port_str);
+				continue;
+			}
+			if (0 != connect(sock, p->ai_addr, p->ai_addrlen)) {
+				warnf("connect(%s:%s)", a_hostname, port_str);
+				close(sock);
+				sock = INVALID_SOCKET;
+				continue;
+			}
+			break;
+		}
+		freeaddrinfo(result);
 		if (INVALID_SOCKET == sock) {
-			warnf("socket(%s:%s)", a_hostname, port_str);
-			continue;
+			return NULL;
 		}
-		if (0 != connect(sock, p->ai_addr, p->ai_addrlen)) {
-			warnf("connect(%s:%s)", a_hostname, port_str);
+	}
+#else
+	{
+		struct SOCKADDR_STORAGE server;
+		struct hostent *host;
+
+		/* Not const?! Wtf... */
+		host = gethostbyname((char *)a_hostname);
+		if (NULL == host) {
+			fprintf(stderr, "gethostbyname(%s): %s.\n",
+			    a_hostname, strerror(h_errno));
+			return NULL;
+		}
+		sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		if (0 > sock) {
+			fprintf(stderr, "socket: %s.\n", strerror(errno));
+			return NULL;
+		}
+		server.sin_family = get_family(a_flags);
+		memcpy(&server.sin_addr.s_addr, host->h_addr, host->h_length);
+		server.sin_port = htons(a_port);
+		if (0 != connect(sock, (void *)&server, sizeof server)) {
+			fprintf(stderr, "connect: %s.\n", strerror(errno));
 			close(sock);
-			sock = INVALID_SOCKET;
-			continue;
+			return NULL;
 		}
-		break;
 	}
-	freeaddrinfo(result);
-	if (INVALID_SOCKET == sock) {
-		return NULL;
-	}
+#endif
 	if (!set_non_blocking(sock)) {
-		warnf("set_non_blocking(%s:%s)", a_hostname, port_str);
+		warnf("set_non_blocking(%s:%d)", a_hostname, a_port);
 		close(sock);
 		return NULL;
 	}
@@ -256,50 +319,75 @@ udp_client_send(struct UDPClient const *a_client, struct UDPDatagram
 struct UDPServer *
 udp_server_create(int a_flags, uint16_t a_port)
 {
-	struct addrinfo addri;
-	char port_str[10];
-	struct addrinfo *result, *p;
 	struct UDPServer *server;
 	int sock;
 
 	if (!g_is_setup) {
-		fprintf(stderr, "udp_client_create called outside "
+		fprintf(stderr, "udp_server_create called outside "
 		    "udp_setup/udp_shutdown.\n");
 		return NULL;
 	}
 
-	ZERO(addri);
-	addri.ai_family = get_family(a_flags);
-	addri.ai_socktype = SOCK_DGRAM;
-	addri.ai_flags = AI_PASSIVE;
-	addri.ai_protocol = IPPROTO_UDP;
-	snprintf(port_str, sizeof port_str, "%d", a_port);
-	if (0 != getaddrinfo(NULL, port_str, &addri, &result)) {
-		warnf("NULL:%s", port_str);
-		return NULL;
-	}
-	sock = INVALID_SOCKET;
-	for (p = result; NULL != p; p = p->ai_next) {
-		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+#if defined(GETADDRINFO)
+	{
+		struct addrinfo addri;
+		char port_str[10];
+		struct addrinfo *result, *p;
+
+		snprintf(port_str, sizeof port_str, "%d", a_port);
+		ZERO(addri);
+		addri.ai_family = get_family(a_flags);
+		addri.ai_socktype = SOCK_DGRAM;
+		addri.ai_flags = AI_PASSIVE;
+		addri.ai_protocol = IPPROTO_UDP;
+		if (0 != getaddrinfo(NULL, port_str, &addri, &result)) {
+			warnf("NULL:%s", port_str);
+			return NULL;
+		}
+		sock = INVALID_SOCKET;
+		for (p = result; NULL != p; p = p->ai_next) {
+			sock = socket(p->ai_family, p->ai_socktype,
+			    p->ai_protocol);
+			if (INVALID_SOCKET == sock) {
+				warnf("socket(NULL:%s)", port_str);
+				continue;
+			}
+			if (0 != bind(sock, p->ai_addr, p->ai_addrlen)) {
+				warnf("connect(NULL:%s)", port_str);
+				close(sock);
+				sock = INVALID_SOCKET;
+				continue;
+			}
+			break;
+		}
+		freeaddrinfo(result);
 		if (INVALID_SOCKET == sock) {
-			warnf("socket(NULL:%s)", port_str);
-			continue;
+			fprintf(stderr, "Could not create any socket.\n");
+			return NULL;
 		}
-		if (0 != bind(sock, p->ai_addr, p->ai_addrlen)) {
-			warnf("connect(NULL:%s)", port_str);
+	}
+#else
+	{
+		struct SOCKADDR_STORAGE me;
+
+		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		if (0 > sock) {
+			fprintf(stderr, "socket: %s.", strerror(errno));
+			return NULL;
+		}
+		ZERO(me);
+		me.sin_family = get_family(a_flags);
+		me.sin_addr.s_addr = htonl(INADDR_ANY);
+		me.sin_port = htons(a_port);
+		if (0 != bind(sock, (void *)&me, sizeof me)) {
+			fprintf(stderr, "bind: %s.", strerror(errno));
 			close(sock);
-			sock = INVALID_SOCKET;
-			continue;
+			return NULL;
 		}
-		break;
 	}
-	freeaddrinfo(result);
-	if (INVALID_SOCKET == sock) {
-		fprintf(stderr, "Could not create any socket.\n");
-		return NULL;
-	}
+#endif
 	if (!set_non_blocking(sock)) {
-		warnf("set_non_blocking(NULL:%s)", port_str);
+		warnf("set_non_blocking(NULL:%d)", a_port);
 		close(sock);
 		return NULL;
 	}
@@ -368,5 +456,3 @@ udp_shutdown()
 #endif
 	g_is_setup = 0;
 }
-
-#endif
