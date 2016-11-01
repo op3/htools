@@ -126,6 +126,20 @@ struct HTestSuite g_htest_suite_list_[] = {
 		HTRY_FAIL_FOOTER_;\
 	}\
 } WHILE_0
+
+#define HTRY64(Type, fmt, a, op, b) do {\
+	Type const aa_ = a;\
+	Type const bb_ = b;\
+	IF_CONST(!(aa_ op bb_)) {\
+		HTRY_FAIL_HEADER_;\
+		printf("'"#a"'=%" #fmt "%" #fmt " "#op" '"#b\
+		    "'=%" #fmt "%" #fmt "\n", (uint32_t)(aa_ >> 32), \
+		    (uint32_t)(aa_ & 0xffffffff), (uint32_t)(bb_ >> 32), \
+		    (uint32_t)(bb_ & 0xffffffff));\
+		HTRY_FAIL_FOOTER_;\
+	}\
+} WHILE_0
+
 #define HTRY_DBL(a, op, b) HTRY(double, e, a, op, b)
 #define HTRY_FLT(a, op, b) HTRY(float, e, a, op, b)
 #define HTRY_I(a, op, b) HTRY(int, d, a, op, b)
@@ -134,6 +148,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY_UC(a, op, b) HTRY(unsigned char, u, a, op, b)
 #define HTRY_U(a, op, b) HTRY(unsigned int, u, a, op, b)
 #define HTRY_UL(a, op, b) HTRY(unsigned long int, lu, a, op, b)
+#define HTRY_ULL(a, op, b) HTRY64(uint64_t, u, a, op, b)
 
 #define HTRY_BOOL(expr) do {\
 	IF_CONST(!(expr)) {\
