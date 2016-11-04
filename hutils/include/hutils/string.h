@@ -39,9 +39,9 @@ int hutils_snprintf_(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
 int hutils_vsnprintf_(char *, size_t, char const *, va_list);
 #endif
 #if defined(HCONFING_mNPRINTF)
-HCONF_TEST(int, (char *a_s, size_t a_n, char const *a_fmt))
+HCONF_TEST(int, (char *a_s, size_t a_n, char const *a_fmt, va_list args))
 {
-	return snprintf(a_s, a_n, a_fmt);
+	return snprintf(a_s, a_n, a_fmt) + vsnprintf(a_s, a_n, a_fmt, args);
 }
 #endif
 

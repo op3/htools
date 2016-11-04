@@ -21,28 +21,33 @@
 #include <hutils/err.h>
 #include <hutils/macros.h>
 
-#define CALLOC(ptr, num) do {\
-	int n_ = num;\
-	ptr = calloc(n_, sizeof *ptr);\
-	if (NULL == ptr) {\
-		hutils_err(EXIT_FAILURE, "calloc(%d,%d)", n_, \
-		    (int)sizeof *ptr);\
-	}\
-} WHILE_0
-#define DUP(dst, src) do {\
-	MALLOC(dst, sizeof *dst);\
-	COPY(*dst, src);\
-} WHILE_0
-#define FREE(ptr) do {\
-	free(ptr);\
-	ptr = NULL;\
-} WHILE_0
-#define MALLOC(ptr, size) do {\
-	size_t s_ = size;\
-	ptr = malloc(s_);\
-	if (NULL == ptr) {\
-		hutils_err(EXIT_FAILURE, "malloc(%d)", (int)s_);\
-	}\
-} WHILE_0
+#define CALLOC(ptr, num)\
+	do {\
+		int n_ = num;\
+		ptr = calloc(n_, sizeof *ptr);\
+		if (NULL == ptr) {\
+			hutils_err(EXIT_FAILURE, __FILE__":%d: "\
+			    "calloc(%d,%d)", __LINE__, n_, (int)sizeof *ptr);\
+		}\
+	} WHILE_0
+#define DUP(dst, src)\
+	do {\
+		MALLOC(dst, sizeof *dst);\
+		COPY(*dst, src);\
+	} WHILE_0
+#define FREE(ptr)\
+	do {\
+		free(ptr);\
+		ptr = NULL;\
+	} WHILE_0
+#define MALLOC(ptr, size)\
+	do {\
+		size_t s_ = size;\
+		ptr = malloc(s_);\
+		if (NULL == ptr) {\
+			hutils_err(EXIT_FAILURE, __FILE__":%d: malloc(%d)",\
+			    __LINE__, (int)s_);\
+		}\
+	} WHILE_0
 
 #endif

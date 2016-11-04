@@ -22,7 +22,7 @@
 #	include <stdarg.h>
 #	include <stdio.h>
 int
-snprintf(char *a_dst, size_t a_dst_size, char const *a_fmt, ...)
+hutils_snprintf_(char *a_dst, size_t a_dst_size, char const *a_fmt, ...)
 {
 	va_list args;
 	int len;
@@ -34,7 +34,8 @@ snprintf(char *a_dst, size_t a_dst_size, char const *a_fmt, ...)
 }
 
 int
-vsnprintf(char *a_dst, size_t a_dst_size, char const *a_fmt, va_list a_args)
+hutils_vsnprintf_(char *a_dst, size_t a_dst_size, char const *a_fmt, va_list
+    a_args)
 {
 	int len;
 
