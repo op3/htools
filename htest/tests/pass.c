@@ -15,6 +15,7 @@
  */
 
 #include <htest/htest.h>
+#include <hutils/stdint.h>
 
 static int const c_zero = 0;
 static int const c_one = 1;
@@ -26,6 +27,11 @@ HTEST(ThisShouldPass)
 	HTRY_I(c_zero, ==, c_zero);
 	HTRY_I(c_zero, !=, c_one);
 	HTRY_I(c_zero + 1, ==, c_one);
+	HTRY_C((char)0, ==, (char)0);
+	HTRY_UC((unsigned char)0, ==, (unsigned char)0);
+	HTRY_U((unsigned int)0, ==, (unsigned int)0);
+	HTRY_UL((unsigned long int)0, ==, (unsigned long int)0);
+	HTRY_ULL((uint64_t)0, ==, (uint64_t)0);
 }
 
 HTEST_SUITE(Pass)
