@@ -41,9 +41,9 @@ $(HTEST_TESTS): $(HTEST_SUITES)
 	$(HTEST_TESTS_PRE)$(HTEST_PRE);\
 	echo "#include <htest/htest.h>" > $@;\
 	if [ "$^" ]; then\
-		cat $^ | sed 's/^\(.*\)$$/HTEST_SUITE_PROTO(\1);/';\
+		cat $^ | awk '{print "HTEST_SUITE_PROTO("$$0");"}';\
 		echo "HTEST_SUITE_LIST_BEGIN";\
-		cat $^ | sed 's/^\(.*\)$$/ HTEST_SUITE_LIST_ADD(\1)/';\
+		cat $^ | awk '{print "\tHTEST_SUITE_LIST_ADD("$$0")"}';\
 		echo "HTEST_SUITE_LIST_END";\
 	else\
 		echo;\

@@ -44,15 +44,6 @@ set_non_blocking(SOCKET a_socket)
 {
 	return 0 == fcntl(a_socket, F_SETFL, O_NONBLOCK);
 }
-static void
-warnf(char const *a_fmt, ...)
-{
-	va_list args;
-
-	va_start(args, a_fmt);
-	hutils_vwarn(a_fmt, args);
-	va_end(args);
-}
 #elif defined(_MSC_VER)
 #	define GETADDRINFO
 #	include <winsock2.h>
@@ -68,8 +59,9 @@ set_non_blocking(SOCKET a_socket)
 	non_blocking = 1;
 	return NO_ERROR == ioctlsocket(a_socket, FIONBIO, &non_blocking);
 }
+/*
 static void
-warnf(char const *a_fmt, ...)
+hutils_warn(char const *a_fmt, ...)
 {
 	va_list args;
 	LPTSTR s;
@@ -85,6 +77,7 @@ warnf(char const *a_fmt, ...)
 	fprintf(stderr, "%s\n", s);
 	LocalFree(s);
 }
+*/
 #else
 #	define GETHOSTBYNAME
 #	include <fcntl.h>
@@ -100,15 +93,6 @@ static int
 set_non_blocking(SOCKET a_socket)
 {
 	return 0 == fcntl(a_socket, F_SETFL, O_NONBLOCK);
-}
-static void
-warnf(char const *a_fmt, ...)
-{
-	va_list args;
-
-	va_start(args, a_fmt);
-	hutils_vwarn(a_fmt, args);
-	va_end(args);
 }
 #endif
 
@@ -127,12 +111,12 @@ struct UDPClient {
 };
 struct UDPServer {
 	SOCKET	socket;
+	int	pfd[2];
 };
 
 static int	get_family(int) FUNC_RETURNS;
-static int	receive_datagram(SOCKET, struct UDPDatagram *, struct
-    UDPAddress *, double);
-static int	send_datagram(SOCKET, struct UDPDatagram const *);
+static int	receive_datagram(SOCKET, int, struct UDPDatagram *, struct
+    UDPAddress **, double);
 
 static int g_is_setup;
 
@@ -152,19 +136,29 @@ get_family(int a_flags)
 }
 
 int
-receive_datagram(SOCKET a_socket, struct UDPDatagram *a_dgram, struct
-    UDPAddress *a_addr, double a_timeout)
+receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
+    struct UDPAddress **a_addr, double a_timeout)
 {
+	struct UDPAddress addr;
 	fd_set socks;
 	struct timeval timeout;
-	int ret;
+	int nfds, ret;
 
+	if (NULL != a_addr) {
+		*a_addr = NULL;
+	}
 	a_dgram->size = 0;
 	FD_ZERO(&socks);
 	FD_SET(a_socket, &socks);
+	if (0 < a_fd_extra) {
+		FD_SET(a_fd_extra, &socks);
+		nfds = MAX(a_socket, a_fd_extra);
+	} else {
+		nfds = a_socket;
+	}
 	timeout.tv_sec = (long)a_timeout;
 	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
-	ret = select(a_socket + 1, &socks, NULL, NULL, &timeout);
+	ret = select(nfds + 1, &socks, NULL, NULL, &timeout);
 	if (0 == ret) {
 		return 1;
 	}
@@ -172,33 +166,40 @@ receive_datagram(SOCKET a_socket, struct UDPDatagram *a_dgram, struct
 		if (EINTR == errno) {
 			return 1;
 		}
-		warnf("select");
+		hutils_warn("select");
 		return 0;
 	}
-	a_addr->len = sizeof a_addr->addr;
-	ZERO(a_addr->addr);
+	if (0 < a_fd_extra && FD_ISSET(a_fd_extra, &socks)) {
+		a_dgram->size = read(a_fd_extra, a_dgram->buf,
+		    LENGTH(a_dgram->buf));
+		return 1;
+	}
+	addr.len = sizeof addr.addr;
+	ZERO(addr.addr);
 	ret = recvfrom(a_socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf),
-	    0, (struct sockaddr *)&a_addr->addr, &a_addr->len);
+	    0, (struct sockaddr *)&addr.addr, &addr.len);
 	if (SOCKET_ERROR == ret) {
 		if (EAGAIN == errno || EWOULDBLOCK != errno) {
 			return 1;
 		}
-		warnf("recv");
+		hutils_warn("recv");
 		return 0;
 	}
 	a_dgram->size = ret;
+	if (0 != ret && NULL != a_addr) {
+		struct UDPAddress *paddr;
+
+		CALLOC(paddr, 1);
+		COPY(*paddr, addr);
+		*a_addr = paddr;
+	}
 	return 1;
 }
 
-int
-send_datagram(SOCKET a_socket, struct UDPDatagram const *a_dgram)
+void
+udp_address_free(struct UDPAddress **a_address)
 {
-	if (SOCKET_ERROR == send(a_socket, (char *)a_dgram->buf,
-	    a_dgram->size, 0)) {
-		warnf("send");
-		return 0;
-	}
-	return 1;
+	FREE(*a_address);
 }
 
 struct UDPClient *
@@ -235,11 +236,11 @@ udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 			sock = socket(p->ai_family, p->ai_socktype,
 			    p->ai_protocol);
 			if (INVALID_SOCKET == sock) {
-				warnf("socket(%s:%s)", a_hostname, port_str);
+				hutils_warn("socket(%s:%s)", a_hostname, port_str);
 				continue;
 			}
 			if (0 != connect(sock, p->ai_addr, p->ai_addrlen)) {
-				warnf("connect(%s:%s)", a_hostname, port_str);
+				hutils_warn("connect(%s:%s)", a_hostname, port_str);
 				close(sock);
 				sock = INVALID_SOCKET;
 				continue;
@@ -279,7 +280,7 @@ udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 	}
 #endif
 	if (!set_non_blocking(sock)) {
-		warnf("set_non_blocking(%s:%d)", a_hostname, a_port);
+		hutils_warn("set_non_blocking(%s:%d)", a_hostname, a_port);
 		close(sock);
 		return NULL;
 	}
@@ -305,28 +306,58 @@ int
 udp_client_receive(struct UDPClient const *a_client, struct UDPDatagram
     *a_dgram, double a_timeout)
 {
-	struct UDPAddress addr;
-
-	return receive_datagram(a_client->socket, a_dgram, &addr, a_timeout);
+	return receive_datagram(a_client->socket, -1, a_dgram, NULL, a_timeout);
 }
 
 int
 udp_client_send(struct UDPClient const *a_client, struct UDPDatagram
     const *a_dgram)
 {
-	return send_datagram(a_client->socket, a_dgram);
+	if (SOCKET_ERROR == send(a_client->socket, (char *)a_dgram->buf,
+	    a_dgram->size, 0)) {
+		hutils_warn("send");
+		return 0;
+	}
+	return 1;
 }
 
 struct UDPServer *
 udp_server_create(int a_flags, uint16_t a_port)
 {
 	struct UDPServer *server;
-	int sock;
+	int flags, has_pfd, sock;
 
 	if (!g_is_setup) {
 		fprintf(stderr, "udp_server_create called outside "
 		    "udp_setup/udp_shutdown.\n");
 		return NULL;
+	}
+
+	has_pfd = 0;
+	sock = INVALID_SOCKET;
+	CALLOC(server, 1);
+	if (-1 == pipe(server->pfd)) {
+		hutils_warn("pipe");
+		goto udp_server_create_fail;
+	}
+	has_pfd = 1;
+	flags = fcntl(server->pfd[0], F_GETFL);
+	if (-1 == flags) {
+		hutils_warn("fcntl_get(pfd[0])");
+		goto udp_server_create_fail;
+	}
+	if (-1 == fcntl(server->pfd[0], F_SETFL, flags | O_NONBLOCK)) {
+		hutils_warn("fcntl_set(pfd[0])");
+		goto udp_server_create_fail;
+	}
+	flags = fcntl(server->pfd[1], F_GETFL);
+	if (-1 == flags) {
+		hutils_warn("fcntl_get(pfd[1])");
+		goto udp_server_create_fail;
+	}
+	if (-1 == fcntl(server->pfd[1], F_SETFL, flags | O_NONBLOCK)) {
+		hutils_warn("fcntl_set(pfd[1])");
+		goto udp_server_create_fail;
 	}
 
 #if defined(GETADDRINFO)
@@ -342,19 +373,18 @@ udp_server_create(int a_flags, uint16_t a_port)
 		addri.ai_flags = AI_PASSIVE;
 		addri.ai_protocol = IPPROTO_UDP;
 		if (0 != getaddrinfo(NULL, port_str, &addri, &result)) {
-			warnf("NULL:%s", port_str);
-			return NULL;
+			hutils_warn("NULL:%s", port_str);
+			goto udp_server_create_fail;
 		}
-		sock = INVALID_SOCKET;
 		for (p = result; NULL != p; p = p->ai_next) {
 			sock = socket(p->ai_family, p->ai_socktype,
 			    p->ai_protocol);
 			if (INVALID_SOCKET == sock) {
-				warnf("socket(NULL:%s)", port_str);
+				hutils_warn("socket(NULL:%s)", port_str);
 				continue;
 			}
 			if (0 != bind(sock, p->ai_addr, p->ai_addrlen)) {
-				warnf("connect(NULL:%s)", port_str);
+				hutils_warn("connect(NULL:%s)", port_str);
 				close(sock);
 				sock = INVALID_SOCKET;
 				continue;
@@ -363,8 +393,8 @@ udp_server_create(int a_flags, uint16_t a_port)
 		}
 		freeaddrinfo(result);
 		if (INVALID_SOCKET == sock) {
-			fprintf(stderr, "Could not create any socket.\n");
-			return NULL;
+			hutils_warnx("Could not create socket.");
+			goto udp_server_create_fail;
 		}
 	}
 #else
@@ -388,13 +418,23 @@ udp_server_create(int a_flags, uint16_t a_port)
 	}
 #endif
 	if (!set_non_blocking(sock)) {
-		warnf("set_non_blocking(NULL:%d)", a_port);
+		hutils_warn("set_non_blocking(NULL:%d)", a_port);
 		close(sock);
 		return NULL;
 	}
-	CALLOC(server, 1);
 	server->socket = sock;
 	return server;
+
+udp_server_create_fail:
+	if (INVALID_SOCKET != sock) {
+		close(sock);
+	}
+	if (has_pfd) {
+		close(server->pfd[0]);
+		close(server->pfd[1]);
+	}
+	FREE(server);
+	return NULL;
 }
 
 void
@@ -407,6 +447,8 @@ udp_server_free(struct UDPServer **a_server)
 		return;
 	}
 	close(server->socket);
+	close(server->pfd[0]);
+	close(server->pfd[1]);
 	FREE(*a_server);
 }
 
@@ -414,24 +456,32 @@ int
 udp_server_receive(struct UDPServer const *a_server, struct UDPAddress
     **a_addr, struct UDPDatagram *a_dgram, double a_timeout)
 {
-	struct UDPAddress addr, *paddr;
+	return receive_datagram(a_server->socket, a_server->pfd[0], a_dgram,
+	    a_addr, a_timeout);
+}
 
-	if (!receive_datagram(a_server->socket, a_dgram, &addr, a_timeout)) {
+int
+udp_server_send(struct UDPServer const *a_server, struct UDPAddress const
+    *a_addr, struct UDPDatagram const *a_dgram)
+{
+	if (SOCKET_ERROR == sendto(a_server->socket, (char *)a_dgram->buf,
+	    a_dgram->size, 0, (struct sockaddr const *)&a_addr->addr,
+	    a_addr->len)) {
+		hutils_warn("send");
 		return 0;
-	}
-	if (0 != a_dgram->size) {
-		CALLOC(paddr, 1);
-		COPY(*paddr, addr);
-		*a_addr = paddr;
 	}
 	return 1;
 }
 
 int
-udp_server_send(struct UDPServer const *a_server, struct UDPDatagram
-    const *a_dgram)
+udp_server_write(struct UDPServer const *a_server, void const *a_data, size_t
+    a_data_len)
 {
-	return send_datagram(a_server->socket, a_dgram);
+	if (-1 == write(a_server->pfd[1], a_data, a_data_len)) {
+		hutils_warn("write(pfd[1])");
+		return FALSE;
+	}
+	return TRUE;
 }
 
 int
@@ -441,7 +491,7 @@ udp_setup()
 	struct WSAData wsa;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
-		warnf("WSAStartup");
+		hutils_warn("WSAStartup");
 		return 0;
 	}
 #endif

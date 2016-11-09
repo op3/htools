@@ -89,13 +89,30 @@ HTEST(ServerClient)
 	HTRY_PTR(NULL, !=, address);
 	HTRY_I(sizeof STRING, ==, datagram.size);
 	HTRY_STR(STRING, ==, s);
-	FREE(address);
+	udp_address_free(&address);
 
 	ZERO(datagram);
 	udp_server_receive(server, &address, &datagram, 0.1);
 	HTRY_PTR(NULL, ==, address);
 	HTRY_I(0, ==, datagram.size);
 
+	udp_server_free(&server);
+}
+
+HTEST(ServerWriting)
+{
+	struct UDPAddress *address;
+	struct UDPDatagram datagram;
+	struct UDPServer *server;
+	uint8_t value;
+
+	server = udp_server_create(UDP_IPV4, 12345);
+	value = 2;
+	udp_server_write(server, &value, sizeof value);
+	HTRY_BOOL(udp_server_receive(server, &address, &datagram, 1.0));
+	HTRY_PTR(NULL, ==, address);
+	HTRY_I(1, ==, datagram.size);
+	HTRY_I(2, ==, datagram.buf[0]);
 	udp_server_free(&server);
 }
 
@@ -109,5 +126,6 @@ HTEST_SUITE(UDP)
 	HTEST_ADD(ServerPostSetup);
 	HTEST_ADD(ClientPostSetup);
 	HTEST_ADD(ServerClient);
+	HTEST_ADD(ServerWriting);
 	udp_shutdown();
 }

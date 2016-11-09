@@ -37,7 +37,7 @@ HCONF_MVD=sh $(HCONF_CACHE).mvd $(@:.o=.d) $(@D) $(patsubst %.c,%.d,$(<F))
 AR_A_VERB=$(AR) rcs $@ $(filter %.o,$^)
 CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS) && $(HCONF_MVD)
 CC_PRINCESS_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS)) && $(HCONF_MVD)
-LD_E_VERB=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(HCONF_LIBS) $(LIBS)
+LD_E_VERB=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)
 MKDIR_VERB=[ -d $(@D) ] || mkdir -p $(@D)
 
 ifneq (,$(V))

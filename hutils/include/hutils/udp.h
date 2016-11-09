@@ -31,8 +31,9 @@
 
 #if defined(HCONF_mIPPROTO_UDP_bNETINET_IN_H)
 #	include <netinet/in.h>
-#elif defined(HCONF_mIPPROTO_UDP_bZERO)
-#	define IPPROTO_UDP 0
+#elif defined(HCONF_mIPPROTO_UDP_bNOWARN_NETINET_IN_H)
+/* HCONF_CPPFLAGS=-D__NO_INCLUDE_WARN__ */
+#	include <netinet/in.h>
 #endif
 #if defined(HCONFING_mIPPROTO_UDP)
 HCONF_TEST(int, (void))
@@ -74,6 +75,7 @@ struct UDPDatagram {
 	size_t	size;
 };
 
+void			udp_address_free(struct UDPAddress **);
 struct UDPClient	*udp_client_create(int, char const *, uint16_t)
 	FUNC_RETURNS;
 void			udp_client_free(struct UDPClient **);
@@ -86,7 +88,9 @@ void			udp_server_free(struct UDPServer **);
 int			udp_server_receive(struct UDPServer const *, struct
     UDPAddress **, struct UDPDatagram *, double);
 int			udp_server_send(struct UDPServer const *, struct
-    UDPDatagram const *);
+    UDPAddress const *, struct UDPDatagram const *);
+int			udp_server_write(struct UDPServer const *, void const
+    *, size_t);
 int			udp_setup(void) FUNC_RETURNS;
 void			udp_shutdown(void);
 
