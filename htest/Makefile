@@ -32,7 +32,7 @@ endif
 
 SRC:=$(wildcard src/*.c)
 OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-HCONF_CACHES:=../hutils
+HCONF_PROJECTS:=../hutils
 HCONF_SRC:=src/htest.h
 
 HTEST_SRC:=$(wildcard tests/*.c)

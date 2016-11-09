@@ -12,10 +12,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# BUILD_DIR    = Generated files will be put in here.
-# HCONF_CACHES = List of hconf caches from other projects to be included.
-# HCONF_SRC    = List of files to be hconf:ed.
-# HCONF_DEP    = List of files to depend on.
+# BUILD_DIR         = Generated files will be put in here.
+# HCONF_PROJECTS    = List of hconf:ed projects to be included.
+# HCONF_SRC         = List of files to be hconf:ed.
+# HCONF_DEP         = List of files to depend on.
+# HCONF_EXT_PROJECT = Project to extract cache data from with HCONF_EXT_*.
 
 ifeq (,$(SED))
 SED=sed
@@ -33,6 +34,13 @@ HCONF_CFLAGS=$(shell $(SED) -n 3p $(HCONF_CACHE))
 HCONF_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_CACHE))
 HCONF_LIBS=$(shell $(SED) -n 5p $(HCONF_CACHE))
 HCONF_MVD=sh $(HCONF_CACHE).mvd $(@:.o=.d) $(@D) $(patsubst %.c,%.d,$(<F))
+
+HCONF_EXT_CACHE:=$(HCONF_EXT_PROJECT)/$(HCONF_CACHE)
+HCONF_EXT_CC=$(shell $(SED) -n 1p $(HCONF_EXT_CACHE))
+HCONF_EXT_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_EXT_CACHE))
+HCONF_EXT_CFLAGS=$(shell $(SED) -n 3p $(HCONF_EXT_CACHE))
+HCONF_EXT_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_EXT_CACHE))
+HCONF_EXT_LIBS=$(shell $(SED) -n 5p $(HCONF_EXT_CACHE))
 
 AR_A_VERB=$(AR) rcs $@ $(filter %.o,$^)
 CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS) && $(HCONF_MVD)
@@ -63,19 +71,19 @@ CC_PRINCESS_O=$(CC_PRINCESS_O_PRE)$(CC_PRINCESS_O_VERB)
 LD_E=$(LD_E_PRE)$(LD_E_VERB)
 MKDIR=$(QUIET)$(MKDIR_VERB)
 
-HCONF_CACHES_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_CACHES))
-CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_CACHES))
+HCONF_PROJECTS_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_PROJECTS))
+CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_PROJECTS))
 
 export CC
 export CFLAGS
 export CPPFLAGS
 export LDFLAGS
 export LIBS
-$(HCONF_CACHE): $(HCONF_CACHES_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
+$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
 	$(MKDIR)
 	$(QUIET)(echo;echo $(CPPFLAGS);echo $(CFLAGS);echo;echo;) > $@.tmp;\
-	if [ "$(HCONF_CACHES_FILES)" ]; then\
-		$(HCONF_MERGE) $@.tmp $(HCONF_CACHES_FILES) > $@.tmp2;\
+	if [ "$(HCONF_PROJECTS_FILES)" ]; then\
+		$(HCONF_MERGE) $@.tmp $(HCONF_PROJECTS_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\
 	fi;\
 	do_rebuild=;\

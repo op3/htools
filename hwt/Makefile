@@ -50,7 +50,7 @@ test: $(TEST)
 splint:
 	splint -nullret +posixstrictlib $(CPPFLAGS) $(SRC)
 
-HCONF_CACHES:=../hutils
+HCONF_PROJECTS:=../hutils
 include ../hgmake/hconf.mk
 include ../htest/htest.mk
 
