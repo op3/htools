@@ -102,6 +102,11 @@ HCONF_TEST(char *, (int a_signum))
 }
 #endif
 
+#define STRAPP(dst, dstlen, ofs, src)\
+	do {\
+		ofs += strlcpy(dst + ofs, src, dstlen - ofs);\
+		ofs = MIN(ofs, dstlen - 1);\
+	} WHILE_0
 #define STRCTV_BEGIN strctv_(
 #define STRCTV_END ,strctv_sentinel_)
 
