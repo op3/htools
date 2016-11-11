@@ -23,6 +23,9 @@ HTEST(SimpleStrings)
 	HTRY_STR("Hello", ==, c_hello);
 	HTRY_STR("abc", <, "def");
 	HTRY_STR("def", >, "abc");
+	HTRY_STRN("abc", ==, "abd", 1);
+	HTRY_STRN("abc", ==, "abd", 2);
+	HTRY_STRN("abc", !=, "abd", 3);
 }
 
 HTEST(NullStrings)
@@ -30,6 +33,9 @@ HTEST(NullStrings)
 	HTRY_STR(NULL, ==, "a");
 	HTRY_STR("a", ==, NULL);
 	HTRY_STR(NULL, ==, NULL);
+	HTRY_STRN(NULL, ==, "a", 0);
+	HTRY_STRN("a", ==, NULL, 0);
+	HTRY_STRN(NULL, ==, NULL, 0);
 }
 
 HTEST_SUITE(String)
