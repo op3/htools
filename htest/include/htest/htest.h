@@ -158,26 +158,34 @@ struct HTestSuite g_htest_suite_list_[] = {
 	}\
 } WHILE_0
 
-#define HTRY_STR(a, op, b) do {\
+#define HTRY_STRN(a, op, b, siz) do {\
 	char const *aa_ = a;\
 	char const *bb_ = b;\
 	if (NULL == aa_) {\
 		HTRY_FAIL_HEADER_;\
-		printf("'%s'=\"%s\" "#op" '%s'"\
-		    "=\"%s\".\n", #a, aa_, #b, bb_);\
+		printf("'%s'=\"%s\" "#op" '%s'=\"%s\".\n", #a, aa_, #b, bb_);\
 		HTRY_FAIL_FOOTER_;\
 	} else if (NULL == bb_) {\
 		HTRY_FAIL_HEADER_;\
-		printf("'%s'=\"%s\" "#op" '%s'"\
-		    "=\"%s\".\n", #a, aa_, #b, bb_);\
+		printf("'%s'=\"%s\" "#op" '%s'=\"%s\".\n", #a, aa_, #b, bb_);\
 		HTRY_FAIL_FOOTER_;\
-	} else if (!(strcmp(aa_, bb_) op 0)) {\
-		HTRY_FAIL_HEADER_;\
-		printf("'%s'=\"%s\" "#op" '%s'"\
-			"=\"%s\".\n", #a, aa_, #b, bb_); \
-		HTRY_FAIL_FOOTER_; \
+	} else if (-1 == siz) {\
+		if (!(strcmp(aa_, bb_) op 0)) {\
+			HTRY_FAIL_HEADER_;\
+			printf("'%s'=\"%s\" "#op"(%d) '%s'=\"%s\".\n", #a,\
+			    aa_, siz, #b, bb_); \
+			HTRY_FAIL_FOOTER_; \
+		}\
+	} else {\
+		if (!(strncmp(aa_, bb_, siz) op 0)) {\
+			HTRY_FAIL_HEADER_;\
+			printf("'%s'=\"%s\" "#op" '%s'=\"%s\".\n", #a, aa_,\
+			    #b, bb_); \
+			HTRY_FAIL_FOOTER_; \
+		}\
 	}\
 } WHILE_0
+#define HTRY_STR(a, op, b) HTRY_STRN(a, op, b, -1)
 
 #define HTRY_VOID(expr) do {\
 	(void)a_color_fail_;\
