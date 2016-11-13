@@ -42,7 +42,7 @@ HTEST_SUITE_DST=$@
 
 .PHONY: all
 all: $(BUILD_DIR)/test
-	@./$< -c
+	-@./$< -c
 	@echo "The result should be 7/11!"
 
 .PHONY: clean

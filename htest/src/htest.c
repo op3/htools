@@ -321,5 +321,5 @@ main(int const argc, char **const argv)
 
 	printf("Passed %d/%d (%.1f%%) tests.\n", test_pass_num, test_num,
 	    100.0f * test_pass_num / test_num);
-	return 0;
+	exit(test_pass_num == test_num ? EXIT_SUCCESS : EXIT_FAILURE);
 }
