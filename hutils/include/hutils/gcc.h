@@ -35,4 +35,9 @@
 /* HCONF_OPT=nolink */
 #endif
 
+#if defined(HCONF_mWFORMAT_bWFORMAT2)
+/* HCONF_CFLAGS=-Wformat=2 */
+/* HCONF_OPT=nolink */
+#endif
+
 #endif

@@ -125,7 +125,7 @@ htest_set_color_(HTEST_COLOR_ a_color)
 #if defined(_MSC_VER)
 	SetConsoleTextAttribute(g_htest_console_, a_color);
 #else
-	printf(a_color);
+	printf("%s", a_color);
 #endif
 }
 

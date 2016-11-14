@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <hutils/funcattr.h>
 #include <hutils/string.h>
 
 static int	printer(char const *, ...);
@@ -156,5 +157,5 @@ printer(char const *a_fmt, ...)
 int
 stdio(char const *a_fmt, va_list args)
 {
-	return fprintf(stderr, a_fmt, args);
+	return vfprintf(stderr, a_fmt, args);
 }
