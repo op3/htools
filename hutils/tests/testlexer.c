@@ -18,22 +18,6 @@
 #include <htest/htest.h>
 #include <hutils/memory.h>
 
-static size_t	my_read(void *, char *, size_t) FUNC_RETURNS;
-
-size_t
-my_read(void *a_data, char *a_dst, size_t a_max)
-{
-	char **pp;
-	size_t len;
-
-	pp = (char **)a_data;
-	len = strlen(*pp);
-	len = MIN(a_max, len);
-	memmove(a_dst, *pp, len);
-	*pp += len;
-	return len;
-}
-
 HTEST(BufMajeur)
 {
 	int const c_n = 1000;
@@ -55,7 +39,7 @@ HTEST(BufMajeur)
 	}
 	text[ofs] = '\0';
 	p = text;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 	for (i = 0; c_n > i; ++i) {
 		HTRY_BOOL(lexer_token_get(lexer, &token));
 		HTRY_I(LEXER_ALNUM, ==, token.type);
@@ -82,7 +66,7 @@ HTEST(AlnumVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ALNUM, ==, token.type);
@@ -149,7 +133,7 @@ HTEST(HexVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_HEX, ==, token.type);
@@ -190,7 +174,7 @@ HTEST(NumberVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_NUMBER, ==, token.type);
@@ -263,14 +247,14 @@ HTEST(LiteralVariations)
 	char const *p;
 
 	p = c_text1;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 	HTRY_BOOL(!lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ERROR, ==, token.type);
 	HTRY_I(LEXER_ERROR_UNTERMINATED_LITERAL, ==, lexer_get_error(lexer));
 	lexer_free(&lexer);
 
 	p = c_text2;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_LITERAL, ==, token.type);
 	HTRY_STR("text", ==, token.str);
@@ -286,7 +270,7 @@ HTEST(UglyText)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(my_read, &p);
+	lexer = lexer_create(lexer_cstr_callback, &p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ALNUM, ==, token.type);
@@ -329,6 +313,42 @@ HTEST(UglyText)
 	lexer_free(&lexer);
 }
 
+HTEST(Expects)
+{
+	char const c_text[] = "a,b ,c, d , e";
+	struct LexerToken token;
+	struct Lexer *lexer;
+	char const *p;
+
+	p = c_text;
+	lexer = lexer_create(lexer_cstr_callback, &p);
+
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("a", ==, token.str);
+	FREE(token.str);
+	HTRY_BOOL(lexer_expect_symbol(lexer, ','));
+
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("b", ==, token.str);
+	FREE(token.str);
+	HTRY_BOOL(lexer_expect_symbol(lexer, ','));
+
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("c", ==, token.str);
+	FREE(token.str);
+	HTRY_BOOL(lexer_expect_symbol(lexer, ','));
+
+	/* The next will look at 'd'. */
+	HTRY_BOOL(!lexer_expect_symbol(lexer, ','));
+	HTRY_BOOL(lexer_expect_symbol(lexer, ','));
+
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("e", ==, token.str);
+	FREE(token.str);
+
+	lexer_free(&lexer);
+}
+
 HTEST_SUITE(Lexer)
 {
 	HTEST_ADD(BufMajeur);
@@ -337,4 +357,5 @@ HTEST_SUITE(Lexer)
 	HTEST_ADD(NumberVariations);
 	HTEST_ADD(LiteralVariations);
 	HTEST_ADD(UglyText);
+	HTEST_ADD(Expects);
 }

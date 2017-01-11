@@ -273,7 +273,6 @@ main(int const argc, char **const argv)
 					}
 				}
 			}
-			else
 #elif defined(SUPPORT_JMP)
 			/* This is rubbish, but some OS:s cannot do more... */
 			if (do_recover) {
@@ -299,9 +298,8 @@ main(int const argc, char **const argv)
 					++test_pass_num;
 				}
 			}
-			else
 #endif
-			{
+			else {
 				int result;
 
 				test_enumerator = 0;

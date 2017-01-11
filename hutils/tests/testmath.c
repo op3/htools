@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,32 +14,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_MATH_H
-#define HUTILS_MATH_H
+#include <hutils/math.h>
+#include <htest/htest.h>
 
-#include <math.h>
-#include <hutils/funcattr.h>
-#include <hutils/stdint.h>
-#include <hconf/include/hutils/math.h>
-
-#if defined(HCONF_mMATH_bNOTHING)
-#elif defined(HCONF_mMATH_bLM)
-/* HCONF_LIBS=-lm */
-#elif defined(HCONF_mMATH_bDEFAULT_SOURCE_LM)
-/* HCONF_CPPFLAGS=-D_DEFAULT_SOURCE */
-/* HCONF_LIBS=-lm */
-#elif defined(HCONF_mMATH_bBSD_SOURCE_LM)
-/* HCONF_CPPFLAGS=-D_BSD_SOURCE */
-/* HCONF_LIBS=-lm */
-#endif
-#if defined(HCONFING_mMATH)
-HCONF_TEST(double, (double a_v))
+HTEST(Conversion)
 {
-	return sqrt(M_PI * a_v);
+	HTRY_I(0, ==, double2half(0.0));
+	HTRY_I(0x3c00, ==, double2half(1.0));
+	HTRY_I(0xc000, ==, double2half(-2.0));
+	HTRY_I(0x7bff, ==, double2half(65504.0));
+
+	HTRY_DBL(0.0, ==, half2double(0));
+	HTRY_DBL(1.0, ==, half2double(0x3c00));
+	HTRY_DBL(-2.0, ==, half2double(0xc000));
+	HTRY_DBL(65504.0, ==, half2double(0x7bff));
 }
-#endif
 
-uint16_t	double2half(double) FUNC_RETURNS;
-double	half2double(uint16_t) FUNC_RETURNS;
-
-#endif
+HTEST_SUITE(Math)
+{
+	HTEST_ADD(Conversion);
+}

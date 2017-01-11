@@ -41,7 +41,7 @@ struct Lexer {
 
 static char	*extract(struct Lexer *, size_t) FUNC_RETURNS;
 static int	peek_char(struct Lexer *, size_t) FUNC_RETURNS;
-static size_t	stdio_read(void *, char *, size_t) FUNC_RETURNS;
+static size_t	stdio_fread(void *, char *, size_t) FUNC_RETURNS;
 
 char *
 extract(struct Lexer *a_lexer, size_t a_len)
@@ -76,12 +76,51 @@ lexer_create(LexerCallback a_callback, void *a_callback_data)
 	struct Lexer *lexer;
 
 	CALLOC(lexer, 1);
-	lexer->callback = NULL == a_callback ? stdio_read : a_callback;
+	lexer->callback = NULL == a_callback ? stdio_fread : a_callback;
 	lexer->callback_data = a_callback_data;
 	lexer->error = LEXER_ERROR_NONE;
 	lexer->line_no = 1;
 	lexer->col = 1;
 	return lexer;
+}
+
+/*
+ * Read given number of chars from pointed to c-string and advances the
+ * pointer, e.g.:
+ *  char *str, *p;
+ *  p = str = some_string();
+ *  lexer_create(lexer_cstr_callback, &p);
+ *  lexer_token_get(lexer, &token);
+ *  assert(p != str);
+ */
+size_t
+lexer_cstr_callback(void *a_src, char *a_dst, size_t a_dst_size)
+{
+	char **src;
+	size_t len;
+
+	src = a_src;
+	len = strlen(*src);
+	len = MIN(len, a_dst_size);
+	memmove(a_dst, *src, len);
+	a_dst[len] = '\0';
+	*src += len;
+	return len;
+}
+
+/* Expects 'a_ch' as the next token. */
+int
+lexer_expect_symbol(struct Lexer *a_lexer, char a_ch)
+{
+	struct LexerToken token;
+	int ret;
+
+	if (!lexer_token_get(a_lexer, &token)) {
+		return 0;
+	}
+	ret = a_ch == token.str[0];
+	FREE(token.str);
+	return ret;
 }
 
 void
@@ -288,7 +327,7 @@ peek_char(struct Lexer *a_lexer, size_t a_ofs)
 }
 
 size_t
-stdio_read(void *a_user_data, char *a_dst, size_t a_max)
+stdio_fread(void *a_user_data, char *a_dst, size_t a_max)
 {
 	return fread(a_dst, 1, a_max, a_user_data);
 }
