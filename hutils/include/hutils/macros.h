@@ -70,12 +70,6 @@ HCONF_TEST(void, (void))
 	memmove(&a, &b, sizeof a);\
 	memmove(&b, swap_assert_size_, sizeof a);\
 } WHILE_0
-#ifndef TRUE
-#	define TRUE (0 == 0)
-#endif
-#ifndef FALSE
-#	define FALSE (!TRUE)
-#endif
 #define ZERO(x) memset(&x, 0, sizeof x)
 
 #endif

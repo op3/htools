@@ -150,21 +150,20 @@ receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
 	a_dgram->size = 0;
 	FD_ZERO(&socks);
 	FD_SET(a_socket, &socks);
+	nfds = MAX(a_socket, a_fd_extra);
 	if (0 < a_fd_extra) {
 		FD_SET(a_fd_extra, &socks);
-		nfds = MAX(a_socket, a_fd_extra);
-	} else {
-		nfds = a_socket;
 	}
 	timeout.tv_sec = (long)a_timeout;
 	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
+receive_datagram_try:
 	ret = select(nfds + 1, &socks, NULL, NULL, &timeout);
 	if (0 == ret) {
-		return 1;
+		return 0;
 	}
 	if (SOCKET_ERROR == ret) {
 		if (EINTR == errno) {
-			return 1;
+			goto receive_datagram_try;
 		}
 		hutils_warn("select");
 		return 0;
@@ -306,7 +305,8 @@ int
 udp_client_receive(struct UDPClient const *a_client, struct UDPDatagram
     *a_dgram, double a_timeout)
 {
-	return receive_datagram(a_client->socket, -1, a_dgram, NULL, a_timeout);
+	return receive_datagram(a_client->socket, -1, a_dgram, NULL,
+	    a_timeout);
 }
 
 int
@@ -479,9 +479,9 @@ udp_server_write(struct UDPServer const *a_server, void const *a_data, size_t
 {
 	if (-1 == write(a_server->pfd[1], a_data, a_data_len)) {
 		hutils_warn("write(pfd[1])");
-		return FALSE;
+		return 0;
 	}
-	return TRUE;
+	return 1;
 }
 
 int
