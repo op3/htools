@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,10 +16,10 @@
 # GCOV_SRC=files to undergo gcov.
 
 ifeq (gcov,$(BUILD_MODE))
-
-ifeq (,$(GCOV))
-GCOV=gcov
-endif
+GCOV?=gcov
+CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
+CFLAGS:=$(CFLAGS) --coverage
+LIBS:=$(LIBS) --coverage
 
 .PHONY: gcov
 gcov:
@@ -28,7 +28,7 @@ gcov:
 	lines_ok_total=0;\
 	for i in $(GCOV_SRC); do\
 		dir=`dirname $$i`;\
-		numbers=`$(GCOV) -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | $(SED) -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
+		numbers=`$(GCOV) -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
 		[ "x" = "x$$numbers" ] && continue;\
 		percentage=`echo $$numbers | awk '{print $$1}'`;\
 		lines=`echo $$numbers | awk '{print $$2}'`;\
@@ -44,8 +44,7 @@ gcov_files:
 	$(QUIET)echo Dumping gcov file-level info...;\
 	for i in $(GCOV_SRC); do\
 		echo $$i;\
-		dir=`dirname $$i`;\
-		$(GCOV) -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null;\
+		$(GCOV) -n $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done
 
 .PHONY: gcov_funcs
@@ -53,17 +52,20 @@ gcov_funcs:
 	$(QUIET)echo Dumping gcov function-level info...;\
 	for i in $(GCOV_SRC); do\
 		echo $$i;\
-		dir=`dirname $$i`;\
-		$(GCOV) -fn $$i -o $(BUILD_DIR)/$$dir 2> /dev/null;\
+		$(GCOV) -fn $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done
 
 .PHONY: gcov_anno
 gcov_anno:
 	$(QUIET)echo Generating gcov annotated files...;\
 	for i in $(GCOV_SRC); do\
-		dir=`dirname $$i`;\
-		$(GCOV) -p $$i -o $(BUILD_DIR)/$$dir 2> /dev/null;\
+		$(GCOV) -lp $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done;\
 	[ -d $(BUILD_DIR)/gcov ] || mkdir -p $(BUILD_DIR)/gcov;\
-	mv *.c.gcov $(BUILD_DIR)/gcov
+	mv *.gcov $(BUILD_DIR)/gcov
+
+else
+.PHONY: gcov gcov_files gcov_funcs gcov_anno
+gcov gcov_files gcov_funcs gcov_anno:
+	$(QUIET)echo "gcov*" targets available only with BUILD_MODE=gcov. 1>&2 && exit 1
 endif

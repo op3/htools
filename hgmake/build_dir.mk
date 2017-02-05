@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -12,12 +12,6 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-ifeq (,$(BUILD_MODE))
-	BUILD_MODE=debug
-endif
-ifeq (gcov,$(BUILD_MODE))
-	CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
-	CFLAGS:=$(CFLAGS) --coverage
-	LIBS:=$(LIBS) --coverage
-endif
-BUILD_DIR:=build_$(shell $(CC) -dumpmachine)_$(shell $(CC) -dumpversion)_$(BUILD_MODE)
+BUILD_MODE?=debug
+BUILD_DIR_!=echo build_`$(CC) -dumpmachine`_`$(CC) -dumpversion`_$(BUILD_MODE)
+BUILD_DIR?=$(BUILD_DIR_)

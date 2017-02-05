@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -12,33 +12,28 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-AR?=ar
-CC?=gcc
-LD?=gcc
 HTOOLS_PATH=..
 
-include ../hgmake/build_dir.mk
-
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I../hutils/include \
-	-I../hutils/$(BUILD_DIR)
-include ../hgmake/strict_cflags.mk
-
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
+CPPFLAGS+=-I$(BUILD_DIR) -I. -Iinclude -I$(HTOOLS_PATH)/hutils/include \
+	-I$(HTOOLS_PATH)/hutils/$(BUILD_DIR)
+include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
-	CFLAGS:=$(CFLAGS) -O3
-endif
-ifeq (debug,$(BUILD_MODE))
-	CFLAGS:=$(CFLAGS) -ggdb
+	CFLAGS+=-O3
+else
+	CFLAGS+=-ggdb
 endif
 
 SRC:=$(wildcard src/*.c)
-OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-HCONF_PROJECTS:=../hutils
-HCONF_SRC:=src/htest.h
-
 HTEST_SRC:=$(wildcard tests/*.c)
-HTEST_PRE=$(MKDIR_VERB)
-HTEST_SUITE_SRC=$<
-HTEST_SUITE_DST=$@
+
+OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
+HTEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC))
+
+CPPFLAGS:=$(CPPFLAGS)
+CFLAGS:=$(CFLAGS)
+LDFLAGS:=$(LDFLAGS)
+LIBS:=$(LIBS)
 
 .PHONY: all
 all: $(BUILD_DIR)/test
@@ -49,23 +44,31 @@ all: $(BUILD_DIR)/test
 clean:
 	rm -rf $(BUILD_DIR)
 
-include ../hgmake/hconf.mk
+HCONF_PROJECTS=$(HTOOLS_PATH)/hutils
+HCONF_SRC=src/htest.h
+HCONF_DEP=Makefile
+include $(HTOOLS_PATH)/hgmake/hconf.mk
+
+HTEST_PRE=$(MKDIR)
 include htest.mk
+HTEST_OBJ:=$(HTEST_OBJ) $(patsubst %.c,%.o,$(BUILD_DIR)/$(HTEST_TESTS))
+
+GCOV_SRC:=$(SRC)
+include $(HTOOLS_PATH)/hgmake/gcov.mk
 
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(HTEST_OBJ)
-	$(MKDIR)
+	$(QUIET)echo "LD....$@" &&\
+	$(MKDIR) &&\
 	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils
 
 $(BUILD_DIR)/libhtest.a: $(OBJ)
-	$(MKDIR)
-	$(AR_A)
+	$(QUIET)echo "AR....$@" &&\
+	$(MKDIR) &&\
+	ar rcs $@ $^
 
-$(BUILD_DIR)/%.o: %.c Makefile htest.mk $(HCONF_CACHE)
-	$(MKDIR)
-	$(CC_O)
-
-%.o: %.c Makefile htest.mk $(HCONF_CACHE)
-	$(MKDIR)
+$(BUILD_DIR)/%.o %.o: %.c Makefile htest.mk $(HCONF_CACHE)
+	$(QUIET)echo "CC....$@" &&\
+	$(MKDIR) &&\
 	$(CC_O)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))

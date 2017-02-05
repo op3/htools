@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,12 +67,27 @@ matrix4f_set_ortho(struct Matrix4f *a_m, float a_left, float a_right, float
     a_bottom, float a_top, float a_near, float a_far)
 {
 	ZERO(a_m->m);
-	a_m->m[0] = 2.0f / (a_right - a_left);
-	a_m->m[5] = 2.0f / (a_top - a_bottom);
+	a_m->m[ 0] = 2.0f / (a_right - a_left);
+	a_m->m[ 5] = 2.0f / (a_top - a_bottom);
 	a_m->m[10] = 2.0f / (a_near - a_far);
 	a_m->m[12] = (a_left + a_right) / (a_left - a_right);
 	a_m->m[13] = (a_bottom + a_top) / (a_bottom - a_top);
 	a_m->m[14] = (a_far + a_near) / (a_far - a_near);
 	a_m->m[15] = 1.0f;
+	return a_m;
+}
+
+struct Matrix4f *
+matrix4f_set_perspective(struct Matrix4f *a_m, float a_left, float a_right,
+    float a_bottom, float a_top, float a_near, float a_far)
+{
+	ZERO(a_m->m);
+	a_m->m[ 0] = 2.0f * a_near / (a_right - a_left);
+	a_m->m[ 5] = 2.0f * a_near / (a_top - a_bottom);
+	a_m->m[ 8] = (a_right + a_left) / (a_right - a_left);
+	a_m->m[ 9] = (a_top + a_bottom) / (a_top - a_bottom);
+	a_m->m[10] = (a_near + a_far) / (a_near - a_far);
+	a_m->m[11] = -1.0f;
+	a_m->m[14] = 2.0f * a_near * a_far / (a_near - a_far);
 	return a_m;
 }

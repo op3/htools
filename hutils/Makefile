@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -12,33 +12,30 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-AR?=ar
-CC?=gcc
-LD?=gcc
 HTOOLS_PATH=..
 
-include ../hgmake/build_dir.mk
-
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -Iinclude -I../htest/include
-include ../hgmake/strict_cflags.mk
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
+CPPFLAGS+=-I$(BUILD_DIR) -Iinclude -I$(HTOOLS_PATH)/htest/include
+include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
- CFLAGS:=$(CFLAGS) -O3
+	CFLAGS+=-O3
 else
- CFLAGS:=$(CFLAGS) -ggdb
+	CFLAGS+=-ggdb
 endif
 
 TARGET:=$(BUILD_DIR)/libhutils.a
-SRC:=$(wildcard src/*.c)
-OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr stdint fmtmod macros \
-	math string getopt dir thread time udp)
-HCONF_DEP:=Makefile
-
 TEST:=$(BUILD_DIR)/test
+
+SRC:=$(wildcard src/*.c)
 HTEST_SRC:=$(wildcard tests/*.c)
-HTEST_PRE=$(MKDIR_VERB)
-HTEST_SUITE_SRC=$<
-HTEST_SUITE_DST=$@
+
+OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
+TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC))
+
+CPPFLAGS:=$(CPPFLAGS)
+CFLAGS:=$(CFLAGS)
+LDFLAGS:=$(LDFLAGS)
+LIBS:=$(LIBS)
 
 .PHONY: all
 all: $(TARGET)
@@ -55,26 +52,31 @@ splint:
 clean:
 	rm -rf $(BUILD_DIR)
 
-include ../hgmake/hconf.mk
-include ../htest/htest.mk
+HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr stdint fmtmod macros \
+	math string getopt dir thread time udp)
+HCONF_DEP:=Makefile
+include $(HTOOLS_PATH)/hgmake/hconf.mk
+
+HTEST_PRE=$(MKDIR)
+include $(HTOOLS_PATH)/htest/htest.mk
+TEST_OBJ:=$(TEST_OBJ) $(patsubst %.c,%.o,$(BUILD_DIR)/$(HTEST_TESTS))
+
+GCOV_SRC:=$(SRC)
+include $(HTOOLS_PATH)/hgmake/gcov.mk
 
 $(TARGET): $(OBJ)
-	$(MKDIR)
-	$(AR_A)
+	$(QUIET)$(MKDIR) &&\
+	echo "AR....$@" &&\
+	ar rcs $@ $^
 
-$(TEST): $(HTEST_OBJ) $(TARGET)
-	$(MKDIR)
-	$(LD_E) -L../htest/$(BUILD_DIR) -lhtest
+$(TEST): $(TEST_OBJ) $(TARGET)
+	$(QUIET)echo "LD....$@" &&\
+	$(MKDIR) &&\
+	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest
 
-$(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
-	$(MKDIR)
-	$(CC_O)
-
-%.o: %.c Makefile $(HCONF_CACHE)
-	$(MKDIR)
+$(BUILD_DIR)/%.o %.o: %.c Makefile $(HCONF_CACHE)
+	$(QUIET)$(MKDIR) &&\
+	echo "CC....$@" &&\
 	$(CC_O)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))
-
-GCOV_SRC:=$(SRC)
-include ../hgmake/gcov.mk

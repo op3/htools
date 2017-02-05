@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -25,10 +25,6 @@ clean:
 	$(MAKE) -C hutils $@
 	$(MAKE) -C htest $@
 
-.PHONY: gcov
-gcov:
-	$(MAKE) -C hutils $@
-
-.PHONY: gcov
-gcov_anno:
+.PHONY: gcov gcov_files gcov_funcs gcov_anno
+gcov gcov_files gcov_funcs gcov_anno:
 	$(MAKE) -C hutils $@

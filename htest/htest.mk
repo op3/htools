@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -13,33 +13,30 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # Input:
-#  $(BUILD_DIR)       = where to put generated stuff.
-#  $(HTEST_SRC)       = test source files.
+#  $(BUILD_DIR)       = build directory.
 #  $(HTEST_PRE)       = called before creating a file (e.g. mkdir).
-#  $(HTEST_SUITE_SRC) = source file pattern (e.g. $<).
-#  $(HTEST_SUITE_DST) = suite file pattern (e.g. $@).
+#  $(HTEST_SRC)       = test source files.
+#  $(HTEST_TESTS)     = generated code dump, htest/tests.c by default.
 # Output:
-#  $(HTEST_TESTS)     = will contain the suite list.
-#  $(HTEST_SUITES)    = test suite cache files.
-#  $(HTEST_OBJ)       = test source filenames turned into object filenames.
+#  $(HTEST_SUITES)    = suite cache files.
 
-HTEST_CC_E=$(CC) -E $(HTEST_SUITE_SRC) $(CPPFLAGS) 2>/dev/null | \
-	sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $(HTEST_SUITE_DST)
-ifneq (,$(V))
- HTEST_CC_E_PRE=
- HTEST_TESTS_PRE=
-else
+HTEST_PRE?=true
+HTEST_TESTS?=htest/tests.c
+
+HTEST_CC_E=gcc -E $(CPPFLAGS) $< | sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $@
+ifeq (,$(V))
  HTEST_CC_E_PRE=@echo "SUITE $@" &&
  HTEST_TESTS_PRE=@echo "TESTS $@" &&
+else
+ HTEST_CC_E_PRE=true &&
+ HTEST_TESTS_PRE=true &&
 endif
 
-HTEST_TESTS:=$(BUILD_DIR)/htest/tests.c
 HTEST_SUITES:=$(patsubst %.c,$(BUILD_DIR)/%.suite,$(HTEST_SRC))
-HTEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC)) $(HTEST_TESTS:.c=.o)
 
-$(HTEST_TESTS): $(HTEST_SUITES)
-	$(HTEST_TESTS_PRE)$(HTEST_PRE);\
-	echo "#include <htest/htest.h>" > $@;\
+$(BUILD_DIR)/$(HTEST_TESTS): $(HTEST_SUITES)
+	$(HTEST_TESTS_PRE)$(HTEST_PRE) &&\
+	echo "#include <htest/htest.h>" > $@ &&\
 	if [ "$^" ]; then\
 		cat $^ | awk '{print "HTEST_SUITE_PROTO("$$0");"}';\
 		echo "HTEST_SUITE_LIST_BEGIN";\
@@ -50,9 +47,8 @@ $(HTEST_TESTS): $(HTEST_SUITES)
 	fi >> $@
 
 $(BUILD_DIR)/%.suite: %.c
-	$(HTEST_CC_E_PRE)$(HTEST_PRE);\
-	$(HTEST_CC_E)
+	$(HTEST_CC_E_PRE)$(HTEST_PRE) && $(HTEST_CC_E)
 
-.PHONY: clean_htest
-clean_htest:
-	rm -f $(HTEST_TESTS) $(HTEST_SUITES)
+.PHONY: htest_clean
+htest_clean:
+	rm -f $(BUILD_DIR)/$(HTEST_TESTS) $(HTEST_SUITES)

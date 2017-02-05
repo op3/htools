@@ -14,49 +14,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <hutils/math.h>
+#ifndef HUTILS_VECTOR4_H
+#define HUTILS_VECTOR4_H
 
-/* TODO: These are really crude... Do IEEE754 properly! */
+#include <hutils/cdecls.h>
+#include <hutils/funcattr.h>
 
-uint16_t
-double2half(double a_d)
-{
-	union {
-		double	d;
-		uint64_t	u64;
-	} u;
-	uint32_t u32;
-	int sign, exp_, mantissa;
+CDECLS_BEGIN
 
-	if (0.0 == a_d) {
-		return 0;
-	}
-	u.d = a_d;
-	u32 = u.u64 >> 32;
-	sign = (0x80000000 & u32) >> 31;
-	exp_ = (0x7ff00000 & u32) >> 20;
-	mantissa = 0xfffff & u32;
-	return sign << 15 | (exp_ - 1023 + 15) << 10 | mantissa >> 10;
-}
+struct Vector4f {
+	float	x;
+	float	y;
+	float	z;
+	float	w;
+};
 
-double
-half2double(uint16_t a_u16)
-{
-	union {
-		double	d;
-		uint64_t	u64;
-	} u;
-	uint32_t u32;
-	uint32_t sign, exp_, mantissa;
+struct Vector4f	*vector4f_add(struct Vector4f *, struct Vector4f const *,
+    struct Vector4f const *);
+float		vector4f_dot(struct Vector4f const *, struct Vector4f const
+    *) FUNC_PURE FUNC_RETURNS;
+float		vector4f_get_magnitude(struct Vector4f const *) FUNC_PURE
+FUNC_RETURNS;
+struct Vector4f	*vector4f_scale(struct Vector4f *, struct Vector4f const *,
+    float);
+struct Vector4f	*vector4f_set(struct Vector4f *, float, float, float, float);
+struct Vector4f	*vector4f_sub(struct Vector4f *, struct Vector4f const *,
+    struct Vector4f const *);
 
-	if (0 == a_u16) {
-		return 0.0;
-	}
-	u.u64 = 0;
-	sign = (0x8000 & a_u16) >> 15;
-	exp_ = (0x7c00 & a_u16) >> 10;
-	mantissa = 0x3ff & a_u16;
-	u32 = sign << 31 | (exp_ - 15 + 1023) << 20 | mantissa << 10;
-	u.u64 = (uint64_t)u32 << 32;
-	return u.d;
-}
+CDECLS_END
+
+#endif

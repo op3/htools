@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,49 +50,70 @@ HTEST(Ortho)
 	struct Matrix4f o;
 	struct Vector3f u, v;
 
-	matrix4f_set_ortho(&o, -2, 2, -2, 2, -2, 2);
+	matrix4f_set_ortho(&o, -2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
 
-	v.x = -2; v.y = -2; v.z = -2;
+	vector3f_set(&v, -2.0f, -2.0f, -2.0f);
 	matrix4f_mul_vector3f(&u, &o, &v);
-	HTRY_FLT(-1, ==, u.x);
-	HTRY_FLT(-1, ==, u.y);
-	HTRY_FLT(+1, ==, u.z);
+	HTRY_FLT(-1.0f, ==, u.x);
+	HTRY_FLT(-1.0f, ==, u.y);
+	HTRY_FLT(+1.0f, ==, u.z);
 
-	v.x = 0; v.y = 0; v.z = 0;
+	vector3f_set(&v, 0.0f, 0.0f, 0.0f);
 	matrix4f_mul_vector3f(&u, &o, &v);
-	HTRY_FLT(0, ==, u.x);
-	HTRY_FLT(0, ==, u.y);
-	HTRY_FLT(0, ==, u.z);
+	HTRY_FLT( 0.0f, ==, u.x);
+	HTRY_FLT( 0.0f, ==, u.y);
+	HTRY_FLT( 0.0f, ==, u.z);
 
-	v.x = 2; v.y = 2; v.z = 2;
+	vector3f_set(&v, 2.0f, 2.0f, 2.0f);
 	matrix4f_mul_vector3f(&u, &o, &v);
-	HTRY_FLT(+1, ==, u.x);
-	HTRY_FLT(+1, ==, u.y);
-	HTRY_FLT(-1, ==, u.z);
+	HTRY_FLT(+1.0f, ==, u.x);
+	HTRY_FLT(+1.0f, ==, u.y);
+	HTRY_FLT(-1.0f, ==, u.z);
 
 	matrix4f_set_ortho(&o, 2, 0, 2, 0, 0, 2);
 
-	v.x = 0; v.y = 0; v.z = 0;
+	vector3f_set(&v, 0.0f, 0.0f, 0.0f);
 	matrix4f_mul_vector3f(&u, &o, &v);
-	HTRY_FLT(+1, ==, u.x);
-	HTRY_FLT(+1, ==, u.y);
-	HTRY_FLT(+1, ==, u.z);
+	HTRY_FLT(+1.0f, ==, u.x);
+	HTRY_FLT(+1.0f, ==, u.y);
+	HTRY_FLT(+1.0f, ==, u.z);
 
-	v.x = 1; v.y = 1; v.z = 1;
+	vector3f_set(&v, 1.0f, 1.0f, 1.0f);
 	matrix4f_mul_vector3f(&u, &o, &v);
-	HTRY_FLT(0, ==, u.x);
-	HTRY_FLT(0, ==, u.y);
-	HTRY_FLT(0, ==, u.z);
+	HTRY_FLT( 0.0f, ==, u.x);
+	HTRY_FLT( 0.0f, ==, u.y);
+	HTRY_FLT( 0.0f, ==, u.z);
 
-	v.x = 2; v.y = 2; v.z = 2;
+	vector3f_set(&v, 2.0f, 2.0f, 2.0f);
 	matrix4f_mul_vector3f(&u, &o, &v);
-	HTRY_FLT(-1, ==, u.x);
-	HTRY_FLT(-1, ==, u.y);
-	HTRY_FLT(-1, ==, u.z);
+	HTRY_FLT(-1.0f, ==, u.x);
+	HTRY_FLT(-1.0f, ==, u.y);
+	HTRY_FLT(-1.0f, ==, u.z);
+}
+
+HTEST(Perspective)
+{
+	struct Matrix4f p;
+	struct Vector3f u, v;
+
+	matrix4f_set_perspective(&p, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 3.0f);
+
+	vector3f_set(&v, -1.0f, -1.0f, -1.0f);
+	matrix4f_mul_vector3f(&u, &p, &v);
+	HTRY_FLT(-1.0f, ==, u.x);
+	HTRY_FLT(-1.0f, ==, u.y);
+	HTRY_FLT(-1.0f, ==, u.z);
+
+	vector3f_set(&v, 0.0f, 0.0f, -1.5f);
+	matrix4f_mul_vector3f(&u, &p, &v);
+	HTRY_FLT( 0.0f, ==, u.x);
+	HTRY_FLT( 0.0f, ==, u.y);
+	HTRY_FLT( 0.0f, ==, u.z);
 }
 
 HTEST_SUITE(Matrix4)
 {
 	HTEST_ADD(Identity);
 	HTEST_ADD(Ortho);
+	HTEST_ADD(Perspective);
 }

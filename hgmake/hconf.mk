@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -12,76 +12,57 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# BUILD_DIR         = Generated files will be put in here.
-# HCONF_PROJECTS    = List of hconf:ed projects to be included.
-# HCONF_SRC         = List of files to be hconf:ed.
-# HCONF_DEP         = List of files to depend on.
-# HCONF_EXT_PROJECT = Project to extract cache data from with HCONF_EXT_*.
+# BUILD_DIR      = Generated files will be put in here.
+# HCONF_PROJECTS = List of hconf:ed projects to be included.
+# HCONF_SRC      = List of files to be hconf:ed.
+# HCONF_DEP      = List of files to depend on.
+# HCONF_EXT_PATH = Path(s) to hconf cache(s) for HCONF_EXT_* variables.
 
-ifeq (,$(SED))
-SED=sed
-endif
-
+HCONF_CACHE:=$(BUILD_DIR)/hconf.cache
 HCONF_CONF:=$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf
 HCONF_MERGE:=$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge
 
-HCONF_CACHE:=$(BUILD_DIR)/hconf.cache
-HCONF_LOG:=$(BUILD_DIR)/hconf.log
+# Hconf:ed variables in current build.
+HCONF_CC=$(shell sed -n 1p $(HCONF_CACHE) | sed s/^$$/no-cc/)
+HCONF_CPPFLAGS=$(shell sed -n 2p $(HCONF_CACHE))
+HCONF_CFLAGS=$(shell sed -n 3p $(HCONF_CACHE))
+HCONF_LDFLAGS=$(shell sed -n 4p $(HCONF_CACHE))
+HCONF_LIBS=$(shell sed -n 5p $(HCONF_CACHE))
 
-HCONF_CC=$(shell $(SED) -n 1p $(HCONF_CACHE))
-HCONF_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_CACHE))
-HCONF_CFLAGS=$(shell $(SED) -n 3p $(HCONF_CACHE))
-HCONF_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_CACHE))
-HCONF_LIBS=$(shell $(SED) -n 5p $(HCONF_CACHE))
-HCONF_MVD=sh $(HCONF_CACHE).mvd $(@:.o=.d) $(@D) $(patsubst %.c,%.d,$(<F))
+# If you don't want an hconf cache in your own build:
+#  HCONF_EXT_PATH=$(HTOOLS_PATH)/hutils/$(BUILD_DIR) yadayada/$(BUILD_DIR)
+#  include $(HTOOLS_PATH)/hgmake/hconf.mk
+#  CPPFLAGS:=$(CPPFLAGS) $(HCONF_EXT_CPPFLAGS)
+HCONF_EXT_CACHE:=$(HCONF_EXT_PATH)/$(HCONF_CACHE)
+HCONF_EXT_CC=$(shell sed -n 1p $(HCONF_EXT_CACHE))
+HCONF_EXT_CPPFLAGS=$(shell sed -n 2p $(HCONF_EXT_CACHE))
+HCONF_EXT_CFLAGS=$(shell sed -n 3p $(HCONF_EXT_CACHE))
+HCONF_EXT_LDFLAGS=$(shell sed -n 4p $(HCONF_EXT_CACHE))
+HCONF_EXT_LIBS=$(shell sed -n 5p $(HCONF_EXT_CACHE))
 
-HCONF_EXT_CACHE:=$(HCONF_EXT_PROJECT)/$(HCONF_CACHE)
-HCONF_EXT_CC=$(shell $(SED) -n 1p $(HCONF_EXT_CACHE))
-HCONF_EXT_CPPFLAGS=$(shell $(SED) -n 2p $(HCONF_EXT_CACHE))
-HCONF_EXT_CFLAGS=$(shell $(SED) -n 3p $(HCONF_EXT_CACHE))
-HCONF_EXT_LDFLAGS=$(shell $(SED) -n 4p $(HCONF_EXT_CACHE))
-HCONF_EXT_LIBS=$(shell $(SED) -n 5p $(HCONF_EXT_CACHE))
+# Common commands.
+CPP_D=[ ! "`sed -n 1p $(HCONF_CACHE).dflags`" ] || (echo -n "$@:"; gcc -E $(CPPFLAGS) $(HCONF_CPPFLAGS) $< | sed -n 's,^\# *[0-9]* *"\([^/]*/[^"]*\)".*,\1,p' | sort -u | tr '\n' ' ') > $(@:.o=.d) &&
+CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
+CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
+LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)
+MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 
-AR_A_VERB=$(AR) rcs $@ $(filter %.o,$^)
-CC_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS) && $(HCONF_MVD)
-CC_PRINCESS_O_VERB=$(HCONF_CC) -c -o $@ $< -MD $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS)) && $(HCONF_MVD)
-LD_E_VERB=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)
-MKDIR_VERB=[ -d $(@D) ] || mkdir -p $(@D)
-
-ifneq (,$(V))
- AR_A_PRE=
- CC_O_PRE=
- CC_PRINCESS_O_PRE=
- HCONF_CONF_V=-v
- HCONF_MVD_ECHO=
- LD_E_PRE=
- QUIET=
-else
- AR_A_PRE=@echo "AR    $@";
- CC_O_PRE=@echo "CC    $@";
- CC_PRINCESS_O_PRE=@echo "CCP   $@";
+# "true" used to not be confused by e.g. "-" in GNU make recipes.
+ifeq (,$(V))
  HCONF_CONF_V=
- HCONF_MVD_ECHO=@echo "HMVD  $@";
- LD_E_PRE=@echo "LD    $@";
  QUIET=@
+else
+ HCONF_CONF_V=-v
+ QUIET=true &&
 endif
-AR_A=$(AR_A_PRE)$(AR_A_VERB)
-CC_O=$(CC_O_PRE)$(CC_O_VERB)
-CC_PRINCESS_O=$(CC_PRINCESS_O_PRE)$(CC_PRINCESS_O_VERB)
-LD_E=$(LD_E_PRE)$(LD_E_VERB)
-MKDIR=$(QUIET)$(MKDIR_VERB)
 
 HCONF_PROJECTS_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_PROJECTS))
 CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_PROJECTS))
 
-export CC
-export CFLAGS
-export CPPFLAGS
-export LDFLAGS
-export LIBS
-$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
-	$(MKDIR)
-	$(QUIET)(echo;echo $(CPPFLAGS);echo $(CFLAGS);echo;echo;) > $@.tmp;\
+$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).dflags
+	$(QUIET)$(MKDIR) &&\
+	export CC=$(CC);\
+	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE).dflags`;echo $(CFLAGS);echo;echo;) > $@.tmp;\
 	if [ "$(HCONF_PROJECTS_FILES)" ]; then\
 		$(HCONF_MERGE) $@.tmp $(HCONF_PROJECTS_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\
@@ -103,7 +84,7 @@ $(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
 			done;\
 		fi;\
 		if [ "$$do_rebuild" ]; then\
-			echo HCONF $$i;\
+			echo HCONF.$$i;\
 			$(HCONF_CONF) $(HCONF_CONF_V) -d $(BUILD_DIR) -h $@.tmp -i $$i;\
 			if [ 0 -ne $$? ]; then\
 				cat $(BUILD_DIR)/_hconf/hconf/$$i.log;\
@@ -120,12 +101,20 @@ $(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).mvd
 	done;\
 	mv -f $@.tmp $@
 
-$(HCONF_CACHE).mvd:
-	$(HCONF_MVD_ECHO)
-	$(MKDIR)
-	$(QUIET)cd $(@D);\
-	[ -d mvd_ ] || mkdir mvd_;\
-	echo "int main(){return 0;}" > mvd_/main.c;\
-	gcc -MD -o mvd_/main.o mvd_/main.c
-	$(QUIET)[ -f $(@D)/main.d ] && echo 'echo -n $$2/ | cat - $$3 > $$1 && rm -f $$3' > $@;\
-	touch $@
+# Either:
+#  1) Line 1 = dep script
+#  2) Line 2 = -MD
+$(HCONF_CACHE).dflags:
+	$(QUIET)$(MKDIR) &&\
+	echo "DEP...$@";\
+	cd $(@D);\
+	[ -d _ccd ] || mkdir _ccd;\
+	echo "int main(){return 0;}" > _ccd/main.c;\
+	gcc -MD -o _ccd/main.o _ccd/main.c;\
+	if [ -f _ccd/main.d ]; then\
+		(echo;echo "-MD") > $(@F) && exit 0;\
+	fi;\
+	if [ 1 -eq `gcc -E _ccd/main.c | grep ^\# | wc -l` ]; then\
+		echo 1 > $(@F) && exit 0;\
+	fi;\
+	exit 1
