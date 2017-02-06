@@ -57,17 +57,17 @@ GCOV_SRC:=$(SRC)
 include $(HTOOLS_PATH)/hgmake/gcov.mk
 
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(HTEST_OBJ)
-	$(QUIET)echo "LD....$@" &&\
+	$(QUIET)echo "LD    $@" &&\
 	$(MKDIR) &&\
 	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils
 
 $(BUILD_DIR)/libhtest.a: $(OBJ)
-	$(QUIET)echo "AR....$@" &&\
+	$(QUIET)echo "AR    $@" &&\
 	$(MKDIR) &&\
 	ar rcs $@ $^
 
 $(BUILD_DIR)/%.o %.o: %.c Makefile htest.mk $(HCONF_CACHE)
-	$(QUIET)echo "CC....$@" &&\
+	$(QUIET)echo "CC    $@" &&\
 	$(MKDIR) &&\
 	$(CC_O)
 

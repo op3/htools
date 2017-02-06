@@ -65,18 +65,18 @@ GCOV_SRC:=$(SRC)
 include $(HTOOLS_PATH)/hgmake/gcov.mk
 
 $(TARGET): $(OBJ)
-	$(QUIET)$(MKDIR) &&\
-	echo "AR....$@" &&\
+	$(QUIET)echo "AR    $@" &&\
+	$(MKDIR) &&\
 	ar rcs $@ $^
 
 $(TEST): $(TEST_OBJ) $(TARGET)
-	$(QUIET)echo "LD....$@" &&\
+	$(QUIET)echo "LD    $@" &&\
 	$(MKDIR) &&\
 	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest
 
 $(BUILD_DIR)/%.o %.o: %.c Makefile $(HCONF_CACHE)
-	$(QUIET)$(MKDIR) &&\
-	echo "CC....$@" &&\
+	$(QUIET)echo "CC    $@" &&\
+	$(MKDIR) &&\
 	$(CC_O)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))

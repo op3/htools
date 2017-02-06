@@ -13,5 +13,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 BUILD_MODE?=debug
-BUILD_DIR_!=echo build_`$(CC) -dumpmachine`_`$(CC) -dumpversion`_$(BUILD_MODE)
-BUILD_DIR?=$(BUILD_DIR_)
+ifeq (,$(BUILD_DIR))
+ BUILD_DIR:=$(shell echo build_`$(CC) -dumpmachine`_`$(CC) -dumpversion`_$(BUILD_MODE))
+endif

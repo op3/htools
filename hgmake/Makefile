@@ -26,16 +26,19 @@ all: $(CONF) $(MERGE)
 include hconf.mk
 
 $(CONF): $(addprefix $(BUILD_DIR)/,common.o hconf_conf.o)
-	$(MKDIR)
-	$(LD_E_PRE)$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+	$(QUIET)echo "LD    $@" &&\
+	$(MKDIR) &&\
+	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 $(MERGE): $(addprefix $(BUILD_DIR)/,common.o hconf_merge.o)
-	$(MKDIR)
-	$(LD_E_PRE)$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+	$(QUIET)echo "LD    $@" &&\
+	$(MKDIR) &&\
+	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile
-	$(MKDIR)
-	$(CC_O_PRE)$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(QUIET)echo "CC    $@" &&\
+	$(MKDIR) &&\
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 .PHONY: clean
 clean:

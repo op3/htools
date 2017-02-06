@@ -84,7 +84,7 @@ $(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).dflags
 			done;\
 		fi;\
 		if [ "$$do_rebuild" ]; then\
-			echo HCONF.$$i;\
+			echo HCONF $$i;\
 			$(HCONF_CONF) $(HCONF_CONF_V) -d $(BUILD_DIR) -h $@.tmp -i $$i;\
 			if [ 0 -ne $$? ]; then\
 				cat $(BUILD_DIR)/_hconf/hconf/$$i.log;\
@@ -106,7 +106,7 @@ $(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).dflags
 #  2) Line 2 = -MD
 $(HCONF_CACHE).dflags:
 	$(QUIET)$(MKDIR) &&\
-	echo "DEP...$@";\
+	echo "DEP   $@";\
 	cd $(@D);\
 	[ -d _ccd ] || mkdir _ccd;\
 	echo "int main(){return 0;}" > _ccd/main.c;\
