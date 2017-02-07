@@ -20,8 +20,12 @@
 # Output:
 #  $(HTEST_SUITES)    = suite cache files.
 
-HTEST_PRE?=true
-HTEST_TESTS?=htest/tests.c
+ifeq (,$(HTEST_PRE))
+ HTEST_PRE=true
+endif
+ifeq (,$(HTEST_TESTS))
+ HTEST_TESTS=htest/tests.c
+endif
 
 HTEST_CC_E=gcc -E $(CPPFLAGS) $< | sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $@
 ifeq (,$(V))

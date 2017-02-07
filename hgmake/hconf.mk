@@ -41,7 +41,7 @@ HCONF_EXT_LDFLAGS=$(shell sed -n 4p $(HCONF_EXT_CACHE))
 HCONF_EXT_LIBS=$(shell sed -n 5p $(HCONF_EXT_CACHE))
 
 # Common commands.
-CPP_D=[ ! "`sed -n 1p $(HCONF_CACHE).dflags`" ] || (echo -n "$@:"; gcc -E $(CPPFLAGS) $(HCONF_CPPFLAGS) $< | sed -n 's,^\# *[0-9]* *"\([^/]*/[^"]*\)".*,\1,p' | sort -u | tr '\n' ' ') > $(@:.o=.d) &&
+CPP_D=[ ! "`sed -n 1p $(HCONF_CACHE).dflags`" ] || (echo -n "$@: "; list=`gcc -E $(CPPFLAGS) $(HCONF_CPPFLAGS) $< | sed -n 's,^\#.*"\(.*\)".*,\1,p' | sort -u` && for i in $$list; do [ -f $$i ] && echo $$i; done) | tr '\n' ' ' > $(@:.o=.d) &&
 CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
 CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
 LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)

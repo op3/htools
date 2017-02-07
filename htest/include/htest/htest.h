@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,7 @@
 #include <hutils/err.h>
 #include <hutils/macros.h>
 
-#if defined(DO_GCOV_FLUSH)
+#if defined(HTEST_GCOV_FLUSH)
 #	define GCOV_FLUSH __gcov_flush()
 void __gcov_flush(void);
 #else
@@ -58,7 +58,7 @@ htest_test_header_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_\
 }\
 static void \
 htest_test_##name##_(HTEST_COLOR_ a_color_fail_, HTEST_COLOR_ a_color_reset_,\
-    int *a_result_)
+    int *a_passed_)
 
 /* Suite. */
 
@@ -80,14 +80,14 @@ htest_suite_header_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_\
 void \
 htest_suite_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_ a_color_fail_,\
     HTEST_COLOR_ a_color_reset_, int a_test_index_, int *a_test_enumerator_,\
-    int *a_result_)
+    int *a_passed_)
 #define HTEST_ADD(name) do {\
 	++*a_test_enumerator_;\
 	if (*a_test_enumerator_ == a_test_index_) {\
 		htest_test_header_##name##_(a_color_header_, a_color_reset_);\
 		htest_output_suppress_();\
 		htest_test_##name##_(a_color_fail_, a_color_reset_,\
-		    a_result_);\
+		    a_passed_);\
 		htest_output_restore_();\
 	}\
 } WHILE_0
@@ -113,7 +113,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 } WHILE_0
 #define HTRY_FAIL_FOOTER_ do {\
 	htest_output_suppress_();\
-	*a_result_ = 0;\
+	*a_passed_ = 0;\
 } WHILE_0
 
 #define HTRY(Type, fmt, a, op, b) do {\
@@ -190,58 +190,54 @@ struct HTestSuite g_htest_suite_list_[] = {
 #define HTRY_VOID(expr) do {\
 	(void)a_color_fail_;\
 	(void)a_color_reset_;\
-	(void)a_result_;\
+	(void)a_passed_;\
 	expr;\
 } WHILE_0
 #if defined(_MSC_VER)
 #	include <setjmp.h>
-#	define HTRY_SIGNAL_DTOR(expr, dtor) do {\
-	if (0 == setjmp(g_htest_try_jmp_buf_)) {\
-		g_htest_dtor_ = dtor;\
+#	define HTRY_SIGNAL(expr) do {\
+	if (htest_do_recover()) {\
 		htest_try_install_sighandler_();\
-		expr;\
-		g_htest_dtor_();\
-		GCOV_FLUSH;\
-		HTRY_FAIL_HEADER_;\
-		printf("Expected signal.\n");\
-		HTRY_FAIL_FOOTER_;\
+		if (0 == setjmp(g_htest_try_jmp_buf_)) {\
+			expr;\
+			GCOV_FLUSH;\
+			HTRY_FAIL_HEADER_;\
+			printf("Expected signal.\n");\
+			HTRY_FAIL_FOOTER_;\
+		}\
+		htest_suite_install_sighandler_();\
 	}\
-htest_output_suppress_();\
-	htest_suite_install_sighandler_();\
 } WHILE_0
 extern jmp_buf g_htest_try_jmp_buf_;
 #else
-#	define HTRY_SIGNAL_DTOR(expr, dtor) do {\
-	pid_t pid_;\
-	int status_;\
-	pid_ = fork();\
-	if (0 > pid_) {\
-		hutils_err(EXIT_FAILURE, "fork");\
-	} else if (0 == pid_) {\
-		g_htest_dtor_ = dtor;\
-		htest_try_install_sighandler_();\
-		expr;\
-		g_htest_dtor_();\
-		GCOV_FLUSH;\
-		_exit(EXIT_SUCCESS);\
-	}\
-	waitpid(pid_, &status_, 0);\
-	if (0 == status_) {\
-		HTRY_FAIL_HEADER_;\
-		printf("Expected signal.\n");\
-		HTRY_FAIL_FOOTER_;\
+#	define HTRY_SIGNAL(expr) do {\
+	if (htest_do_recover()) {\
+		pid_t pid_;\
+		int status_;\
+		pid_ = fork();\
+		if (0 > pid_) {\
+			hutils_err(EXIT_FAILURE, "fork");\
+		} else if (0 == pid_) {\
+			htest_try_install_sighandler_();\
+			expr;\
+			GCOV_FLUSH;\
+			_exit(EXIT_SUCCESS);\
+		}\
+		waitpid(pid_, &status_, 0);\
+		if (EXIT_SUCCESS == status_) {\
+			HTRY_FAIL_HEADER_;\
+			printf("Expected signal.\n");\
+			HTRY_FAIL_FOOTER_;\
+		}\
 	}\
 } WHILE_0
 #endif
-#define HTRY_SIGNAL(expr) HTRY_SIGNAL_DTOR(expr, htest_dtor_noop_)
 
-void	htest_dtor_noop_(void);
+int	htest_do_recover(void) FUNC_RETURNS;
 void	htest_output_restore_(void);
 void	htest_output_suppress_(void);
 void	htest_set_color_(HTEST_COLOR_);
 void	htest_suite_install_sighandler_(void);
 void	htest_try_install_sighandler_(void);
-
-extern void	(*g_htest_dtor_)(void);
 
 #endif

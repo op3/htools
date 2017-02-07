@@ -16,7 +16,6 @@
 # GCOV_SRC=files to undergo gcov.
 
 ifeq (gcov,$(BUILD_MODE))
-GCOV?=gcov
 CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
 CFLAGS:=$(CFLAGS) --coverage
 LIBS:=$(LIBS) --coverage
@@ -28,7 +27,7 @@ gcov:
 	lines_ok_total=0;\
 	for i in $(GCOV_SRC); do\
 		dir=`dirname $$i`;\
-		numbers=`$(GCOV) -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
+		numbers=`gcov -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
 		[ "x" = "x$$numbers" ] && continue;\
 		percentage=`echo $$numbers | awk '{print $$1}'`;\
 		lines=`echo $$numbers | awk '{print $$2}'`;\
@@ -44,7 +43,7 @@ gcov_files:
 	$(QUIET)echo Dumping gcov file-level info...;\
 	for i in $(GCOV_SRC); do\
 		echo $$i;\
-		$(GCOV) -n $$i -o $(BUILD_DIR)/`dirname $$i`;\
+		gcov -n $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done
 
 .PHONY: gcov_funcs
@@ -52,14 +51,14 @@ gcov_funcs:
 	$(QUIET)echo Dumping gcov function-level info...;\
 	for i in $(GCOV_SRC); do\
 		echo $$i;\
-		$(GCOV) -fn $$i -o $(BUILD_DIR)/`dirname $$i`;\
+		gcov -fn $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done
 
 .PHONY: gcov_anno
 gcov_anno:
 	$(QUIET)echo Generating gcov annotated files...;\
 	for i in $(GCOV_SRC); do\
-		$(GCOV) -lp $$i -o $(BUILD_DIR)/`dirname $$i`;\
+		gcov -lp $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done;\
 	[ -d $(BUILD_DIR)/gcov ] || mkdir -p $(BUILD_DIR)/gcov;\
 	mv *.gcov $(BUILD_DIR)/gcov

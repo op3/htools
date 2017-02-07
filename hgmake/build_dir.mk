@@ -12,7 +12,9 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-BUILD_MODE?=debug
+ifeq (,$(BUILD_MODE))
+ BUILD_MODE=debug
+endif
 ifeq (,$(BUILD_DIR))
  BUILD_DIR:=$(shell echo build_`$(CC) -dumpmachine`_`$(CC) -dumpversion`_$(BUILD_MODE))
 endif

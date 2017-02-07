@@ -235,11 +235,13 @@ udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
 			sock = socket(p->ai_family, p->ai_socktype,
 			    p->ai_protocol);
 			if (INVALID_SOCKET == sock) {
-				hutils_warn("socket(%s:%s)", a_hostname, port_str);
+				hutils_warn("socket(%s:%s)", a_hostname,
+				    port_str);
 				continue;
 			}
 			if (0 != connect(sock, p->ai_addr, p->ai_addrlen)) {
-				hutils_warn("connect(%s:%s)", a_hostname, port_str);
+				hutils_warn("connect(%s:%s)", a_hostname,
+				    port_str);
 				close(sock);
 				sock = INVALID_SOCKET;
 				continue;

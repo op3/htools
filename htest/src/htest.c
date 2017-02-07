@@ -52,27 +52,27 @@ static WORD RESET;
 
 static void suite_sighandler(int);
 static void try_sighandler(int);
-static void usage(FILE *, char const *, int);
+static void usage(int, char const *);
 
 static int g_nul, g_old_stderr, g_old_stdout;
-static int g_do_verbose;
-static HTEST_COLOR_ g_color_suite;
-static HTEST_COLOR_ g_color_test;
-static HTEST_COLOR_ g_color_fail;
+static int g_do_colors, g_do_recover, g_do_verbose;
+static HTEST_COLOR_ const c_color_suite = GREEN;
+static HTEST_COLOR_ const c_color_test = BLUE;
+static HTEST_COLOR_ const c_color_fail = RED;
 
 extern struct HTestSuite g_htest_suite_list_[];
-void (*g_htest_dtor_)(void);
 
 void
 suite_sighandler(int a_signum)
 {
 	htest_output_restore_();
-	htest_set_color_(g_color_fail);
+	htest_set_color_(c_color_fail);
 	printf("  Fail:");
 	htest_set_color_(RESET);
 	printf("Caught signal \"%s\".\n", strsignal(a_signum));
 	GCOV_FLUSH;
 #if defined(SUPPORT_JMP)
+	htest_output_suppress_();
 	longjmp(g_suite_jmp_buf, 1);
 #else
 	_exit(EXIT_FAILURE);
@@ -83,7 +83,6 @@ void
 try_sighandler(int a_signum)
 {
 	(void)a_signum;
-	g_htest_dtor_();
 	GCOV_FLUSH;
 #if defined(SUPPORT_JMP)
 	longjmp(g_htest_try_jmp_buf_, 1);
@@ -92,9 +91,10 @@ try_sighandler(int a_signum)
 #endif
 }
 
-void
-htest_dtor_noop_()
+int
+htest_do_recover()
 {
+	return g_do_recover;
 }
 
 void
@@ -122,6 +122,9 @@ htest_output_suppress_()
 void
 htest_set_color_(HTEST_COLOR_ a_color)
 {
+	if (!g_do_colors) {
+		return;
+	}
 #if defined(_MSC_VER)
 	SetConsoleTextAttribute(g_htest_console_, a_color);
 #else
@@ -155,13 +158,16 @@ htest_try_install_sighandler_()
 }
 
 void
-usage(FILE *a_out, char const *a_argv0, int a_exit_code)
+usage(int a_exit_code, char const *a_argv0)
 {
-	fprintf(a_out, "Usage: %s [-c] [-h] [-r] [-v]\n", a_argv0);
-	fprintf(a_out, " -c  Enable colored output.\n");
-	fprintf(a_out, " -h  Show this.\n");
-	fprintf(a_out, " -r  Disable failure recovery (fork/longjmp).\n");
-	fprintf(a_out, " -v  Show what tested code prints to stdout/stderr.\n");
+	FILE *str;
+
+	str = EXIT_SUCCESS == a_exit_code ? stdout : stderr;
+	fprintf(str, "Usage: %s [-c] [-h] [-r] [-s] [-v]\n", a_argv0);
+	fprintf(str, " -c  Enable colored output.\n");
+	fprintf(str, " -h  Show this.\n");
+	fprintf(str, " -r  Disable failure recovery (fork/longjmp).\n");
+	fprintf(str, " -v  Show what tested code prints to stdout/stderr.\n");
 	exit(a_exit_code);
 }
 
@@ -170,33 +176,32 @@ main(int const argc, char **const argv)
 {
 	struct HTestSuite *suite;
 	int test_num, test_pass_num;
-	int do_colors, do_recover;
 	int opt;
 
-	do_colors = 0;
-	do_recover = 1;
+	g_do_colors = 0;
 	g_do_verbose = 0;
+	g_do_recover = 1;
 	while (-1 != (opt = getopt(argc, argv, "chrv"))) {
 		switch (opt) {
 		case 'c':
-			do_colors = 1;
+			g_do_colors = 1;
 			break;
 		case 'h':
-			usage(stdout, argv[0], EXIT_SUCCESS);
+			usage(EXIT_SUCCESS, argv[0]);
 		case 'r':
-			do_recover = 0;
+			g_do_recover = 0;
 			break;
 		case 'v':
 			g_do_verbose = 1;
 			break;
 		default:
-			usage(stderr, argv[0], EXIT_FAILURE);
+			usage(EXIT_FAILURE, argv[0]);
 		}
 	}
 
-		g_nul = open(c_nul_path, O_WRONLY);
-		g_old_stdout = dup(STDOUT_FILENO);
-		g_old_stderr = dup(STDERR_FILENO);
+	g_nul = open(c_nul_path, O_WRONLY);
+	g_old_stdout = dup(STDOUT_FILENO);
+	g_old_stderr = dup(STDERR_FILENO);
 #if defined(_MSC_VER)
 	_set_abort_behavior(0, _WRITE_ABORT_MSG);
 	{
@@ -207,16 +212,6 @@ main(int const argc, char **const argv)
 		RESET = info.wAttributes;
 	}
 #endif
-	if (do_colors) {
-		g_color_suite = GREEN;
-		g_color_test = BLUE;
-		g_color_fail = RED;
-	}
-	else {
-		g_color_suite = "";
-		g_color_test = "";
-		g_color_fail = "";
-	}
 	htest_suite_install_sighandler_();
 	test_num = 0;
 	test_pass_num = 0;
@@ -224,7 +219,7 @@ main(int const argc, char **const argv)
 		int test_enumerator;
 		int test_index;
 
-		suite->header(g_color_suite, RESET);
+		suite->header(c_color_suite, RESET);
 
 		test_enumerator = 0;
 		suite->suite(RESET, RESET, RESET, 0, &test_enumerator, NULL);
@@ -234,88 +229,78 @@ main(int const argc, char **const argv)
 		test_num += test_enumerator;
 
 		for (test_index = 1; test_enumerator >= test_index;
-			++test_index) {
+		    ++test_index) {
+			if (g_do_recover) {
 #if defined(SUPPORT_FORK)
-			if (do_recover) {
 				pid_t pid;
+				int status;
 
 				pid = fork();
 				if (0 > pid) {
-					perror(NULL);
-					exit(EXIT_FAILURE);
-				}
-				if (0 == pid) {
-					int result;
+					hutils_err(EXIT_FAILURE, "fork");
+				} else if (0 == pid) {
+					int passed;
 
 					test_enumerator = 0;
-					result = 1;
-					suite->suite(g_color_test,
-						g_color_fail, RESET,
-						test_index, &test_enumerator,
-						&result);
+					passed = 1;
+					suite->suite(c_color_test,
+					    c_color_fail, RESET, test_index,
+					    &test_enumerator, &passed);
 					GCOV_FLUSH;
-					_exit(result ? EXIT_SUCCESS :
-						EXIT_FAILURE);
+					_exit(passed ? EXIT_SUCCESS :
+					    EXIT_FAILURE);
 				}
-				else {
-					int status;
-
-					waitpid(pid, &status, 0);
-					if (EXIT_SUCCESS !=
-						WEXITSTATUS(status)) {
-						htest_set_color_(g_color_fail);
-						printf("  Fail:");
-						htest_set_color_(RESET);
-						printf("Exited.\n");
-					}
-					else {
-						++test_pass_num;
-					}
+				waitpid(pid, &status, 0);
+				if (EXIT_SUCCESS != WEXITSTATUS(status)) {
+					htest_set_color_(c_color_fail);
+					printf("  Fail:");
+					htest_set_color_(RESET);
+					printf("Exited.\n");
+				} else {
+					++test_pass_num;
 				}
-			}
 #elif defined(SUPPORT_JMP)
-			/* This is rubbish, but some OS:s cannot do more... */
-			if (do_recover) {
-				int result;
+				/*
+				 * This is crap, but some OS:s can't do
+				 * better...
+				 */
+				int passed;
 
 				if (0 == setjmp(g_suite_jmp_buf)) {
 					test_enumerator = 0;
-					result = 1;
-					suite->suite(g_color_test,
-						g_color_fail, RESET,
-						test_index, &test_enumerator,
-						&result);
+					passed = 1;
+					suite->suite(c_color_test,
+					    c_color_fail, RESET, test_index,
+					    &test_enumerator, &passed);
 					GCOV_FLUSH;
-				}
-				else {
-					htest_set_color_(g_color_fail);
+				} else {
+					htest_set_color_(c_color_fail);
 					printf("  Fail:");
 					htest_set_color_(RESET);
 					printf("Jumped.\n");
-					result = 0;
+					passed = 0;
 				}
-				if (result) {
+				if (passed) {
 					++test_pass_num;
 				}
-			}
 #endif
-			else {
-				int result;
+			} else {
+				int passed;
 
 				test_enumerator = 0;
-				result = 1;
-				suite->suite(g_color_test, g_color_fail,
-					RESET, test_index,
-					&test_enumerator, &result);
-				if (result) {
+				passed = 1;
+				suite->suite(c_color_test, c_color_fail,
+				    RESET, test_index, &test_enumerator,
+				    &passed);
+				if (passed) {
 					++test_pass_num;
 				}
 			}
 		}
 	}
-		close(g_nul);
-		close(g_old_stdout);
-		close(g_old_stderr);
+	close(g_nul);
+	close(g_old_stdout);
+	close(g_old_stderr);
 
 	printf("Passed %d/%d (%.1f%%) tests.\n", test_pass_num, test_num,
 	    100.0f * test_pass_num / test_num);
