@@ -41,9 +41,9 @@ HCONF_EXT_LDFLAGS=$(shell sed -n 4p $(HCONF_EXT_CACHE))
 HCONF_EXT_LIBS=$(shell sed -n 5p $(HCONF_EXT_CACHE))
 
 # Common commands.
-CPP_D=[ ! "`sed -n 1p $(HCONF_CACHE).dflags`" ] || (echo -n "$@: "; list=`gcc -E $(CPPFLAGS) $(HCONF_CPPFLAGS) $< | sed -n 's,^\#.*"\(.*\)".*,\1,p' | sort -u` && for i in $$list; do [ -f $$i ] && echo $$i; done) | tr '\n' ' ' > $(@:.o=.d) &&
-CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $(CPPFLAGS) $(HCONF_CPPFLAGS) $(CFLAGS) $(HCONF_CFLAGS)
-CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $(CPPFLAGS) $(HCONF_CPPFLAGS) $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
+CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE).ccd $@ $< $$cppflags > $(@:.o=.d) &&
+CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $$cppflags $(CFLAGS) $(HCONF_CFLAGS)
+CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $$cppflags $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
 LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)
 MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 
@@ -59,10 +59,10 @@ endif
 HCONF_PROJECTS_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_PROJECTS))
 CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_PROJECTS))
 
-$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).dflags
+$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).ccd
 	$(QUIET)$(MKDIR) &&\
-	export CC=$(CC);\
-	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE).dflags`;echo $(CFLAGS);echo;echo;) > $@.tmp;\
+	export CC=$(CC) &&\
+	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE).ccd`;echo $(CFLAGS);echo;echo;) > $@.tmp;\
 	if [ "$(HCONF_PROJECTS_FILES)" ]; then\
 		$(HCONF_MERGE) $@.tmp $(HCONF_PROJECTS_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\
@@ -104,17 +104,17 @@ $(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).dflags
 # Either:
 #  1) Line 1 = dep script
 #  2) Line 2 = -MD
-$(HCONF_CACHE).dflags:
-	$(QUIET)$(MKDIR) &&\
-	echo "DEP   $@";\
-	cd $(@D);\
+$(HCONF_CACHE).ccd:
+	$(QUIET)echo "DEP   $@";\
+	$(MKDIR) &&\
+	cd $(@D) &&\
 	[ -d _ccd ] || mkdir _ccd;\
-	echo "int main(){return 0;}" > _ccd/main.c;\
+	echo "int main(){return 0;}" > _ccd/main.c &&\
 	gcc -MD -o _ccd/main.o _ccd/main.c;\
 	if [ -f _ccd/main.d ]; then\
-		(echo;echo "-MD") > $(@F) && exit 0;\
+		(echo exit 0;echo "-MD") > $(@F) && exit 0;\
 	fi;\
 	if [ 1 -eq `gcc -E _ccd/main.c | grep ^\# | wc -l` ]; then\
-		echo 1 > $(@F) && exit 0;\
+		echo "(o=\$$1;shift;c=\$$1;shift;echo -n \$$o:;list=\`gcc -E \$$@ \$$c | sed -n 's/^#.*\"\\(.*\\)\".*/\1/p' | sort -u\`;for i in \$$list;do [ -f \$$i ]&&echo \$$i;done) | tr '\n' ' '" > $(@F) && exit 0;\
 	fi;\
 	exit 1

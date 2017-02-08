@@ -79,4 +79,4 @@ $(BUILD_DIR)/%.o %.o: %.c Makefile $(HCONF_CACHE)
 	$(MKDIR) &&\
 	$(CC_O)
 
--include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))
+-include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))
