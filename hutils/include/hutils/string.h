@@ -17,6 +17,7 @@
 #ifndef HUTILS_STRING_H
 #define HUTILS_STRING_H
 
+#include <stdarg.h>
 #include <string.h>
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
@@ -27,22 +28,20 @@ CDECLS_BEGIN
 #if defined(HCONF_mNPRINTF_bSTDIO) || defined(_MSC_VER)
 #	include <stdio.h>
 #elif defined(HCONF_mNPRINTF_bPROTOTYPE)
-#	include <stdarg.h>
 int snprintf(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
 int vsnprintf(char *, size_t, char const *, va_list);
 #elif defined(HCONF_mNPRINTF_bUNSAFE)
 /* HCONF_SRC=src/string.c */
-#	include <stdarg.h>
 #	define snprintf hutils_snprintf_
 #	define vsnprintf hutils_vsnprintf_
 int hutils_snprintf_(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
 int hutils_vsnprintf_(char *, size_t, char const *, va_list);
 #endif
 #if defined(HCONFING_mNPRINTF)
-HCONF_TEST(int, (char *a_s, size_t a_n, va_list args))
+HCONF_TEST(int, (char *a_s, size_t a_n, va_list a_args))
 {
 	return snprintf(a_s, a_n, "snprintf") +
-	    vsnprintf(a_s, a_n, "vsnprintf", args);
+	    vsnprintf(a_s, a_n, "vsnprintf", a_args);
 }
 #endif
 
