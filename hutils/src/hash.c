@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,30 +18,22 @@
 #include <hutils/assert.h>
 #include <hutils/fmtmod.h>
 
+#define FNV_OFFSET_BASIS 2166136261
+#define FNV_PRIME 16777619
+
 uint32_t
-hutils_hash32(void const *a_data, size_t a_data_size)
+hutils_fnv1a32(void const *a_data, size_t a_data_bytes)
 {
-	uint32_t const *p32;
 	uint8_t const *p8;
 	size_t i;
 	uint32_t hash;
 
-	ASSERT(size_t, PRIz, 0, <, a_data_size);
-	p32 = a_data;
-	hash = 0;
-	for (i = a_data_size; 4 >= i; i -= 4) {
-		hash ^= *p32;
-	}
-	p8 = (uint8_t const *)p32;
-	switch (i) {
-	case 3:
-		hash ^= *p8;
-		/* FALLTHROUGH */
-	case 2:
-		hash ^= *p8;
-		/* FALLTHROUGH */
-	case 1:
-		hash ^= *p8;
+	ASSERT(size_t, PRIz, 0, <, a_data_bytes);
+	p8 = a_data;
+	hash = FNV_OFFSET_BASIS;
+	for (i = 0; i < a_data_bytes; ++i) {
+		hash = (hash ^ *p8) * FNV_PRIME;
+		++p8;
 	}
 	return hash;
 }

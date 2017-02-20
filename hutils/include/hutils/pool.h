@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,15 +35,15 @@ struct Pool##PoolType##Page_ {\
 };\
 TAILQ_HEAD(PoolType, Pool##PoolType##Page_)
 
-#define POOL_PROTOTYPE(name, PoolType, Type) \
-static struct Type	*name##_alloc(struct PoolType *);\
-static void		name##_free(struct PoolType *, struct Type **);\
-static void		name##_init(struct PoolType *);\
-static void		name##_shutdown(struct PoolType *)
+#define POOL_PROTOTYPE(PoolType, Type) \
+static struct Type	*PoolType##_alloc(struct PoolType *);\
+static void		PoolType##_free(struct PoolType *, struct Type **);\
+static void		PoolType##_init(struct PoolType *);\
+static void		PoolType##_shutdown(struct PoolType *)
 
-#define POOL_IMPLEMENT(name, PoolType, Type, entry) \
+#define POOL_IMPLEMENT(PoolType, Type, entry) \
 static struct Type *\
-name##_alloc(struct PoolType *a_pool)\
+PoolType##_alloc(struct PoolType *a_pool)\
 {\
 	struct Pool##PoolType##Page_ *page;\
 	struct Type *node;\
@@ -72,7 +72,7 @@ name##_alloc(struct PoolType *a_pool)\
 	return node;\
 }\
 static void \
-name##_free(struct PoolType *a_pool, struct Type **a_node)\
+PoolType##_free(struct PoolType *a_pool, struct Type **a_node)\
 {\
 	struct Type *node;\
 	struct Pool##PoolType##Page_ *page;\
@@ -89,12 +89,12 @@ name##_free(struct PoolType *a_pool, struct Type **a_node)\
 	*a_node = NULL;\
 }\
 static void \
-name##_init(struct PoolType *a_pool)\
+PoolType##_init(struct PoolType *a_pool)\
 {\
 	TAILQ_INIT(a_pool);\
 }\
 static void \
-name##_shutdown(struct PoolType *a_pool)\
+PoolType##_shutdown(struct PoolType *a_pool)\
 {\
 	while (!TAILQ_EMPTY(a_pool)) {\
 		struct Pool##PoolType##Page_ *page;\

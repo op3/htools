@@ -15,6 +15,7 @@
  */
 
 #include <hutils/lexer.h>
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +25,7 @@
 
 enum {
 	PEEK_EOF = -1,
-	PEEK_ERROR
+	PEEK_OVERFLOW = -2
 };
 
 struct Lexer {
@@ -54,6 +55,7 @@ extract(struct Lexer *a_lexer, size_t a_len)
 		int c;
 
 		c = peek_char(a_lexer, 0);
+		assert(PEEK_OVERFLOW != c);
 		if (PEEK_EOF == c) {
 			break;
 		}
@@ -151,6 +153,29 @@ int
 lexer_get_line_no(struct Lexer const *a_lexer)
 {
 	return a_lexer->line_no;
+}
+
+int
+lexer_skip(struct Lexer *a_lexer, char a_c)
+{
+	a_lexer->error = LEXER_ERROR_NONE;
+	for (;;) {
+		int c;
+
+		c = peek_char(a_lexer, 0);
+		if (PEEK_EOF == c) {
+			return 0;
+		}
+		++a_lexer->ofs;
+		++a_lexer->col;
+		if ('\n' == c) {
+			++a_lexer->line_no;
+			a_lexer->col = 1;
+		}
+		if (a_c == c) {
+			return 1;
+		}
+	}
 }
 
 int
@@ -292,7 +317,7 @@ peek_char(struct Lexer *a_lexer, size_t a_ofs)
 	size_t ofs;
 
 	if (BUF_SIZE <= a_ofs) {
-		return PEEK_ERROR;
+		return PEEK_OVERFLOW;
 	}
 	ofs = a_lexer->ofs + a_ofs;
 	if (ofs >= a_lexer->buf_end) {

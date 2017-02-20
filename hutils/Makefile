@@ -74,7 +74,7 @@ $(TEST): $(TEST_OBJ) $(TARGET)
 	$(MKDIR) &&\
 	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest
 
-$(BUILD_DIR)/%.o %.o: %.c Makefile $(HCONF_CACHE)
+$(BUILD_DIR)/%.o %.o: %.c $(HCONF_CACHE)
 	$(QUIET)echo "CC    $@" &&\
 	$(MKDIR) &&\
 	$(CC_O)

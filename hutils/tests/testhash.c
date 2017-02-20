@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,18 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_HASH_H
-#define HUTILS_HASH_H
+#include <hutils/hash.h>
+#include <htest/htest.h>
 
-#include <stdlib.h>
-#include <hutils/cdecls.h>
-#include <hutils/funcattr.h>
-#include <hutils/stdint.h>
+HTEST(FNV1A)
+{
+	char data0[] = "abc0";
+	char data1[] = "abc1";
+	uint32_t hash0, hash1;
 
-CDECLS_BEGIN
+	HTRY_SIGNAL(hash0 = hutils_fnv1a32(data0, 0));
+	hash0 = hutils_fnv1a32(data0, strlen(data0));
+	hash1 = hutils_fnv1a32(data1, strlen(data1));
+	HTRY_I(hash0, !=, hash1);
+}
 
-uint32_t	hutils_fnv1a32(void const *, size_t) FUNC_PURE FUNC_RETURNS;
-
-CDECLS_END
-
-#endif
+HTEST_SUITE(Hash)
+{
+	HTEST_ADD(FNV1A);
+}

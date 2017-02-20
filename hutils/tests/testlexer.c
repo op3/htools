@@ -349,6 +349,48 @@ HTEST(Expects)
 	lexer_free(&lexer);
 }
 
+HTEST(Skip)
+{
+	char const c_text[] = "Line1\nLine2";
+	struct LexerToken token;
+	struct Lexer *lexer;
+	char const *p;
+
+	p = c_text;
+	lexer = lexer_create(lexer_cstr_callback, &p);
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("Line1", ==, token.str);
+	free(token.str);
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("Line2", ==, token.str);
+	free(token.str);
+	HTRY_BOOL(!lexer_token_get(lexer, &token));
+	lexer_free(&lexer);
+
+	p = c_text;
+	lexer = lexer_create(lexer_cstr_callback, &p);
+	HTRY_BOOL(lexer_skip(lexer, '\n'));
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("Line2", ==, token.str);
+	free(token.str);
+	HTRY_BOOL(!lexer_skip(lexer, '\n'));
+	HTRY_BOOL(!lexer_token_get(lexer, &token));
+	lexer_free(&lexer);
+
+	p = c_text;
+	lexer = lexer_create(lexer_cstr_callback, &p);
+	HTRY_BOOL(lexer_skip(lexer, 'e'));
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("1", ==, token.str);
+	free(token.str);
+	HTRY_BOOL(lexer_token_get(lexer, &token));
+	HTRY_STR("Line2", ==, token.str);
+	free(token.str);
+	HTRY_BOOL(!lexer_skip(lexer, '\n'));
+	HTRY_BOOL(!lexer_token_get(lexer, &token));
+	lexer_free(&lexer);
+}
+
 HTEST_SUITE(Lexer)
 {
 	HTEST_ADD(BufMajeur);
@@ -358,4 +400,5 @@ HTEST_SUITE(Lexer)
 	HTEST_ADD(LiteralVariations);
 	HTEST_ADD(UglyText);
 	HTEST_ADD(Expects);
+	HTEST_ADD(Skip);
 }

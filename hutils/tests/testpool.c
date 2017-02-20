@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,8 +24,8 @@ struct Int {
 
 POOL_HEAD(PoolInt, Int, 10);
 
-POOL_PROTOTYPE(testpool, PoolInt, Int);
-POOL_IMPLEMENT(testpool, PoolInt, Int, entry);
+POOL_PROTOTYPE(PoolInt, Int);
+POOL_IMPLEMENT(PoolInt, Int, entry);
 
 HTEST(AllocAndFree100)
 {
@@ -33,19 +33,19 @@ HTEST(AllocAndFree100)
 	struct Int *p[100];
 	size_t i;
 
-	testpool_init(&pool_int);
+	PoolInt_init(&pool_int);
 	HTRY_BOOL(TAILQ_EMPTY(&pool_int));
 	for (i = 0; LENGTH(p) > i; ++i) {
-		p[i] = testpool_alloc(&pool_int);
+		p[i] = PoolInt_alloc(&pool_int);
 		p[i]->i = i;
 	}
 	HTRY_BOOL(!TAILQ_EMPTY(&pool_int));
 	for (i = 0; LENGTH(p) > i; ++i) {
 		HTRY_I(p[i]->i, ==, i);
-		testpool_free(&pool_int, &p[i]);
+		PoolInt_free(&pool_int, &p[i]);
 	}
 	HTRY_BOOL(TAILQ_EMPTY(&pool_int));
-	testpool_shutdown(&pool_int);
+	PoolInt_shutdown(&pool_int);
 }
 
 HTEST_SUITE(Pool)

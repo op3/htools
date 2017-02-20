@@ -55,6 +55,7 @@ int		lexer_get_col_no(struct Lexer const *) FUNC_PURE FUNC_RETURNS;
 enum LexerError	lexer_get_error(struct Lexer const *) FUNC_RETURNS;
 int		lexer_get_line_no(struct Lexer const *) FUNC_PURE
 FUNC_RETURNS;
+int		lexer_skip(struct Lexer *, char);
 int		lexer_token_get(struct Lexer *, struct LexerToken *)
 	FUNC_RETURNS;
 
