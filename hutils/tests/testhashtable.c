@@ -115,20 +115,20 @@ HTEST(Strings)
 		struct String *s, *inserted;
 
 		CALLOC(s, 1);
-		sprintf(s->key.str, "abc_%"PRIz, i);
+		snprintf(s->key.str, sizeof s->key.str, "abc_%"PRIz, i);
 		inserted = HashTableString_insert(&table, s);
 		HTRY_PTR(inserted, ==, s);
 	}
 	for (i = 0; N > i; ++i) {
 		struct KeyString key;
 
-		sprintf(key.str, "abc_%"PRIz, i);
+		snprintf(key.str, sizeof key.str, "abc_%"PRIz, i);
 		HTRY_PTR(NULL, !=, HashTableString_find(&table, &key));
 	}
 	for (i = 0; N > i; ++i) {
 		struct String s, *inserted;
 
-		sprintf(s.key.str, "abc_%"PRIz, i);
+		snprintf(s.key.str, sizeof s.key.str, "abc_%"PRIz, i);
 		inserted = HashTableString_insert(&table, &s);
 		HTRY_PTR(inserted, !=, &s);
 	}
