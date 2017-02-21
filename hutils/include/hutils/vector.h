@@ -29,7 +29,7 @@
 	size_t	ofs;\
 	size_t	size;\
 	size_t	capacity;\
-	Type	*data;\
+	struct	Type *data;\
 }
 
 #define VECTOR_IMPLEMENT(VectorType, Type, chunk)\
@@ -59,7 +59,7 @@ VectorType##_try_shrink_(struct VectorType *a_vec)\
 		    chunk);\
 	}\
 }\
-FUNC_UNUSED static Type *\
+FUNC_UNUSED static struct Type *\
 VectorType##_at(struct VectorType *a_vec, size_t a_i)\
 {\
 	VECTOR_INVARIANT_;\
@@ -71,7 +71,7 @@ VectorType##_at(struct VectorType *a_vec, size_t a_i)\
 	}\
 	return &a_vec->data[a_vec->ofs + a_i];\
 }\
-FUNC_UNUSED static Type *\
+FUNC_UNUSED static struct Type *\
 VectorType##_back(struct VectorType *a_vec)\
 {\
 	VECTOR_INVARIANT_;\
@@ -98,7 +98,7 @@ VectorType##_free(struct VectorType *a_vec)\
 	a_vec->capacity = 0;\
 	FREE(a_vec->data);\
 }\
-FUNC_UNUSED static Type *\
+FUNC_UNUSED static struct Type *\
 VectorType##_front(struct VectorType *a_vec)\
 {\
 	VECTOR_INVARIANT_;\
@@ -120,7 +120,7 @@ VectorType##_pop_front(struct VectorType *a_vec)\
 	    *a_vec->data);\
 	VectorType##_try_shrink_(a_vec);\
 }\
-FUNC_UNUSED static Type *\
+FUNC_UNUSED static struct Type *\
 VectorType##_push_back(struct VectorType *a_vec)\
 {\
 	VECTOR_INVARIANT_;\
@@ -129,7 +129,7 @@ VectorType##_push_back(struct VectorType *a_vec)\
 	VECTOR_INVARIANT_;\
 	return &a_vec->data[a_vec->ofs + a_vec->size - 1];\
 }\
-FUNC_UNUSED static Type *\
+FUNC_UNUSED static struct Type *\
 VectorType##_push_front(struct VectorType *a_vec)\
 {\
 	VECTOR_INVARIANT_;\

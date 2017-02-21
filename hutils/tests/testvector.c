@@ -19,9 +19,12 @@
 
 #define N 100
 
-VECTOR_HEAD(IntVector, int);
+struct Int {
+	int	i;
+};
+VECTOR_HEAD(IntVector, Int);
 
-VECTOR_IMPLEMENT(IntVector, int, 10);
+VECTOR_IMPLEMENT(IntVector, Int, 10);
 
 HTEST(CreateAtFree1)
 {
@@ -30,11 +33,11 @@ HTEST(CreateAtFree1)
 
 	IntVector_create(&vec, 1);
 	HTRY_I(1, ==, vec.size);
-	*IntVector_at(&vec, 0) = 3;
-	HTRY_SIGNAL(i = *IntVector_at(&vec, -1));
-	i = *IntVector_at(&vec, 0);
+	IntVector_at(&vec, 0)->i = 3;
+	HTRY_SIGNAL(i = IntVector_at(&vec, -1)->i);
+	i = IntVector_at(&vec, 0)->i;
 	HTRY_I(3, ==, i);
-	HTRY_SIGNAL(i = *IntVector_at(&vec, 1));
+	HTRY_SIGNAL(i = IntVector_at(&vec, 1)->i);
 	IntVector_free(&vec);
 }
 
@@ -47,15 +50,15 @@ HTEST(PushPopBack100)
 	IntVector_create(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
-		*IntVector_push_back(&vec) = 100 + i;
+		IntVector_push_back(&vec)->i = 100 + i;
 	}
 	HTRY_I(N, ==, vec.size);
 	for (i = 0; N > i; ++i) {
-		j = *IntVector_at(&vec, i);
+		j = IntVector_at(&vec, i)->i;
 		HTRY_I(100 + i, ==, j);
 	}
 	for (i = 0; N > i; ++i) {
-		j = *IntVector_back(&vec);
+		j = IntVector_back(&vec)->i;
 		HTRY_I(99 + N - i, ==, j);
 		IntVector_pop_back(&vec);
 		HTRY_I(N - i - 1, ==, vec.size);
@@ -73,15 +76,15 @@ HTEST(PushPopFront100)
 	IntVector_create(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
-		*IntVector_push_front(&vec) = 100 + i;
+		IntVector_push_front(&vec)->i = 100 + i;
 	}
 	HTRY_I(N, ==, vec.size);
 	for (i = 0; N > i; ++i) {
-		j = *IntVector_at(&vec, i);
+		j = IntVector_at(&vec, i)->i;
 		HTRY_I(99 + N - i, ==, j);
 	}
 	for (i = 0; N > i; ++i) {
-		j = *IntVector_front(&vec);
+		j = IntVector_front(&vec)->i;
 		HTRY_I(99 + N - i, ==, j);
 		IntVector_pop_front(&vec);
 		HTRY_I(N - i - 1, ==, vec.size);
