@@ -15,10 +15,10 @@
  */
 
 #include <hutils/udp.h>
+#include <errno.h>
 
 #if defined(HCONF_mUDP_bGETADDRINFO)
 #	define GETADDRINFO
-#	include <sys/select.h>
 #	include <fcntl.h>
 #	include <time.h>
 #	include <stdarg.h>
@@ -96,7 +96,62 @@ set_non_blocking(SOCKET a_socket)
 }
 #endif
 
-#include <errno.h>
+/*
+ * A few things can happen:
+ *  1) Error -> err().
+ *  2) Interruption -> return -1.
+ *  3) Timeout -> return = 0.
+ *  4) Socket -> return 1;
+ *  4) Extra -> return 2;
+ */
+static int
+event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
+{
+#if defined(HCONF_mUDP_EVENT_bPOLL)
+	struct pollfd pfd[2];
+	int nfds, ret;
+
+	nfds = 0;
+	pfd[nfds].fd = a_socket;
+	pfd[nfds].events = POLLIN;
+	++nfds;
+	if (0 < a_fd_extra) {
+		pfd[nfds].fd = a_fd_extra;
+		pfd[nfds].events = POLLIN;
+		++nfds;
+	}
+	ret = poll(pfd, nfds, a_timeout * 1e3);
+	if (-1 == ret && EINTR != errno) {
+		hutils_err(EXIT_FAILURE, "poll");
+	}
+	if (POLLIN & pfd[1].revents) {
+		return 2;
+	}
+	return 1;
+#elif defined(HCONF_mUDP_EVENT_bSELECT)
+	fd_set socks;
+	struct timeval timeout;
+	int nfds, ret;
+
+	FD_ZERO(&socks);
+	FD_SET(a_socket, &socks);
+	if (0 < a_fd_extra) {
+		FD_SET(a_fd_extra, &socks);
+	}
+	nfds = MAX(a_socket, a_fd_extra);
+	timeout.tv_sec = (long)a_timeout;
+	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
+	ret = select(nfds + 1, &socks, NULL, NULL, &timeout);
+	if (-1 == ret && EINTR != errno) {
+		hutils_err(EXIT_FAILURE, "select");
+	}
+	if (FD_ISSET(a_fd_extra, &socks)) {
+		return 2;
+	}
+	return 1;
+#endif
+}
+
 #include <hutils/err.h>
 #include <hutils/macros.h>
 #include <hutils/memory.h>
@@ -140,35 +195,17 @@ receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
     struct UDPAddress **a_addr, double a_timeout)
 {
 	struct UDPAddress addr;
-	fd_set socks;
-	struct timeval timeout;
-	int nfds, ret;
+	int ret;
 
 	if (NULL != a_addr) {
 		*a_addr = NULL;
 	}
 	a_dgram->size = 0;
-	FD_ZERO(&socks);
-	FD_SET(a_socket, &socks);
-	nfds = MAX(a_socket, a_fd_extra);
-	if (0 < a_fd_extra) {
-		FD_SET(a_fd_extra, &socks);
-	}
-	timeout.tv_sec = (long)a_timeout;
-	timeout.tv_usec = (long)(1e6 * (a_timeout - timeout.tv_sec));
-receive_datagram_try:
-	ret = select(nfds + 1, &socks, NULL, NULL, &timeout);
-	if (0 == ret) {
+	ret = event_wait(a_socket, a_fd_extra, a_timeout);
+	if (1 > ret) {
 		return 0;
 	}
-	if (SOCKET_ERROR == ret) {
-		if (EINTR == errno) {
-			goto receive_datagram_try;
-		}
-		hutils_warn("select");
-		return 0;
-	}
-	if (0 < a_fd_extra && FD_ISSET(a_fd_extra, &socks)) {
+	if (2 == ret) {
 		a_dgram->size = read(a_fd_extra, a_dgram->buf,
 		    LENGTH(a_dgram->buf));
 		return 1;
@@ -179,7 +216,7 @@ receive_datagram_try:
 	    0, (struct sockaddr *)&addr.addr, &addr.len);
 	if (SOCKET_ERROR == ret) {
 		if (EAGAIN == errno || EWOULDBLOCK != errno) {
-			return 1;
+			return 0;
 		}
 		hutils_warn("recv");
 		return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -59,6 +59,24 @@ HCONF_TEST(int, (void))
 HCONF_TEST(struct hostent *, (socklen_t *a_len))
 {
 	return gethostbyname(0) + recvfrom(0, 0, 0, 0, 0, a_len);
+}
+#	endif
+#endif
+
+#if defined(HCONF_mUDP_EVENT_bPOLL)
+#	include <poll.h>
+#	if defined(HCONFING_mUDP)
+HCONF_TEST(int, (struct pollfd *a_fds, int a_nfds, int a_ms))
+{
+	return poll(a_fds, a_nfds, a_ms);
+}
+#	endif
+#elif defined(HCONF_mUDP_EVENT_bSELECT)
+#	include <sys/select.h>
+#	if defined(HCONFING_mUDP)
+HCONF_TEST(int, (fd_set *a_fds, int a_nfds, struct timeval *a_timeout))
+{
+	return select(a_nfds + 1, a_fds, a_fds, a_fds, a_timeout);
 }
 #	endif
 #endif
