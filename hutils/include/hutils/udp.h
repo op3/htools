@@ -19,6 +19,7 @@
 
 #include <hconf/include/hutils/udp.h>
 #include <stdlib.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
@@ -62,6 +63,8 @@ HCONF_TEST(struct hostent *, (socklen_t *a_len))
 #	endif
 #endif
 
+CDECLS_BEGIN
+
 enum {
 	UDP_IPV4 = 0x0,
 	UDP_IPV6 = 0x1
@@ -93,5 +96,7 @@ int			udp_server_write(struct UDPServer const *, void const
     *, size_t);
 int			udp_setup(void) FUNC_RETURNS;
 void			udp_shutdown(void);
+
+CDECLS_END
 
 #endif

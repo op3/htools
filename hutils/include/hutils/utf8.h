@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,23 +14,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HUTILS_AABB3_H
-#define HUTILS_AABB3_H
+#ifndef HUTILS_UTF8_H
+#define HUTILS_UTF8_H
 
+#include <stdlib.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
-#include <hutils/vector3.h>
 
 CDECLS_BEGIN
 
-struct AABB3f {
-	struct	Vector3f min;
-	struct	Vector3f max;
+struct UTF8 {
+	/* Number of replacements performed on source string. */
+	int	replacement_num;
+	size_t	length;
+	size_t	size;
+	uint8_t	*data;
 };
 
-float	aabb3f_get_distance_sqr(struct AABB3f const *, struct Vector3f const
-    *) FUNC_RETURNS;
-float	aabb3f_get_distance(struct AABB3f const *, struct Vector3f const *)
-	FUNC_RETURNS;
+struct UTF8	*utf8_alloc(uint8_t const *, size_t) FUNC_RETURNS;
+void		utf8_free(struct UTF8 **);
 
 CDECLS_END
 

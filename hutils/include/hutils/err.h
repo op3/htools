@@ -18,7 +18,10 @@
 #define HUTILS_ERR_H
 
 #include <stdarg.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+
+CDECLS_BEGIN
 
 typedef int (*HutilsPrinter)(char const *, va_list);
 
@@ -35,5 +38,7 @@ void	hutils_vwarnx(char const *, va_list);
 void	hutils_warn(char const *, ...) FUNC_PRINTF(1, 2);
 void	hutils_warnc(int, char const *, ...) FUNC_PRINTF(2, 3);
 void	hutils_warnx(char const *, ...) FUNC_PRINTF(1, 2);
+
+CDECLS_END
 
 #endif

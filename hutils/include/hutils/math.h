@@ -18,6 +18,7 @@
 #define HUTILS_MATH_H
 
 #include <math.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 #include <hconf/include/hutils/math.h>
@@ -39,7 +40,11 @@ HCONF_TEST(double, (double a_v))
 }
 #endif
 
+CDECLS_BEGIN
+
 uint16_t	double2half(double) FUNC_RETURNS;
 double	half2double(uint16_t) FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

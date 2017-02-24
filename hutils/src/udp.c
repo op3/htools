@@ -312,11 +312,16 @@ udp_client_receive(struct UDPClient const *a_client, struct UDPDatagram
 }
 
 int
-udp_client_send(struct UDPClient const *a_client, struct UDPDatagram
-    const *a_dgram)
+udp_client_send(struct UDPClient const *a_client, struct UDPDatagram const
+    *a_dgram)
 {
-	if (SOCKET_ERROR == send(a_client->socket, (char *)a_dgram->buf,
-	    a_dgram->size, 0)) {
+	union {
+		uint8_t	const *c;
+		uint8_t	*u;
+	} u;
+
+	u.c = a_dgram->buf;
+	if (SOCKET_ERROR == send(a_client->socket, u.u, a_dgram->size, 0)) {
 		hutils_warn("send");
 		return 0;
 	}
@@ -466,9 +471,14 @@ int
 udp_server_send(struct UDPServer const *a_server, struct UDPAddress const
     *a_addr, struct UDPDatagram const *a_dgram)
 {
-	if (SOCKET_ERROR == sendto(a_server->socket, (char *)a_dgram->buf,
-	    a_dgram->size, 0, (struct sockaddr const *)&a_addr->addr,
-	    a_addr->len)) {
+	union {
+		uint8_t	const *c;
+		uint8_t	*u;
+	} u;
+
+	u.c = a_dgram->buf;
+	if (SOCKET_ERROR == sendto(a_server->socket, u.u, a_dgram->size, 0,
+	    (struct sockaddr const *)&a_addr->addr, a_addr->len)) {
 		hutils_warn("send");
 		return 0;
 	}
