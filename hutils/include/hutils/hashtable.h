@@ -17,113 +17,187 @@
 #ifndef HUTILS_HASHTABLE_H
 #define HUTILS_HASHTABLE_H
 
-#define HASHTABLE_COLLISION_LENGTH 3
-
+#include <assert.h>
+#include <hutils/funcattr.h>
 #include <hutils/memory.h>
-#include <hutils/queue.h>
 
-#define HASHTABLE_ENTRY(Type) TAILQ_ENTRY(Type)
 #define HASHTABLE_HEAD(HashTableType, Type)\
-TAILQ_HEAD(HashTableType##Chain_, Type);\
+struct HashTableType##Entry {\
+	uint32_t	hash;\
+	struct	Type *t;\
+};\
 struct HashTableType {\
-	size_t	size;\
-	struct	HashTableType##Chain_ *table;\
+	uint32_t	mask;\
+	uint32_t	num;\
+	struct	HashTableType##Entry *array;\
 }
 
+#define HASHTABLE_DIB(a_ht, hash, i) (i - (hash & a_ht->mask)) & a_ht->mask
+
 #define HASHTABLE_IMPLEMENT(HashTableType, Type, Key, key, start_size,\
-    hash, equal, free_, field)\
-static struct HashTableType##Chain_ *\
-HashTableType##_get_chain_(struct HashTableType *a_ht, struct Key const\
-    *a_key)\
+    hash_, equal, free_, field)\
+static size_t \
+HashTableType##_find_(struct HashTableType *a_ht, struct Key const *a_key)\
 {\
-	return &a_ht->table[hash(a_key) % a_ht->size];\
-}\
-static struct Type *\
-HashTableType##_get_node_(struct HashTableType##Chain_ *a_chain, struct Key\
-    const *a_key, size_t *a_len)\
-{\
-	struct Type *node;\
-	*a_len = 0;\
-	TAILQ_FOREACH(node, a_chain, field) {\
-		if (equal(a_key, &node->key)) {\
-			return node;\
+	size_t i, dib;\
+	uint32_t hash;\
+	i = hash = hash_(a_key);\
+	dib = 0;\
+	for (;;) {\
+		struct HashTableType##Entry *entry;\
+		size_t d;\
+		i &= a_ht->mask;\
+		entry = &a_ht->array[i];\
+		if (NULL == entry->t) {\
+			return -1;\
 		}\
-		++*a_len;\
+		d = HASHTABLE_DIB(a_ht, entry->hash, i);\
+		if (dib > d) {\
+			return -1;\
+		}\
+		if (hash == entry->hash && equal(a_key, &entry->t->key)) {\
+			return i;\
+		}\
+		++i;\
 	}\
-	return NULL;\
+}\
+static struct HashTableType##Entry *\
+HashTableType##_insert_(struct HashTableType *a_ht, struct Type *a_t,\
+    uint32_t a_hash)\
+{\
+	struct HashTableType##Entry *ret;\
+	struct Type *t;\
+	size_t i, dib;\
+	uint32_t hash;\
+	ret = NULL;\
+	t = a_t;\
+	i = hash = a_hash;\
+	dib = 0;\
+	for (;;) {\
+		struct HashTableType##Entry *entry;\
+		size_t d;\
+		i &= a_ht->mask;\
+		entry = &a_ht->array[i];\
+		if (NULL == entry->t) {\
+			entry->hash = hash;\
+			entry->t = t;\
+			++a_ht->num;\
+			return NULL == ret ? entry : ret;\
+		}\
+		if (hash == entry->hash && equal(&t->key, &entry->t->key)) {\
+			assert(NULL == ret);\
+			return entry;\
+		}\
+		d = HASHTABLE_DIB(a_ht, entry->hash, i);\
+		if (dib > d) {\
+			struct Type *new_t;\
+			uint32_t new_hash;\
+			ret = NULL == ret ? entry : ret;\
+			new_hash = hash;\
+			hash = entry->hash;\
+			entry->hash = new_hash;\
+			new_t = t;\
+			t = entry->t;\
+			entry->t = new_t;\
+			dib = d;\
+		}\
+		++i;\
+		++dib;\
+	}\
 }\
 static void \
 HashTableType##_rehash_(struct HashTableType *a_ht, size_t a_size)\
 {\
-	struct HashTableType##Chain_ *old_table;\
-	size_t old_size, i;\
-	old_table = a_ht->table;\
-	old_size = a_ht->size;\
-	CALLOC(a_ht->table, a_size);\
-	a_ht->size = a_size;\
-	for (i = 0; a_size > i; ++i) {\
-		TAILQ_INIT(&a_ht->table[i]);\
-	}\
-	for (i = 0; old_size > i; ++i) {\
-		struct Type *cur, *next;\
-		TAILQ_FOREACH_SAFE(cur, &old_table[i], field, next) {\
-			struct HashTableType##Chain_ *chain;\
-			chain = HashTableType##_get_chain_(a_ht, &cur->key);\
-			TAILQ_INSERT_TAIL(chain, cur, field);\
+	struct HashTableType##Entry *old_array;\
+	size_t i;\
+	uint32_t old_mask;\
+	assert(IS_POW2(a_size));\
+	old_mask = a_ht->mask;\
+	old_array = a_ht->array;\
+	a_ht->mask = a_size - 1;\
+	a_ht->num = 0;\
+	CALLOC(a_ht->array, a_size);\
+	if (NULL != old_array) {\
+		for (i = 0; old_mask >= i; ++i) {\
+			struct HashTableType##Entry *entry;\
+			entry = &old_array[i];\
+			if (NULL != entry->t) {\
+				HashTableType##_insert_(a_ht, entry->t,\
+				    entry->hash);\
+			}\
 		}\
+		FREE(old_array);\
 	}\
-	FREE(old_table);\
 }\
-static struct Type *\
+FUNC_UNUSED static void \
+HashTableType##_erase(struct HashTableType *a_ht, struct HashTableType##Entry\
+    *a_entry)\
+{\
+	struct HashTableType##Entry *cur;\
+	size_t i;\
+	cur = a_entry;\
+	free_(cur->t);\
+	cur->t = NULL;\
+	i = cur - a_ht->array;\
+	for (;;) {\
+		struct HashTableType##Entry *next;\
+		size_t dib;\
+		int j;\
+		j = (i + 1) & a_ht->mask;\
+		next = &a_ht->array[j];\
+		if (NULL == next->t) {\
+			return;\
+		}\
+		dib = HASHTABLE_DIB(a_ht, next->hash, j);\
+		if (0 == dib) {\
+			return;\
+		}\
+		cur->hash = next->hash;\
+		cur->t = next->t;\
+		next->t = NULL;\
+		i = j;\
+		cur = next;\
+	}\
+}\
+static struct HashTableType##Entry *\
 HashTableType##_find(struct HashTableType *a_ht, struct Key const *a_key)\
 {\
-	struct HashTableType##Chain_ *chain;\
-	size_t dummy;\
-	chain = HashTableType##_get_chain_(a_ht, a_key);\
-	return HashTableType##_get_node_(chain, a_key, &dummy);\
+	size_t i;\
+	i = HashTableType##_find_(a_ht, a_key);\
+	return (size_t)-1 == i ? NULL : &a_ht->array[i];\
 }\
 static void \
 HashTableType##_init(struct HashTableType *a_ht)\
 {\
-	a_ht->size = 0;\
-	a_ht->table = NULL;\
+	a_ht->mask = 0;\
+	a_ht->num = 0;\
+	a_ht->array = NULL;\
 }\
-static struct Type *\
+static struct HashTableType##Entry *\
 HashTableType##_insert(struct HashTableType *a_ht, struct Type *a_t)\
 {\
-	struct HashTableType##Chain_ *chain;\
-	struct Type *node;\
-	size_t len;\
-	if (0 == a_ht->size) {\
-		HashTableType##_rehash_(a_ht, start_size);\
+	if (a_ht->num >= (9 * a_ht->mask) / 10) {\
+		uint32_t goal, size;\
+		goal = MAX(start_size, (a_ht->mask + 1));\
+		for (size = 1; goal >= size; size <<= 1)\
+			;\
+		HashTableType##_rehash_(a_ht, size);\
 	}\
-	chain = HashTableType##_get_chain_(a_ht, &a_t->key);\
-	node = HashTableType##_get_node_(chain, &a_t->key, &len);\
-	if (NULL != node) {\
-		return node;\
-	}\
-	if (HASHTABLE_COLLISION_LENGTH <= len) {\
-		HashTableType##_rehash_(a_ht, a_ht->size * 2);\
-		chain = HashTableType##_get_chain_(a_ht, &a_t->key);\
-	}\
-	TAILQ_INSERT_TAIL(chain, a_t, field);\
-	return a_t;\
+	return HashTableType##_insert_(a_ht, a_t, hash_(&a_t->key));\
 }\
 static void \
 HashTableType##_shutdown(struct HashTableType *a_ht)\
 {\
 	size_t i;\
-	if (0 == a_ht->size) {\
+	if (NULL == a_ht->array) {\
 		return;\
 	}\
-	for (i = 0; a_ht->size > i; ++i) {\
-		struct Type *cur, *next;\
-		TAILQ_FOREACH_SAFE(cur, &a_ht->table[i], field, next) {\
-			free_(cur);\
-		}\
+	for (i = 0; a_ht->mask >= i; ++i) {\
+		free_(a_ht->array[i].t);\
 	}\
-	FREE(a_ht->table);\
-	a_ht->size = 0;\
+	FREE(a_ht->array);\
+	a_ht->mask = 0;\
+	a_ht->num = 0;\
 }\
 struct HashTableType
 
