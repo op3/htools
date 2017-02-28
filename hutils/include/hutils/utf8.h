@@ -17,9 +17,9 @@
 #ifndef HUTILS_UTF8_H
 #define HUTILS_UTF8_H
 
-#include <stdlib.h>
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+#include <hutils/stdint.h>
 
 CDECLS_BEGIN
 

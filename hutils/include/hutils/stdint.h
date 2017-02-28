@@ -18,11 +18,25 @@
 #define HUTILS_STDINT_H
 
 #include <hconf/include/hutils/stdint.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-#if defined(HCONF_mSTDINT_bSTDINT_H)
+#if defined(HCONF_mSTDINT_LIMITS_bSTD_H)
 /* HCONF_OPT="nolink" */
-#	include <stdint.h>
-#elif defined(HCONF_mSTDINT_bTYPEDEF_SYS_TYPES_H)
+#elif defined(HCONF_mSTDINT_LIMITS_bCUSTOM)
+/* HCONF_OPT="nolink" */
+#	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
+#endif
+#if defined(HCONFING_mSTDINT_LIMITS)
+HCONF_TEST(size_t, (void))
+{
+	return SIZE_MAX;
+}
+#endif
+
+#if defined(HCONF_mSTDINT_TYPES_bNOTHING)
+/* HCONF_OPT="nolink" */
+#elif defined(HCONF_mSTDINT_TYPES_bTYPEDEF_SYS_TYPES_H)
 /* HCONF_OPT="nolink" */
 #	include <sys/types.h>
 typedef u_int8_t  uint8_t;
@@ -31,10 +45,8 @@ typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
 typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
-#elif defined(_MSC_VER)
-#	include <stdint.h>
 #endif
-#if defined(HCONFING_mSTDINT)
+#if defined(HCONFING_mSTDINT_TYPES)
 HCONF_TEST(void, (void))
 {
 	char pi8 [             1 == sizeof(int8_t)    ? 1 : -1];

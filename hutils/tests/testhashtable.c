@@ -18,6 +18,7 @@
 #include <htest/htest.h>
 #include <hutils/fmtmod.h>
 #include <hutils/hash.h>
+#include <hutils/string.h>
 
 #define N 1000
 
