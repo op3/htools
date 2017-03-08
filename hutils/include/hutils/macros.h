@@ -37,9 +37,9 @@
 		__pragma(warning(pop))
 #endif
 #if defined(HCONFING_mCONST_EXPR)
-HCONF_TEST(void, (void))
+HCONF_TEST
 {
-	do {} WHILE_0;
+	do { return 1; } WHILE_0;
 }
 #endif
 
@@ -60,6 +60,7 @@ HCONF_TEST(void, (void))
 #ifndef MIN
 #	define MIN(a, b) (a < b ? a : b)
 #endif
+#define OFFSETOF(s, m) ((uintptr_t)&(s).m - (uintptr_t)&(s))
 #define SGN(x) (0 > x ? -1 : 1)
 #define SQR(x) (x * x)
 #define STRINGIFY(x) #x

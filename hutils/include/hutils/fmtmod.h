@@ -39,9 +39,9 @@
 #	define PRIzx "lx"
 #endif
 #if defined(HCONFING_mFMTMOD_SIZET)
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
-	return printf("%"PRIz" %"PRIzx, (size_t)0, (size_t)0);
+	return printf("%"PRIz" %"PRIzx, (size_t)1, (size_t)1);
 }
 #endif
 
@@ -55,7 +55,7 @@ HCONF_TEST(int, (void))
 #	define PRIpx "lx"
 #endif
 #if defined(HCONFING_mFMTMOD_INTPTRT)
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
 	return printf("%"PRIp" %"PRIpx" %"PRIp" %"PRIpx,
 	    (uintptr_t)1, (uintptr_t)1, (intptr_t)1, (intptr_t)1);

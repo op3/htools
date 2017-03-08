@@ -32,7 +32,7 @@ CDECLS_BEGIN
 #	define HUTILS_CLOCK_GETTIME
 #elif defined(HCONF_mTIME_GET_bMACH)
 #	if defined(HCONFING_mTIME_GET)
-HCONF_TEST(uint64_t, (void))
+HCONF_TEST
 {
 	return mach_absolute_time();
 }
@@ -40,7 +40,7 @@ HCONF_TEST(uint64_t, (void))
 #endif
 #if defined(HCONFING_mTIME_GET) && defined(HUTILS_CLOCK_GETTIME)
 #	include <time.h>
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
 	return clock_gettime(0, NULL);
 }
@@ -49,9 +49,9 @@ HCONF_TEST(int, (void))
 #if defined(HCONF_mTIME_SLEEP_bNANOSLEEP)
 #	if defined(HCONFING_mTIME_SLEEP)
 #		include <time.h>
-HCONF_TEST(int, (struct timespec ts))
+HCONF_TEST
 {
-	return nanosleep(&ts, NULL);
+	return nanosleep(NULL, NULL);
 }
 #	endif
 #endif
@@ -59,17 +59,17 @@ HCONF_TEST(int, (struct timespec ts))
 #if defined(HCONF_mTIME_DRAFT9_bNO)
 #	if defined(HCONFING_mTIME_DRAFT9)
 #		include <time.h>
-HCONF_TEST(char *, (void))
+HCONF_TEST
 {
-	return asctime_r(NULL, NULL);
+	return NULL != asctime_r(NULL, NULL);
 }
 #	endif
 #elif defined(HCONF_mTIME_DRAFT9_bYES)
 #	if defined(HCONFING_mTIME_DRAFT9)
 #		include <time.h>
-HCONF_TEST(char *, (void))
+HCONF_TEST
 {
-	return asctime_r(NULL, NULL, 0);
+	return NULL != asctime_r(NULL, NULL, 0);
 }
 #	endif
 #endif

@@ -26,7 +26,7 @@
 #	include <pthread.h>
 #	define PTHREADS
 #	if defined(HCONFING_mTHREAD_bST_OLD)
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
 	return pthread_attr_create(NULL);
 }
@@ -36,7 +36,7 @@ HCONF_TEST(int, (void))
 #	include <pthread.h>
 #	define PTHREADS
 #	if defined(HCONFING_mTHREAD_bST_NEW)
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
 	return pthread_attr_init(NULL);
 }
@@ -46,7 +46,7 @@ HCONF_TEST(int, (void))
 #	include <pthread.h>
 #	define PTHREADS
 #	if defined(HCONFING_mTHREAD_bPTHREAD)
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
 	return pthread_attr_init(NULL);
 }

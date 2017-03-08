@@ -38,10 +38,21 @@ int hutils_snprintf_(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
 int hutils_vsnprintf_(char *, size_t, char const *, va_list);
 #endif
 #if defined(HCONFING_mNPRINTF)
-HCONF_TEST(int, (char *a_s, size_t a_n, va_list a_args))
+static int
+vsnprintf_test_(char const *a_fmt, ...)
 {
-	return snprintf(a_s, a_n, "snprintf") +
-	    vsnprintf(a_s, a_n, "vsnprintf", a_args);
+	va_list args;
+	char s[2];
+	int ret;
+
+	va_start(args, a_fmt);
+	ret = snprintf(s, sizeof s, "a") + vsnprintf(s, sizeof s, "a", args);
+	va_end(args);
+	return ret;
+}
+HCONF_TEST
+{
+	return vsnprintf_test_("");
 }
 #endif
 
@@ -51,9 +62,9 @@ HCONF_TEST(int, (char *a_s, size_t a_n, va_list a_args))
 #	define strdup _strdup
 #endif
 #if defined(HCONFING_mSTRDUP)
-HCONF_TEST(char *, (char *a_s))
+HCONF_TEST
 {
-	return strdup(a_s);
+	return NULL != strdup("");
 }
 #endif
 
@@ -65,10 +76,11 @@ size_t strlcat(char *, char const *, size_t);
 size_t strlcpy(char *, char const *, size_t);
 #endif
 #if defined(HCONFING_mSTRL)
-HCONF_TEST(size_t, (char *a_dst, char const *a_src, size_t a_dst_size))
+HCONF_TEST
 {
-	return strlcat(a_dst, a_src, a_dst_size) +
-	    strlcpy(a_dst, a_src, a_dst_size);
+	char s[2];
+
+	return strlcat(s, "", sizeof s) + strlcpy(s, "", sizeof s);
 }
 #endif
 
@@ -80,9 +92,9 @@ HCONF_TEST(size_t, (char *a_dst, char const *a_src, size_t a_dst_size))
 char *hutils_strndup_(char const *, size_t) FUNC_RETURNS;
 #endif
 #if defined(HCONFING_mSTRNDUP)
-HCONF_TEST(char *, (char *a_s, size_t a_n))
+HCONF_TEST
 {
-	return strndup(a_s, a_n);
+	return NULL != strndup("", 1);
 }
 #endif
 
@@ -96,9 +108,9 @@ char *strsignal(int) FUNC_RETURNS;
 char *hutils_strsignal_(int) FUNC_RETURNS;
 #endif
 #if defined(HCONFING_mSTRSIGNAL)
-HCONF_TEST(char *, (int a_signum))
+HCONF_TEST
 {
-	return strsignal(a_signum);
+	return NULL != strsignal(0);
 }
 #endif
 

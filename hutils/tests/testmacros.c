@@ -80,6 +80,17 @@ HTEST(MaxMin)
 	HTRY_I(-1, ==, MIN(-1, 2));
 }
 
+HTEST(OffsetOf)
+{
+	struct {
+		uint8_t	a;
+		uint32_t	b;
+	} s;
+
+	HTRY_I(0, ==, OFFSETOF(s, a));
+	HTRY_I(sizeof(int), ==, OFFSETOF(s, b));
+}
+
 HTEST(Sign)
 {
 	HTRY_I(1, ==, SGN(+10));
@@ -121,6 +132,7 @@ HTEST_SUITE(Macros)
 	HTEST_ADD(Length);
 	HTEST_ADD(Mask);
 	HTEST_ADD(MaxMin);
+	HTEST_ADD(OffsetOf);
 	HTEST_ADD(Sign);
 	HTEST_ADD(Swap);
 	HTEST_ADD(Trunc);

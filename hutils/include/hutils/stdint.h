@@ -28,9 +28,9 @@
 #	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
 #endif
 #if defined(HCONFING_mSTDINT_LIMITS)
-HCONF_TEST(size_t, (void))
+HCONF_TEST
 {
-	return SIZE_MAX;
+	return (int)SIZE_MAX;
 }
 #endif
 
@@ -47,7 +47,7 @@ typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
 #endif
 #if defined(HCONFING_mSTDINT_TYPES)
-HCONF_TEST(void, (void))
+HCONF_TEST
 {
 	char pi8 [             1 == sizeof(int8_t)    ? 1 : -1];
 	char pu8 [             1 == sizeof(uint8_t)   ? 1 : -1];
@@ -69,6 +69,7 @@ HCONF_TEST(void, (void))
 	(void)pu64;
 	(void)pip;
 	(void)pup;
+	return 1;
 }
 #endif
 

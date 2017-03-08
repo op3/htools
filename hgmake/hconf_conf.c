@@ -357,10 +357,11 @@ resolve_variables(struct Branch *a_branch)
 void
 try()
 {
+	pid_t pid;
 	struct Module *module;
 	struct Bucket *bucket;
 	char *cppflags, *cflags, *src;
-	int ret;
+	int ret, status;
 
 	if (TAILQ_EMPTY(&g_module_list)) {
 		return;
@@ -395,9 +396,23 @@ try()
 	    bucket->var[VAR_LIBS]);
 	free(cppflags);
 	free(src);
-	if (0 == ret) {
+	if (0 != ret) {
+		goto try_failed;
+	}
+	pid = fork();
+	if (-1 == pid) {
+		err_(EXIT_FAILURE, "fork()");
+	} else if (0 == pid) {
+		execlp(g_filename_main_bin, g_filename_main_bin, NULL);
+		err_(EXIT_FAILURE, "exec(%s)", g_filename_main_bin);
+	}
+	if (-1 == waitpid(pid, &status, 0)) {
+		err_(EXIT_FAILURE, "wait(%s)", g_filename_main_bin);
+	}
+	if (WIFEXITED(status) && 0 == WEXITSTATUS(status)) {
 		goto try_passed;
 	}
+	log_("HCONF_TEST execution failed.");
 try_failed:
 	log_("Failed.\n");
 	branch_free(&module->branch);
@@ -439,8 +454,8 @@ write_files(int a_write_final)
 	fprintf(f, "#ifndef HCONF_%s\n", g_filename_upper);
 	fprintf(f, "#define HCONF_%s\n", g_filename_upper);
 	if (!a_write_final) {
-		fprintf(f, "#define HCONF_TEST(ret, args) extern ret "
-		    "hconf_test_ args; ret hconf_test_ args\n");
+		fprintf(f, "#define HCONF_TEST extern int hconf_test_(void); "
+		    "int hconf_test_()\n");
 	}
 	TAILQ_FOREACH(module, &g_module_list, next) {
 		fprintf(f, "#define HCONF_m%s_b%s\n", module->name,
@@ -594,7 +609,13 @@ main(int argc, char const *const *argv)
 			    g_filename_main_c);
 		}
 		fprintf(file, "#include <%s>\n", g_filename);
-		fprintf(file, "int main(void) { return 0; }\n");
+		fprintf(file, "int main(void) {\n");
+		fprintf(file, "#ifdef HCONF_TEST_RUN\n");
+		fprintf(file, "return !hconf_test_();\n");
+		fprintf(file, "#else\n");
+		fprintf(file, "return 0;\n");
+		fprintf(file, "#endif\n");
+		fprintf(file, "}\n");
 		fclose(file);
 	}
 

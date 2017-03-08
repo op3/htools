@@ -32,9 +32,10 @@ int	getopt(int, char *const *, char const *) FUNC_RETURNS;
 CDECLS_END
 #endif
 #if defined(HCONFING_mGETOPT)
-HCONF_TEST(int, (int argc, char **argv))
+#	include <stdlib.h>
+HCONF_TEST
 {
-	return getopt(argc, argv, "b");
+	return getopt(0, NULL, NULL);
 }
 #endif
 

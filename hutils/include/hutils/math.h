@@ -34,9 +34,9 @@
 /* HCONF_LIBS=-lm */
 #endif
 #if defined(HCONFING_mMATH)
-HCONF_TEST(double, (double a_v))
+HCONF_TEST
 {
-	return sqrt(M_PI * a_v);
+	return (int)sqrt(M_PI);
 }
 #endif
 

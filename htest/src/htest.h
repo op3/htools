@@ -22,9 +22,9 @@
 #if defined(HCONF_mHTEST_bPOSIX)
 #	include <unistd.h>
 #	if defined(HCONFING_mHTEST_bPOSIX)
-HCONF_TEST(pid_t, (void))
+HCONF_TEST
 {
-	return fork();
+	return (int)fork();
 }
 #	endif
 

@@ -37,46 +37,61 @@
 #	include <netinet/in.h>
 #endif
 #if defined(HCONFING_mIPPROTO_UDP)
-HCONF_TEST(int, (void))
+HCONF_TEST
 {
 	return IPPROTO_UDP;
 }
 #endif
 
-#if defined(HCONF_mUDP_bGETADDRINFO)
+#if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO)
 #	include <netdb.h>
-#	if defined(HCONFING_mUDP)
-HCONF_TEST(int, (void))
+#	if defined(HCONFING_mUDP_LOOKUP)
+HCONF_TEST
 {
 	return getaddrinfo(0, 0, 0, 0);
 }
 #	endif
-#elif defined(HCONF_mUDP_bGETHOSTBYNAME_SOCKLEN)
+#elif defined(HCONF_mUDP_LOOKUP_bGETHOSTBYNAME_SOCKLEN)
 /* HCONF_LIBS=-lnetinet */
 #	include <netdb.h>
 #	define socklen_t int
-#	if defined(HCONFING_mUDP)
-HCONF_TEST(struct hostent *, (socklen_t *a_len))
+#	if defined(HCONFING_mUDP_LOOKUP)
+HCONF_TEST
 {
-	return gethostbyname(0) + recvfrom(0, 0, 0, 0, 0, a_len);
+	socklen_t len;
+
+	gethostbyname(0);
+	return recvfrom(0, 0, 0, 0, 0, &len);
 }
 #	endif
 #endif
 
 #if defined(HCONF_mUDP_EVENT_bPOLL)
 #	include <poll.h>
-#	if defined(HCONFING_mUDP)
-HCONF_TEST(int, (struct pollfd *a_fds, int a_nfds, int a_ms))
+#	if defined(HCONFING_mUDP_EVENT)
+#		define HCONF_TEST_RUN
+HCONF_TEST
 {
-	return poll(a_fds, a_nfds, a_ms);
+	struct pollfd fds[1];
+	fds[0].fd = 0;
+	fds[0].events = POLLIN;
+	return -1 != poll(fds, 1, 0);
 }
 #	endif
-#elif defined(HCONF_mUDP_EVENT_bSELECT)
+#elif defined(HCONF_mUDP_EVENT_bSYS_SELECT_H)
 #	include <sys/select.h>
-#	if defined(HCONFING_mUDP)
-HCONF_TEST(int, (fd_set *a_fds, int a_nfds, struct timeval *a_timeout))
+#	if defined(HCONFING_mUDP_EVENT)
+HCONF_TEST
 {
-	return select(a_nfds + 1, a_fds, a_fds, a_fds, a_timeout);
+	return select(0, NULL, NULL, NULL, NULL);
+}
+#	endif
+#elif defined(HCONF_mUDP_EVENT_bSELECT_TIME_H)
+#	include <time.h>
+#	if defined(HCONFING_mUDP_EVENT)
+HCONF_TEST
+{
+	return select(0, NULL, NULL, NULL, NULL);
 }
 #	endif
 #endif

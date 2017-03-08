@@ -25,18 +25,22 @@
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
 #	include <dirent.h>
 #	if defined(HCONFING_mDIR)
-HCONF_TEST(int, (void *a_p))
+HCONF_TEST
 {
-	return readdir_r(a_p, a_p, a_p);
+	DIR *dir;
+	struct dirent entry, *p;
+	dir = opendir(".");
+	return readdir_r(dir, &entry, &p);
 }
 #	endif
 #elif defined(HCONF_mDIR_bDIRENT_ANCIENT)
 #	include <sys/types.h>
 #	include <dirent.h>
 #	if defined(HCONFING_mDIR)
-HCONF_TEST(struct dirent *, (void))
+#		include <stdlib.h>
+HCONF_TEST
 {
-	return readdir_r(0, 0);
+	return NULL != readdir_r(NULL, NULL);
 }
 #	endif
 #endif
