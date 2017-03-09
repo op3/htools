@@ -38,7 +38,7 @@
 #if defined(HCONFING_mMATH)
 HCONF_TEST
 {
-	return 0.0f < sqrt(i);
+	return 0.0f < sqrt(M_PI * i);
 }
 #endif
 
