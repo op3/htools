@@ -41,7 +41,17 @@ enum LexerType {
 
 typedef size_t (*LexerCallback)(void *, char *, size_t);
 
-struct Lexer;
+struct Lexer {
+	LexerCallback	callback;
+	void	*callback_data;
+	enum	LexerError error;
+	unsigned	int line_no;
+	unsigned	int col_no;
+	char	buf[256];
+	size_t	ofs;
+	size_t	buf_end;
+	int	buf_ended;
+};
 struct LexerToken {
 	enum	LexerType type;
 	char	*str;
@@ -49,12 +59,8 @@ struct LexerToken {
 
 struct Lexer	*lexer_create(LexerCallback, void *) FUNC_RETURNS;
 size_t		lexer_cstr_callback(void *, char *, size_t) FUNC_RETURNS;
-int		lexer_expect_symbol(struct Lexer *, char) FUNC_RETURNS;
 void		lexer_free(struct Lexer **);
-int		lexer_get_col_no(struct Lexer const *) FUNC_PURE FUNC_RETURNS;
-enum LexerError	lexer_get_error(struct Lexer const *) FUNC_RETURNS;
-int		lexer_get_line_no(struct Lexer const *) FUNC_PURE
-FUNC_RETURNS;
+char const	*lexer_get_strerror(struct Lexer const *) FUNC_RETURNS;
 int		lexer_skip(struct Lexer *, char);
 int		lexer_token_get(struct Lexer *, struct LexerToken *)
 	FUNC_RETURNS;

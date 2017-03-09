@@ -327,8 +327,8 @@ load(struct Lexer *a_lexer)
 
 		token.str = NULL;
 #define LOAD_ERROR(descr) do {\
-		fprintf(stderr, "%d:%d: "descr".\n", \
-		    lexer_get_line_no(a_lexer), lexer_get_col_no(a_lexer));\
+		fprintf(stderr, "%d:%d: "descr".\n", a_lexer->line_no,\
+		    a_lexer->col_no);\
 		FREE(token.str);\
 		goto load_error;\
 	} WHILE_0

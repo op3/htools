@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,30 +29,31 @@ CDECLS_BEGIN
 #	include <stdio.h>
 #elif defined(HCONF_mNPRINTF_bPROTOTYPE)
 int snprintf(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
-int vsnprintf(char *, size_t, char const *, va_list);
+int vsnprintf(char *, size_t, char const *, va_list) FUNC_PRINTF(3, 0);
 #elif defined(HCONF_mNPRINTF_bUNSAFE)
 /* HCONF_SRC=src/string.c */
 #	define snprintf hutils_snprintf_
 #	define vsnprintf hutils_vsnprintf_
 int hutils_snprintf_(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
-int hutils_vsnprintf_(char *, size_t, char const *, va_list);
+int hutils_vsnprintf_(char *, size_t, char const *, va_list) FUNC_PRINTF(3,
+    0);
 #endif
 #if defined(HCONFING_mNPRINTF)
 static int
-vsnprintf_test_(char const *a_fmt, ...)
+vsnprintf_wrapper_(char *a_fmt, ...)
 {
 	va_list args;
 	char s[2];
 	int ret;
-
 	va_start(args, a_fmt);
-	ret = snprintf(s, sizeof s, "a") + vsnprintf(s, sizeof s, "a", args);
+	ret = vsnprintf(s, sizeof s, a_fmt, args);
 	va_end(args);
 	return ret;
 }
 HCONF_TEST
 {
-	return vsnprintf_test_("");
+	char s[2];
+	return snprintf(s, sizeof s, "%d", i) + vsnprintf_wrapper_("%d", i);
 }
 #endif
 
@@ -64,6 +65,7 @@ HCONF_TEST
 #if defined(HCONFING_mSTRDUP)
 HCONF_TEST
 {
+	(void)i;
 	return NULL != strdup("");
 }
 #endif
@@ -79,7 +81,7 @@ size_t strlcpy(char *, char const *, size_t);
 HCONF_TEST
 {
 	char s[2];
-
+	(void)i;
 	return strlcat(s, "", sizeof s) + strlcpy(s, "", sizeof s);
 }
 #endif
@@ -94,7 +96,8 @@ char *hutils_strndup_(char const *, size_t) FUNC_RETURNS;
 #if defined(HCONFING_mSTRNDUP)
 HCONF_TEST
 {
-	return NULL != strndup("", 1);
+	(void)i;
+	return NULL != strndup("", 0);
 }
 #endif
 
@@ -108,9 +111,11 @@ char *strsignal(int) FUNC_RETURNS;
 char *hutils_strsignal_(int) FUNC_RETURNS;
 #endif
 #if defined(HCONFING_mSTRSIGNAL)
+#	include <signal.h>
 HCONF_TEST
 {
-	return NULL != strsignal(0);
+	(void)i;
+	return NULL != strsignal(SIGSEGV);
 }
 #endif
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,7 @@ CDECLS_BEGIN
 #	if defined(HCONFING_mTIME_GET)
 HCONF_TEST
 {
+	(void)i;
 	return mach_absolute_time();
 }
 #	endif
@@ -42,6 +43,7 @@ HCONF_TEST
 #	include <time.h>
 HCONF_TEST
 {
+	(void)i;
 	return clock_gettime(0, NULL);
 }
 #endif
@@ -51,6 +53,7 @@ HCONF_TEST
 #		include <time.h>
 HCONF_TEST
 {
+	(void)i;
 	return nanosleep(NULL, NULL);
 }
 #	endif
@@ -61,6 +64,7 @@ HCONF_TEST
 #		include <time.h>
 HCONF_TEST
 {
+	(void)i;
 	return NULL != asctime_r(NULL, NULL);
 }
 #	endif
@@ -69,6 +73,7 @@ HCONF_TEST
 #		include <time.h>
 HCONF_TEST
 {
+	(void)i;
 	return NULL != asctime_r(NULL, NULL, 0);
 }
 #	endif

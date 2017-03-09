@@ -17,7 +17,6 @@
 #ifndef HUTILS_MATH_H
 #define HUTILS_MATH_H
 
-#include <math.h>
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
@@ -33,10 +32,13 @@
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 /* HCONF_LIBS=-lm */
 #endif
+
+#include <math.h>
+
 #if defined(HCONFING_mMATH)
 HCONF_TEST
 {
-	return (int)sqrt(M_PI);
+	return 0.0f < sqrt(i);
 }
 #endif
 

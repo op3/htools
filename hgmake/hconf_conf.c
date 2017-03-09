@@ -454,8 +454,8 @@ write_files(int a_write_final)
 	fprintf(f, "#ifndef HCONF_%s\n", g_filename_upper);
 	fprintf(f, "#define HCONF_%s\n", g_filename_upper);
 	if (!a_write_final) {
-		fprintf(f, "#define HCONF_TEST extern int hconf_test_(void); "
-		    "int hconf_test_()\n");
+		fprintf(f, "#define HCONF_TEST extern int hconf_test_(int); "
+		    "int hconf_test_(int i)\n");
 	}
 	TAILQ_FOREACH(module, &g_module_list, next) {
 		fprintf(f, "#define HCONF_m%s_b%s\n", module->name,

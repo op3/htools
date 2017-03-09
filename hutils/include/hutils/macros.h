@@ -39,6 +39,7 @@
 #if defined(HCONFING_mCONST_EXPR)
 HCONF_TEST
 {
+	(void)i;
 	do { return 1; } WHILE_0;
 }
 #endif

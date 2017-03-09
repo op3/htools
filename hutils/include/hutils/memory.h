@@ -22,35 +22,18 @@
 #include <hutils/fmtmod.h>
 #include <hutils/macros.h>
 
-#define CALLOC(ptr, num)\
-	do {\
-		size_t n_ = num;\
-		ptr = calloc(n_, sizeof *ptr);\
-		if (NULL == ptr) {\
-			hutils_err(EXIT_FAILURE, __FILE__":%d: "\
-			    "calloc(%"PRIz",%"PRIz")", __LINE__, n_,\
-			    sizeof *ptr);\
-		}\
-	} WHILE_0
+#define CALLOC(ptr, num) ptr = calloc(num, sizeof *ptr)
 #define DUP(dst, src)\
 	do {\
 		MALLOC(dst, sizeof *dst);\
-		COPY(*dst, src);\
+		COPY(*dst, *src);\
 	} WHILE_0
 #define FREE(ptr)\
 	do {\
 		free(ptr);\
 		ptr = NULL;\
 	} WHILE_0
-#define MALLOC(ptr, size)\
-	do {\
-		size_t s_ = size;\
-		ptr = malloc(s_);\
-		if (NULL == ptr) {\
-			hutils_err(EXIT_FAILURE, __FILE__":%d: "\
-			    "malloc(%"PRIz")", __LINE__, s_);\
-		}\
-	} WHILE_0
+#define MALLOC(ptr, size) ptr = malloc(size)
 
 /* The following from OpenBSD /usr/src/lib/libc/stdlib/reallocarray.c. */
 #ifndef MUL_NO_OVERFLOW
@@ -58,7 +41,6 @@
 #endif
 #define REALLOCARRAY(ptr, num)\
 	do {\
-		void *ptr_;\
 		size_t n_ = num;\
 		if ((n_ >= MUL_NO_OVERFLOW ||\
 		    sizeof *ptr >= MUL_NO_OVERFLOW) &&\
@@ -68,13 +50,7 @@
 			    sizeof *ptr);\
 			exit(EXIT_FAILURE);\
 		}\
-		ptr_ = realloc(ptr, n_ * sizeof *ptr);\
-		if (NULL == ptr_) {\
-			hutils_err(EXIT_FAILURE, __FILE__":%d: "\
-			    "realloc(%"PRIz"x%"PRIz")", __LINE__, n_,\
-			    sizeof *ptr);\
-		}\
-		ptr = ptr_;\
+		ptr = realloc(ptr, n_ * sizeof *ptr);\
 	} WHILE_0
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,8 @@
 #if defined(HCONFING_mSTDINT_LIMITS)
 HCONF_TEST
 {
-	return (int)SIZE_MAX;
+	(void)i;
+	return 0 != SIZE_MAX;
 }
 #endif
 
@@ -59,6 +60,7 @@ HCONF_TEST
 	char pu64[             8 == sizeof(uint64_t)  ? 1 : -1];
 	char pip [sizeof(void *) == sizeof(intptr_t)  ? 1 : -1];
 	char pup [sizeof(void *) == sizeof(uintptr_t) ? 1 : -1];
+	(void)i;
 	(void)pi8;
 	(void)pu8;
 	(void)pi16;

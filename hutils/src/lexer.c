@@ -21,23 +21,9 @@
 #include <string.h>
 #include <hutils/memory.h>
 
-#define BUF_SIZE 256
-
 enum {
 	PEEK_EOF = -1,
 	PEEK_OVERFLOW = -2
-};
-
-struct Lexer {
-	LexerCallback	callback;
-	void	*callback_data;
-	enum	LexerError error;
-	int	line_no;
-	int	col;
-	char	buf[BUF_SIZE];
-	size_t	ofs;
-	size_t	buf_end;
-	int	buf_ended;
 };
 
 static char	*extract(struct Lexer *, size_t) FUNC_RETURNS;
@@ -63,9 +49,9 @@ extract(struct Lexer *a_lexer, size_t a_len)
 		++a_lexer->ofs;
 		if ('\n' == c) {
 			++a_lexer->line_no;
-			a_lexer->col = 1;
+			a_lexer->col_no = 1;
 		} else {
-			++a_lexer->col;
+			++a_lexer->col_no;
 		}
 	}
 	str[i] = '\0';
@@ -82,7 +68,7 @@ lexer_create(LexerCallback a_callback, void *a_callback_data)
 	lexer->callback_data = a_callback_data;
 	lexer->error = LEXER_ERROR_NONE;
 	lexer->line_no = 1;
-	lexer->col = 1;
+	lexer->col_no = 1;
 	return lexer;
 }
 
@@ -110,21 +96,6 @@ lexer_cstr_callback(void *a_src, char *a_dst, size_t a_dst_size)
 	return len;
 }
 
-/* Expects 'a_ch' as the next token. */
-int
-lexer_expect_symbol(struct Lexer *a_lexer, char a_ch)
-{
-	struct LexerToken token;
-	int ret;
-
-	if (!lexer_token_get(a_lexer, &token)) {
-		return 0;
-	}
-	ret = a_ch == token.str[0];
-	FREE(token.str);
-	return ret;
-}
-
 void
 lexer_free(struct Lexer **a_lexer)
 {
@@ -135,24 +106,6 @@ lexer_free(struct Lexer **a_lexer)
 		return;
 	}
 	FREE(*a_lexer);
-}
-
-int
-lexer_get_col_no(struct Lexer const *a_lexer)
-{
-	return a_lexer->col;
-}
-
-enum LexerError
-lexer_get_error(struct Lexer const *a_lexer)
-{
-	return a_lexer->error;
-}
-
-int
-lexer_get_line_no(struct Lexer const *a_lexer)
-{
-	return a_lexer->line_no;
 }
 
 int
@@ -167,10 +120,10 @@ lexer_skip(struct Lexer *a_lexer, char a_c)
 			return 0;
 		}
 		++a_lexer->ofs;
-		++a_lexer->col;
+		++a_lexer->col_no;
 		if ('\n' == c) {
 			++a_lexer->line_no;
-			a_lexer->col = 1;
+			a_lexer->col_no = 1;
 		}
 		if (a_c == c) {
 			return 1;
@@ -192,12 +145,12 @@ lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 				break;
 			}
 			++a_lexer->ofs;
-			++a_lexer->col;
+			++a_lexer->col_no;
 		}
 		if ('#' == c) {
 			do {
 				++a_lexer->ofs;
-				++a_lexer->col;
+				++a_lexer->col_no;
 				c = peek_char(a_lexer, 0);
 			} while (0 < c && '\n' != c);
 		}
@@ -208,14 +161,14 @@ lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 		if ('\n' == c) {
 			++a_lexer->ofs;
 			++a_lexer->line_no;
-			a_lexer->col = 1;
+			a_lexer->col_no = 1;
 			continue;
 		}
 		if ('_' == c || isalpha(c)) {
 			size_t len;
 
 			a_token->type = LEXER_ALNUM;
-			for (len = 1; BUF_SIZE > len; ++len) {
+			for (len = 1; LENGTH(a_lexer->buf) > len; ++len) {
 				c = peek_char(a_lexer, len);
 				if ('_' != c && !isalnum(c)) {
 					break;
@@ -229,8 +182,8 @@ lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 
 			a_token->type = LEXER_LITERAL;
 			++a_lexer->ofs;
-			++a_lexer->col;
-			for (len = 0; BUF_SIZE > len; ++len) {
+			++a_lexer->col_no;
+			for (len = 0; LENGTH(a_lexer->buf) > len; ++len) {
 				c = peek_char(a_lexer, len);
 				if (PEEK_EOF == c) {
 					a_token->type = LEXER_ERROR;
@@ -244,7 +197,7 @@ lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 			}
 			a_token->str = extract(a_lexer, len);
 			++a_lexer->ofs;
-			++a_lexer->col;
+			++a_lexer->col_no;
 			return 1;
 		}
 		if ('0' == c && 'x' == peek_char(a_lexer, 1)) {
@@ -254,11 +207,11 @@ lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 				a_token->type = LEXER_ERROR;
 				a_lexer->error = LEXER_ERROR_INVALID_HEX;
 				a_lexer->ofs += 2;
-				a_lexer->col += 2;
+				a_lexer->col_no += 2;
 				return 0;
 			}
 			a_token->type = LEXER_HEX;
-			for (len = 3; BUF_SIZE > len; ++len) {
+			for (len = 3; LENGTH(a_lexer->buf) > len; ++len) {
 				c = peek_char(a_lexer, len);
 				if (!isxdigit(c)) {
 					break;
@@ -316,28 +269,30 @@ peek_char(struct Lexer *a_lexer, size_t a_ofs)
 {
 	size_t ofs;
 
-	if (BUF_SIZE <= a_ofs) {
+	if (LENGTH(a_lexer->buf) <= a_ofs) {
 		return PEEK_OVERFLOW;
 	}
 	ofs = a_lexer->ofs + a_ofs;
 	if (ofs >= a_lexer->buf_end) {
-		char buf[BUF_SIZE];
+		char buf[LENGTH(a_lexer->buf)];
 		size_t buf_first, buf_last, len, ret;
 
 		if (a_lexer->buf_ended) {
 			return PEEK_EOF;
 		}
-		len = BUF_SIZE - (a_lexer->buf_end - a_lexer->ofs);
+		len = LENGTH(a_lexer->buf) - (a_lexer->buf_end -
+		    a_lexer->ofs);
 		ret = a_lexer->callback(a_lexer->callback_data, buf, len);
 		if (0 == ret) {
 			return PEEK_EOF;
 		}
-		buf_first = (BUF_SIZE - 1) & a_lexer->buf_end;
-		buf_last = (BUF_SIZE - 1) & (a_lexer->buf_end + len - 1);
+		buf_first = (LENGTH(a_lexer->buf) - 1) & a_lexer->buf_end;
+		buf_last = (LENGTH(a_lexer->buf) - 1) & (a_lexer->buf_end +
+		    len - 1);
 		if (buf_first > buf_last) {
 			size_t len1;
 
-			len1 = BUF_SIZE - buf_first;
+			len1 = LENGTH(a_lexer->buf) - buf_first;
 			memmove(a_lexer->buf + buf_first, buf, len1);
 			memmove(a_lexer->buf, buf + len1, len - len1);
 		} else {
@@ -348,7 +303,7 @@ peek_char(struct Lexer *a_lexer, size_t a_ofs)
 			a_lexer->buf_ended = 1;
 		}
 	}
-	return a_lexer->buf[(BUF_SIZE - 1) & ofs];
+	return a_lexer->buf[(LENGTH(a_lexer->buf) - 1) & ofs];
 }
 
 size_t

@@ -39,6 +39,7 @@
 #if defined(HCONFING_mIPPROTO_UDP)
 HCONF_TEST
 {
+	(void)i;
 	return IPPROTO_UDP;
 }
 #endif
@@ -48,6 +49,7 @@ HCONF_TEST
 #	if defined(HCONFING_mUDP_LOOKUP)
 HCONF_TEST
 {
+	(void)i;
 	return getaddrinfo(0, 0, 0, 0);
 }
 #	endif
@@ -60,6 +62,7 @@ HCONF_TEST
 {
 	socklen_t len;
 
+	(void)i;
 	gethostbyname(0);
 	return recvfrom(0, 0, 0, 0, 0, &len);
 }
@@ -73,6 +76,7 @@ HCONF_TEST
 HCONF_TEST
 {
 	struct pollfd fds[1];
+	(void)i;
 	fds[0].fd = 0;
 	fds[0].events = POLLIN;
 	return -1 != poll(fds, 1, 0);
@@ -83,6 +87,7 @@ HCONF_TEST
 #	if defined(HCONFING_mUDP_EVENT)
 HCONF_TEST
 {
+	(void)i;
 	return select(0, NULL, NULL, NULL, NULL);
 }
 #	endif
@@ -91,6 +96,7 @@ HCONF_TEST
 #	if defined(HCONFING_mUDP_EVENT)
 HCONF_TEST
 {
+	(void)i;
 	return select(0, NULL, NULL, NULL, NULL);
 }
 #	endif

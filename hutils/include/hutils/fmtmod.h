@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,7 @@
 #if defined(HCONFING_mFMTMOD_SIZET)
 HCONF_TEST
 {
-	return printf("%"PRIz" %"PRIzx, (size_t)1, (size_t)1);
+	return printf("%"PRIz" %"PRIzx, (size_t)i, (size_t)i);
 }
 #endif
 
@@ -58,7 +58,7 @@ HCONF_TEST
 HCONF_TEST
 {
 	return printf("%"PRIp" %"PRIpx" %"PRIp" %"PRIpx,
-	    (uintptr_t)1, (uintptr_t)1, (intptr_t)1, (intptr_t)1);
+	    (uintptr_t)i, (uintptr_t)i, (intptr_t)i, (intptr_t)i);
 }
 #endif
 
