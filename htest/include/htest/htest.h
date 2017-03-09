@@ -31,6 +31,8 @@
 #include <hutils/err.h>
 #include <hutils/macros.h>
 
+CDECLS_BEGIN
+
 #if defined(HTEST_GCOV_FLUSH)
 #	define GCOV_FLUSH __gcov_flush()
 void __gcov_flush(void);
@@ -239,5 +241,7 @@ void	htest_output_suppress_(void);
 void	htest_set_color_(HTEST_COLOR_);
 void	htest_suite_install_sighandler_(void);
 void	htest_try_install_sighandler_(void);
+
+CDECLS_END
 
 #endif

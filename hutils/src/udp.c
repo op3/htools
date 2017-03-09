@@ -115,14 +115,13 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 	struct pollfd pfd[2];
 	int nfds, ret;
 
-	nfds = 0;
-	pfd[nfds].fd = a_socket;
-	pfd[nfds].events = POLLIN;
-	++nfds;
+	pfd[0].fd = a_socket;
+	pfd[0].events = POLLIN;
+	nfds = 1;
 	if (0 < a_fd_extra) {
-		pfd[nfds].fd = a_fd_extra;
-		pfd[nfds].events = POLLIN;
-		++nfds;
+		pfd[1].fd = a_fd_extra;
+		pfd[1].events = POLLIN;
+		nfds = 2;
 	}
 	ret = poll(pfd, nfds, a_timeout * 1e3);
 	if (-1 == ret && EINTR != errno) {
@@ -131,7 +130,7 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 	if (1 > ret) {
 		return 0;
 	}
-	if (POLLIN & pfd[1].revents) {
+	if (-1 != a_fd_extra && POLLIN & pfd[1].revents) {
 		return 2;
 	}
 	return 1;
@@ -156,7 +155,7 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 	if (1 > ret) {
 		return 0;
 	}
-	if (FD_ISSET(a_fd_extra, &socks)) {
+	if (-1 != a_fd_extra && FD_ISSET(a_fd_extra, &socks)) {
 		return 2;
 	}
 	return 1;
