@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,19 +18,7 @@
 #include <hutils/macros.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_mDIR_bDIRENT)
-#	define DO_DIRENT
-#	define READDIR_R(a_dir, a_result) do {\
-	if (0 != readdir_r(a_dir->dir, a_dir->entry, &a_result)) {\
-		a_result = NULL;\
-	}\
-} WHILE_0
-#elif defined(HCONF_mDIR_bDIRENT_ANCIENT)
-#	define DO_DIRENT
-#	define READDIR_R(a_dir, a_result) do {\
-	a_result = readdir_r(a_dir->dir, a_dir->entry);\
-} WHILE_0
-#elif defined(_MSC_VER)
+#if defined(_MSC_VER)
 #	include <windows.h>
 #	include <hutils/string.h>
 
@@ -104,9 +92,7 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 	return 1;
 }
 
-#endif
-
-#if defined(DO_DIRENT)
+#else
 
 #	include <dirent.h>
 #	include <stddef.h>
@@ -167,7 +153,7 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 	if (a_dir->is_done) {
 		return 0;
 	}
-	READDIR_R(a_dir, result);
+	HUTILS_READDIR(a_dir->dir, *a_dir->entry, result);
 	if (NULL == result) {
 		a_dir->is_done = 1;
 		a_entry->name = NULL;
