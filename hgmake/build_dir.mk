@@ -15,6 +15,4 @@
 ifeq (,$(BUILD_MODE))
  BUILD_MODE=debug
 endif
-ifeq (,$(BUILD_DIR))
- BUILD_DIR:=$(shell echo build_`$(CC) -dumpmachine`_`$(CC) -dumpversion`_$(BUILD_MODE))
-endif
+BUILD_DIR:=$(shell echo build_`$(CC) -dumpmachine`_`$(CC) -dumpversion`_$(BUILD_MODE))

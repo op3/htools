@@ -202,7 +202,6 @@ struct HTestSuite g_htest_suite_list_[] = {
 		htest_try_install_sighandler_();\
 		if (0 == setjmp(g_htest_try_jmp_buf_)) {\
 			expr;\
-			GCOV_FLUSH;\
 			HTRY_FAIL_HEADER_;\
 			printf("Expected signal.\n");\
 			HTRY_FAIL_FOOTER_;\

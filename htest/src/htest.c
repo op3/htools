@@ -70,11 +70,11 @@ suite_sighandler(int a_signum)
 	printf("  Fail:");
 	htest_set_color_(RESET);
 	printf("Caught signal \"%s\".\n", strsignal(a_signum));
-	GCOV_FLUSH;
 #if defined(SUPPORT_JMP)
 	htest_output_suppress_();
 	longjmp(g_suite_jmp_buf, 1);
 #else
+	GCOV_FLUSH;
 	_exit(EXIT_FAILURE);
 #endif
 }
@@ -83,10 +83,10 @@ void
 try_sighandler(int a_signum)
 {
 	(void)a_signum;
-	GCOV_FLUSH;
 #if defined(SUPPORT_JMP)
 	longjmp(g_htest_try_jmp_buf_, 1);
 #else
+	GCOV_FLUSH;
 	_exit(EXIT_FAILURE);
 #endif
 }
@@ -272,7 +272,6 @@ main(int const argc, char **const argv)
 					suite->suite(c_color_test,
 					    c_color_fail, RESET, test_index,
 					    &test_enumerator, &passed);
-					GCOV_FLUSH;
 				} else {
 					htest_set_color_(c_color_fail);
 					printf("  Fail:");
