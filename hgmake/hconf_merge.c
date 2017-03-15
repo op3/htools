@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +25,8 @@ main(int argc, char const **argv)
 
 	merge(&bucket, argc - 1, argv + 1);
 	for (i = 0; VAR_OUTPUT_NUM > i; ++i) {
-		puts(bucket.var[i]);
+		puts(NULL == bucket.var[i] ? "" : bucket.var[i]);
+		free(bucket.var[i]);
 	}
 	return 0;
 }

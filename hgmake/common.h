@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,6 @@
 #include <stdlib.h>
 
 #define LENGTH(arr) (sizeof(arr) / sizeof *(arr))
-#define STR_SIZ 1024
 #define STRBCMP(str, ptn) strncmp(str, ptn, sizeof ptn - 1)
 #define STRECMP(str, ptn) strcmp(str + strlen(str) - sizeof ptn + 1, ptn)
 #define STRCTV_BEGIN strctv_(
@@ -33,19 +32,18 @@ enum VariableEnum {
 	VAR_LDFLAGS,
 	VAR_LIBS,
 	VAR_OUTPUT_NUM,
-	VAR_SRC,
-	VAR_DOLINK,
+	VAR_SRC = VAR_OUTPUT_NUM,
 	VAR_INPUT_NUM
 };
 
 struct Bucket {
-	char	var[VAR_INPUT_NUM][STR_SIZ];
+	char	*var[VAR_INPUT_NUM];
 	int	do_link;
 };
 
 extern char const *strctv_sentinel_;
 
-void	cat_str(char *, char const *, size_t);
+void	cat_str(char **, char const *);
 void	err_(int, char const *, ...);
 void	errx_(int, char const *, ...);
 void	merge(struct Bucket *, int, char const *const *);

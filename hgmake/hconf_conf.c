@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -283,7 +283,7 @@ resolve_variables(struct Branch *a_branch)
 	FILE *file, *pip;
 	struct Bucket *bucket;
 	struct Variable *var;
-	size_t line_i;
+	size_t line_i, i;
 
 	/* Generate variable extractor script. */
 	file = fopen(g_filename_sh, "wb");
@@ -291,6 +291,9 @@ resolve_variables(struct Branch *a_branch)
 		err_(EXIT_FAILURE, "fopen(%s, wb)", g_filename_sh);
 	}
 	bucket = &a_branch->bucket;
+	for (i = 0; LENGTH(bucket->var) > i; ++i) {
+		free(bucket->var[i]);
+	}
 	bucket->do_link = 1;
 	TAILQ_FOREACH(var, &a_branch->var_list, next) {
 		if (0 == STRBCMP(var->expr, "HCONF_SRC")) {
@@ -298,18 +301,14 @@ resolve_variables(struct Branch *a_branch)
 
 			p = strchr(var->expr, '=');
 			assert(NULL != p);
-			++p;
-			*bucket->var[VAR_SRC] = '\0';
-			cat_str(bucket->var[VAR_SRC], p, sizeof
-			    bucket->var[VAR_SRC]);
+			cat_str(&bucket->var[VAR_SRC], p + 1);
 		} else if (0 == STRBCMP(var->expr, "HCONF_OPT")) {
 			char const *p;
 			char const *nolink;
 
 			p = strchr(var->expr, '=');
 			assert(NULL != p);
-			++p;
-			nolink = strstr(p, "nolink");
+			nolink = strstr(p + 1, "nolink");
 			if (NULL != nolink) {
 				bucket->do_link = 0;
 			}
@@ -332,7 +331,7 @@ resolve_variables(struct Branch *a_branch)
 		err_(EXIT_FAILURE, "popen(%s)", g_filename_sh);
 	}
 	for (line_i = 0;; ++line_i) {
-		char line[STR_SIZ];
+		char line[65536];
 		char *p;
 
 		if (NULL == fgets(line, sizeof line, pip)) {
@@ -345,7 +344,7 @@ resolve_variables(struct Branch *a_branch)
 		for (p = line; '\0' != *p && '\n' != *p; ++p)
 			;
 		*p = '\0';
-		memmove(bucket->var[line_i], line, p - line + 1);
+		bucket->var[line_i] = strndup_(line, p - line);
 	}
 	pclose(pip);
 	if (VAR_OUTPUT_NUM != line_i) {
@@ -480,7 +479,8 @@ write_files(int a_write_final)
 				fprintf(f, " ");
 			}
 			is_first = 0;
-			fprintf(f, "%s", bucket->var[i]);
+			fprintf(f, "%s", NULL == bucket->var[i] ? "" :
+			    bucket->var[i]);
 		}
 		fprintf(f, "\n");
 	}
@@ -503,7 +503,8 @@ write_files(int a_write_final)
 		err_(EXIT_FAILURE, "fopen(%s, wb)", g_filename_hconf);
 	}
 	for (i = 0; VAR_OUTPUT_NUM > i; ++i) {
-		fprintf(f, "%s\n", bucket->var[i]);
+		fprintf(f, "%s\n", NULL == bucket->var[i] ? "" :
+		    bucket->var[i]);
 	}
 	fclose(f);
 }
@@ -624,7 +625,7 @@ main(int argc, char const *const *argv)
 		err_(EXIT_FAILURE, "fopen(%s, rb)", g_filename);
 	}
 	for (g_line_no = 1;; ++g_line_no) {
-		char line[STR_SIZ];
+		char line[256];
 		struct Module *module;
 		struct Variable *var;
 		char *module_new, *branch_new, *p;

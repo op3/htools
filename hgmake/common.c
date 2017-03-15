@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,17 +58,27 @@ add_flag(struct FlagList *a_list, char const *a_name, size_t a_name_size, char
 }
 
 void
-cat_str(char *a_dst, char const *a_src, size_t a_dst_len)
+cat_str(char **a_dst, char const *a_src)
 {
-	char const *from;
-	char *to;
+	char *dst;
+	size_t dstlen, srclen, len;
 
-	for (to = a_dst; '\0' != *to; ++to)
-		;
-	for (from = a_src; '\0' != *from && a_dst_len - 1 > to - a_dst;) {
-		*to++ = *from++;
+	srclen = strlen(a_src);
+	dst = *a_dst;
+	if (NULL == dst) {
+		dstlen = 0;
+		len = srclen + 1;
+		dst = malloc(len);
+	} else {
+		dstlen = strlen(dst);
+		len = dstlen + srclen + 1;
+		dst = realloc(dst, len);
 	}
-	*to = '\0';
+	if (NULL == dst) {
+		err_(EXIT_FAILURE, "*alloc(%d)", len);
+	}
+	strcpy(dst + dstlen, a_src);
+	*a_dst = dst;
 }
 
 int
@@ -128,7 +138,7 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 	size_t i, idx;
 
 	for (i = 0; VAR_OUTPUT_NUM > i; ++i) {
-		a_bucket->var[i][0] = '\0';
+		a_bucket->var[i] = NULL;
 		TAILQ_INIT(&flag_list[i]);
 	}
 	TAILQ_INIT(&original_list);
@@ -144,7 +154,7 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 			err_(EXIT_FAILURE, "fopen(%s, rb)", filename);
 		}
 		for (i = 0;; ++i) {
-			char line[STR_SIZ];
+			char line[65536];
 			char *p;
 
 			if (NULL == fgets(line, sizeof line, file)) {
@@ -245,8 +255,8 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 				FREE(next);
 			}
 		}
-		cat_str(a_bucket->var[i], flag->str, sizeof a_bucket->var[i]);
-		cat_str(a_bucket->var[i], " ", sizeof a_bucket->var[i]);
+		cat_str(&a_bucket->var[i], flag->str);
+		cat_str(&a_bucket->var[i], " ");
 		FREE(flag);
 	}
 
@@ -304,10 +314,8 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 
 			flag = TAILQ_FIRST(&original_list);
 			TAILQ_REMOVE(&original_list, flag, original_next);
-			cat_str(a_bucket->var[i], flag->str, sizeof
-			    a_bucket->var[i]);
-			cat_str(a_bucket->var[i], " ", sizeof
-			    a_bucket->var[i]);
+			cat_str(&a_bucket->var[i], flag->str);
+			cat_str(&a_bucket->var[i], " ");
 			FREE(flag);
 		}
 	}
@@ -333,10 +341,8 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 		}
 		while (!EMPTY) {
 			flag = FIRST;
-			cat_str(a_bucket->var[i], flag->str, sizeof
-			    a_bucket->var[i]);
-			cat_str(a_bucket->var[i], " ", sizeof
-			    a_bucket->var[i]);
+			cat_str(&a_bucket->var[i], flag->str);
+			cat_str(&a_bucket->var[i], " ");
 			REMOVE(flag);
 			FREE(flag);
 		}

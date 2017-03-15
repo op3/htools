@@ -41,9 +41,9 @@ HCONF_EXT_LDFLAGS=$(shell sed -n 4p $(HCONF_EXT_CACHE))
 HCONF_EXT_LIBS=$(shell sed -n 5p $(HCONF_EXT_CACHE))
 
 # Common commands.
-CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE).ccd $@ $< $$cppflags > $(@:.o=.d) &&
-CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $$cppflags $(CFLAGS) $(HCONF_CFLAGS)
-CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $< $$cppflags $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
+CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE).ccd $@ $(filter %.c,$<) $$cppflags > $(@:.o=.d) &&
+CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(CFLAGS) $(HCONF_CFLAGS)
+CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
 LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)
 MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 
