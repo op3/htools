@@ -24,26 +24,36 @@
 #if defined(HCONF_mDIR_bDIRENT)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
 #	include <dirent.h>
-#	if defined(HCONFING_mDIR)
-#		define READDIR_R readdir_r(dir, &entry, &p)
-#	endif
+#	define HUTILS_READDIR(dir, entry, result) do {\
+		if (0 != readdir_r(dir, &entry, &result)) {\
+			result = NULL;\
+		}\
+	} WHILE_0
 #elif defined(HCONF_mDIR_bDIRENT_ANCIENT)
 #	include <sys/types.h>
 #	include <dirent.h>
-#	if defined(HCONFING_mDIR)
-#		define READDIR_R (void)p; readdir_r(dir, &entry)
-#	endif
+#	define HUTILS_READDIR(dir, entry, result)\
+    result = readdir_r(dir, &entry)
+#elif defined(HCONF_mDIR_bDIRENT_READDIR)
+/* readdir_r deprecated and readdir made safe, on modern platforms. */
+#	include <dirent.h>
+#	define HUTILS_READDIR(dir, entry, result) do {\
+		(void)entry;\
+		result = readdir(dir);\
+	} WHILE_0
 #endif
 #if defined(HCONFING_mDIR)
+#	include <stdlib.h>
+#	include <hutils/macros.h>
 HCONF_TEST
 {
 	DIR *dir;
-	struct dirent entry, *p;
+	struct dirent entry, *result;
 	(void)i;
 	dir = opendir(".");
-	READDIR_R;
+	HUTILS_READDIR(dir, entry, result);
 	closedir(dir);
-	return 1;
+	return NULL != result;
 }
 #endif
 
