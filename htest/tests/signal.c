@@ -28,7 +28,7 @@ HTEST(ThisShouldNotSegfaultAndFail)
 
 HTEST(ThisShouldSegfaultAndPass)
 {
-	uint32_t *p;
+	int *p;
 
 	p = NULL;
 	HTRY_SIGNAL(*p = 0);
@@ -36,7 +36,7 @@ HTEST(ThisShouldSegfaultAndPass)
 
 HTEST(ThisShouldSegfaultAndFail)
 {
-	uint32_t *p;
+	int *p;
 
 	p = NULL;
 	HTRY_VOID(*p = 0);
