@@ -28,12 +28,18 @@ HTEST(ThisShouldNotSegfaultAndFail)
 
 HTEST(ThisShouldSegfaultAndPass)
 {
-	HTRY_SIGNAL(*(int *)NULL = 0);
+	uint32_t *p;
+
+	p = NULL;
+	HTRY_SIGNAL(*p = 0);
 }
 
 HTEST(ThisShouldSegfaultAndFail)
 {
-	HTRY_VOID(*(int *)NULL = 0);
+	uint32_t *p;
+
+	p = NULL;
+	HTRY_VOID(*p = 0);
 }
 
 HTEST_SUITE(MySignal)

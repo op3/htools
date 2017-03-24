@@ -390,9 +390,9 @@ try()
 	cppflags = STRCTV_BEGIN "-I", g_out_dir, "/_hconf ",
 		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
 	src = STRCTV_BEGIN g_filename_o, " ", bucket->var[VAR_SRC] STRCTV_END;
+	cflags = NULL == bucket->var[VAR_SRC] ? "" : bucket->var[VAR_CFLAGS];
 	ret = build(g_filename_main_bin, src, bucket->var[VAR_CC], cppflags,
-	    bucket->var[VAR_CFLAGS], bucket->var[VAR_LDFLAGS],
-	    bucket->var[VAR_LIBS]);
+	    cflags, bucket->var[VAR_LDFLAGS], bucket->var[VAR_LIBS]);
 	free(cppflags);
 	free(src);
 	if (0 != ret) {

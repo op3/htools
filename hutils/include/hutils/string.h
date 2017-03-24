@@ -40,20 +40,20 @@ int hutils_vsnprintf_(char *, size_t, char const *, va_list) FUNC_PRINTF(3,
 #endif
 #if defined(HCONFING_mNPRINTF)
 static int
-vsnprintf_wrapper_(char *a_fmt, ...)
+vsnprintf_wrapper_(int a, ...)
 {
 	va_list args;
 	char s[2];
 	int ret;
-	va_start(args, a_fmt);
-	ret = vsnprintf(s, sizeof s, a_fmt, args);
+	va_start(args, a);
+	ret = vsnprintf(s, sizeof s, "%d", args);
 	va_end(args);
 	return ret;
 }
 HCONF_TEST
 {
 	char s[2];
-	return snprintf(s, sizeof s, "%d", i) + vsnprintf_wrapper_("%d", i);
+	return snprintf(s, sizeof s, "%d", i) + vsnprintf_wrapper_(0, i);
 }
 #endif
 

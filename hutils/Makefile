@@ -52,8 +52,8 @@ splint:
 clean:
 	rm -rf $(BUILD_DIR)
 
-HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr stdint fmtmod macros \
-	math string getopt dir thread time udp)
+HCONF_SRC:=$(patsubst %,include/hutils/%.h,compiler funcattr stdint fmtmod \
+	macros math string getopt dir thread time udp)
 HCONF_DEP:=Makefile
 include $(HTOOLS_PATH)/hgmake/hconf.mk
 

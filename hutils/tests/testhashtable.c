@@ -137,10 +137,10 @@ HTEST(Strings)
 	size_t i;
 
 #define MAKE_STR(str) do {\
-	int ret;\
-	ret = snprintf(str, sizeof str, "abc_%"PRIz, i);\
-	HTRY_I(sizeof str, >, ret);\
-} WHILE_0
+		int ret;\
+		ret = snprintf(str, sizeof str, "abc_%"PRIz, i);\
+		HTRY_I(sizeof str, >, ret);\
+	} WHILE_0
 
 	HTString_init(&table);
 	for (i = 0; N > i; ++i) {

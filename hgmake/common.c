@@ -77,7 +77,8 @@ cat_str(char **a_dst, char const *a_src)
 	if (NULL == dst) {
 		err_(EXIT_FAILURE, "*alloc(%d)", len);
 	}
-	strcpy(dst + dstlen, a_src);
+	memcpy(dst + dstlen, a_src, srclen);
+	dst[dstlen + srclen] = '\0';
 	*a_dst = dst;
 }
 

@@ -34,7 +34,7 @@
 #	define SOCKADDR_STORAGE sockaddr_storage
 #	define SOCKET int
 #	define SOCKET_ERROR -1
-static void
+FUNC_PRINTF(2, 0) static void
 gaif(int a_error, char const *a_fmt, ...)
 {
 	va_list args;

@@ -22,7 +22,7 @@
 #include <hutils/string.h>
 
 static int	printer(char const *, ...);
-static int	stdio(char const *, va_list);
+static int	stdio(char const *, va_list) FUNC_PRINTF(1, 0);
 
 static HutilsPrinter g_printer = stdio;
 
