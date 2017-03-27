@@ -25,8 +25,15 @@
 /* HCONF_OPT="nolink" */
 #elif defined(HCONF_mSTDINT_LIMITS_bCUSTOM)
 /* HCONF_OPT="nolink" */
-#	undef SIZE_MAX
 #	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
+#elif defined(HCONF_mSTDINT_LIMITS_bLAST_RESORT
+/* HCONF_OPT="nolink" */
+#	undef SIZE_MAX
+#	if __WORDSIZE == 64
+#		define SIZE_MAX 18446744073709551615UL
+#	else
+#		define SIZE_MAX 4294967295UL
+#	endif
 #endif
 #if defined(HCONFING_mSTDINT_LIMITS)
 HCONF_TEST
