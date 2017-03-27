@@ -25,6 +25,7 @@
 /* HCONF_OPT="nolink" */
 #elif defined(HCONF_mSTDINT_LIMITS_bCUSTOM)
 /* HCONF_OPT="nolink" */
+#	undef SIZE_MAX
 #	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
 #endif
 #if defined(HCONFING_mSTDINT_LIMITS)
