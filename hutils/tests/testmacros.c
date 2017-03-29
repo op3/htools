@@ -84,11 +84,13 @@ HTEST(OffsetOf)
 {
 	struct {
 		uint8_t	a;
-		uint32_t	b;
+		struct {
+			uint32_t	b;
+		} t;
 	} s;
 
 	HTRY_I(0, ==, OFFSETOF(s, a));
-	HTRY_I(sizeof(int), ==, OFFSETOF(s, b));
+	HTRY_I(sizeof(int), ==, OFFSETOF(s, t.b));
 }
 
 HTEST(Sign)
