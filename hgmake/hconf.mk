@@ -19,6 +19,7 @@
 # HCONF_EXT_PATH = Path(s) to hconf cache(s) for HCONF_EXT_* variables.
 
 HCONF_CACHE:=$(BUILD_DIR)/hconf.cache
+HCONF_CACHE_CCD:=$(HCONF_CACHE).ccd
 HCONF_CONF:=$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_conf
 HCONF_MERGE:=$(HTOOLS_PATH)/hgmake/$(BUILD_DIR)/hconf_merge
 
@@ -30,18 +31,20 @@ HCONF_LDFLAGS=$(shell sed -n 4p $(HCONF_CACHE))
 HCONF_LIBS=$(shell sed -n 5p $(HCONF_CACHE))
 
 # If you don't want an hconf cache in your own build:
-#  HCONF_EXT_PATH=$(HTOOLS_PATH)/hutils/$(BUILD_DIR) yadayada/$(BUILD_DIR)
+#  HCONF_EXT_PATH=$(HTOOLS_PATH)/hutils
 #  include $(HTOOLS_PATH)/hgmake/hconf.mk
 #  CPPFLAGS:=$(CPPFLAGS) $(HCONF_EXT_CPPFLAGS)
+ifneq (,$(HCONF_EXT_PATH))
 HCONF_EXT_CACHE:=$(HCONF_EXT_PATH)/$(HCONF_CACHE)
-HCONF_EXT_CC=$(shell sed -n 1p $(HCONF_EXT_CACHE))
+HCONF_EXT_CC=$(shell sed -n 1p $(HCONF_EXT_CACHE) | sed s/^$$/no-cc/)
 HCONF_EXT_CPPFLAGS=$(shell sed -n 2p $(HCONF_EXT_CACHE))
 HCONF_EXT_CFLAGS=$(shell sed -n 3p $(HCONF_EXT_CACHE))
 HCONF_EXT_LDFLAGS=$(shell sed -n 4p $(HCONF_EXT_CACHE))
 HCONF_EXT_LIBS=$(shell sed -n 5p $(HCONF_EXT_CACHE))
+endif
 
 # Common commands.
-CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE).ccd $@ $(filter %.c,$<) $$cppflags > $(@:.o=.d) &&
+CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE_CCD) $@ $(filter %.c,$<) $$cppflags > $(@:.o=.d) &&
 CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(CFLAGS) $(HCONF_CFLAGS)
 CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(filter-out -ansi% -pedantic% -W%,$(CFLAGS) $(HCONF_CFLAGS))
 LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LDFLAGS) $(LIBS) $(HCONF_LIBS) $(LIBS_POST)
@@ -59,10 +62,10 @@ endif
 HCONF_PROJECTS_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_PROJECTS))
 CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_PROJECTS))
 
-$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).ccd
+$(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE_CCD)
 	$(QUIET)$(MKDIR) &&\
 	export CC=$(CC) &&\
-	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE).ccd`;echo $(CFLAGS);echo;echo;) > $@.tmp;\
+	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE_CCD)`;echo $(CFLAGS);echo $(LDFLAGS);echo $(LIBS);) > $@.tmp;\
 	if [ "$(HCONF_PROJECTS_FILES)" ]; then\
 		$(HCONF_MERGE) $@.tmp $(HCONF_PROJECTS_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\
@@ -104,7 +107,7 @@ $(HCONF_CACHE): $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE).ccd
 # Either:
 #  1) Line 1 = dep script
 #  2) Line 2 = -MD
-$(HCONF_CACHE).ccd:
+$(HCONF_CACHE_CCD):
 	$(QUIET)echo "DEP   $@";\
 	$(MKDIR) &&\
 	cd $(@D) &&\
