@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@ HTEST(FreeDoesNullify)
 {
 	char *p;
 
-	MALLOC(p, 1);
+	CALLOC(p, 1);
 	HTRY_PTR(NULL, !=, p);
 	FREE(p);
 	HTRY_PTR(NULL, ==, p);

@@ -25,7 +25,8 @@
 #define CALLOC(ptr, num) ptr = calloc(num, sizeof *ptr)
 #define DUP(dst, src)\
 	do {\
-		MALLOC(dst, sizeof *dst);\
+		ASSERT(size_t, PRIz, sizeof *dst, ==, sizeof *src);\
+		dst = malloc(sizeof *dst);\
 		COPY(*dst, *src);\
 	} WHILE_0
 #define FREE(ptr)\
@@ -33,7 +34,6 @@
 		free(ptr);\
 		ptr = NULL;\
 	} WHILE_0
-#define MALLOC(ptr, size) ptr = malloc(size)
 
 /* The following from OpenBSD /usr/src/lib/libc/stdlib/reallocarray.c. */
 #ifndef MUL_NO_OVERFLOW

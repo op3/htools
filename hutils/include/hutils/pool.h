@@ -56,7 +56,7 @@ PoolType##_alloc(struct PoolType *a_pool)\
 	if (TAILQ_END(a_pool) == page) {\
 		size_t i;\
 \
-		MALLOC(page, sizeof *page);\
+		page = malloc(sizeof *page);\
 		TAILQ_INIT(&page->node_list);\
 		for (i = 0; LENGTH(page->node_array) > i; ++i) {\
 			page->node_array[i].entry.page = page;\

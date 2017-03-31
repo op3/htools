@@ -44,26 +44,26 @@ HCONF_TEST
 }
 #endif
 
-#define ABS(x) (0 > x ? -x : x)
-#define CLAMP(x, a, b) (x < a ? a : x > b ? b : x)
+#define ABS(x) (0 > (x) ? -(x) : (x))
+#define CLAMP(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
 #define COPY(dst, src) do {\
 	int copy_assert_size_[sizeof dst == sizeof src];\
 	(void)copy_assert_size_;\
 	memmove(&dst, &src, sizeof dst);\
 } WHILE_0
-#define IS_POW2(x) (0 == ((x - 1) & x))
+#define IS_POW2(x) (0 == (((x) - 1) & (x)))
 #define LENGTH(x) (sizeof x / sizeof *x)
 #define MASK(lsb, msb) ((0xffffffff >> (32 - msb)) & \
     ((0xffffffff >> lsb) << lsb))
 #ifndef MAX
-#	define MAX(a, b) (a > b ? a : b)
+#	define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 #ifndef MIN
-#	define MIN(a, b) (a < b ? a : b)
+#	define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 #define OFFSETOF(s, m) ((uintptr_t)&(s).m - (uintptr_t)&(s))
-#define SGN(x) (0 > x ? -1 : 1)
-#define SQR(x) (x * x)
+#define SGN(x) (0 > (x) ? -1 : 1)
+#define SQR(x) ((x) * (x))
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
 #define SWAP(a, b) do {\

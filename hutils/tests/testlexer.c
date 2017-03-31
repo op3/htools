@@ -27,7 +27,7 @@ HTEST(BufMajeur)
 	size_t ofs;
 	int i;
 
-	MALLOC(text, c_n * ('[' - 'A' + 1) + 1);
+	text = malloc(c_n * ('[' - 'A' + 1) + 1);
 	/* Fill with cycles of capitals and '['. */
 	ofs = 0;
 	for (i = 0; c_n > i; ++i) {

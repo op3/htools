@@ -36,7 +36,7 @@ extract(struct Lexer *a_lexer, size_t a_len)
 	char *str;
 	size_t i;
 
-	MALLOC(str, a_len + 1);
+	str = malloc(a_len + 1);
 	for (i = 0; a_len > i; ++i) {
 		int c;
 

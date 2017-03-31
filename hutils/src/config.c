@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -235,7 +235,7 @@ config_setd(struct Config *a_config, double a_d)
 	a_config->d = a_d;
 	a_config->i32 = (int32_t)a_d;
 	len = 24;
-	MALLOC(a_config->str, len);
+	a_config->str = malloc(len);
 	ret = snprintf(a_config->str, len, "%g", a_d);
 	ASSERT(int, "d", len, >, ret);
 }
@@ -249,7 +249,7 @@ config_seti32(struct Config *a_config, int32_t a_i32)
 	a_config->d = a_i32;
 	a_config->i32 = a_i32;
 	len = 16;
-	MALLOC(a_config->str, len);
+	a_config->str = malloc(len);
 	ret = snprintf(a_config->str, len, "%d", a_i32);
 	ASSERT(int, "d", len, >, ret);
 }

@@ -102,7 +102,7 @@ HTEST(Test)
 			HTRY_I(0, ==, utf8->replacement_num);
 		}
 
-		utf8_again = utf8_alloc(utf8->data, utf8->size);
+		utf8_again = utf8_alloc(utf8->data, utf8->bytes);
 		HTRY_I(0, ==, utf8_again->replacement_num);
 		utf8_free(&utf8_again);
 		utf8_free(&utf8);
@@ -131,7 +131,7 @@ HTEST(Demo)
 		utf8 = utf8_alloc(line, i);
 		HTRY_I(0, ==, utf8->replacement_num);
 
-		utf8_again = utf8_alloc(utf8->data, utf8->size);
+		utf8_again = utf8_alloc(utf8->data, utf8->bytes);
 		HTRY_I(0, ==, utf8_again->replacement_num);
 		utf8_free(&utf8_again);
 		utf8_free(&utf8);
@@ -140,8 +140,43 @@ HTEST(Demo)
 	fclose(file);
 }
 
+HTEST(Parse)
+{
+	uint8_t str[] = {
+		0x40,
+		0xd0, 0x80,
+		0xe8, 0x80, 0x80,
+		0xf4, 0x80, 0x80, 0x80
+	};
+	struct UTF8 *utf8;
+	uint32_t code;
+	size_t bytes, ofs;
+
+	utf8 = utf8_alloc(str, sizeof str);
+	ofs = 0;
+	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	HTRY_I(0x40, ==, code);
+	HTRY_I(1, ==, bytes);
+	ofs += bytes;
+	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	HTRY_I(0x400, ==, code);
+	HTRY_I(2, ==, bytes);
+	ofs += bytes;
+	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	HTRY_I(0x8000, ==, code);
+	HTRY_I(3, ==, bytes);
+	ofs += bytes;
+	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	HTRY_I(0x100000, ==, code);
+	HTRY_I(4, ==, bytes);
+	ofs += bytes;
+	HTRY_I(1 + 2 + 3 + 4, ==, ofs);
+	utf8_free(&utf8);
+}
+
 HTEST_SUITE(UTF8)
 {
 	HTEST_ADD(Test);
 	HTEST_ADD(Demo);
+	HTEST_ADD(Parse);
 }

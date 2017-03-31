@@ -113,7 +113,6 @@ dir_open(char const *a_path)
 {
 	DIR *d;
 	struct Dir *dir;
-	size_t len;
 	long name_max;
 
 	d = opendir(a_path);
@@ -126,8 +125,7 @@ dir_open(char const *a_path)
 	if (-1 == name_max) {
 		name_max = 255;
 	}
-	len = offsetof(struct dirent, d_name) + name_max + 1;
-	MALLOC(dir->entry, len);
+	dir->entry = malloc(offsetof(struct dirent, d_name) + name_max + 1);
 	return dir;
 }
 

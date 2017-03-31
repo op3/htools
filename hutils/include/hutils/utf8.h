@@ -27,12 +27,14 @@ struct UTF8 {
 	/* Number of replacements performed on source string. */
 	int	replacement_num;
 	size_t	length;
-	size_t	size;
+	size_t	bytes;
 	uint8_t	*data;
 };
 
 struct UTF8	*utf8_alloc(uint8_t const *, size_t) FUNC_RETURNS;
 void		utf8_free(struct UTF8 **);
+int		utf8_get(struct UTF8 const *, size_t, uint32_t *, size_t *)
+	FUNC_RETURNS;
 
 CDECLS_END
 

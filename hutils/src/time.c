@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -136,7 +136,7 @@ time_gets()
 
 	time(&tt);
 	GMTIME_R(&tt, &tm);
-	MALLOC(buf, 26);
+	buf = malloc(26);
 	ASCTIME_R(&tm, buf);
 	return buf;
 }
