@@ -235,6 +235,8 @@ main(int const argc, char **const argv)
 				pid_t pid;
 				int status;
 
+				fflush(stdout);
+				fflush(stderr);
 				pid = fork();
 				if (0 > pid) {
 					hutils_err(EXIT_FAILURE, "fork");

@@ -215,6 +215,8 @@ extern jmp_buf g_htest_try_jmp_buf_;
 	if (htest_do_recover()) {\
 		pid_t pid_;\
 		int status_;\
+		fflush(stdout);\
+		fflush(stderr);\
 		pid_ = fork();\
 		if (0 > pid_) {\
 			hutils_err(EXIT_FAILURE, "fork");\
