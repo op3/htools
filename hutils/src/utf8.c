@@ -81,7 +81,7 @@ get_code(uint8_t const *a_str, size_t a_bytes, size_t a_i, uint32_t *a_code,
 }
 
 struct UTF8 *
-utf8_alloc(uint8_t const *a_str, size_t a_bytes)
+utf8_create(uint8_t const *a_str, size_t a_bytes)
 {
 	struct UTF8 *utf8;
 	uint8_t *dst;
@@ -106,7 +106,7 @@ utf8_alloc(uint8_t const *a_str, size_t a_bytes)
 	CALLOC(utf8, 1);
 	utf8->length = utf8_len;
 	utf8->bytes = utf8_bytes;
-	utf8->data = malloc(utf8_bytes);
+	utf8->data = malloc(utf8_bytes + 1);
 	dst = utf8->data;
 	for (i = 0; a_bytes > i;) {
 		size_t len;
@@ -124,6 +124,7 @@ utf8_alloc(uint8_t const *a_str, size_t a_bytes)
 			*dst++ = 0xbd;
 		}
 	}
+	*dst++ = '\0';
 	return utf8;
 }
 

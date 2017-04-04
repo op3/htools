@@ -73,6 +73,20 @@ mygets(uint8_t *a_dst, size_t *a_bytes, FILE *a_file)
 	return EOF != c || 0 != i;
 }
 
+HTEST(Basic)
+{
+	char const c_str[] = "This is a boring but satisfying test.";
+	struct UTF8 *utf8;
+	size_t str_len;
+
+	str_len = strlen(c_str);
+	utf8 = utf8_create((uint8_t const *)c_str, str_len);
+	HTRY_I(str_len, ==, utf8->length);
+	HTRY_I(str_len, ==, utf8->bytes);
+	HTRY_I('\0', ==, utf8->data[utf8->bytes]);
+	utf8_free(&utf8);
+}
+
 HTEST(Test)
 {
 	FILE *file;
@@ -89,7 +103,7 @@ HTEST(Test)
 		if (!mygets(line, &i, file)) {
 			break;
 		}
-		utf8 = utf8_alloc(line, i);
+		utf8 = utf8_create(line, i);
 		for (i = 0; LENGTH(c_test_invalid) > i; ++i) {
 			if (c_test_invalid[i].line_no == line_no) {
 				break;
@@ -102,7 +116,7 @@ HTEST(Test)
 			HTRY_I(0, ==, utf8->replacement_num);
 		}
 
-		utf8_again = utf8_alloc(utf8->data, utf8->bytes);
+		utf8_again = utf8_create(utf8->data, utf8->bytes);
 		HTRY_I(0, ==, utf8_again->replacement_num);
 		utf8_free(&utf8_again);
 		utf8_free(&utf8);
@@ -128,10 +142,10 @@ HTEST(Demo)
 			break;
 		}
 		line[i] = '\0';
-		utf8 = utf8_alloc(line, i);
+		utf8 = utf8_create(line, i);
 		HTRY_I(0, ==, utf8->replacement_num);
 
-		utf8_again = utf8_alloc(utf8->data, utf8->bytes);
+		utf8_again = utf8_create(utf8->data, utf8->bytes);
 		HTRY_I(0, ==, utf8_again->replacement_num);
 		utf8_free(&utf8_again);
 		utf8_free(&utf8);
@@ -142,7 +156,7 @@ HTEST(Demo)
 
 HTEST(Parse)
 {
-	uint8_t str[] = {
+	uint8_t const c_str[] = {
 		0x40,
 		0xd0, 0x80,
 		0xe8, 0x80, 0x80,
@@ -152,7 +166,9 @@ HTEST(Parse)
 	uint32_t code;
 	size_t bytes, ofs;
 
-	utf8 = utf8_alloc(str, sizeof str);
+	utf8 = utf8_create(c_str, sizeof c_str);
+	HTRY_I(4, ==, utf8->length);
+	HTRY_I(sizeof c_str, ==, utf8->bytes);
 	ofs = 0;
 	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
 	HTRY_I(0x40, ==, code);
@@ -171,11 +187,13 @@ HTEST(Parse)
 	HTRY_I(4, ==, bytes);
 	ofs += bytes;
 	HTRY_I(1 + 2 + 3 + 4, ==, ofs);
+	HTRY_I('\0', ==, utf8->data[ofs]);
 	utf8_free(&utf8);
 }
 
 HTEST_SUITE(UTF8)
 {
+	HTEST_ADD(Basic);
 	HTEST_ADD(Test);
 	HTEST_ADD(Demo);
 	HTEST_ADD(Parse);
