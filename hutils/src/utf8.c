@@ -32,7 +32,7 @@ get_code(uint8_t const *a_str, size_t a_bytes, size_t a_i, uint32_t *a_code,
 	if (a_bytes <= a_i) {
 		fprintf(stderr, __FILE__":%d: UTF8 index %"PRIz" out of "
 		    "bounds %"PRIz".\n", __LINE__, a_i, a_bytes);
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	p = &a_str[a_i];
 	avail = a_bytes - a_i;
@@ -141,10 +141,13 @@ utf8_free(struct UTF8 **a_utf8)
 	FREE(*a_utf8);
 }
 
-int
+void
 utf8_get(struct UTF8 const *a_utf8, size_t a_i, uint32_t *a_code, size_t
     *a_code_bytes)
 {
-	return get_code(a_utf8->data, a_utf8->bytes, a_i, a_code,
+	int	ret;
+
+	(void)ret;
+	ret = get_code(a_utf8->data, a_utf8->bytes, a_i, a_code,
 	    a_code_bytes);
 }

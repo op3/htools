@@ -31,10 +31,9 @@ struct UTF8 {
 	uint8_t	*data;
 };
 
-struct UTF8	*utf8_alloc(uint8_t const *, size_t) FUNC_RETURNS;
+struct UTF8	*utf8_create(uint8_t const *, size_t) FUNC_RETURNS;
 void		utf8_free(struct UTF8 **);
-int		utf8_get(struct UTF8 const *, size_t, uint32_t *, size_t *)
-	FUNC_RETURNS;
+void		utf8_get(struct UTF8 const *, size_t, uint32_t *, size_t *);
 
 CDECLS_END
 

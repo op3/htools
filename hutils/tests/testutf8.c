@@ -154,7 +154,7 @@ HTEST(Demo)
 	fclose(file);
 }
 
-HTEST(Parse)
+HTEST(ParseOk)
 {
 	uint8_t const c_str[] = {
 		0x40,
@@ -170,23 +170,51 @@ HTEST(Parse)
 	HTRY_I(4, ==, utf8->length);
 	HTRY_I(sizeof c_str, ==, utf8->bytes);
 	ofs = 0;
-	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	utf8_get(utf8, ofs, &code, &bytes);
 	HTRY_I(0x40, ==, code);
 	HTRY_I(1, ==, bytes);
 	ofs += bytes;
-	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	utf8_get(utf8, ofs, &code, &bytes);
 	HTRY_I(0x400, ==, code);
 	HTRY_I(2, ==, bytes);
 	ofs += bytes;
-	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	utf8_get(utf8, ofs, &code, &bytes);
 	HTRY_I(0x8000, ==, code);
 	HTRY_I(3, ==, bytes);
 	ofs += bytes;
-	HTRY_BOOL(utf8_get(utf8, ofs, &code, &bytes));
+	utf8_get(utf8, ofs, &code, &bytes);
 	HTRY_I(0x100000, ==, code);
 	HTRY_I(4, ==, bytes);
 	ofs += bytes;
 	HTRY_I(1 + 2 + 3 + 4, ==, ofs);
+	HTRY_I('\0', ==, utf8->data[ofs]);
+	utf8_free(&utf8);
+}
+
+HTEST(ParseBad)
+{
+	uint8_t const c_str[] = {
+		0x80,
+		0xc0, 0x80,
+		0xe0, 0x80, 0x80,
+		0xf0, 0x80, 0x80, 0x80
+	};
+	struct UTF8 *utf8;
+	size_t ofs, i;
+
+	utf8 = utf8_create(c_str, sizeof c_str);
+	HTRY_I(sizeof c_str, ==, utf8->length);
+	HTRY_I(3 * sizeof c_str, ==, utf8->bytes);
+	ofs = 0;
+	for (i = 0; i < sizeof c_str; ++i) {
+		uint32_t code;
+		size_t bytes;
+
+		utf8_get(utf8, ofs, &code, &bytes);
+		HTRY_I(0xfffd, ==, code);
+		HTRY_I(3, ==, bytes);
+		ofs += bytes;
+	}
 	HTRY_I('\0', ==, utf8->data[ofs]);
 	utf8_free(&utf8);
 }
@@ -196,5 +224,6 @@ HTEST_SUITE(UTF8)
 	HTEST_ADD(Basic);
 	HTEST_ADD(Test);
 	HTEST_ADD(Demo);
-	HTEST_ADD(Parse);
+	HTEST_ADD(ParseOk);
+	HTEST_ADD(ParseBad);
 }
