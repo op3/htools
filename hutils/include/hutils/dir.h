@@ -64,9 +64,10 @@ struct DirEntry {
 	char	const *name;
 };
 
-struct Dir	*dir_open(char const *) FUNC_RETURNS;
-void		dir_close(struct Dir **);
-int		dir_get(struct Dir *, struct DirEntry *) FUNC_RETURNS;
+struct Dir	*dir_open(char const *) FUNC_NONNULL(()) FUNC_RETURNS;
+void		dir_close(struct Dir **) FUNC_NONNULL(());
+int		dir_get(struct Dir *, struct DirEntry *) FUNC_NONNULL(())
+	FUNC_RETURNS;
 
 CDECLS_END
 

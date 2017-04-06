@@ -29,21 +29,23 @@ struct Vector3f {
 };
 
 struct Vector3f	*vector3f_add(struct Vector3f *, struct Vector3f const *,
-    struct Vector3f const *);
+    struct Vector3f const *) FUNC_NONNULL(());
 struct Vector3f	*vector3f_cross(struct Vector3f *, struct Vector3f const *,
-    struct Vector3f const *);
+    struct Vector3f const *) FUNC_NONNULL(());
 float		vector3f_dot(struct Vector3f const *, struct Vector3f const
-    *) FUNC_PURE FUNC_RETURNS;
-float		vector3f_get_magnitude(struct Vector3f const *) FUNC_PURE
-FUNC_RETURNS;
-struct Vector3f	*vector3f_negate(struct Vector3f *, struct Vector3f const *);
+    *) FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
+float		vector3f_get_magnitude(struct Vector3f const *) FUNC_NONNULL(())
+	FUNC_PURE FUNC_RETURNS;
+struct Vector3f	*vector3f_negate(struct Vector3f *, struct Vector3f const *)
+	FUNC_NONNULL(());
 struct Vector3f	*vector3f_normalize(struct Vector3f *, struct Vector3f const
-    *);
+    *) FUNC_NONNULL(());
 struct Vector3f	*vector3f_scale(struct Vector3f *, struct Vector3f const *,
-    float);
-struct Vector3f	*vector3f_set(struct Vector3f *, float, float, float);
+    float) FUNC_NONNULL(());
+struct Vector3f	*vector3f_set(struct Vector3f *, float, float, float)
+	FUNC_NONNULL(());
 struct Vector3f	*vector3f_sub(struct Vector3f *, struct Vector3f const *,
-    struct Vector3f const *);
+    struct Vector3f const *) FUNC_NONNULL(());
 
 CDECLS_END
 

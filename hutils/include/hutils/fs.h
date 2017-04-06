@@ -22,7 +22,7 @@
 
 CDECLS_BEGIN
 
-int	fs_mkdirs(char const *) FUNC_RETURNS;
+int	fs_mkdirs(char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 
 CDECLS_END
 

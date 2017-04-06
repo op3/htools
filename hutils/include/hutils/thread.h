@@ -72,17 +72,18 @@ struct Thread {
 #elif defined(_MSC_VER)
 #endif
 
-int	thread_condvar_broadcast(struct CondVar *);
-int	thread_condvar_clean(struct CondVar *);
-int	thread_condvar_init(struct CondVar *) FUNC_RETURNS;
-int	thread_condvar_signal(struct CondVar *);
-int	thread_condvar_wait(struct CondVar *, struct Mutex *);
-int	thread_mutex_clean(struct Mutex *);
-int	thread_mutex_init(struct Mutex *) FUNC_RETURNS;
-int	thread_mutex_lock(struct Mutex *);
-int	thread_mutex_unlock(struct Mutex *);
-int	thread_clean(struct Thread *);
-int	thread_start(struct Thread *, void (*)(void *), void *) FUNC_RETURNS;
+int	thread_condvar_broadcast(struct CondVar *) FUNC_NONNULL(());
+int	thread_condvar_clean(struct CondVar *) FUNC_NONNULL(());
+int	thread_condvar_init(struct CondVar *) FUNC_NONNULL(()) FUNC_RETURNS;
+int	thread_condvar_signal(struct CondVar *) FUNC_NONNULL(());
+int	thread_condvar_wait(struct CondVar *, struct Mutex *) FUNC_NONNULL(());
+int	thread_mutex_clean(struct Mutex *) FUNC_NONNULL(());
+int	thread_mutex_init(struct Mutex *) FUNC_NONNULL(()) FUNC_RETURNS;
+int	thread_mutex_lock(struct Mutex *) FUNC_NONNULL(());
+int	thread_mutex_unlock(struct Mutex *) FUNC_NONNULL(());
+int	thread_clean(struct Thread *) FUNC_NONNULL(());
+int	thread_start(struct Thread *, void (*)(void *), void *)
+	FUNC_NONNULL((1, 2)) FUNC_RETURNS;
 
 CDECLS_END
 

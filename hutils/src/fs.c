@@ -28,7 +28,7 @@ fs_mkdirs(char const *a_path)
 {
 	char *path, *p;
 
-	if ('\0' == a_path) {
+	if ('\0' == *a_path) {
 		return 0;
 	}
 	path = strdup(a_path);

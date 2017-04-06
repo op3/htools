@@ -129,9 +129,9 @@ HCONF_TEST
 
 extern char const *strctv_sentinel_;
 
-int	strbcmp(char const *, char const *) FUNC_RETURNS;
+int	strbcmp(char const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 char	*strctv_(char const *, ...) FUNC_RETURNS;
-int	strecmp(char const *, char const *) FUNC_RETURNS;
+int	strecmp(char const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 
 CDECLS_END
 

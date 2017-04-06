@@ -117,22 +117,22 @@ struct UDPDatagram {
 	size_t	size;
 };
 
-void			udp_address_free(struct UDPAddress **);
+void			udp_address_free(struct UDPAddress **) FUNC_NONNULL(());
 struct UDPClient	*udp_client_create(int, char const *, uint16_t)
-	FUNC_RETURNS;
-void			udp_client_free(struct UDPClient **);
+	FUNC_NONNULL(()) FUNC_RETURNS;
+void			udp_client_free(struct UDPClient **) FUNC_NONNULL(());
 int			udp_client_receive(struct UDPClient const *, struct
-    UDPDatagram *, double);
+    UDPDatagram *, double) FUNC_NONNULL(());
 int			udp_client_send(struct UDPClient const *, struct
-    UDPDatagram const *);
+    UDPDatagram const *) FUNC_NONNULL(());
 struct UDPServer	*udp_server_create(int, uint16_t) FUNC_RETURNS;
-void			udp_server_free(struct UDPServer **);
+void			udp_server_free(struct UDPServer **) FUNC_NONNULL(());
 int			udp_server_receive(struct UDPServer const *, struct
-    UDPAddress **, struct UDPDatagram *, double);
+    UDPAddress **, struct UDPDatagram *, double) FUNC_NONNULL(());
 int			udp_server_send(struct UDPServer const *, struct
-    UDPAddress const *, struct UDPDatagram const *);
+    UDPAddress const *, struct UDPDatagram const *) FUNC_NONNULL(());
 int			udp_server_write(struct UDPServer const *, void const
-    *, size_t);
+    *, size_t) FUNC_NONNULL(());
 int			udp_setup(void) FUNC_RETURNS;
 void			udp_shutdown(void);
 

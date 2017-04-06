@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,30 +28,33 @@ struct Config;
 struct ConfigCollection;
 struct ConfigSection;
 
-void			config_collection_free(struct ConfigCollection **);
+void			config_collection_free(struct ConfigCollection **)
+	FUNC_NONNULL(());
 struct ConfigSection	*config_collection_get_section(struct ConfigCollection
-    *, char const *) FUNC_RETURNS;
+    *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 struct ConfigCollection	*config_collection_load_from_file(char const *)
-	FUNC_RETURNS;
-struct ConfigCollection	*config_collection_load_from_memory(char const *,
-    size_t) FUNC_RETURNS;
+	FUNC_NONNULL(()) FUNC_RETURNS;
+struct ConfigCollection	*config_collection_load_from_memory(void const *,
+    size_t) FUNC_NONNULL(()) FUNC_RETURNS;
 int			config_collection_write(struct ConfigCollection const
-    *, char const *);
-double			config_getd(struct Config const *) FUNC_PURE
-FUNC_RETURNS;
-int32_t			config_geti32(struct Config const *) FUNC_PURE
-FUNC_RETURNS;
-char const		*config_gets(struct Config const *) FUNC_PURE
-FUNC_RETURNS;
-struct Config		*config_section_getd_config(struct ConfigSection *,
-    char const *, double) FUNC_RETURNS;
-struct Config		*config_section_geti32_config(struct ConfigSection *,
-    char const *, int32_t) FUNC_RETURNS;
-struct Config		*config_section_gets_config(struct ConfigSection *,
-    char const *, char const *) FUNC_RETURNS;
-void			config_setd(struct Config *, double);
-void			config_seti32(struct Config *, int32_t);
-void			config_sets(struct Config *, char const *);
+    *, char const *) FUNC_NONNULL(());
+double			config_getd(struct Config const *) FUNC_NONNULL(())
+	FUNC_PURE FUNC_RETURNS;
+int32_t			config_geti32(struct Config const *) FUNC_NONNULL(())
+	FUNC_PURE FUNC_RETURNS;
+char const		*config_gets(struct Config const *) FUNC_NONNULL(())
+	FUNC_PURE FUNC_RETURNS;
+struct Config		*config_section_getd(struct ConfigSection *, char
+    const *, double) FUNC_NONNULL(()) FUNC_RETURNS;
+struct Config		*config_section_geti32(struct ConfigSection *, char
+    const *, int32_t) FUNC_NONNULL(()) FUNC_RETURNS;
+struct Config		*config_section_gets(struct ConfigSection *, char
+    const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
+void			config_setd(struct Config *, double) FUNC_NONNULL(());
+void			config_seti32(struct Config *, int32_t)
+	FUNC_NONNULL(());
+void			config_sets(struct Config *, char const *)
+	FUNC_NONNULL(());
 
 CDECLS_END
 

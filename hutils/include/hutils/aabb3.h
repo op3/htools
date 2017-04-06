@@ -28,9 +28,9 @@ struct AABB3f {
 };
 
 float	aabb3f_get_distance_sqr(struct AABB3f const *, struct Vector3f const
-    *) FUNC_RETURNS;
+    *) FUNC_NONNULL(()) FUNC_RETURNS;
 float	aabb3f_get_distance(struct AABB3f const *, struct Vector3f const *)
-	FUNC_RETURNS;
+	FUNC_NONNULL(()) FUNC_RETURNS;
 
 CDECLS_END
 

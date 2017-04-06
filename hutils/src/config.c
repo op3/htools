@@ -108,9 +108,6 @@ config_collection_load_from_file(char const *a_path)
 
 	file = fopen(a_path, "rb");
 	if (NULL == file) {
-		/* TODO: How to deliver messages in htools? */
-		fprintf(stderr, "fopen(%s, rb) failed, empty config.\n",
-		    a_path);
 		CALLOC(coll, 1);
 		TAILQ_INIT(&coll->section_list);
 	} else {
@@ -122,14 +119,14 @@ config_collection_load_from_file(char const *a_path)
 }
 
 struct ConfigCollection *
-config_collection_load_from_memory(char const *a_buf, size_t a_len)
+config_collection_load_from_memory(void const *a_buf, size_t a_len)
 {
 	struct MemoryData memory_data;
 	struct Lexer *lexer;
 	struct ConfigCollection *coll;
 
 	memory_data.buf = a_buf;
-	memory_data.len = 0 == a_len ? strlen(a_buf) : a_len;
+	memory_data.len = a_len;
 	memory_data.ofs = 0;
 	lexer = lexer_create(memory_read, &memory_data);
 	coll = load(lexer);
@@ -151,12 +148,15 @@ config_collection_write(struct ConfigCollection const *a_coll, char const
 	time_str = time_gets();
 	fprintf(file, "# Created %s\n", time_str);
 	FREE(time_str);
-	if (NULL != a_coll) {
-		TAILQ_FOREACH(section, &a_coll->section_list, next) {
-			struct Config *config;
+	TAILQ_FOREACH(section, &a_coll->section_list, next) {
+		struct Config *config;
 
-			fprintf(file, "\n[%s]\n", section->name);
-			TAILQ_FOREACH(config, &section->config_list, next) {
+		fprintf(file, "[%s]\n", section->name);
+		TAILQ_FOREACH(config, &section->config_list, next) {
+			if (config->str) {
+				fprintf(file, "%s=\"%s\"\n", config->name,
+				    config->str);
+			} else {
 				fprintf(file, "%s=%s\n", config->name,
 				    config->str);
 			}
@@ -185,8 +185,8 @@ config_gets(struct Config const *a_config)
 }
 
 struct Config *
-config_section_getd_config(struct ConfigSection *a_section, char const
-    *a_name, double a_default_value)
+config_section_getd(struct ConfigSection *a_section, char const *a_name,
+    double a_default_value)
 {
 	struct Config *config;
 
@@ -199,8 +199,8 @@ config_section_getd_config(struct ConfigSection *a_section, char const
 }
 
 struct Config *
-config_section_geti32_config(struct ConfigSection *a_section, char const
-    *a_name, int32_t a_default_value)
+config_section_geti32(struct ConfigSection *a_section, char const *a_name,
+    int32_t a_default_value)
 {
 	struct Config *config;
 
@@ -213,8 +213,8 @@ config_section_geti32_config(struct ConfigSection *a_section, char const
 }
 
 struct Config *
-config_section_gets_config(struct ConfigSection *a_section, char const
-    *a_name, char const *a_default_value)
+config_section_gets(struct ConfigSection *a_section, char const *a_name, char
+    const *a_default_value)
 {
 	struct Config *config;
 
@@ -358,6 +358,7 @@ load(struct Lexer *a_lexer)
 		} else if (LEXER_ALNUM == token.type) {
 			struct Config *config;
 			char *name;
+			int c;
 
 			if (NULL == last_section) {
 				LOAD_ERROR("Section required before config");
@@ -368,12 +369,16 @@ load(struct Lexer *a_lexer)
 			}
 			name = token.str;
 			token.str = NULL;
-			if (!lexer_token_get(a_lexer, &token) ||
-			    '=' != token.str[0]) {
+			if (!lexer_token_get(a_lexer, &token)) {
 				FREE(name);
 				LOAD_ERROR("Missing '='");
 			}
+			c = token.str[0];
 			FREE(token.str);
+			if ('=' != c) {
+				FREE(name);
+				LOAD_ERROR("Expected '='");
+			}
 			if (!lexer_token_get(a_lexer, &token)) {
 				FREE(name);
 				LOAD_ERROR("Missing value");

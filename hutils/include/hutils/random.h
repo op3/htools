@@ -27,9 +27,10 @@ struct RandomSeed {
 	uint32_t	seed[5];
 };
 
-double		random_getd(struct RandomSeed *) FUNC_RETURNS;
-float		random_getf(struct RandomSeed *) FUNC_RETURNS;
-uint32_t	random_getu32(struct RandomSeed *) FUNC_RETURNS;
+double		random_getd(struct RandomSeed *) FUNC_NONNULL(()) FUNC_RETURNS;
+float		random_getf(struct RandomSeed *) FUNC_NONNULL(()) FUNC_RETURNS;
+uint32_t	random_getu32(struct RandomSeed *) FUNC_NONNULL(())
+	FUNC_RETURNS;
 
 CDECLS_END
 

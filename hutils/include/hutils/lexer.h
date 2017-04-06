@@ -57,13 +57,16 @@ struct LexerToken {
 	char	*str;
 };
 
-struct Lexer	*lexer_create(LexerCallback, void *) FUNC_RETURNS;
-size_t		lexer_cstr_callback(void *, char *, size_t) FUNC_RETURNS;
-void		lexer_free(struct Lexer **);
-char const	*lexer_get_strerror(struct Lexer const *) FUNC_RETURNS;
-int		lexer_skip(struct Lexer *, char);
-int		lexer_token_get(struct Lexer *, struct LexerToken *)
+struct Lexer	*lexer_create(LexerCallback, void *) FUNC_NONNULL((2))
 	FUNC_RETURNS;
+size_t		lexer_cstr_callback(void *, char *, size_t) FUNC_NONNULL(())
+	FUNC_RETURNS;
+void		lexer_free(struct Lexer **) FUNC_NONNULL(());
+char const	*lexer_get_strerror(struct Lexer const *) FUNC_NONNULL(())
+	FUNC_RETURNS;
+int		lexer_skip(struct Lexer *, char) FUNC_NONNULL(());
+int		lexer_token_get(struct Lexer *, struct LexerToken *)
+	FUNC_NONNULL(()) FUNC_RETURNS;
 
 CDECLS_END
 

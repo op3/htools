@@ -24,7 +24,8 @@
 
 CDECLS_BEGIN
 
-uint32_t	hutils_fnv1a32(void const *, size_t) FUNC_PURE FUNC_RETURNS;
+uint32_t	hutils_fnv1a32(void const *, size_t) FUNC_NONNULL(()) FUNC_PURE
+	FUNC_RETURNS;
 
 CDECLS_END
 

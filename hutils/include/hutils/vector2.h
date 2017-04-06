@@ -28,21 +28,22 @@ struct Vector2f {
 };
 
 struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
-    struct Vector2f const *);
+    struct Vector2f const *) FUNC_NONNULL(());
 float		vector2f_dot(struct Vector2f const *, struct Vector2f const
-    *) FUNC_PURE FUNC_RETURNS;
-float		vector2f_get_magnitude(struct Vector2f const *) FUNC_PURE
-FUNC_RETURNS;
+    *) FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
+float		vector2f_get_magnitude(struct Vector2f const *) FUNC_NONNULL(())
+	FUNC_PURE FUNC_RETURNS;
 struct Vector2f	*vector2f_mad(struct Vector2f *, struct Vector2f const *,
-    struct Vector2f const *, struct Vector2f const *);
-struct Vector2f	*vector2f_negate(struct Vector2f *, struct Vector2f const *);
+    struct Vector2f const *, struct Vector2f const *) FUNC_NONNULL(());
+struct Vector2f	*vector2f_negate(struct Vector2f *, struct Vector2f const *)
+	FUNC_NONNULL(());
 struct Vector2f	*vector2f_normalize(struct Vector2f *, struct Vector2f const
-    *);
+    *) FUNC_NONNULL(());
 struct Vector2f	*vector2f_scale(struct Vector2f *, struct Vector2f const *,
-    float);
-struct Vector2f	*vector2f_set(struct Vector2f *, float, float);
+    float) FUNC_NONNULL(());
+struct Vector2f	*vector2f_set(struct Vector2f *, float, float) FUNC_NONNULL(());
 struct Vector2f	*vector2f_sub(struct Vector2f *, struct Vector2f const *,
-    struct Vector2f const *);
+    struct Vector2f const *) FUNC_NONNULL(());
 
 CDECLS_END
 

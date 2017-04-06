@@ -30,16 +30,17 @@ struct Vector4f {
 };
 
 struct Vector4f	*vector4f_add(struct Vector4f *, struct Vector4f const *,
-    struct Vector4f const *);
+    struct Vector4f const *) FUNC_NONNULL(());
 float		vector4f_dot(struct Vector4f const *, struct Vector4f const
-    *) FUNC_PURE FUNC_RETURNS;
-float		vector4f_get_magnitude(struct Vector4f const *) FUNC_PURE
-FUNC_RETURNS;
+    *) FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
+float		vector4f_get_magnitude(struct Vector4f const *) FUNC_NONNULL(())
+	FUNC_PURE FUNC_RETURNS;
 struct Vector4f	*vector4f_scale(struct Vector4f *, struct Vector4f const *,
-    float);
-struct Vector4f	*vector4f_set(struct Vector4f *, float, float, float, float);
+    float) FUNC_NONNULL(());
+struct Vector4f	*vector4f_set(struct Vector4f *, float, float, float, float)
+	FUNC_NONNULL(());
 struct Vector4f	*vector4f_sub(struct Vector4f *, struct Vector4f const *,
-    struct Vector4f const *);
+    struct Vector4f const *) FUNC_NONNULL(());
 
 CDECLS_END
 

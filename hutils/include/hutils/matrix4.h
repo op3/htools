@@ -28,14 +28,14 @@ struct Matrix4f {
 struct Vector3f;
 
 struct Matrix4f	*matrix4f_mul(struct Matrix4f *, struct Matrix4f const *,
-    struct Matrix4f const *);
+    struct Matrix4f const *) FUNC_NONNULL(());
 struct Vector3f	*matrix4f_mul_vector3f(struct Vector3f *, struct Matrix4f *,
-    struct Vector3f const *);
-struct Matrix4f	*matrix4f_set_identity(struct Matrix4f *);
+    struct Vector3f const *) FUNC_NONNULL(());
+struct Matrix4f	*matrix4f_set_identity(struct Matrix4f *) FUNC_NONNULL(());
 struct Matrix4f	*matrix4f_set_ortho(struct Matrix4f *, float, float, float,
-    float, float, float);
+    float, float, float) FUNC_NONNULL(());
 struct Matrix4f	*matrix4f_set_perspective(struct Matrix4f *, float, float,
-    float, float, float, float);
+    float, float, float, float) FUNC_NONNULL(());
 
 CDECLS_END
 
