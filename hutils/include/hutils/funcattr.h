@@ -19,6 +19,19 @@
 
 #include <hconf/include/hutils/funcattr.h>
 
+#if defined(HCONF_mFUNC_NONNULL_bYES)
+/* HCONF_OPT=nolink */
+#	define FUNC_NONNULL(list) \
+    __attribute__((nonnull list))
+#elif defined(HCONF_mFUNC_FORMAT_ARG_bNO) || defined(_MSC_VER)
+/* HCONF_OPT=nolink */
+#	define FUNC_NONNULL(list)
+#endif
+#if defined(HCONFING_mFUNC_NONNULL)
+char *hconf_test_nonnull_1_(void *) FUNC_NONNULL(());
+char *hconf_test_nonnull_2_(void *) FUNC_NONNULL((1));
+#endif
+
 #if defined(HCONF_mFUNC_NORETURN_bYES)
 /* HCONF_OPT=nolink */
 #	define FUNC_NORETURN __attribute__((noreturn))
@@ -40,18 +53,6 @@ void hconf_test_noreturn_(void) FUNC_NORETURN;
 #endif
 #if defined(HCONFING_mFUNC_PRINTF)
 void hconf_test_printf_(int, char const *, ...) FUNC_PRINTF(2, 3);
-#endif
-
-#if defined(HCONF_mFUNC_FORMAT_ARG_bYES)
-/* HCONF_OPT=nolink */
-#	define FUNC_FORMAT_ARG(fmt) \
-    __attribute__((format_arg(fmt)))
-#elif defined(HCONF_mFUNC_FORMAT_ARG_bNO) || defined(_MSC_VER)
-/* HCONF_OPT=nolink */
-#	define FUNC_FORMAT_ARG(fmt)
-#endif
-#if defined(HCONFING_mFUNC_FORMAT_ARG)
-char *hconf_test_format_arg_(int, char const *, ...) FUNC_FORMAT_ARG(2);
 #endif
 
 #if defined(HCONF_mFUNC_PURE_bYES)
