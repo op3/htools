@@ -23,7 +23,7 @@
 /* HCONF_OPT=nolink */
 #	define FUNC_NONNULL(list) \
     __attribute__((nonnull list))
-#elif defined(HCONF_mFUNC_FORMAT_ARG_bNO) || defined(_MSC_VER)
+#elif defined(HCONF_mFUNC_NONNULL_bNO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_NONNULL(list)
 #endif
