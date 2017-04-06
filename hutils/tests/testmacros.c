@@ -38,6 +38,26 @@ HTEST(Copy)
 	HTRY_I(1, ==, b);
 }
 
+HTEST(Move)
+{
+	int *ap, *bp;
+	int a, b;
+
+	a = 1;
+	b = 2;
+	MOVE(a, b);
+	HTRY_I(2, ==, a);
+	HTRY_I(0, ==, b);
+
+	a = 1;
+	b = 2;
+	ap = &a;
+	bp = &b;
+	MOVE(*ap, *bp);
+	HTRY_I(2, ==, a);
+	HTRY_I(0, ==, b);
+}
+
 HTEST(IsPow2)
 {
 	HTRY_I(1, ==, IS_POW2(1));
@@ -130,6 +150,7 @@ HTEST(Trunc)
 HTEST_SUITE(Macros)
 {
 	HTEST_ADD(Copy);
+	HTEST_ADD(Move);
 	HTEST_ADD(IsPow2);
 	HTEST_ADD(Length);
 	HTEST_ADD(Mask);

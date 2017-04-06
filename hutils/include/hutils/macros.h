@@ -61,6 +61,10 @@ HCONF_TEST
 #ifndef MIN
 #	define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
+#define MOVE(dst, src) do {\
+	COPY(dst, src);\
+	ZERO(src);\
+} WHILE_0
 #define OFFSETOF(s, m) ((uintptr_t)&(s).m - (uintptr_t)&(s))
 #define SGN(x) (0 > (x) ? -1 : 1)
 #define SQR(x) ((x) * (x))
