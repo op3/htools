@@ -35,8 +35,17 @@
 /* HCONF_OPT=nolink */
 #endif
 
-#if defined(HCONF_mWFORMAT_bWFORMAT2)
-/* HCONF_CFLAGS=-Wformat=2 */
+#if defined(HCONF_mWSTRICT_ALIASING_bYES)
+/* HCONF_CFLAGS=-Wstrict-aliasing */
+/* HCONF_OPT=nolink */
+#elif defined(HCONF_mWSTRICT_ALIASING_bNO)
+/* HCONF_OPT=nolink */
+#endif
+
+#if defined(HCONF_mWSTRICT_OVERFLOW_bYES)
+/* HCONF_CFLAGS=-Wstrict-overflow */
+/* HCONF_OPT=nolink */
+#elif defined(HCONF_mWSTRICT_OVERFLOW_bNO)
 /* HCONF_OPT=nolink */
 #endif
 
