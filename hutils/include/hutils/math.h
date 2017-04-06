@@ -32,13 +32,11 @@
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 /* HCONF_LIBS=-lm */
 #endif
-
 #include <math.h>
-
 #if defined(HCONFING_mMATH)
 HCONF_TEST
 {
-	return 0.0f < sqrt(M_PI * i);
+	return 0.0f < sqrt(M_PI * floor(i));
 }
 #endif
 
