@@ -34,6 +34,7 @@
 		free(ptr);\
 		ptr = NULL;\
 	} WHILE_0
+#define MALLOC(ptr, num) ptr = malloc(num * sizeof *ptr)
 
 /* The following from OpenBSD /usr/src/lib/libc/stdlib/reallocarray.c. */
 #ifndef MUL_NO_OVERFLOW
