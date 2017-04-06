@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -12,5 +12,5 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# -Wextra/-W and -Wswitch-enum are added by hconf.
-CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-prototypes
+# -Wextra/-W and -Wswitch-enum added by hconf.
+CFLAGS:=$(CFLAGS) -ansi -pedantic-errors -Wall -Werror -Wmissing-prototypes -Wshadow -Wstrict-aliasing -Wstrict-overflow -Wstrict-prototypes
