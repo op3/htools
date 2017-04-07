@@ -22,11 +22,11 @@
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
-CDECLS_BEGIN
-
 struct Config;
 struct ConfigCollection;
 struct ConfigSection;
+
+CDECLS_BEGIN
 
 void			config_collection_free(struct ConfigCollection **)
 	FUNC_NONNULL(());

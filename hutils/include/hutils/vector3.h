@@ -20,13 +20,13 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 struct Vector3f {
 	float	x;
 	float	y;
 	float	z;
 };
+
+CDECLS_BEGIN
 
 struct Vector3f	*vector3f_add(struct Vector3f *, struct Vector3f const *,
     struct Vector3f const *) FUNC_NONNULL(());

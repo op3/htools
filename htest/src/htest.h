@@ -24,11 +24,9 @@
 #	if defined(HCONFING_mHTEST_bPOSIX)
 HCONF_TEST
 {
-	(void)i;
-	return (int)fork();
+	return (int)fork() + 0 * i;
 }
 #	endif
-
 #elif defined(HCONF_mHTEST_bMSC)
 #	include <io.h>
 #endif

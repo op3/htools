@@ -20,12 +20,12 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 struct Vector2f {
 	float	x;
 	float	y;
 };
+
+CDECLS_BEGIN
 
 struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *) FUNC_NONNULL(());

@@ -21,8 +21,6 @@
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/time.h>
 
-CDECLS_BEGIN
-
 #if defined(HCONF_mTIME_GET_bCLOCK_GETTIME)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 #	define HUTILS_CLOCK_GETTIME
@@ -78,6 +76,8 @@ HCONF_TEST
 }
 #	endif
 #endif
+
+CDECLS_BEGIN
 
 double	time_getd(void) FUNC_RETURNS;
 char	*time_gets(void) FUNC_RETURNS;

@@ -21,9 +21,9 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 typedef int (*HutilsPrinter)(char const *, va_list);
+
+CDECLS_BEGIN
 
 void	hutils_err(int, char const *, ...) FUNC_PRINTF(2, 3);
 void	hutils_errc(int, int, char const *, ...) FUNC_PRINTF(3, 4);

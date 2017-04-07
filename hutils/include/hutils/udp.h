@@ -102,8 +102,6 @@ HCONF_TEST
 #	endif
 #endif
 
-CDECLS_BEGIN
-
 enum {
 	UDP_IPV4 = 0x0,
 	UDP_IPV6 = 0x1
@@ -116,6 +114,8 @@ struct UDPDatagram {
 	uint8_t	buf[512];
 	size_t	size;
 };
+
+CDECLS_BEGIN
 
 void			udp_address_free(struct UDPAddress **) FUNC_NONNULL(());
 struct UDPClient	*udp_client_create(int, char const *, uint16_t)

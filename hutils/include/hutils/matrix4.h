@@ -20,12 +20,12 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 struct Matrix4f {
 	float	m[16];
 };
 struct Vector3f;
+
+CDECLS_BEGIN
 
 struct Matrix4f	*matrix4f_mul(struct Matrix4f *, struct Matrix4f const *,
     struct Matrix4f const *) FUNC_NONNULL(());

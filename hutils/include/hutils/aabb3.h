@@ -20,12 +20,12 @@
 #include <hutils/funcattr.h>
 #include <hutils/vector3.h>
 
-CDECLS_BEGIN
-
 struct AABB3f {
 	struct	Vector3f min;
 	struct	Vector3f max;
 };
+
+CDECLS_BEGIN
 
 float	aabb3f_get_distance_sqr(struct AABB3f const *, struct Vector3f const
     *) FUNC_NONNULL(()) FUNC_RETURNS;

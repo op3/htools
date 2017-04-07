@@ -31,8 +31,6 @@
 #include <hutils/err.h>
 #include <hutils/macros.h>
 
-CDECLS_BEGIN
-
 #if defined(HTEST_GCOV_FLUSH)
 #	define GCOV_FLUSH __gcov_flush()
 void __gcov_flush(void);
@@ -235,6 +233,8 @@ extern jmp_buf g_htest_try_jmp_buf_;
 	}\
 } WHILE_0
 #endif
+
+CDECLS_BEGIN
 
 int	htest_do_recover(void) FUNC_RETURNS;
 void	htest_output_restore_(void);

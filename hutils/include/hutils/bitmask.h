@@ -20,9 +20,9 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 struct Bitmask;
+
+CDECLS_BEGIN
 
 struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_NONNULL(()) FUNC_PURE
 FUNC_RETURNS;

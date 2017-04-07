@@ -35,8 +35,7 @@ CDECLS_END
 #	include <stdlib.h>
 HCONF_TEST
 {
-	(void)i;
-	return -1 == getopt(0, NULL, NULL);
+	return -1 == getopt(0, NULL, NULL) + 0 * i;
 }
 #endif
 

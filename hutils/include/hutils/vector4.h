@@ -20,14 +20,14 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 struct Vector4f {
 	float	x;
 	float	y;
 	float	z;
 	float	w;
 };
+
+CDECLS_BEGIN
 
 struct Vector4f	*vector4f_add(struct Vector4f *, struct Vector4f const *,
     struct Vector4f const *) FUNC_NONNULL(());

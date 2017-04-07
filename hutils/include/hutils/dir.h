@@ -57,12 +57,12 @@ HCONF_TEST
 }
 #endif
 
-CDECLS_BEGIN
-
 struct Dir;
 struct DirEntry {
 	char	const *name;
 };
+
+CDECLS_BEGIN
 
 struct Dir	*dir_open(char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 void		dir_close(struct Dir **) FUNC_NONNULL(());

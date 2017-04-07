@@ -21,8 +21,6 @@
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
-CDECLS_BEGIN
-
 struct UTF8 {
 	/* Number of replacements performed on source string. */
 	int	replacement_num;
@@ -30,6 +28,8 @@ struct UTF8 {
 	size_t	bytes;
 	uint8_t	*data;
 };
+
+CDECLS_BEGIN
 
 struct UTF8	*utf8_create(uint8_t const *, size_t) FUNC_NONNULL(())
 	FUNC_RETURNS;

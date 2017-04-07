@@ -21,11 +21,11 @@
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
-CDECLS_BEGIN
-
 struct RandomSeed {
 	uint32_t	seed[5];
 };
+
+CDECLS_BEGIN
 
 double		random_getd(struct RandomSeed *) FUNC_NONNULL(()) FUNC_RETURNS;
 float		random_getf(struct RandomSeed *) FUNC_NONNULL(()) FUNC_RETURNS;

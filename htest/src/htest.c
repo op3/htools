@@ -52,7 +52,7 @@ static WORD RESET;
 
 static void suite_sighandler(int);
 static void try_sighandler(int);
-static void usage(int, char const *);
+static void usage(int, char const *) FUNC_NONNULL(());
 
 static int g_nul, g_old_stderr, g_old_stdout;
 static int g_do_colors, g_do_recover, g_do_verbose;

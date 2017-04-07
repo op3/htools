@@ -21,8 +21,6 @@
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 
-CDECLS_BEGIN
-
 enum LexerError {
 	LEXER_ERROR_NONE,
 	LEXER_ERROR_INVALID_HEX,
@@ -56,6 +54,8 @@ struct LexerToken {
 	enum	LexerType type;
 	char	*str;
 };
+
+CDECLS_BEGIN
 
 struct Lexer	*lexer_create(LexerCallback, void *) FUNC_NONNULL((2))
 	FUNC_RETURNS;
