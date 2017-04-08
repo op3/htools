@@ -20,7 +20,7 @@
 #include <string.h>
 #include <hutils/string.h>
 
-#if defined(HCONF_mSTRL_bCUSTOM) || defined(_MSC_VER)
+#if HCONF_BRANCH(STRL, CUSTOM) || defined(_MSC_VER)
 
 /*
  * Copy string src to buffer dst of size dsize.  At most dsize-1

@@ -28,7 +28,8 @@
 #	if HCONFING(THREAD)
 HCONF_TEST
 {
-	return pthread_attr_create(NULL) + 0 * i;
+	pthread_attr_t a;
+	return pthread_attr_create(&a) + 0 * i;
 }
 #	endif
 #elif HCONF_BRANCH(THREAD, ST_NEW)
@@ -38,7 +39,8 @@ HCONF_TEST
 #	if HCONFING(THREAD)
 HCONF_TEST
 {
-	return pthread_attr_init(NULL) + 0 * i;
+	pthread_attr_t a;
+	return pthread_attr_init(&a) + 0 * i;
 }
 #	endif
 #elif HCONF_BRANCH(THREAD, PTHREAD)
@@ -48,7 +50,8 @@ HCONF_TEST
 #	if HCONFING(THREAD)
 HCONF_TEST
 {
-	return pthread_attr_init(NULL) + 0 * i;
+	pthread_attr_t a;
+	return pthread_attr_init(&a) + 0 * i;
 }
 #	endif
 #endif

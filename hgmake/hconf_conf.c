@@ -371,8 +371,8 @@ try()
 	resolve_variables(module->branch);
 	write_files(0);
 	bucket = &module->branch->bucket;
-	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf ",
-		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
+	cppflags = STRCTV_BEGIN "-DHCONFING_m", module->name, " -I. -I",
+		 g_out_dir, "/_hconf ", bucket->var[VAR_CPPFLAGS] STRCTV_END;
 	cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS] STRCTV_END;
 	ret = build(g_filename_o, g_filename_main_c, bucket->var[VAR_CC],
 	    cppflags, cflags, "", "");
@@ -460,10 +460,6 @@ write_files(int a_write_final)
 	if (!a_write_final) {
 		fprintf(f, "#define HCONF_TEST extern int hconf_test_(int); "
 		    "int hconf_test_(int i)\n");
-		module = TAILQ_LAST(&g_module_list, ModuleList);
-		if (TAILQ_END(&g_module_list) != module) {
-			fprintf(f, "#define HCONFING_m%s 1\n", module->name);
-		}
 	}
 	fprintf(f, "#endif \n");
 	fclose(f);

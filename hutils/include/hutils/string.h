@@ -69,14 +69,14 @@ HCONF_TEST
 }
 #endif
 
-#if HCONF_BRANCH(STRLCPY, BSD_SOURCE)
+#if HCONF_BRANCH(STRL, BSD_SOURCE)
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
-#elif HCONF_BRANCH(STRLCPY, CUSTOM) || defined(_MSC_VER)
+#elif HCONF_BRANCH(STRL, CUSTOM) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 size_t strlcat(char *, char const *, size_t);
 size_t strlcpy(char *, char const *, size_t);
 #endif
-#if HCONFING(STRLCPY)
+#if HCONFING(STRL)
 HCONF_TEST
 {
 	char s[2];
