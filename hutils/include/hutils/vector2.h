@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,8 +31,8 @@ struct Vector2f	*vector2f_add(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *) FUNC_NONNULL(());
 float		vector2f_dot(struct Vector2f const *, struct Vector2f const
     *) FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
-float		vector2f_get_magnitude(struct Vector2f const *) FUNC_NONNULL(())
-	FUNC_PURE FUNC_RETURNS;
+float		vector2f_get_magnitude(struct Vector2f const *)
+	FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
 struct Vector2f	*vector2f_mad(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *, struct Vector2f const *) FUNC_NONNULL(());
 struct Vector2f	*vector2f_negate(struct Vector2f *, struct Vector2f const *)
@@ -41,7 +41,8 @@ struct Vector2f	*vector2f_normalize(struct Vector2f *, struct Vector2f const
     *) FUNC_NONNULL(());
 struct Vector2f	*vector2f_scale(struct Vector2f *, struct Vector2f const *,
     float) FUNC_NONNULL(());
-struct Vector2f	*vector2f_set(struct Vector2f *, float, float) FUNC_NONNULL(());
+struct Vector2f	*vector2f_set(struct Vector2f *, float, float)
+	FUNC_NONNULL(());
 struct Vector2f	*vector2f_sub(struct Vector2f *, struct Vector2f const *,
     struct Vector2f const *) FUNC_NONNULL(());
 
