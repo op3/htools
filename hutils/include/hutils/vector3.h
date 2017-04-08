@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,8 +34,8 @@ struct Vector3f	*vector3f_cross(struct Vector3f *, struct Vector3f const *,
     struct Vector3f const *) FUNC_NONNULL(());
 float		vector3f_dot(struct Vector3f const *, struct Vector3f const
     *) FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
-float		vector3f_get_magnitude(struct Vector3f const *) FUNC_NONNULL(())
-	FUNC_PURE FUNC_RETURNS;
+float		vector3f_get_magnitude(struct Vector3f const *)
+	FUNC_NONNULL(()) FUNC_PURE FUNC_RETURNS;
 struct Vector3f	*vector3f_negate(struct Vector3f *, struct Vector3f const *)
 	FUNC_NONNULL(());
 struct Vector3f	*vector3f_normalize(struct Vector3f *, struct Vector3f const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,8 +27,10 @@ struct RandomSeed {
 
 CDECLS_BEGIN
 
-double		random_getd(struct RandomSeed *) FUNC_NONNULL(()) FUNC_RETURNS;
-float		random_getf(struct RandomSeed *) FUNC_NONNULL(()) FUNC_RETURNS;
+double		random_getd(struct RandomSeed *) FUNC_NONNULL(())
+	FUNC_RETURNS;
+float		random_getf(struct RandomSeed *) FUNC_NONNULL(())
+	FUNC_RETURNS;
 uint32_t	random_getu32(struct RandomSeed *) FUNC_NONNULL(())
 	FUNC_RETURNS;
 
