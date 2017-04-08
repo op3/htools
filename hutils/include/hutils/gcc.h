@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,33 +19,33 @@
 
 #include <hconf/include/hutils/gcc.h>
 
-#if defined(HCONF_mCCACHE_bYES)
+#if HCONF_BRANCH(CCACHE, YES)
 /* HCONF_CC="ccache $CC" */
 /* HCONF_OPT=nolink */
-#elif defined(HCONF_mCCACHE_bNO)
+#elif HCONF_BRANCH(CCACHE, NO)
 /* HCONF_CC="$CC" */
 /* HCONF_OPT=nolink */
 #endif
 
-#if defined(HCONF_mWEXTRA_bWEXTRA)
+#if HCONF_BRANCH(WEXTRA, WEXTRA)
 /* HCONF_CFLAGS=-Wextra */
 /* HCONF_OPT=nolink */
-#elif defined(HCONF_mWEXTRA_bW)
+#elif HCONF_BRANCH(WEXTRA, W)
 /* HCONF_CFLAGS=-W */
 /* HCONF_OPT=nolink */
 #endif
 
-#if defined(HCONF_mWSTRICT_ALIASING_bYES)
+#if HCONF_BRANCH(WSTRICT_ALIASING, YES)
 /* HCONF_CFLAGS=-Wstrict-aliasing */
 /* HCONF_OPT=nolink */
-#elif defined(HCONF_mWSTRICT_ALIASING_bNO)
+#elif HCONF_BRANCH(WSTRICT_ALIASING, NO)
 /* HCONF_OPT=nolink */
 #endif
 
-#if defined(HCONF_mWSTRICT_OVERFLOW_bYES)
+#if HCONF_BRANCH(WSTRICT_OVERFLOW, YES)
 /* HCONF_CFLAGS=-Wstrict-overflow */
 /* HCONF_OPT=nolink */
-#elif defined(HCONF_mWSTRICT_OVERFLOW_bNO)
+#elif HCONF_BRANCH(WSTRICT_OVERFLOW, NO)
 /* HCONF_OPT=nolink */
 #endif
 

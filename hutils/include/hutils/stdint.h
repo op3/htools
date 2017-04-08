@@ -21,12 +21,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#if defined(HCONF_mSTDINT_LIMITS_bSTD_H)
+#if HCONF_BRANCH(STDINT_LIMITS, STD_H)
 /* HCONF_OPT="nolink" */
-#elif defined(HCONF_mSTDINT_LIMITS_bCUSTOM)
+#elif HCONF_BRANCH(STDINT_LIMITS, CUSTOM)
 /* HCONF_OPT="nolink" */
 #	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
-#elif defined(HCONF_mSTDINT_LIMITS_bLAST_RESORT)
+#elif HCONF_BRANCH(STDINT_LIMITS, LAST_RESORT)
 /* HCONF_OPT="nolink" */
 #	undef SIZE_MAX
 #	if __WORDSIZE == 64
@@ -35,17 +35,16 @@
 #		define SIZE_MAX 4294967295UL
 #	endif
 #endif
-#if defined(HCONFING_mSTDINT_LIMITS)
+#if HCONFING(STDINT_LIMITS)
 HCONF_TEST
 {
-	(void)i;
-	return 0 != SIZE_MAX;
+	return 0 != SIZE_MAX + 0 * i;
 }
 #endif
 
-#if defined(HCONF_mSTDINT_TYPES_bNOTHING)
+#if HCONF_BRANCH(STDINT_TYPES, NOTHING)
 /* HCONF_OPT="nolink" */
-#elif defined(HCONF_mSTDINT_TYPES_bTYPEDEF_SYS_TYPES_H)
+#elif HCONF_BRANCH(STDINT_TYPES, TYPEDEF_SYS_TYPES_H)
 /* HCONF_OPT="nolink" */
 #	include <sys/types.h>
 typedef u_int8_t  uint8_t;
@@ -55,7 +54,7 @@ typedef u_int64_t uint64_t;
 typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
 #endif
-#if defined(HCONFING_mSTDINT_TYPES)
+#if HCONFING(STDINT_TYPES)
 HCONF_TEST
 {
 	char pi8 [             1 == sizeof(int8_t)    ? 1 : -1];
@@ -68,7 +67,6 @@ HCONF_TEST
 	char pu64[             8 == sizeof(uint64_t)  ? 1 : -1];
 	char pip [sizeof(void *) == sizeof(intptr_t)  ? 1 : -1];
 	char pup [sizeof(void *) == sizeof(uintptr_t) ? 1 : -1];
-	(void)i;
 	(void)pi8;
 	(void)pu8;
 	(void)pi16;
@@ -79,7 +77,7 @@ HCONF_TEST
 	(void)pu64;
 	(void)pip;
 	(void)pup;
-	return 1;
+	return 1 + 0 * i;
 }
 #endif
 

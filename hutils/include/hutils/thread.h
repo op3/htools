@@ -21,37 +21,34 @@
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/thread.h>
 
-#if defined(HCONF_mTHREAD_bST_OLD)
+#if HCONF_BRANCH(THREAD, ST_OLD)
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
 #	define PTHREADS
-#	if defined(HCONFING_mTHREAD_bST_OLD)
+#	if HCONFING(THREAD)
 HCONF_TEST
 {
-	(void)i;
-	return pthread_attr_create(NULL);
+	return pthread_attr_create(NULL) + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mTHREAD_bST_NEW)
+#elif HCONF_BRANCH(THREAD, ST_NEW)
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
 #	define PTHREADS
-#	if defined(HCONFING_mTHREAD_bST_NEW)
+#	if HCONFING(THREAD)
 HCONF_TEST
 {
-	(void)i;
-	return pthread_attr_init(NULL);
+	return pthread_attr_init(NULL) + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mTHREAD_bPHTREAD)
+#elif HCONF_BRANCH(THREAD, PTHREAD)
 /* HCONF_LIBS=-lpthread */
 #	include <pthread.h>
 #	define PTHREADS
-#	if defined(HCONFING_mTHREAD_bPTHREAD)
+#	if HCONFING(THREAD)
 HCONF_TEST
 {
-	(void)i;
-	return pthread_attr_init(NULL);
+	return pthread_attr_init(NULL) + 0 * i;
 }
 #	endif
 #endif

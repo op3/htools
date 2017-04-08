@@ -20,7 +20,7 @@
 #include <string.h>
 #include <hconf/include/hutils/macros.h>
 
-#if defined(HCONF_mCONST_EXPR_bSIMPLE)
+#if HCONF_BRANCH(CONST_EXPR, SIMPLE)
 /* HCONF_OPT=nolink */
 #	define WHILE_0 while (0)
 #	define IF_CONST(cond) if (cond)
@@ -36,11 +36,10 @@
 		if (cond)\
 		__pragma(warning(pop))
 #endif
-#if defined(HCONFING_mCONST_EXPR)
+#if HCONFING(CONST_EXPR)
 HCONF_TEST
 {
-	(void)i;
-	do { return 1; } WHILE_0;
+	do { return 1 + 0 * i; } WHILE_0;
 }
 #endif
 

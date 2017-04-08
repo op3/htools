@@ -19,41 +19,46 @@
 
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
+#include <hutils/macros.h>
 #include <hconf/include/hutils/dir.h>
 
-#if defined(HCONF_mDIR_bDIRENT)
+#if HCONF_BRANCH(DIR, DIRENT)
+
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
 #	include <dirent.h>
 #	define HUTILS_READDIR(dir, entry, result) do {\
-		if (0 != readdir_r(dir, &entry, &result)) {\
-			result = NULL;\
-		}\
-	} WHILE_0
-#elif defined(HCONF_mDIR_bDIRENT_ANCIENT)
+	if (0 != readdir_r(dir, &entry, &result)) {\
+		result = NULL;\
+	}\
+} WHILE_0
+
+#elif HCONF_BRANCH(DIR, DIRENT_ANCIENT)
+
 #	include <sys/types.h>
 #	include <dirent.h>
 #	define HUTILS_READDIR(dir, entry, result)\
     result = readdir_r(dir, &entry)
-#elif defined(HCONF_mDIR_bDIRENT_READDIR)
-/* readdir_r deprecated and readdir made safe, on modern platforms. */
+
+#elif HCONF_BRANCH(DIR, DIRENT_READDIR)
+
+/* readdir_r deprecated and readdir made safe on modern platforms. */
 #	include <dirent.h>
 #	define HUTILS_READDIR(dir, entry, result) do {\
-		(void)entry;\
-		result = readdir(dir);\
-	} WHILE_0
+	(void)entry;\
+	result = readdir(dir);\
+} WHILE_0
+
 #endif
-#if defined(HCONFING_mDIR)
+#if HCONFING(DIR)
 #	include <stdlib.h>
-#	include <hutils/macros.h>
 HCONF_TEST
 {
 	DIR *dir;
 	struct dirent entry, *result;
-	(void)i;
 	dir = opendir(".");
 	HUTILS_READDIR(dir, entry, result);
 	closedir(dir);
-	return NULL != result;
+	return NULL != result + 0 * i;
 }
 #endif
 

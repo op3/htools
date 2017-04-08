@@ -18,7 +18,7 @@
 #include <string.h>
 #include <hutils/memory.h>
 
-#if defined(HCONF_mTHREAD_bST_OLD)
+#if HCONF_BRANCH(THREAD, ST_OLD)
 #	define DO_PTHREADS 1
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_create(&a)
@@ -29,8 +29,7 @@
 } WHILE_0
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, t->attr, run, starter)
-
-#elif defined(HCONF_mTHREAD_bST_NEW)
+#elif HCONF_BRANCH(THREAD, ST_NEW)
 #	define DO_PTHREADS 1
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
@@ -41,8 +40,7 @@
 } WHILE_0
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, &t->attr, run, starter)
-
-#elif defined(HCONF_mTHREAD_bPHTREAD)
+#elif HCONF_BRANCH(THREAD, PTHREAD)
 #	define DO_PTHREADS 1
 #	include <limits.h>
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
@@ -53,7 +51,6 @@
 } WHILE_0
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, &t->attr, run, starter)
-
 #elif defined(_MSC_VER)
 #	include <process.h>
 #	include <hutils/string.h>
@@ -230,7 +227,7 @@ thread_mutex_unlock(struct Mutex *a_mutex)
 
 #if DO_PTHREADS
 
-#include <errno.h>
+#	include <errno.h>
 
 struct Starter {
 	void	(*func)(void *);

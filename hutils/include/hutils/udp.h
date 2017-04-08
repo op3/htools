@@ -23,81 +23,75 @@
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
-#if defined(HCONF_mSOCKET_H_bSOCKET_H)
+#if HCONF_BRANCH(SOCKET_H, SOCKET_H)
 #	include <socket.h>
-#elif defined(HCONF_mSOCKET_H_bSYS_SOCKET_H)
+#elif HCONF_BRANCH(SOCKET_H, SYS_SOCKET_H)
 #	include <sys/socket.h>
-#elif defined(HCONF_mSOCKET_H_bNONE)
+#elif HCONF_BRANCH(SOCKET_H, NONE)
 #endif
 
-#if defined(HCONF_mIPPROTO_UDP_bNETINET_IN_H)
+#if HCONF_BRANCH(IPPROTO_UDP, NETINET_IN_H)
 #	include <netinet/in.h>
-#elif defined(HCONF_mIPPROTO_UDP_bNOWARN_NETINET_IN_H)
+#elif HCONF_BRANCH(IPPROTO_UDP, NOWARN_NETINET_IN_H)
 /* HCONF_CPPFLAGS=-D__NO_INCLUDE_WARN__ */
 #	include <netinet/in.h>
 #endif
-#if defined(HCONFING_mIPPROTO_UDP)
+#if HCONFING(IPPROTO_UDP)
 HCONF_TEST
 {
-	(void)i;
-	return IPPROTO_UDP;
+	return IPPROTO_UDP + 0 * i;
 }
 #endif
 
-#if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO)
+#if HCONF_BRANCH(UDP_LOOKUP, GETADDRINFO)
 #	include <netdb.h>
-#	if defined(HCONFING_mUDP_LOOKUP)
+#	if HCONFING(UDP_LOOKUP)
 HCONF_TEST
 {
-	(void)i;
-	return getaddrinfo(0, 0, 0, 0);
+	return getaddrinfo(0, 0, 0, 0) + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mUDP_LOOKUP_bGETHOSTBYNAME_SOCKLEN)
+#elif HCONF_BRANCH(UDP_LOOKUP, GETHOSTBYNAME_SOCKLEN)
 /* HCONF_LIBS=-lnetinet */
 #	include <netdb.h>
 #	define socklen_t int
-#	if defined(HCONFING_mUDP_LOOKUP)
+#	if HCONFING(UDP_LOOKUP)
 HCONF_TEST
 {
 	socklen_t len;
 
-	(void)i;
 	gethostbyname(0);
-	return recvfrom(0, 0, 0, 0, 0, &len);
+	return recvfrom(0, 0, 0, 0, 0, &len) + 0 * i;
 }
 #	endif
 #endif
 
-#if defined(HCONF_mUDP_EVENT_bPOLL)
+#if HCONF_BRANCH(UDP_EVENT, POLL)
 #	include <poll.h>
-#	if defined(HCONFING_mUDP_EVENT)
+#	if HCONFING(UDP_EVENT)
 #		define HCONF_TEST_RUN
 HCONF_TEST
 {
 	struct pollfd fds[1];
-	(void)i;
 	fds[0].fd = 0;
 	fds[0].events = POLLIN;
-	return -1 != poll(fds, 1, 0);
+	return -1 != poll(fds, 1, 0) + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mUDP_EVENT_bSYS_SELECT_H)
+#elif HCONF_BRANCH(UDP_EVENT, SYS_SELECT_H)
 #	include <sys/select.h>
-#	if defined(HCONFING_mUDP_EVENT)
+#	if HCONFING(UDP_EVENT)
 HCONF_TEST
 {
-	(void)i;
-	return select(0, NULL, NULL, NULL, NULL);
+	return select(0, NULL, NULL, NULL, NULL) + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mUDP_EVENT_bSELECT_TIME_H)
+#elif HCONF_BRANCH(UDP_EVENT, SELECT_TIME_H)
 #	include <time.h>
-#	if defined(HCONFING_mUDP_EVENT)
+#	if HCONFING(UDP_EVENT)
 HCONF_TEST
 {
-	(void)i;
-	return select(0, NULL, NULL, NULL, NULL);
+	return select(0, NULL, NULL, NULL, NULL) + 0 * i;
 }
 #	endif
 #endif

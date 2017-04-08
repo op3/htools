@@ -19,72 +19,71 @@
 
 #include <hconf/include/hutils/funcattr.h>
 
-#if defined(HCONF_mFUNC_NONNULL_bYES)
+#if HCONF_BRANCH(FUNC_NONNULL, YES)
 /* HCONF_OPT=nolink */
-#	define FUNC_NONNULL(list) \
-    __attribute__((nonnull list))
-#elif defined(HCONF_mFUNC_NONNULL_bNO) || defined(_MSC_VER)
+#	define FUNC_NONNULL(list) __attribute__((nonnull list))
+#elif HCONF_BRANCH(FUNC_NONNULL, NO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_NONNULL(list)
 #endif
-#if defined(HCONFING_mFUNC_NONNULL)
+#if HCONFING(FUNC_NONNULL)
 char *hconf_test_nonnull_1_(void *) FUNC_NONNULL(());
 char *hconf_test_nonnull_2_(void *) FUNC_NONNULL((1));
 #endif
 
-#if defined(HCONF_mFUNC_NORETURN_bYES)
+#if HCONF_BRANCH(FUNC_NORETURN, YES)
 /* HCONF_OPT=nolink */
 #	define FUNC_NORETURN __attribute__((noreturn))
-#elif defined(HCONF_mFUNC_NORETURN_bNO) || defined(_MSC_VER)
+#elif HCONF_BRANCH(FUNC_NORETURN, NO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_NORETURN
 #endif
-#if defined(HCONFING_mFUNC_NORETURN)
+#if HCONFING(FUNC_NORETURN)
 void hconf_test_noreturn_(void) FUNC_NORETURN;
 #endif
 
-#if defined(HCONF_mFUNC_PRINTF_bYES)
+#if HCONF_BRANCH(FUNC_PRINTF, YES)
 /* HCONF_OPT=nolink */
 #	define FUNC_PRINTF(fmt, args) \
     __attribute__((format(printf, fmt, args)))
-#elif defined(HCONF_mFUNC_PRINTF_bNO) || defined(_MSC_VER)
+#elif HCONF_BRANCH(FUNC_PRINTF, NO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_PRINTF(fmt, args)
 #endif
-#if defined(HCONFING_mFUNC_PRINTF)
+#if HCONFING(FUNC_PRINTF)
 void hconf_test_printf_(int, char const *, ...) FUNC_PRINTF(2, 3);
 #endif
 
-#if defined(HCONF_mFUNC_PURE_bYES)
+#if HCONF_BRANCH(FUNC_PURE, YES)
 /* HCONF_OPT=nolink */
 #	define FUNC_PURE __attribute__((pure))
-#elif defined(HCONF_mFUNC_PURE_bNO) || defined(_MSC_VER)
+#elif HCONF_BRANCH(FUNC_PURE, NO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_PURE
 #endif
-#if defined(HCONFING_mFUNC_PURE)
+#if HCONFING(FUNC_PURE)
 void hconf_test_pure_(void) FUNC_PURE;
 #endif
 
-#if defined(HCONF_mFUNC_RETURNS_bYES)
+#if HCONF_BRANCH(FUNC_RETURNS, YES)
 /* HCONF_OPT=nolink */
 #	define FUNC_RETURNS __attribute__((warn_unused_result))
-#elif defined(HCONF_mFUNC_RETURNS_bNO) || defined(_MSC_VER)
+#elif HCONF_BRANCH(FUNC_RETURNS, NO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_RETURNS
 #endif
-#if defined(HCONFING_mFUNC_RETURNS)
+#if HCONFING(FUNC_RETURNS)
 int hconf_test_returns_(void) FUNC_RETURNS;
 #endif
 
-#if defined(HCONF_mFUNC_UNUSED_bYES)
+#if HCONF_BRANCH(FUNC_UNUSED, YES)
 /* HCONF_OPT=nolink */
 #	define FUNC_UNUSED __attribute__((unused))
-#elif defined(HCONF_mFUNC_UNUSED_bNO) || defined(_MSC_VER)
+#elif HCONF_BRANCH(FUNC_UNUSED, NO) || defined(_MSC_VER)
 /* HCONF_OPT=nolink */
 #	define FUNC_UNUSED
 #endif
-#if defined(HCONFING_mFUNC_UNUSED)
+#if HCONFING(FUNC_UNUSED)
 int hconf_test_unused_(void) FUNC_UNUSED;
 #endif
 

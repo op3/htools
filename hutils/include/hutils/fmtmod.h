@@ -22,15 +22,15 @@
 #include <hutils/stdint.h>
 #include <hconf/include/hutils/fmtmod.h>
 
-#if defined(HCONF_mFMTMOD_SIZET_bINT)
+#if HCONF_BRANCH(FMTMOD_SIZET, INT)
 /* HCONF_OPT=nolink */
 #	define PRIz "d"
 #	define PRIzx "x"
-#elif defined(HCONF_mFMTMOD_SIZET_bZ)
+#elif HCONF_BRANCH(FMTMOD_SIZET, Z)
 /* HCONF_OPT=nolink */
 #	define PRIz "z"
 #	define PRIzx "zx"
-#elif defined(HCONF_mFMTMOD_SIZET_bLONG)
+#elif HCONF_BRANCH(FMTMOD_SIZET, LONG)
 /* HCONF_OPT=nolink */
 #	define PRIz "ld"
 #	define PRIzx "lx"
@@ -38,23 +38,23 @@
 #	define PRIz "lu"
 #	define PRIzx "lx"
 #endif
-#if defined(HCONFING_mFMTMOD_SIZET)
+#if HCONFING(FMTMOD_SIZET)
 HCONF_TEST
 {
 	return printf("%"PRIz" %"PRIzx, (size_t)i, (size_t)i);
 }
 #endif
 
-#if defined(HCONF_mFMTMOD_INTPTRT_bINT)
+#if HCONF_BRANCH(FMTMOD_INTPTRT, INT)
 /* HCONF_OPT=nolink */
 #	define PRIp "d"
 #	define PRIpx "x"
-#elif defined(HCONF_mFMTMOD_INTPTRT_bLONG)
+#elif HCONF_BRANCH(FMTMOD_INTPTRT, LONG)
 /* HCONF_OPT=nolink */
 #	define PRIp "ld"
 #	define PRIpx "lx"
 #endif
-#if defined(HCONFING_mFMTMOD_INTPTRT)
+#if HCONFING(FMTMOD_INTPTRT)
 HCONF_TEST
 {
 	return printf("%"PRIp" %"PRIpx" %"PRIp" %"PRIpx,

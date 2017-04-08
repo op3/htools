@@ -21,58 +21,51 @@
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/time.h>
 
-#if defined(HCONF_mTIME_GET_bCLOCK_GETTIME)
+#if HCONF_BRANCH(TIME_GET, CLOCK_GETTIME)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 #	define HUTILS_CLOCK_GETTIME
-#elif defined(HCONF_mTIME_GET_bCLOCK_GETTIME_LRT)
+#elif HCONF_BRANCH(TIME_GET, CLOCK_GETTIME_LRT)
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 /* HCONF_LIBS=-lrt */
 #	define HUTILS_CLOCK_GETTIME
-#elif defined(HCONF_mTIME_GET_bMACH)
-#	if defined(HCONFING_mTIME_GET)
+#elif HCONF_BRANCH(TIME_GET, MACH)
 HCONF_TEST
 {
-	(void)i;
-	return mach_absolute_time();
+	return mach_absolute_time() + 0 * i;
 }
-#	endif
 #endif
-#if defined(HCONFING_mTIME_GET) && defined(HUTILS_CLOCK_GETTIME)
+#if HCONFING(TIME_GET) && defined(HUTILS_CLOCK_GETTIME)
 #	include <time.h>
 HCONF_TEST
 {
-	(void)i;
-	return clock_gettime(0, NULL);
+	return clock_gettime(0, NULL) + 0 * i;
 }
 #endif
 
-#if defined(HCONF_mTIME_SLEEP_bNANOSLEEP)
-#	if defined(HCONFING_mTIME_SLEEP)
-#		include <time.h>
+#if HCONF_BRANCH(TIME_SLEEP, NANOSLEEP)
+#endif
+#if HCONFING(TIME_SLEEP)
+#	include <time.h>
 HCONF_TEST
 {
-	(void)i;
-	return nanosleep(NULL, NULL);
+	return nanosleep(NULL, NULL) + 0 * i;
 }
-#	endif
 #endif
 
-#if defined(HCONF_mTIME_DRAFT9_bNO)
-#	if defined(HCONFING_mTIME_DRAFT9)
+#if HCONF_BRANCH(TIME_DRAFT9, NO)
+#	if HCONFING(TIME_DRAFT9)
 #		include <time.h>
 HCONF_TEST
 {
-	(void)i;
-	return NULL != asctime_r(NULL, NULL);
+	return NULL != asctime_r(NULL, NULL) + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mTIME_DRAFT9_bYES)
-#	if defined(HCONFING_mTIME_DRAFT9)
+#elif HCONF_BRANCH(TIME_DRAFT9, YES)
+#	if HCONFING(TIME_DRAFT9)
 #		include <time.h>
 HCONF_TEST
 {
-	(void)i;
-	return NULL != asctime_r(NULL, NULL, 0);
+	return NULL != asctime_r(NULL, NULL, 0) + 0 * i;
 }
 #	endif
 #endif

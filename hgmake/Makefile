@@ -16,7 +16,8 @@ include build_dir.mk
 include strict_cflags.mk
 
 CPPFLAGS:=$(CPPFLAGS) -D_BSD_SOURCE -D_DEFAULT_SOURCE -I. -I../hutils/include
-CFLAGS:=$(CFLAGS) -ggdb
+# hutils hconfs the necessary funcattr, so we have to skip it here.
+CFLAGS:=$(filter-out -Wformat=2,$(CFLAGS)) -ggdb
 CONF:=$(BUILD_DIR)/hconf_conf
 MERGE:=$(BUILD_DIR)/hconf_merge
 

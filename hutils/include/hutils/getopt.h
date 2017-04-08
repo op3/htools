@@ -19,9 +19,9 @@
 
 #include <hconf/include/hutils/getopt.h>
 
-#if defined(HCONF_mGETOPT_bUNISTD_H)
+#if HCONF_BRANCH(GETOPT, UNISTD_H)
 #	include <unistd.h>
-#elif defined(HCONF_mGETOPT_bCUSTOM) || defined(_MSC_VER)
+#elif HCONF_BRANCH(GETOPT, CUSTOM) || defined(_MSC_VER)
 /* HCONF_SRC=src/getopt.c */
 #	include <hutils/cdecls.h>
 #	include <hutils/funcattr.h>
@@ -31,7 +31,7 @@ extern int optind, optopt;
 int	getopt(int, char *const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 CDECLS_END
 #endif
-#if defined(HCONFING_mGETOPT)
+#if HCONFING(GETOPT)
 #	include <stdlib.h>
 HCONF_TEST
 {

@@ -19,15 +19,15 @@
 
 #include <hconf/src/htest.h>
 
-#if defined(HCONF_mHTEST_bPOSIX)
+#if HCONF_BRANCH(HTEST, POSIX)
 #	include <unistd.h>
-#	if defined(HCONFING_mHTEST_bPOSIX)
+#	if HCONFING(HTEST)
 HCONF_TEST
 {
 	return (int)fork() + 0 * i;
 }
 #	endif
-#elif defined(HCONF_mHTEST_bMSC)
+#elif defined(_MSC_VER)
 #	include <io.h>
 #endif
 

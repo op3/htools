@@ -174,9 +174,9 @@ get_branch(char const *a_str, char **a_module, char **a_branch)
 	char const *module_start, *module_end;
 	char const *branch_start, *branch_end;
 
-	/* # (el)if defined ( HCONF_mMODULE_bBRANCH ) */
 	*a_module = NULL;
 	*a_branch = NULL;
+	/* # (el)if HCONF_BRANCH ( MODULE , BRANCH ) */
 	for (p = a_str; isspace(*p); ++p)
 		;
 	if ('#' != *p) {
@@ -196,29 +196,27 @@ get_branch(char const *a_str, char **a_module, char **a_branch)
 	}
 	for (++p; isspace(*p); ++p)
 		;
-	if (0 != STRBCMP(p, "defined")) {
+	if (0 != STRBCMP(p, "HCONF_BRANCH")) {
 		return;
 	}
-	for (p += 7; isspace(*p); ++p)
+	for (p += 12; isspace(*p); ++p)
 		;
 	if ('(' != *p) {
 		return;
 	}
 	for (++p; isspace(*p); ++p)
 		;
-	if (0 != STRBCMP(p, "HCONF_m")) {
-		return;
-	}
-	p += 7;
 	module_start = p;
-	p = strstr(p, "_b");
-	if (NULL == p) {
-		fprintf(stderr, "%s:%d: Hm, is this line really correct?\n",
-		    g_filename, g_line_no);
+	for (; '_' == *p || isalnum(*p); ++p)
+		;
+	module_end = p;
+	for (; isspace(*p); ++p)
+		;
+	if (',' != *p) {
 		return;
 	}
-	module_end = p;
-	p += 2;
+	for (++p; isspace(*p); ++p)
+		;
 	branch_start = p;
 	for (; '_' == *p || isalnum(*p); ++p)
 		;
@@ -373,9 +371,8 @@ try()
 	resolve_variables(module->branch);
 	write_files(0);
 	bucket = &module->branch->bucket;
-	cppflags = STRCTV_BEGIN "-DHCONFING_m", module->name, " -DHCONFING_m",
-		 module->name, "_b", module->branch->name, " -I. -I",
-		 g_out_dir, "/_hconf ", bucket->var[VAR_CPPFLAGS] STRCTV_END;
+	cppflags = STRCTV_BEGIN "-I. -I", g_out_dir, "/_hconf ",
+		 bucket->var[VAR_CPPFLAGS] STRCTV_END;
 	cflags = STRCTV_BEGIN "-c ", bucket->var[VAR_CFLAGS] STRCTV_END;
 	ret = build(g_filename_o, g_filename_main_c, bucket->var[VAR_CC],
 	    cppflags, cflags, "", "");
@@ -452,13 +449,21 @@ write_files(int a_write_final)
 	}
 	fprintf(f, "#ifndef HCONF_%s\n", g_filename_upper);
 	fprintf(f, "#define HCONF_%s\n", g_filename_upper);
+	fprintf(f, "#ifndef HCONF_BRANCH\n");
+	fprintf(f, "#	define HCONF_BRANCH(m, b) HCONF_m##m##_b##b\n");
+	fprintf(f, "#	define HCONFING(m) HCONFING_m##m\n");
+	fprintf(f, "#endif\n");
+	TAILQ_FOREACH(module, &g_module_list, next) {
+		fprintf(f, "#define HCONF_m%s_b%s 1\n", module->name,
+		    module->branch->name);
+	}
 	if (!a_write_final) {
 		fprintf(f, "#define HCONF_TEST extern int hconf_test_(int); "
 		    "int hconf_test_(int i)\n");
-	}
-	TAILQ_FOREACH(module, &g_module_list, next) {
-		fprintf(f, "#define HCONF_m%s_b%s\n", module->name,
-		    module->branch->name);
+		module = TAILQ_LAST(&g_module_list, ModuleList);
+		if (TAILQ_END(&g_module_list) != module) {
+			fprintf(f, "#define HCONFING_m%s 1\n", module->name);
+		}
 	}
 	fprintf(f, "#endif \n");
 	fclose(f);
@@ -612,7 +617,8 @@ main(int argc, char const *const *argv)
 		fprintf(file, "#include <%s>\n", g_filename);
 		fprintf(file, "int main(void) {\n");
 		fprintf(file, "#ifdef HCONF_TEST_RUN\n");
-		fprintf(file, "return !hconf_test_();\n");
+		fprintf(file, "return hconf_test_() ? EXIT_SUCCESS : "
+		    "EXIT_FAILURE;\n");
 		fprintf(file, "#else\n");
 		fprintf(file, "return 0;\n");
 		fprintf(file, "#endif\n");
@@ -642,16 +648,16 @@ main(int argc, char const *const *argv)
 
 			try();
 			module = TAILQ_LAST(&g_module_list, ModuleList);
-			if (TAILQ_END(&g_module_list) != module &&
-			    0 == strcmp(module->name, module_new)) {
+			if (TAILQ_END(&g_module_list) == module ||
+			    0 != strcmp(module->name, module_new)) {
+				module = module_add(module_new);
+			} else {
 				free(module_new);
 				if (NULL != module->branch &&
 				    module->branch->is_ok) {
 					free(branch_new);
 					continue;
 				}
-			} else {
-				module = module_add(module_new);
 			}
 			branch = calloc(1, sizeof *branch);
 			branch->name = branch_new;
