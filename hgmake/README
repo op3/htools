@@ -38,7 +38,7 @@ An "approach" to autoconfing things which tries to solve the following things:
     Everything is done with make, including use of dependency rules.
  *) Much simpler macro guards.
     Bye-bye to: #ifdef __linux__ && GNUC_BLABLA
-    Hello to:   #if defined(HCONF_mMYMODULE_bMYBRANCH)
+    Hello to:   #if HCONF_MODULE(MYMODULE, MYBRANCH)
     hconf will test HCONF guards top-down until one compiles and optionally
     links perfectly.
  *) Production code rather than special test code tested, although a
@@ -90,8 +90,7 @@ HCONF_TEST(char *, (void))
     to create a big hconf file with merged compiler options.
 
  *) Create dependencies on hconf cache:
-    Makefile:
-     %.o: %.c Makefile $(HCONF_CACHE)
+    %.o: %.c Makefile $(HCONF_CACHE)
 
  *) You should get the chosen branches in a generated header file:
     $(BUILD_DIR)/hconf/include/myheader.h:
@@ -99,7 +98,7 @@ HCONF_TEST(char *, (void))
      #define HCONF_INCLUDE_MYHEADER_H
      #define HCONF_mMY_MODULE_bDEUX
      #endif
- *) ... and compiler/linker flags in the hconf file for fun:
+ *) ... and compiler/linker flags in the hconf file for fun (debugging):
     $(BUILD_DIR)/hconf/include/myheader.hconf:
      ccache cc     # CC
      -D_BSD_SOURCE # CPPFLAGS
@@ -112,6 +111,9 @@ HCONF_TEST(char *, (void))
      HCONF_SRC:=...
      HCONF_EXT:=$(HTOOLS_PATH)/hutils
      include $(HTOOLS_PATH)/hgmake/hconf.mk
+
+ *) When compiling don't forget to add $(BUILD_DIR) to your header search
+    path, where the generated header files reside.
 
 Notes:
 

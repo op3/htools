@@ -1,4 +1,4 @@
- Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -17,8 +17,8 @@ hutils - utility code
 =====================
 
 This is just a collection of useful little code snippets that I collect. It's
-tested with the htest unit testing framework. First read htools/README, then
-call GNU make:
+auto-configured with hconf in hgmake and tested with the htest unit testing
+framework. First read htools/README, then call GNU make:
  $ make / gmake
 
 To run the tests, htest must have been built. Note that htest uses hutils, so
