@@ -60,9 +60,9 @@
 
 /* TODO: Optimize rules for front and back margins, add hysteresis? */
 
-#define VECTOR_IMPLEMENT(VectorType, Type, chunk)\
+#define VECTOR_IMPLEMENT(name, VectorType, Type, chunk)\
 static void \
-VectorType##_reserve_(struct VectorType *a_vec, size_t a_capacity)\
+name##_reserve_(struct VectorType *a_vec, size_t a_capacity)\
 {\
 	REALLOCARRAY(a_vec->data, a_capacity);\
 	if (a_vec->ofs + a_vec->size > a_capacity) {\
@@ -72,35 +72,33 @@ VectorType##_reserve_(struct VectorType *a_vec, size_t a_capacity)\
 	VECTOR_ASSERT_INVARIANT_(chunk);\
 }\
 static void \
-VectorType##_try_grow_(struct VectorType *a_vec)\
+name##_try_grow_(struct VectorType *a_vec)\
 {\
 	if (a_vec->ofs + a_vec->size >= a_vec->capacity) {\
-		VectorType##_reserve_(a_vec, a_vec->ofs + a_vec->size +\
-		    chunk);\
+		name##_reserve_(a_vec, a_vec->ofs + a_vec->size + chunk);\
 	}\
 }\
 static void \
-VectorType##_try_shrink_(struct VectorType *a_vec)\
+name##_try_shrink_(struct VectorType *a_vec)\
 {\
 	if (a_vec->ofs + a_vec->size + chunk < a_vec->capacity) {\
-		VectorType##_reserve_(a_vec, a_vec->ofs + a_vec->size +\
-		    chunk);\
+		name##_reserve_(a_vec, a_vec->ofs + a_vec->size + chunk);\
 	}\
 }\
 FUNC_UNUSED static struct Type *\
-VectorType##_at(struct VectorType *a_vec, size_t a_i)\
+name##_at(struct VectorType *a_vec, size_t a_i)\
 {\
 	VECTOR_ASSERT_BOUNDS_(0);\
 	return &a_vec->data[a_vec->ofs + a_i];\
 }\
 FUNC_UNUSED static struct Type *\
-VectorType##_back(struct VectorType *a_vec)\
+name##_back(struct VectorType *a_vec)\
 {\
 	VECTOR_ASSERT_NOTEMPTY_;\
 	return &a_vec->data[a_vec->ofs + a_vec->size - 1];\
 }\
 FUNC_UNUSED static void \
-VectorType##_create(struct VectorType *a_vec, size_t a_size)\
+name##_create(struct VectorType *a_vec, size_t a_size)\
 {\
 	a_vec->ofs = 0;\
 	a_vec->size = a_size;\
@@ -113,7 +111,7 @@ VectorType##_create(struct VectorType *a_vec, size_t a_size)\
 	VECTOR_ASSERT_INVARIANT_(chunk);\
 }\
 FUNC_UNUSED static void \
-VectorType##_erase(struct VectorType *a_vec, size_t a_i)\
+name##_erase(struct VectorType *a_vec, size_t a_i)\
 {\
 	VECTOR_ASSERT_BOUNDS_(0);\
 	--a_vec->size;\
@@ -123,7 +121,7 @@ VectorType##_erase(struct VectorType *a_vec, size_t a_i)\
 			MEMMOVE(0, a_vec->ofs - 1, a_i);\
 			MEMMOVE(a_i, a_vec->ofs + a_i, a_vec->size - a_i);\
 			a_vec->ofs = 0;\
-			VectorType##_try_shrink_(a_vec);\
+			name##_try_shrink_(a_vec);\
 		} else {\
 			MEMMOVE(a_vec->ofs, a_vec->ofs - 1, a_i);\
 			VECTOR_ASSERT_INVARIANT_(chunk);\
@@ -131,11 +129,11 @@ VectorType##_erase(struct VectorType *a_vec, size_t a_i)\
 	} else {\
 		MEMMOVE(a_vec->ofs + a_i, a_vec->ofs + a_i + 1, a_vec->size -\
 		    a_i);\
-		VectorType##_try_shrink_(a_vec);\
+		name##_try_shrink_(a_vec);\
 	}\
 }\
 FUNC_UNUSED static void \
-VectorType##_free(struct VectorType *a_vec)\
+name##_free(struct VectorType *a_vec)\
 {\
 	a_vec->ofs = 0;\
 	a_vec->size = 0;\
@@ -143,13 +141,13 @@ VectorType##_free(struct VectorType *a_vec)\
 	FREE(a_vec->data);\
 }\
 FUNC_UNUSED static struct Type *\
-VectorType##_front(struct VectorType *a_vec)\
+name##_front(struct VectorType *a_vec)\
 {\
 	VECTOR_ASSERT_NOTEMPTY_;\
 	return &a_vec->data[a_vec->ofs];\
 }\
 FUNC_UNUSED static struct Type *\
-VectorType##_insert(struct VectorType *a_vec, size_t a_i)\
+name##_insert(struct VectorType *a_vec, size_t a_i)\
 {\
 	VECTOR_ASSERT_BOUNDS_(1);\
 	++a_vec->size;\
@@ -159,13 +157,13 @@ VectorType##_insert(struct VectorType *a_vec, size_t a_i)\
 			MEMMOVE(a_vec->ofs, a_vec->ofs + 1, a_i);\
 		} else {\
 			a_vec->ofs = chunk - 1;\
-			VectorType##_try_grow_(a_vec);\
+			name##_try_grow_(a_vec);\
 			MEMMOVE(a_vec->ofs + a_i + 1, a_i, a_vec->size -\
 			    a_i);\
 			MEMMOVE(a_vec->ofs, 0, a_i);\
 		}\
 	} else {\
-		VectorType##_try_grow_(a_vec);\
+		name##_try_grow_(a_vec);\
 		MEMMOVE(a_vec->ofs + a_i + 1, a_vec->ofs + a_i, a_vec->size -\
 		    a_i);\
 	}\
@@ -173,50 +171,50 @@ VectorType##_insert(struct VectorType *a_vec, size_t a_i)\
 	return &a_vec->data[a_vec->ofs + a_i];\
 }\
 FUNC_UNUSED static void \
-VectorType##_pop_back(struct VectorType *a_vec)\
+name##_pop_back(struct VectorType *a_vec)\
 {\
 	VECTOR_ASSERT_NOTEMPTY_;\
 	--a_vec->size;\
-	VectorType##_try_shrink_(a_vec);\
+	name##_try_shrink_(a_vec);\
 }\
 FUNC_UNUSED static void \
-VectorType##_pop_front(struct VectorType *a_vec)\
+name##_pop_front(struct VectorType *a_vec)\
 {\
 	VECTOR_ASSERT_NOTEMPTY_;\
 	--a_vec->size;\
 	MEMMOVE(0, a_vec->ofs + 1, a_vec->size);\
-	VectorType##_try_shrink_(a_vec);\
+	name##_try_shrink_(a_vec);\
 }\
 FUNC_UNUSED static struct Type *\
-VectorType##_push_back(struct VectorType *a_vec)\
+name##_push_back(struct VectorType *a_vec)\
 {\
 	++a_vec->size;\
-	VectorType##_try_grow_(a_vec);\
+	name##_try_grow_(a_vec);\
 	return &a_vec->data[a_vec->ofs + a_vec->size - 1];\
 }\
 FUNC_UNUSED static struct Type *\
-VectorType##_push_front(struct VectorType *a_vec)\
+name##_push_front(struct VectorType *a_vec)\
 {\
 	++a_vec->size;\
 	if (0 < a_vec->ofs) {\
 		--a_vec->ofs;\
 	} else {\
 		a_vec->ofs = chunk - 1;\
-		VectorType##_try_grow_(a_vec);\
+		name##_try_grow_(a_vec);\
 		MEMMOVE(a_vec->ofs + 1, 0, a_vec->size - 1);\
 	}\
 	VECTOR_ASSERT_INVARIANT_(chunk);\
 	return &a_vec->data[a_vec->ofs];\
 }\
 FUNC_UNUSED static void \
-VectorType##_reserve(struct VectorType *a_vec, size_t a_capacity)\
+name##_reserve(struct VectorType *a_vec, size_t a_capacity)\
 {\
-	VectorType##_reserve_(a_vec, a_capacity);\
+	name##_reserve_(a_vec, a_capacity);\
 }\
 FUNC_UNUSED static void \
-VectorType##_resize(struct VectorType *a_vec, size_t a_size)\
+name##_resize(struct VectorType *a_vec, size_t a_size)\
 {\
-	VectorType##_reserve_(a_vec, a_vec->ofs + a_size);\
+	name##_reserve_(a_vec, a_vec->ofs + a_size);\
 }\
 struct VectorType
 
