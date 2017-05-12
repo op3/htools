@@ -27,7 +27,7 @@ gcov:
 	lines_ok_total=0;\
 	for i in $(GCOV_SRC); do\
 		dir=`dirname $$i`;\
-		numbers=`gcov -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
+		numbers=`gcov -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | grep -A1 $$i | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
 		[ "x" = "x$$numbers" ] && continue;\
 		percentage=`echo $$numbers | awk '{print $$1}'`;\
 		lines=`echo $$numbers | awk '{print $$2}'`;\
