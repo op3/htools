@@ -21,15 +21,10 @@ auto-configured with hconf in hgmake and tested with the htest unit testing
 framework. First read htools/README, then call GNU make:
  $ make / gmake
 
-To run the tests, htest must have been built. Note that htest uses hutils, so
-the order from scratch would be:
- $ cd $HTOOLS_PATH
- $ make -C hutils
- $ make -C htest
- $ make -C hutils test
-or just:
- $ cd $HTOOLS_PATH
- $ make
+To run the tests, htest must have been built. The root makefile does this in
+the right order, so just call that.
 
-In your own code, include whatever headers look like fun, and link in
-<build_dir>/libnurdlib.a.
+In your own code, include whatever headers look like fun and link like this in
+gcc:
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
+-L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils

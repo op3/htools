@@ -53,73 +53,71 @@ Overview of important project files:
  *) <build_dir>/hconf_merge hconf-files...
     Merges flags from a list of hconf files to stdout.
 
-How to create an hconf:ed file:
+Commented example:
 
- *) Create a header file with switches:
-    include/myheader.h:
+
+--- include/myheader.h ------------------------------------------------------
+/*
+ * The following header will be generated during hconf:ing and will contain
+ * the macro for the hconf:ed branch.
+ */
 #include <hconf/include/myheader.h>
-#if defined(HCONF_mMY_MODULE_bMY_BRANCH_1)
+
+#if HCONF_MODULE(VEGETABLE, COW)
+/* One possible branch, this will probably fail. */
+#	include <cow_is_vegetable.h>
+#elif HCONF_MODULE(VEGETABLE, CARROT)
+/* Another branch more likely to pass. */
 #	include <string.h>
-#elif defined(HCONF_mMY_MODULE_bDEUX)
-/* HCONF_CPPFLAGS=-D_BSD_SOURCE */
-#	include <string.h>
-#elif defined(HCONF_mMY_MODULE_bSAN)
-char *strndup(char const *, size_t);
 #endif
-/* Optional module-level test to be run by hconf. */
-#if HCONFING_mMY_MODULE
-HCONF_TEST(char *, (void))
+
+#if HCONFING(VEGETABLE)
+/*
+ * Define the following macro to actually execute the test, by default it will
+ * only be compiled and linked.
+ */
+/*#define HCONF_TEST_RUN*/
+/* This test function looks like "int test(int i)" and i is always 0. */
+HCONF_TEST
 {
-	return strndup(0, 0);
+	return strcmp("carrot", "carrot") + i;
 }
 #endif
-/* Optional branch-level test. */
-#if HCONFING_mMY_MODULE_bMY_BRANCH_1
-...
-#endif
 
- *) List hconf:able files and include hconf.mk:
-    Makefile:
-     HCONF_SRC=include/myheader.h
-     include $(HTOOLS_PATH)/hgmake/hconf.mk
-    In principle, this does:
-     for i in $(HCONF_SRC); do
-      ./hconf_conf [-v] -d $(BUILD_DIR) -i $i -h $(HCONF_CACHE)
-      ./hconf_merge $(HCONF_CACHE) > $(HCONF_CACHE)
-     done
-    to create a big hconf file with merged compiler options.
 
- *) Create dependencies on hconf cache:
-    %.o: %.c Makefile $(HCONF_CACHE)
+--- Makefile ----------------------------------------------------------------
+/* build_dir.mk gives BUILD_DIR a nice directory name, use it. */
+include $(HTOOLS_PATH)/hgmake/build_dir.mk
+/* 
+CPPFLAGS+=-Iinclude -I$(BUILD_DIR)
 
- *) You should get the chosen branches in a generated header file:
-    $(BUILD_DIR)/hconf/include/myheader.h:
-     #ifndef HCONF_INCLUDE_MYHEADER_H
-     #define HCONF_INCLUDE_MYHEADER_H
-     #define HCONF_mMY_MODULE_bDEUX
-     #endif
- *) ... and compiler/linker flags in the hconf file for fun (debugging):
-    $(BUILD_DIR)/hconf/include/myheader.hconf:
-     ccache cc     # CC
-     -D_BSD_SOURCE # CPPFLAGS
-                   # CFLAGS
-                   # LDFLAGS
-                   # LIBS
+.PHONY: all
+all:
+	echo Whatever goes here.
 
- *) In order to use hconf results from another project, e.g. to use hutils:
-    Makefile:
-     HCONF_SRC:=...
-     HCONF_EXT:=$(HTOOLS_PATH)/hutils
-     include $(HTOOLS_PATH)/hgmake/hconf.mk
+/* List your source code to be hconf:ed. */
+HCONF_SRC=include/myheader.h
+/* If you'd like to use another hconf:ed projects results, list them. */
+/*HCONF_PROJECTS=$(HTOOLS_PATH)/hutils*/
+/*
+ * This is where the hconf magic happens. It's all open source, so please have
+ * a look! Note that it contains rules, so put your default target before,
+ * like in this example.
+ */
+include $(HTOOLS_PATH)/hgmake/hconf.mk
 
- *) When compiling don't forget to add $(BUILD_DIR) to your header search
-    path, where the generated header files reside.
+/* CC_O comes from hconf.mk and will grab hconf:ed info for you. */
+$(BUILD_DIR)/%.o: %.c $(HCONF_CACHE)
+	$(CC_O)
 
-Notes:
+/* Touching Makefile might mean new branches are chosen. */
+$(HCONF_CACHE): Makefile
 
-*) hconf.mk should be included only once.
 
-*) hconf.mk contains rules, so put your default rule before.
+--- Summary -----------------------------------------------------------------
+Building this will generate the header files $(BUILD_DIR)/hconf/$(HCONF_SRC)
+and, for debugging purposes, an hconf file for each hconf:ed file, containing
+the compiler and flags. There will also be temporary files in
+$(BUILD_DIR)/_hconf/ for even more debugging purposes.
 
-*) Branches are put into a generated header file rather than being given as
-CPPFLAGS to reduce command line arguments.
+Any auto-config approach is tricky and involved, so try and have a look!
