@@ -44,7 +44,7 @@ HCONF_TEST
 }
 #	endif
 #elif HCONF_BRANCH(THREAD, PTHREAD)
-/* HCONF_LIBS=-lpthread */
+/* HCONF_LIBS=-pthread */
 #	include <pthread.h>
 #	define PTHREADS
 #	if HCONFING(THREAD)
