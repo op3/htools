@@ -408,7 +408,7 @@ try()
 	if (WIFEXITED(status) && 0 == WEXITSTATUS(status)) {
 		goto try_passed;
 	}
-	log_("HCONF_TEST execution failed.");
+	log_("HCONF_TEST execution failed.\n");
 try_failed:
 	log_("Failed.\n");
 	branch_free(&module->branch);
@@ -613,7 +613,7 @@ main(int argc, char const *const *argv)
 		fprintf(file, "#include <%s>\n", g_filename);
 		fprintf(file, "int main(void) {\n");
 		fprintf(file, "#ifdef HCONF_TEST_RUN\n");
-		fprintf(file, "return hconf_test_() ? EXIT_SUCCESS : "
+		fprintf(file, "return hconf_test_(0) ? EXIT_SUCCESS : "
 		    "EXIT_FAILURE;\n");
 		fprintf(file, "#else\n");
 		fprintf(file, "return 0;\n");

@@ -77,13 +77,19 @@ HTEST(Basic)
 {
 	char const c_str[] = "This is a boring but satisfying test.";
 	struct UTF8 *utf8;
-	size_t str_len;
+	size_t code_bytes, str_len;
+	uint32_t code;
 
 	str_len = strlen(c_str);
+	/* ASCII string test. */
 	utf8 = utf8_create((uint8_t const *)c_str, str_len);
 	HTRY_I(str_len, ==, utf8->length);
 	HTRY_I(str_len, ==, utf8->bytes);
 	HTRY_I('\0', ==, utf8->data[utf8->bytes]);
+	/* Range test. */
+	utf8_get(utf8, 0, &code, &code_bytes);
+	utf8_get(utf8, 36, &code, &code_bytes);
+	HTRY_SIGNAL(utf8_get(utf8, 37, &code, &code_bytes));
 	utf8_free(&utf8);
 }
 

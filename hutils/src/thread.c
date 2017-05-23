@@ -23,10 +23,6 @@
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_create(&a)
 #	define ATTR_DESTROY(a)
-#	define STACK_GET_SIZE(ret, stack_size, t) do {\
-	ret = 0;\
-	stack_size = pthread_attr_getstacksize(&t->attr);\
-} WHILE_0
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, t->attr, run, starter)
 #elif HCONF_BRANCH(THREAD, ST_NEW)
@@ -34,10 +30,6 @@
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
 #	define ATTR_DESTROY(a) pthread_attr_destroy(&a)
-#	define STACK_GET_SIZE(ret, stack_size, t) do {\
-	stack_size = 0;\
-	ret = pthread_attr_getstacksize(&t->attr, &stack_size);\
-} WHILE_0
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, &t->attr, run, starter)
 #elif HCONF_BRANCH(THREAD, PTHREAD)
@@ -45,10 +37,6 @@
 #	include <limits.h>
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
 #	define ATTR_DESTROY(a) pthread_attr_destroy(&a)
-#	define STACK_GET_SIZE(ret, stack_size, t) do {\
-	stack_size = 0;\
-	ret = pthread_attr_getstacksize(&t->attr, &stack_size);\
-} WHILE_0
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, &t->attr, run, starter)
 #elif defined(_MSC_VER)

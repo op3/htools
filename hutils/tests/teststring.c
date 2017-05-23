@@ -44,8 +44,37 @@ HTEST(Strecmp)
 	HTRY_I(0, <, strecmp(s15, s2));
 }
 
+HTEST(Strl)
+{
+	char s[3];
+	size_t ret;
+
+	s[0] = '\0';
+	ret = strlcat(s, "a", sizeof s);
+	HTRY_I(1, ==, ret);
+	HTRY_STR("a", ==, s);
+	ret = strlcat(s, "b", sizeof s);
+	HTRY_I(2, ==, ret);
+	HTRY_STR("ab", ==, s);
+	ret = strlcat(s, "c", sizeof s);
+	HTRY_I(3, ==, ret);
+	HTRY_STR("ab", ==, s);
+
+	s[0] = '\0';
+	ret = strlcpy(s, "a", sizeof s);
+	HTRY_I(1, ==, ret);
+	HTRY_STR("a", ==, s);
+	ret = strlcpy(s, "ab", sizeof s);
+	HTRY_I(2, ==, ret);
+	HTRY_STR("ab", ==, s);
+	ret = strlcpy(s, "abc", sizeof s);
+	HTRY_I(3, ==, ret);
+	HTRY_STR("ab", ==, s);
+}
+
 HTEST_SUITE(String)
 {
 	HTEST_ADD(Strctv);
 	HTEST_ADD(Strecmp);
+	HTEST_ADD(Strl);
 }
