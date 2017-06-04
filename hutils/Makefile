@@ -15,9 +15,10 @@
 HTOOLS_PATH=..
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
-CPPFLAGS+=-I$(BUILD_DIR) -Iinclude -I$(HTOOLS_PATH)/htest/include
+CPPFLAGS+=-I$(BUILD_DIR) -Iinclude -I$(HTOOLS_PATH)/htest/include -D_FORTIFY_SOURCE=2
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
+	CPPFLAGS+=-DNDEBUG
 	CFLAGS+=-O3
 else
 	CFLAGS+=-ggdb
@@ -57,6 +58,7 @@ HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr stdint fmtmod macros \
 HCONF_DEP:=Makefile
 include $(HTOOLS_PATH)/hgmake/hconf.mk
 
+HTEST_DEP:=$(HCONF_CACHE)
 HTEST_PRE=$(MKDIR)
 include $(HTOOLS_PATH)/htest/htest.mk
 TEST_OBJ:=$(TEST_OBJ) $(patsubst %.c,%.o,$(BUILD_DIR)/$(HTEST_TESTS))

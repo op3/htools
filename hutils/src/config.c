@@ -238,6 +238,7 @@ config_setd(struct Config *a_config, double a_d)
 	a_config->str = malloc(len);
 	ret = snprintf(a_config->str, len, "%g", a_d);
 	ASSERT(int, "d", len, >, ret);
+	(void)ret;
 }
 
 void
@@ -252,6 +253,7 @@ config_seti32(struct Config *a_config, int32_t a_i32)
 	a_config->str = malloc(len);
 	ret = snprintf(a_config->str, len, "%d", a_i32);
 	ASSERT(int, "d", len, >, ret);
+	(void)ret;
 }
 
 void

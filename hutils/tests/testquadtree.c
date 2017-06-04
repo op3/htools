@@ -51,6 +51,7 @@ free_(struct TestData *a_user, struct TestNode **a_node)
 {
 	struct TestNode *node;
 
+	(void)node;
 	node = *a_node;
 	ASSERT(void *, "p", NULL, !=, node);
 	ASSERT(void *, "p", NULL, ==, node->tree.child[0]);

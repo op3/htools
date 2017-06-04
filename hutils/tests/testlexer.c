@@ -20,7 +20,7 @@
 
 HTEST(BufMajeur)
 {
-	int const c_n = 1000;
+	int const c_n = 10;
 	struct LexerToken token;
 	struct Lexer *lexer;
 	char *text, *p;

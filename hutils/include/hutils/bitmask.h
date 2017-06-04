@@ -28,13 +28,13 @@ struct Bitmask	*bitmask_copy(struct Bitmask const *) FUNC_NONNULL(())
 	FUNC_PURE FUNC_RETURNS;
 void		bitmask_copy_mask(struct Bitmask *, struct Bitmask const *)
 	FUNC_NONNULL(());
-struct Bitmask	*bitmask_create(int) FUNC_RETURNS;
+struct Bitmask	*bitmask_create(unsigned) FUNC_RETURNS;
 void		bitmask_free(struct Bitmask **) FUNC_NONNULL(());
-int		bitmask_get(struct Bitmask *, int) FUNC_NONNULL(()) FUNC_PURE
-FUNC_RETURNS;
+int		bitmask_get(struct Bitmask *, unsigned) FUNC_NONNULL(())
+	FUNC_RETURNS;
 void		bitmask_one(struct Bitmask *) FUNC_NONNULL(());
-void		bitmask_set(struct Bitmask *, int) FUNC_NONNULL(());
-void		bitmask_unset(struct Bitmask *, int) FUNC_NONNULL(());
+void		bitmask_set(struct Bitmask *, unsigned) FUNC_NONNULL(());
+void		bitmask_unset(struct Bitmask *, unsigned) FUNC_NONNULL(());
 void		bitmask_zero(struct Bitmask *) FUNC_NONNULL(());
 
 CDECLS_END

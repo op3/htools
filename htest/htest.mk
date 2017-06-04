@@ -14,6 +14,7 @@
 
 # Input:
 #  $(BUILD_DIR)       = build directory.
+#  $(HTEST_DEP)       = dependencies before doing anything.
 #  $(HTEST_PRE)       = called before creating a file (e.g. mkdir).
 #  $(HTEST_SRC)       = test source files.
 #  $(HTEST_TESTS)     = generated code dump, htest/tests.c by default.
@@ -53,7 +54,7 @@ $(BUILD_DIR)/$(HTEST_TESTS): $(HTEST_SUITES)
 		echo;\
 	fi >> $@
 
-$(BUILD_DIR)/%.suite: %.c
+$(BUILD_DIR)/%.suite: %.c $(HTEST_DEP)
 	$(HTEST_CC_E_PRE)$(HTEST_PRE) && $(HTEST_CC_E)
 
 .PHONY: htest_clean

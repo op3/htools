@@ -91,7 +91,6 @@ lexer_cstr_callback(void *a_src, char *a_dst, size_t a_dst_size)
 	len = strlen(*src);
 	len = MIN(len, a_dst_size);
 	memmove(a_dst, *src, len);
-	a_dst[len] = '\0';
 	*src += len;
 	return len;
 }

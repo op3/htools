@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,26 +20,17 @@ HTEST(SimpleStrings)
 {
 	char const c_hello[] = "Hello";
 
+	HTRY_STR("", ==, "");
 	HTRY_STR("Hello", ==, c_hello);
 	HTRY_STR("abc", <, "def");
 	HTRY_STR("def", >, "abc");
+	/* GCC break optimized version of comparing 0-length strings. */
 	HTRY_STRN("abc", ==, "abd", 1);
 	HTRY_STRN("abc", ==, "abd", 2);
 	HTRY_STRN("abc", !=, "abd", 3);
 }
 
-HTEST(NullStrings)
-{
-	HTRY_STR(NULL, ==, "a");
-	HTRY_STR("a", ==, NULL);
-	HTRY_STR(NULL, ==, NULL);
-	HTRY_STRN(NULL, ==, "a", 0);
-	HTRY_STRN("a", ==, NULL, 0);
-	HTRY_STRN(NULL, ==, NULL, 0);
-}
-
 HTEST_SUITE(String)
 {
 	HTEST_ADD(SimpleStrings);
-	HTEST_ADD(NullStrings);
 }

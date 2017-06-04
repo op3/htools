@@ -23,7 +23,9 @@ HTEST(FNV1A)
 	char data1[] = "abc1";
 	uint32_t hash0, hash1;
 
+#ifndef NDEBUG
 	HTRY_SIGNAL(hash0 = hutils_fnv1a32(data0, 0));
+#endif
 	hash0 = hutils_fnv1a32(data0, strlen(data0));
 	hash1 = hutils_fnv1a32(data1, strlen(data1));
 	HTRY_I(hash0, !=, hash1);

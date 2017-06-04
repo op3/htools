@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,7 +26,7 @@
 #define NUM_UINT8(bit_num)  (NUM_UINT32(bit_num) * 4)
 
 struct Bitmask {
-	int	bit_num;
+	unsigned	bit_num;
 	uint32_t	*data;
 };
 
@@ -43,16 +43,19 @@ bitmask_copy(struct Bitmask const *a_src)
 void
 bitmask_copy_mask(struct Bitmask *a_dst, struct Bitmask const *a_src)
 {
-	ASSERT(int, "d", a_dst->bit_num, ==, a_src->bit_num);
+	if (a_dst->bit_num != a_src->bit_num) {
+		hutils_errx(EXIT_FAILURE, "bitmask_copy_mask sizes mismatch "
+		    "(dst=%u,src=%u).", a_dst->bit_num, a_src->bit_num);
+	}
 	memmove(a_dst->data, a_src->data, NUM_UINT8(a_src->bit_num));
 }
 
 struct Bitmask *
-bitmask_create(int a_bit_num)
+bitmask_create(unsigned a_bit_num)
 {
 	struct Bitmask *bm;
 
-	ASSERT(int, "d", 0, <, a_bit_num);
+	ASSERT(unsigned, "u", 0, !=, a_bit_num);
 	CALLOC(bm, 1);
 	bm->bit_num = a_bit_num;
 	CALLOC(bm->data, NUM_UINT32(a_bit_num));
@@ -73,10 +76,12 @@ bitmask_free(struct Bitmask **a_bm)
 }
 
 int
-bitmask_get(struct Bitmask *a_bm, int a_index)
+bitmask_get(struct Bitmask *a_bm, unsigned a_index)
 {
-	ASSERT(int, "d", 0, <=, a_index);
-	ASSERT(int, "d", a_bm->bit_num, > , a_index);
+	if (a_bm->bit_num <= a_index) {
+		hutils_errx(EXIT_FAILURE, "bitmask_get index (%u) out of "
+		    "bounds (<%u).", a_index, a_bm->bit_num);
+	}
 	return (1 << (31 & a_index)) & a_bm->data[a_index / 32];
 }
 
@@ -87,18 +92,22 @@ bitmask_one(struct Bitmask *a_bm)
 }
 
 void
-bitmask_set(struct Bitmask *a_bm, int a_index)
+bitmask_set(struct Bitmask *a_bm, unsigned a_index)
 {
-	ASSERT(int, "d", 0, <=, a_index);
-	ASSERT(int, "d", a_bm->bit_num, > , a_index);
+	if (a_bm->bit_num <= a_index) {
+		hutils_errx(EXIT_FAILURE, "bitmask_get index (%u) out of "
+		    "bounds (<%u).", a_index, a_bm->bit_num);
+	}
 	a_bm->data[a_index / 32] |= (1 << (31 & a_index));
 }
 
 void
-bitmask_unset(struct Bitmask *a_bm, int a_index)
+bitmask_unset(struct Bitmask *a_bm, unsigned a_index)
 {
-	ASSERT(int, "d", 0, <=, a_index);
-	ASSERT(int, "d", a_bm->bit_num, > , a_index);
+	if (a_bm->bit_num <= a_index) {
+		hutils_errx(EXIT_FAILURE, "bitmask_get index (%u) out of "
+		    "bounds (<%u).", a_index, a_bm->bit_num);
+	}
 	a_bm->data[a_index / 32] &= ~(1 << (31 & a_index));
 }
 
