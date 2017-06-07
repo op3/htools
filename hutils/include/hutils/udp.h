@@ -37,31 +37,24 @@
 #	include <netinet/in.h>
 #endif
 #if HCONFING(IPPROTO_UDP)
-HCONF_TEST
-{
-	return IPPROTO_UDP + 0 * i;
-}
+#	define HCONF_TEST return -1 == IPPROTO_UDP
 #endif
 
 #if HCONF_BRANCH(UDP_LOOKUP, GETADDRINFO)
 #	include <netdb.h>
 #	if HCONFING(UDP_LOOKUP)
-HCONF_TEST
-{
-	return getaddrinfo(0, 0, 0, 0) + 0 * i;
-}
+#		define HCONF_TEST return !getaddrinfo(NULL, NULL, NULL, NULL)
 #	endif
 #elif HCONF_BRANCH(UDP_LOOKUP, GETHOSTBYNAME_SOCKLEN)
 /* HCONF_LIBS=-lnetinet */
 #	include <netdb.h>
 #	define socklen_t int
 #	if HCONFING(UDP_LOOKUP)
-HCONF_TEST
-{
+#		define HCONF_TEST return hconf_test_()
+static int hconf_test_(void) {
 	socklen_t len;
-
-	gethostbyname(0);
-	return recvfrom(0, 0, 0, 0, 0, &len) + 0 * i;
+	return (NULL == gethostbyname(NULL) &&
+	    -1 == recvfrom(0, NULL, 0, 0, NULL, &len)) ? 0 : 1;
 }
 #	endif
 #endif
@@ -69,29 +62,30 @@ HCONF_TEST
 #if HCONF_BRANCH(UDP_EVENT, POLL)
 #	include <poll.h>
 #	if HCONFING(UDP_EVENT)
-#		define HCONF_TEST_RUN
-HCONF_TEST
-{
+#		define HCONF_TEST hconf_test_()
+static int hconf_test_() {
 	struct pollfd fds[1];
 	fds[0].fd = 0;
 	fds[0].events = POLLIN;
-	return -1 != poll(fds, 1, 0) + 0 * i;
+	return -1 == poll(fds, 1, 0) ? 0 : 1;
 }
 #	endif
 #elif HCONF_BRANCH(UDP_EVENT, SYS_SELECT_H)
 #	include <sys/select.h>
 #	if HCONFING(UDP_EVENT)
-HCONF_TEST
-{
-	return select(0, NULL, NULL, NULL, NULL) + 0 * i;
+#		define HCONF_TEST hconf_test_()
+static void hconf_test_(void) {
+	struct timeval tv = {0, 0};
+	select(0, NULL, NULL, NULL, &tv);
 }
 #	endif
 #elif HCONF_BRANCH(UDP_EVENT, SELECT_TIME_H)
 #	include <time.h>
 #	if HCONFING(UDP_EVENT)
-HCONF_TEST
-{
-	return select(0, NULL, NULL, NULL, NULL) + 0 * i;
+#		define HCONF_TEST hconf_test_()
+static void hconf_test_(void) {
+	struct timeval tv = {0, 0};
+	select(0, NULL, NULL, NULL, &tv);
 }
 #	endif
 #endif

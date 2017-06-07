@@ -37,10 +37,7 @@
 		__pragma(warning(pop))
 #endif
 #if HCONFING(CONST_EXPR)
-HCONF_TEST
-{
-	do { return 1 + 0 * i; } WHILE_0;
-}
+#	define HCONF_TEST do {} WHILE_0
 #endif
 
 #define ABS(x) (0 > (x) ? -(x) : (x))

@@ -28,15 +28,12 @@
 CDECLS_BEGIN
 extern char *optarg;
 extern int optind, optopt;
-int	getopt(int, char *const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
+int	getopt(int, char *const *, char const *) FUNC_NONNULL(())
+	FUNC_RETURNS;
 CDECLS_END
 #endif
 #if HCONFING(GETOPT)
-#	include <stdlib.h>
-HCONF_TEST
-{
-	return -1 == getopt(0, NULL, NULL) + 0 * i;
-}
+#	define HCONF_TEST return -1 == getopt(argc, argv, "") ? 0 : 1
 #endif
 
 #endif

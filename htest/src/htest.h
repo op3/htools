@@ -22,10 +22,7 @@
 #if HCONF_BRANCH(HTEST, POSIX)
 #	include <unistd.h>
 #	if HCONFING(HTEST)
-HCONF_TEST
-{
-	return (int)fork() + 0 * i;
-}
+#		define HCONF_TEST return -1 == fork()
 #	endif
 #elif defined(_MSC_VER)
 #	include <io.h>

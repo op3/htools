@@ -15,7 +15,10 @@
 HTOOLS_PATH=..
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
-CPPFLAGS+=-I$(BUILD_DIR) -Iinclude -I$(HTOOLS_PATH)/htest/include -D_FORTIFY_SOURCE=2
+CPPFLAGS+=-D_FORTIFY_SOURCE=1\
+	  -I$(BUILD_DIR)\
+	  -Iinclude\
+	  -I$(HTOOLS_PATH)/htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
 	CPPFLAGS+=-DNDEBUG
@@ -54,7 +57,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 HCONF_SRC:=$(patsubst %,include/hutils/%.h,gcc funcattr stdint fmtmod macros \
-	math string getopt dir thread time udp)
+	math getopt dir string thread time udp)
 HCONF_DEP:=Makefile
 include $(HTOOLS_PATH)/hgmake/hconf.mk
 

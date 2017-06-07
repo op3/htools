@@ -457,10 +457,6 @@ write_files(int a_write_final)
 		fprintf(f, "#define HCONF_m%s_b%s 1\n", module->name,
 		    module->branch->name);
 	}
-	if (!a_write_final) {
-		fprintf(f, "#define HCONF_TEST extern int hconf_test_(int); "
-		    "int hconf_test_(int i)\n");
-	}
 	fprintf(f, "#endif \n");
 	fclose(f);
 
@@ -611,13 +607,13 @@ main(int argc, char const *const *argv)
 			    g_filename_main_c);
 		}
 		fprintf(file, "#include <%s>\n", g_filename);
-		fprintf(file, "int main(void) {\n");
-		fprintf(file, "#ifdef HCONF_TEST_RUN\n");
-		fprintf(file, "return hconf_test_(0) ? EXIT_SUCCESS : "
-		    "EXIT_FAILURE;\n");
-		fprintf(file, "#else\n");
-		fprintf(file, "return 0;\n");
+		fprintf(file, "int main(int argc, char **argv) {\n");
+		fprintf(file, "#ifdef HCONF_TEST\n");
+		fprintf(file, "HCONF_TEST;\n");
 		fprintf(file, "#endif\n");
+		fprintf(file, "(void)argc;\n");
+		fprintf(file, "(void)argv;\n");
+		fprintf(file, "return 0;\n");
 		fprintf(file, "}\n");
 		fclose(file);
 	}

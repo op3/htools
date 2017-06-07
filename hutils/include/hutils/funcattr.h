@@ -27,8 +27,8 @@
 #	define FUNC_NONNULL(list)
 #endif
 #if HCONFING(FUNC_NONNULL)
-char *hconf_test_nonnull_1_(void *) FUNC_NONNULL(());
-char *hconf_test_nonnull_2_(void *) FUNC_NONNULL((1));
+char *hconf_test1_(void *) FUNC_NONNULL(());
+char *hconf_test2_(void *) FUNC_NONNULL((1));
 #endif
 
 #if HCONF_BRANCH(FUNC_NORETURN, YES)
@@ -39,7 +39,7 @@ char *hconf_test_nonnull_2_(void *) FUNC_NONNULL((1));
 #	define FUNC_NORETURN
 #endif
 #if HCONFING(FUNC_NORETURN)
-void hconf_test_noreturn_(void) FUNC_NORETURN;
+void hconf_test_(void) FUNC_NORETURN;
 #endif
 
 #if HCONF_BRANCH(FUNC_PRINTF, YES)
@@ -51,7 +51,7 @@ void hconf_test_noreturn_(void) FUNC_NORETURN;
 #	define FUNC_PRINTF(fmt, args)
 #endif
 #if HCONFING(FUNC_PRINTF)
-void hconf_test_printf_(int, char const *, ...) FUNC_PRINTF(2, 3);
+void hconf_test_(int, char const *, ...) FUNC_PRINTF(2, 3);
 #endif
 
 #if HCONF_BRANCH(FUNC_PURE, YES)
@@ -62,7 +62,7 @@ void hconf_test_printf_(int, char const *, ...) FUNC_PRINTF(2, 3);
 #	define FUNC_PURE
 #endif
 #if HCONFING(FUNC_PURE)
-void hconf_test_pure_(void) FUNC_PURE;
+void hconf_test_(void) FUNC_PURE;
 #endif
 
 #if HCONF_BRANCH(FUNC_RETURNS, YES)
@@ -73,7 +73,7 @@ void hconf_test_pure_(void) FUNC_PURE;
 #	define FUNC_RETURNS
 #endif
 #if HCONFING(FUNC_RETURNS)
-int hconf_test_returns_(void) FUNC_RETURNS;
+int hconf_test_(void) FUNC_RETURNS;
 #endif
 
 #if HCONF_BRANCH(FUNC_UNUSED, YES)
@@ -84,7 +84,7 @@ int hconf_test_returns_(void) FUNC_RETURNS;
 #	define FUNC_UNUSED
 #endif
 #if HCONFING(FUNC_UNUSED)
-int hconf_test_unused_(void) FUNC_UNUSED;
+int hconf_test_(void) FUNC_UNUSED;
 #endif
 
 #endif

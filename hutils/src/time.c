@@ -51,9 +51,7 @@ time_getd()
 	static enum MutexState s_mutex_state = MUTEX_UNINITED;
 	static struct Mutex s_mutex;
 	clockid_t s_clockid =
-#	if defined(CLOCK_MONOTONIC_RAW)
-	    CLOCK_MONOTONIC_RAW;
-#	elif defined(CLOCK_MONOTONIC)
+#	if defined(CLOCK_MONOTONIC)
 	    CLOCK_MONOTONIC;
 #	else
 	    CLOCK_REALTIME;
@@ -76,16 +74,11 @@ time_getd()
 		if (0 == clock_gettime(s_clockid, &tp)) {
 			break;
 		}
-#define TRANSITION(from, to) do {\
-	if (from == s_clockid) {\
-		s_clockid = to;\
-		continue;\
-	}\
-} WHILE_0
-#	if defined(CLOCK_MONOTONIC_RAW)
-		TRANSITION(CLOCK_MONOTONIC_RAW, CLOCK_MONOTONIC);
-#	elif defined(CLOCK_MONOTONIC)
-		TRANSITION(CLOCK_MONOTONIC, CLOCK_REALTIME);
+#	if defined(CLOCK_MONOTONIC)
+		if (CLOCK_MONOTONIC == s_clockid) {
+			s_clockid = CLOCK_REALTIME;
+			continue;
+		}
 #	endif
 		hutils_err(EXIT_FAILURE, "clock_gettime");
 	}

@@ -25,19 +25,16 @@
 #if HCONF_BRANCH(MATH, NOTHING)
 #elif HCONF_BRANCH(MATH, LM)
 /* HCONF_LIBS=-lm */
-#elif HCONF_BRANCH(MATH, DEFAULT_SOURCE_LM)
-/* HCONF_CPPFLAGS=-D_DEFAULT_SOURCE */
-/* HCONF_LIBS=-lm */
 #elif HCONF_BRANCH(MATH, BSD_SOURCE_LM)
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
+/* HCONF_LIBS=-lm */
+#elif HCONF_BRANCH(MATH, DEFAULT_SOURCE_LM)
+/* HCONF_CPPFLAGS=-D_DEFAULT_SOURCE */
 /* HCONF_LIBS=-lm */
 #endif
 #include <math.h>
 #if HCONFING(MATH)
-HCONF_TEST
-{
-	return 0.0f < sqrt(M_PI * floor(i));
-}
+#	define HCONF_TEST return 0.0 < sqrt(M_PI * argc) ? 0 : 1
 #endif
 
 CDECLS_BEGIN

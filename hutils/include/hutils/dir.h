@@ -51,14 +51,14 @@
 #endif
 #if HCONFING(DIR)
 #	include <stdlib.h>
-HCONF_TEST
-{
+#	define HCONF_TEST return dir_test_()
+static int dir_test_(void) {
 	DIR *dir;
 	struct dirent entry, *result;
 	dir = opendir(".");
 	HUTILS_READDIR(dir, entry, result);
 	closedir(dir);
-	return NULL != result + 0 * i;
+	return NULL != result ? 0 : 1;
 }
 #endif
 

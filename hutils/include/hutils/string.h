@@ -39,21 +39,15 @@ int hutils_vsnprintf_(char *, size_t, char const *, va_list) FUNC_PRINTF(3,
     0);
 #endif
 #if HCONFING(NPRINTF)
-static int
-vsnprintf_wrapper_(int a, ...)
-{
+#	define HCONF_TEST return 0 == nprintf_test_(argc, "")
+static int nprintf_test_(int i, ...) {
 	va_list args;
 	char s[2];
 	int ret;
-	va_start(args, a);
+	va_start(args, i);
 	ret = vsnprintf(s, sizeof s, "%d", args);
 	va_end(args);
-	return ret;
-}
-HCONF_TEST
-{
-	char s[2];
-	return snprintf(s, sizeof s, "%d", i) + vsnprintf_wrapper_(0, i);
+	return snprintf(s, sizeof s, "%d", i) + ret;
 }
 #endif
 
@@ -63,10 +57,7 @@ HCONF_TEST
 #	define strdup _strdup
 #endif
 #if HCONFING(STRDUP)
-HCONF_TEST
-{
-	return NULL != strdup("") + 0 * i;
-}
+#	define HCONF_TEST return NULL == strdup(argv[0])
 #endif
 
 #if HCONF_BRANCH(STRL, BSD_SOURCE)
@@ -77,10 +68,10 @@ size_t strlcat(char *, char const *, size_t);
 size_t strlcpy(char *, char const *, size_t);
 #endif
 #if HCONFING(STRL)
-HCONF_TEST
-{
+#	define HCONF_TEST return strl_test_(argv[0])
+static int strl_test_(char const *str) {
 	char s[2];
-	return strlcat(s, "", sizeof s) + strlcpy(s, "", sizeof s) + 0 * i;
+	return strlcat(s, str, sizeof s) + strlcpy(s, str, sizeof s);
 }
 #endif
 
@@ -92,10 +83,7 @@ HCONF_TEST
 char *hutils_strndup_(char const *, size_t) FUNC_RETURNS;
 #endif
 #if HCONFING(STRNDUP)
-HCONF_TEST
-{
-	return NULL != strndup("", 0) + 0 * i;
-}
+#	define HCONF_TEST return NULL == strndup(argv[0], 1)
 #endif
 
 #if HCONF_BRANCH(STRSIGNAL, POSIX_200809)
@@ -109,10 +97,7 @@ char *hutils_strsignal_(int) FUNC_RETURNS;
 #endif
 #if HCONFING(STRSIGNAL)
 #	include <signal.h>
-HCONF_TEST
-{
-	return NULL != strsignal(SIGSEGV) + 0 * i;
-}
+#	define HCONF_TEST return NULL == strsignal(argc)
 #endif
 
 #define STRAPP(dst, dstlen, ofs, src)\

@@ -35,13 +35,14 @@
 #	define PRIz "ld"
 #	define PRIzx "lx"
 #elif defined(_MSC_VER)
+/* HCONF_OPT=nolink */
 #	define PRIz "lu"
 #	define PRIzx "lx"
 #endif
 #if HCONFING(FMTMOD_SIZET)
-HCONF_TEST
-{
-	return printf("%"PRIz" %"PRIzx, (size_t)i, (size_t)i);
+#	define HCONF_TEST return hconf_test_(argc)
+static int hconf_test_(size_t i) {
+	return printf("%"PRIz" %"PRIzx, i, i);
 }
 #endif
 
@@ -55,10 +56,9 @@ HCONF_TEST
 #	define PRIpx "lx"
 #endif
 #if HCONFING(FMTMOD_INTPTRT)
-HCONF_TEST
-{
-	return printf("%"PRIp" %"PRIpx" %"PRIp" %"PRIpx,
-	    (uintptr_t)i, (uintptr_t)i, (intptr_t)i, (intptr_t)i);
+#	define HCONF_TEST return hconf_test_(argc)
+static int hconf_test_(intptr_t i) {
+	return printf("%"PRIp" %"PRIpx, i, i);
 }
 #endif
 

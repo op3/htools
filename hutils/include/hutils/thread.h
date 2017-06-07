@@ -26,10 +26,10 @@
 #	include <pthread.h>
 #	define PTHREADS
 #	if HCONFING(THREAD)
-HCONF_TEST
-{
+#		define HCONF_TEST return hconf_test_()
+static int hconf_test_(void) {
 	pthread_attr_t a;
-	return pthread_attr_create(&a) + 0 * i;
+	return pthread_attr_create(&a);
 }
 #	endif
 #elif HCONF_BRANCH(THREAD, ST_NEW)
@@ -37,12 +37,11 @@ HCONF_TEST
 #	include <pthread.h>
 #	define PTHREADS
 #	if HCONFING(THREAD)
+#		define HCONF_TEST return hconf_test_()
 static void *runner_(void *a_dummy) { return a_dummy; }
-HCONF_TEST
-{
+static int hconf_test_(void) {
 	pthread_t thread;
-
-	return pthread_create(&thread, NULL, runner_, NULL) + 0 * i;
+	return pthread_create(&thread, NULL, runner_, NULL);
 }
 #	endif
 #elif HCONF_BRANCH(THREAD, PTHREAD)
@@ -50,12 +49,11 @@ HCONF_TEST
 #	include <pthread.h>
 #	define PTHREADS
 #	if HCONFING(THREAD)
+#		define HCONF_TEST return hconf_test_()
 static void *runner_(void *a_dummy) { return a_dummy; }
-HCONF_TEST
-{
+static int hconf_test_(void) {
 	pthread_t thread;
-
-	return pthread_create(&thread, NULL, runner_, NULL) + 0 * i;
+	return pthread_create(&thread, NULL, runner_, NULL);
 }
 #	endif
 #endif

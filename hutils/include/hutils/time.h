@@ -29,16 +29,14 @@
 /* HCONF_LIBS=-lrt */
 #	define HUTILS_CLOCK_GETTIME
 #elif HCONF_BRANCH(TIME_GET, MACH)
-HCONF_TEST
-{
-	return mach_absolute_time() + 0 * i;
-}
+#	define HCONF_TEST return 0 == mach_absolute_time()
 #endif
 #if HCONFING(TIME_GET) && defined(HUTILS_CLOCK_GETTIME)
 #	include <time.h>
-HCONF_TEST
-{
-	return clock_gettime(0, NULL) + 0 * i;
+#	define HCONF_TEST return hconf_test_()
+static int hconf_test_(void) {
+	struct timespec ts;
+	return clock_gettime(CLOCK_REALTIME, &ts);
 }
 #endif
 
@@ -46,26 +44,32 @@ HCONF_TEST
 #endif
 #if HCONFING(TIME_SLEEP)
 #	include <time.h>
-HCONF_TEST
-{
-	return nanosleep(NULL, NULL) + 0 * i;
+#	define HCONF_TEST hconf_test_()
+static int hconf_test_(void) {
+	struct timespec ts = {0, 0};
+	return nanosleep(&ts, NULL);
 }
 #endif
 
 #if HCONF_BRANCH(TIME_DRAFT9, NO)
 #	if HCONFING(TIME_DRAFT9)
 #		include <time.h>
-HCONF_TEST
-{
-	return NULL != asctime_r(NULL, NULL) + 0 * i;
+#		define HCONF_TEST return hconf_test_()
+#include <stdio.h>
+static int hconf_test_(void) {
+	time_t tt;
+	char buf[26];
+	return NULL == asctime_r(localtime(&tt), buf);
 }
 #	endif
 #elif HCONF_BRANCH(TIME_DRAFT9, YES)
 #	if HCONFING(TIME_DRAFT9)
 #		include <time.h>
-HCONF_TEST
-{
-	return NULL != asctime_r(NULL, NULL, 0) + 0 * i;
+#		define HCONF_TEST return hconf_test_()
+static int hconf_test_(void) {
+	time_t tt;
+	char buf[26];
+	return NULL == asctime_r(localtime(&tt), buf);
 }
 #	endif
 #endif
