@@ -59,6 +59,7 @@ static int hconf_test_(void) {
 static int hconf_test_(void) {
 	time_t tt;
 	char buf[26];
+	time(&tt);
 	return NULL == asctime_r(localtime(&tt), buf);
 }
 #	endif
@@ -69,6 +70,7 @@ static int hconf_test_(void) {
 static int hconf_test_(void) {
 	time_t tt;
 	char buf[26];
+	time(&tt);
 	return NULL == asctime_r(localtime(&tt), buf);
 }
 #	endif
