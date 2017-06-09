@@ -31,7 +31,7 @@ ifeq (,$(HTEST_TESTS))
  HTEST_TESTS=htest/tests.c
 endif
 
-HTEST_CC_E=gcc -E $(filter-out -D_FORTIFY_SOURCE%,$(CPPFLAGS)) $< | sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $@
+HTEST_CC_E=gcc -E $(filter-out %_FORTIFY_SOURCE%,$(CPPFLAGS)) $< | sed -n 's/.* htest_suite_header_\([^(]*\)_(.*/\1/p' > $@
 ifeq (,$(V))
  HTEST_CC_E_PRE=@echo "SUITE $@" &&
  HTEST_TESTS_PRE=@echo "TESTS $@" &&

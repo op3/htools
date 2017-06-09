@@ -59,7 +59,7 @@ include $(HTOOLS_PATH)/hgmake/gcov.mk
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(HTEST_OBJ)
 	$(QUIET)echo "LD    $@" &&\
 	$(MKDIR) &&\
-	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils
+	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils $(GCOV_LIBS)
 
 $(BUILD_DIR)/libhtest.a: $(OBJ)
 	$(QUIET)echo "AR    $@" &&\
@@ -69,6 +69,6 @@ $(BUILD_DIR)/libhtest.a: $(OBJ)
 $(BUILD_DIR)/%.o %.o: %.c Makefile htest.mk $(HCONF_CACHE)
 	$(QUIET)echo "CC    $@" &&\
 	$(MKDIR) &&\
-	$(CC_O)
+	$(CC_O) $(GCOV_CPPFLAGS) $(GCOV_CFLAGS)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))

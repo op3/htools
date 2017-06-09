@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,63 +20,67 @@ missing=
 invalid=
 skipped=
 pass=
-for file in `find . -type f | grep -v \.hg | grep -v data | grep -v build_`
+inputs=`hg status -acdmr | grep -v -e strlc -e queue.h -e tree.h | sed 's, ,:,'`
+input_num=`echo $inputs | wc -w`
+input_i=0
+for input in $inputs
 do
-	res=`head -n2 $file | grep Copyright | grep Toshihide`
+	path=`echo $input | cut -d':' -f2`
+	input_i=$(($input_i + 1))
+	progress=`echo "(100 * $input_i) / ($input_num - 1)" | bc`
+	echo -n "\rProgress: $progress% ($input_i/$input_num)"
+	res=`head -n10 $path | grep Copyright`
 	if [ "x" = "x$res" ]
 	then
-		missing="$missing\n$file"
+		missing="$missing
+$path"
 		continue
 	fi
-	years="`hg log $file | grep ^date: | sed 's,.* \(20..\) .*,\1,'`"
+	years="`hg log $path | grep ^date: | sed 's,.* \(20..\) .*,\1,'`"
+	status=`echo $input | cut -d':' -f1`
+	[ "$status" = "M" -o "$status" = "A" ] && years="$years `date +%Y`"
 	if [ "x" = "x$years" ]
 	then
-		skipped="$skipped\n$file"
+		skipped="$skipped
+$path"
 		continue
 	fi
-	years="`echo $years | awk '{do printf"%s"(NF>1?FS:RS),$NF;while(--NF)}'`"
-	set -A array
+	years="$years 10000"
+	start_year=`echo $years | cut -d' ' -f1`
+	end_year=$start_year
+	years=`echo $years | cut -d' ' -f2-`
+	compact=`first=1
 	for year in $years
 	do
-		array[${#array[@]}]=$year
-	done
-	start_value=${array[0]}
-	end_value=$start_value
-	i=0
-	compact=`first=1
-	while true
-	do
-		i=$(($i + 1))
-		if [ $i -ge ${#array[@]} ]
+		[ $year = $end_year ] && continue
+		if [ $year -eq $(($end_year + 1)) ]
 		then
-			value=10000
-		else
-			value=${array[$i]}
+			end_year=$year
+			continue
 		fi
-		[ $value -eq $end_value ] && continue
-		if [ $value -eq $(($end_value + 1)) ]
+		[ "$first" ] || echo ", "
+		first=
+		if [ $start_year = $end_year ]
 		then
-			end_value=$value
+			echo -n $start_year
 		else
-			[ 1 -ne $first ] && echo ", "
-			first=0
-			if [ $start_value -eq $end_value ]
-			then
-				echo -n $start_value
-			else
-				echo -n $start_value-$end_value
-			fi
-			[ 10000 -eq $value ] && break
-			start_value=$value
-			end_value=$start_value
+			echo -n $start_year-$end_year
 		fi
+		[ $year = 10000 ] && break
+		start_year=$year
+		end_year=$year
 	done`
 	match=`echo $res | grep "$compact"`
 	if [ "x" = "x$match" ]
 	then
-		invalid="$invalid\n$file:\"$compact\""
+		invalid="$invalid
+$path: Should be \"$compact\""
 		continue
 	fi
-	pass="$pass\n$file"
+	pass="$pass $path"
 done
-echo Missing:$missing\\nInvalid:$invalid\\nSkipped:$skipped\\nPass:$pass | less
+echo
+echo "Invalid:$invalid
+Missing:$missing
+Skipped:$skipped
+Passed:$pass" | less -F
