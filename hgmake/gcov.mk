@@ -13,12 +13,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # Accepted only when BUILD_MODE=gcov
-# GCOV_SRC=files to undergo gcov.
+# GCOV_SRC=files to consider for gcov summaries.
 
 ifeq (gcov,$(BUILD_MODE))
-CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
-CFLAGS:=$(CFLAGS) --coverage
-LIBS:=$(LIBS) --coverage
+GCOV_CPPFLAGS:=$(CPPFLAGS) -DDO_GCOV_FLUSH
+GCOV_CFLAGS:=$(CFLAGS) --coverage
+GCOV_LIBS:=$(LIBS) --coverage
 
 .PHONY: gcov
 gcov:

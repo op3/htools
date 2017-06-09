@@ -28,3 +28,21 @@ clean:
 .PHONY: gcov gcov_files gcov_funcs gcov_anno
 gcov gcov_files gcov_funcs gcov_anno:
 	$(MAKE) -C hutils $@
+
+.PHONY: mega
+mega:
+	$(MAKE)
+	$(MAKE) BUILD_MODE=release
+	$(MAKE) BUILD_MODE=gcov
+	CC=clang $(MAKE)
+	CC=clang $(MAKE) BUILD_MODE=release
+	CC=clang $(MAKE) BUILD_MODE=gcov
+
+.PHONY: mega-clean
+mega-clean:
+	$(MAKE) clean
+	$(MAKE) BUILD_MODE=release clean
+	$(MAKE) BUILD_MODE=gcov clean
+	CC=clang $(MAKE) clean
+	CC=clang $(MAKE) BUILD_MODE=release clean
+	CC=clang $(MAKE) BUILD_MODE=gcov clean

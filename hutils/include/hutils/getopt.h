@@ -19,7 +19,8 @@
 
 #include <hconf/include/hutils/getopt.h>
 
-#if HCONF_BRANCH(GETOPT, UNISTD_H)
+#if HCONF_BRANCH(GETOPT, POSIX_SOURCE_UNISTD_H)
+/* HCONF_CPPFLAGS=-D_POSIX_SOURCE */
 #	include <unistd.h>
 #elif HCONF_BRANCH(GETOPT, CUSTOM) || defined(_MSC_VER)
 /* HCONF_SRC=src/getopt.c */

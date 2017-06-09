@@ -15,13 +15,13 @@
 HTOOLS_PATH=..
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
-CPPFLAGS+=-D_FORTIFY_SOURCE=1\
-	  -I$(BUILD_DIR)\
+CPPFLAGS+=-I$(BUILD_DIR)\
 	  -Iinclude\
 	  -I$(HTOOLS_PATH)/htest/include
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
 	CPPFLAGS+=-DNDEBUG
+#-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1
 	CFLAGS+=-O3
 else
 	CFLAGS+=-ggdb
@@ -77,11 +77,11 @@ $(TARGET): $(OBJ)
 $(TEST): $(TEST_OBJ) $(TARGET)
 	$(QUIET)echo "LD    $@" &&\
 	$(MKDIR) &&\
-	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest
+	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest $(GCOV_LIBS)
 
 $(BUILD_DIR)/%.o %.o: %.c $(HCONF_CACHE)
 	$(QUIET)echo "CC    $@" &&\
 	$(MKDIR) &&\
-	$(CC_O)
+	$(CC_O) $(GCOV_CPPFLAGS) $(GCOV_CFLAGS)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))
