@@ -45,6 +45,7 @@ static int hconf_test_(void) {
 }
 #	endif
 #elif HCONF_BRANCH(THREAD, PTHREAD)
+/* HCONF_CFLAGS=-pthread */
 /* HCONF_LIBS=-pthread */
 #	include <pthread.h>
 #	define PTHREADS

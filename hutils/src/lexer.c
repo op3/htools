@@ -134,6 +134,7 @@ int
 lexer_token_get(struct Lexer *a_lexer, struct LexerToken *a_token)
 {
 	a_lexer->error = LEXER_ERROR_NONE;
+	a_token->str = NULL;
 	for (;;) {
 		size_t i;
 		int c, is_number;

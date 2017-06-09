@@ -39,6 +39,7 @@ enum VariableEnum {
 struct Bucket {
 	char	*var[VAR_INPUT_NUM];
 	int	do_link;
+	int	do_exec;
 };
 
 extern char const *strctv_sentinel_;

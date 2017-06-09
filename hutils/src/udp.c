@@ -374,6 +374,7 @@ udp_client_send(struct UDPClient const *a_client, struct UDPDatagram const
 	} u;
 
 	u.c = a_dgram->buf;
+	/* TODO: SOCKET_ERROR in Windows, -1 everywhere else... */
 	if (SOCKET_ERROR == send(a_client->socket, u.u, a_dgram->size, 0)) {
 		hutils_warn("send");
 		return 0;
@@ -433,6 +434,7 @@ udp_server_create(int a_flags, uint16_t a_port)
 		addri.ai_flags = AI_PASSIVE;
 		addri.ai_protocol = IPPROTO_UDP;
 		if (0 != getaddrinfo(NULL, port_str, &addri, &result)) {
+			/* TODO Must use gai_strerror! */
 			hutils_warn("NULL:%s", port_str);
 			goto udp_server_create_fail;
 		}

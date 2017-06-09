@@ -41,6 +41,7 @@
 #endif
 
 #if HCONF_BRANCH(UDP_LOOKUP, GETADDRINFO)
+/* HCONF_OPT=noexec */
 #	include <netdb.h>
 #	if HCONFING(UDP_LOOKUP)
 #		define HCONF_TEST return !getaddrinfo(NULL, NULL, NULL, NULL)

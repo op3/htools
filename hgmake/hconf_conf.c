@@ -293,6 +293,7 @@ resolve_variables(struct Branch *a_branch)
 		free(bucket->var[i]);
 	}
 	bucket->do_link = 1;
+	bucket->do_exec = 1;
 	TAILQ_FOREACH(var, &a_branch->var_list, next) {
 		if (0 == STRBCMP(var->expr, "HCONF_SRC")) {
 			char const *p;
@@ -302,13 +303,14 @@ resolve_variables(struct Branch *a_branch)
 			cat_str(&bucket->var[VAR_SRC], p + 1);
 		} else if (0 == STRBCMP(var->expr, "HCONF_OPT")) {
 			char const *p;
-			char const *nolink;
 
 			p = strchr(var->expr, '=');
 			assert(NULL != p);
-			nolink = strstr(p + 1, "nolink");
-			if (NULL != nolink) {
+			if (NULL != strstr(p + 1, "nolink")) {
 				bucket->do_link = 0;
+			}
+			if (NULL != strstr(p + 1, "noexec")) {
+				bucket->do_exec = 0;
 			}
 		} else {
 			fprintf(file, "%s # %d\n", var->expr, var->line_no);
@@ -394,6 +396,9 @@ try()
 	free(src);
 	if (0 != ret) {
 		goto try_failed;
+	}
+	if (!bucket->do_exec) {
+		goto try_passed;
 	}
 	pid = fork();
 	if (-1 == pid) {
