@@ -5,8 +5,5 @@ pipelines:
     - step:
         script:
           - make
-          - make test
           - make BUILD_MODE=release
-          - make BUILD_MODE=release test
           - make BUILD_MODE=gcov
-          - make BUILD_MODE=gcov test
