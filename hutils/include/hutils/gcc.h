@@ -36,7 +36,7 @@
 #endif
 
 #if HCONF_BRANCH(WSTRICT_ALIASING, YES)
-/* HCONF_CFLAGS=-Wstrict-aliasing */
+/* HCONF_CFLAGS="-fstrict-aliasing -Wstrict-aliasing" */
 /* HCONF_OPT=nolink */
 #elif HCONF_BRANCH(WSTRICT_ALIASING, NO)
 /* HCONF_OPT=nolink */

@@ -52,10 +52,10 @@ static int hconf_test_(void) {
 #endif
 
 #if HCONF_BRANCH(TIME_DRAFT9, NO)
+/* HCONF_OPT=noexec */
 #	if HCONFING(TIME_DRAFT9)
 #		include <time.h>
 #		define HCONF_TEST return hconf_test_()
-#include <stdio.h>
 static int hconf_test_(void) {
 	time_t tt;
 	char buf[26];
@@ -64,6 +64,7 @@ static int hconf_test_(void) {
 }
 #	endif
 #elif HCONF_BRANCH(TIME_DRAFT9, YES)
+/* HCONF_OPT=noexec */
 #	if HCONFING(TIME_DRAFT9)
 #		include <time.h>
 #		define HCONF_TEST return hconf_test_()

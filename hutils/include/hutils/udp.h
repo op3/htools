@@ -48,6 +48,7 @@
 #	endif
 #elif HCONF_BRANCH(UDP_LOOKUP, GETHOSTBYNAME_SOCKLEN)
 /* HCONF_LIBS=-lnetinet */
+/* HCONF_OPT=noexec */
 #	include <netdb.h>
 #	define socklen_t int
 #	if HCONFING(UDP_LOOKUP)

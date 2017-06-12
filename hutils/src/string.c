@@ -40,8 +40,8 @@ hutils_vsnprintf_(char *a_dst, size_t a_dst_size, char const *a_fmt, va_list
 	int len;
 
 	len = vsprintf(a_dst, a_fmt, a_args);
-	if ((int)a_dst_size < len) {
-		fprintf(stderr, "Overrun in snprintf_unsafe_, abort!()\n");
+	if (a_dst_size < (size_t)len) {
+		fprintf(stderr, "Overrun in hutils_vsnprintf_, abort!()\n");
 		abort();
 	}
 	return len;

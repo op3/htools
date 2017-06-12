@@ -42,7 +42,7 @@ int hutils_vsnprintf_(char *, size_t, char const *, va_list) FUNC_PRINTF(3,
 #	define HCONF_TEST return 0 == nprintf_test_(argc, "")
 static int nprintf_test_(int i, ...) {
 	va_list args;
-	char s[2];
+	char s[10];
 	int ret;
 	va_start(args, i);
 	ret = vsnprintf(s, sizeof s, "%d", args);
