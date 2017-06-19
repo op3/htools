@@ -37,6 +37,7 @@ HTEST(Uint32Limits)
 	uint32_t u32;
 	int ret;
 
+	(void)ret;
 	bitpack_init(&packer, buf, sizeof buf);
 
 	/* 0 bits make no sense. */
@@ -109,6 +110,7 @@ HTEST(FloatLimits)
 	float flt;
 	int ret;
 
+	(void)ret;
 	bitpack_init(&packer, buf, sizeof buf);
 
 	/*
@@ -206,6 +208,7 @@ HTEST(String)
 	char *string;
 	int ret;
 
+	(void)ret;
 	bitpack_init(&packer, buf, sizeof buf);
 
 	memset(buf, 0xff, sizeof buf);
