@@ -21,7 +21,7 @@ invalid=
 skipped=
 pass=
 inputs=`hg status -acdmr | grep -v -e strlc -e queue.h -e tree.h | sed 's, ,:,'`
-input_num=`echo $inputs | wc -w`
+input_num=`echo $inputs | wc -w | sed 's, *\(.*\) *,\1,'`
 input_i=0
 for input in $inputs
 do

@@ -21,7 +21,6 @@ CPPFLAGS+=-I$(BUILD_DIR)\
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
 	CPPFLAGS+=-DNDEBUG
-#-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1
 	CFLAGS+=-O3
 else
 	CFLAGS+=-ggdb

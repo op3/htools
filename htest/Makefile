@@ -19,6 +19,7 @@ CPPFLAGS+=-I$(BUILD_DIR) -I. -Iinclude -I$(HTOOLS_PATH)/hutils/include \
 	-I$(HTOOLS_PATH)/hutils/$(BUILD_DIR)
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
+	CPPFLAGS+=-DNDEBUG
 	CFLAGS+=-O3
 else
 	CFLAGS+=-ggdb
@@ -38,7 +39,7 @@ LIBS:=$(LIBS)
 .PHONY: all
 all: $(BUILD_DIR)/test
 	-@./$< -c
-	@echo "The result should be 7/11!"
+	@echo "The result should be 7/10!"
 
 .PHONY: clean
 clean:

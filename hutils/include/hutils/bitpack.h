@@ -17,7 +17,7 @@
 #ifndef HUTILS_BITPACK_H
 #define HUTILS_BITPACK_H
 
-#include <stdlib.h>
+#include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 #include <hconf/include/hutils/bitpack.h>
@@ -46,18 +46,22 @@ struct BitPacker {
 	size_t	bit_i;
 };
 
+CDECLS_BEGIN
+
 void	bitpack_init(struct BitPacker *, uint8_t *, size_t) FUNC_NONNULL(());
-int	bitpack_pack_float(struct BitPacker *, float, unsigned, unsigned)
+int	bitpack_float(struct BitPacker *, float, unsigned, unsigned)
 	FUNC_NONNULL(()) FUNC_RETURNS;
-int	bitpack_pack_string(struct BitPacker *, char const *) FUNC_NONNULL(())
+int	bitpack_string(struct BitPacker *, char const *) FUNC_NONNULL(())
 	FUNC_RETURNS;
-int	bitpack_pack_uint32(struct BitPacker *, uint32_t, unsigned)
-	FUNC_NONNULL(()) FUNC_RETURNS;
-int	bitpack_unpack_float(struct BitPacker *, float *, unsigned, unsigned)
-	FUNC_NONNULL(()) FUNC_RETURNS;
-int	bitpack_unpack_string(struct BitPacker *, char **) FUNC_NONNULL(())
+int	bitpack_uint32(struct BitPacker *, uint32_t, unsigned) FUNC_NONNULL(())
 	FUNC_RETURNS;
-int	bitpack_unpack_uint32(struct BitPacker *, uint32_t *, unsigned)
+int	bitunpack_float(struct BitPacker *, float *, unsigned, unsigned)
 	FUNC_NONNULL(()) FUNC_RETURNS;
+int	bitunpack_string(struct BitPacker *, char **) FUNC_NONNULL(())
+	FUNC_RETURNS;
+int	bitunpack_uint32(struct BitPacker *, uint32_t *, unsigned)
+	FUNC_NONNULL(()) FUNC_RETURNS;
+
+CDECLS_END
 
 #endif

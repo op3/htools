@@ -30,7 +30,7 @@ bitpack_init(struct BitPacker *a_packer, uint8_t *a_buf, size_t a_bytes)
 }
 
 int
-bitpack_pack_float(struct BitPacker *a_packer, float a_float, unsigned
+bitpack_float(struct BitPacker *a_packer, float a_float, unsigned
     a_exponent_bits, unsigned a_mantissa_bits)
 {
 	union {
@@ -40,10 +40,14 @@ bitpack_pack_float(struct BitPacker *a_packer, float a_float, unsigned
 	uint32_t mantissa, sign, uflt;
 	int exponent;
 
-	ASSERT(unsigned, "u", 0, <, a_exponent_bits);
-	ASSERT(unsigned, "u", 8, >=, a_exponent_bits);
-	ASSERT(unsigned, "u", 0, <, a_mantissa_bits);
-	ASSERT(unsigned, "u", 23, >=, a_mantissa_bits);
+	if (a_exponent_bits < 2 || 8 < a_exponent_bits) {
+		hutils_errx(EXIT_FAILURE, "bitpack_float invalid # exponent "
+		    "bits = %d != {2..8}.", a_exponent_bits);
+	}
+	if (a_mantissa_bits < 1 || 23 < a_mantissa_bits) {
+		hutils_errx(EXIT_FAILURE, "bitpack_float invalid # mantissa "
+		    "bits = %d != {2..8}.", a_mantissa_bits);
+	}
 	u.flt = a_float;
 	/* Check valid ranges? */
 	sign = u.u32 >> 31;
@@ -54,49 +58,53 @@ bitpack_pack_float(struct BitPacker *a_packer, float a_float, unsigned
 	    sign << (a_exponent_bits + a_mantissa_bits) |
 	    exponent << a_mantissa_bits |
 	    mantissa >> (23 - a_mantissa_bits);
-	return bitpack_pack_uint32(a_packer, uflt, 1 + a_exponent_bits +
+	return bitpack_uint32(a_packer, uflt, 1 + a_exponent_bits +
 	    a_mantissa_bits);
 }
 
 int
-bitpack_pack_string(struct BitPacker *a_packer, char const *a_s)
+bitpack_string(struct BitPacker *a_packer, char const *a_s)
 {
 	char const *p;
 
 	for (p = a_s; '\0' != *p; ++p) {
-		if (!bitpack_pack_uint32(a_packer, *p, 8)) {
+		if (!bitpack_uint32(a_packer, *p, 8)) {
 			return 0;
 		}
 	}
-	return bitpack_pack_uint32(a_packer, 0, 8);
+	return bitpack_uint32(a_packer, 0, 8);
 }
 
 int
-bitpack_pack_uint32(struct BitPacker *a_packer, uint32_t a_u32, unsigned
-    a_bits)
+bitpack_uint32(struct BitPacker *a_packer, uint32_t a_u32, unsigned a_bits)
 {
 	if (0 == a_bits || 32 < a_bits) {
-		hutils_warnx("bitpack_pack_uint32 invalid # bits = %d.",
-		    a_bits);
-		return 0;
+		hutils_errx(EXIT_FAILURE, "bitpack_uint32 invalid # bits = "
+		    "%d != {1..32}.", a_bits);
+	}
+	if (a_packer->bit_i + a_bits > 8 * a_packer->size) {
+		hutils_errx(EXIT_FAILURE, "bitpack_uint32 overflow.");
 	}
 	do {
-		unsigned num, ofs;
+		unsigned avail, ofs, shift;
 
-		ofs = 7 & a_packer->bit_i;
-		num = 8 - ofs;
-		num = MIN(num, a_bits);
-		a_packer->buf[a_packer->bit_i / 8] |= (((1 << num) - 1) &
-		    a_u32) << ofs;
-		a_packer->bit_i += num;
-		a_u32 >>= num;
-		a_bits -= num;
+		shift = 7 & a_packer->bit_i;
+		ofs = a_packer->bit_i / 8;
+		if (0 == shift) {
+			a_packer->buf[ofs] = 0;
+		}
+		avail = 8 - shift;
+		avail = MIN(avail, a_bits);
+		a_packer->buf[ofs] |= (((1 << avail) - 1) & a_u32) << shift;
+		a_packer->bit_i += avail;
+		a_u32 >>= avail;
+		a_bits -= avail;
 	} while (0 < a_bits);
 	return 1;
 }
 
 int
-bitpack_unpack_float(struct BitPacker *a_packer, float *a_float, unsigned
+bitunpack_float(struct BitPacker *a_packer, float *a_float, unsigned
     a_exponent_bits, unsigned a_mantissa_bits)
 {
 	union {
@@ -105,11 +113,15 @@ bitpack_unpack_float(struct BitPacker *a_packer, float *a_float, unsigned
 	} u;
 	uint32_t exponent, mantissa, sign;
 
-	ASSERT(unsigned, "u", 0, <, a_exponent_bits);
-	ASSERT(unsigned, "u", 8, >=, a_exponent_bits);
-	ASSERT(unsigned, "u", 0, <, a_mantissa_bits);
-	ASSERT(unsigned, "u", 23, >=, a_mantissa_bits);
-	if (!bitpack_unpack_uint32(a_packer, &u.u32, 1 + a_exponent_bits +
+	if (a_exponent_bits < 2 || 8 < a_exponent_bits) {
+		hutils_errx(EXIT_FAILURE, "bitpack_float invalid # exponent "
+		    "bits = %d != {2..8}.", a_exponent_bits);
+	}
+	if (a_mantissa_bits < 1 || 23 < a_mantissa_bits) {
+		hutils_errx(EXIT_FAILURE, "bitpack_float invalid # mantissa "
+		    "bits = %d != {2..8}.", a_mantissa_bits);
+	}
+	if (!bitunpack_uint32(a_packer, &u.u32, 1 + a_exponent_bits +
 	    a_mantissa_bits)) {
 		return 0;
 	}
@@ -126,7 +138,7 @@ bitpack_unpack_float(struct BitPacker *a_packer, float *a_float, unsigned
 }
 
 int
-bitpack_unpack_string(struct BitPacker *a_packer, char **a_string)
+bitunpack_string(struct BitPacker *a_packer, char **a_string)
 {
 	char *s;
 	size_t len, bit_i_old;
@@ -135,7 +147,7 @@ bitpack_unpack_string(struct BitPacker *a_packer, char **a_string)
 	for (len = 0;; ++len) {
 		uint32_t c;
 
-		if (!bitpack_unpack_uint32(a_packer, &c, 8)) {
+		if (!bitunpack_uint32(a_packer, &c, 8)) {
 			a_packer->bit_i = bit_i_old;
 			return 0;
 		}
@@ -149,7 +161,7 @@ bitpack_unpack_string(struct BitPacker *a_packer, char **a_string)
 	for (;;) {
 		uint32_t c;
 
-		if (!bitpack_unpack_uint32(a_packer, &c, 8)) {
+		if (!bitunpack_uint32(a_packer, &c, 8)) {
 			hutils_errx(EXIT_FAILURE, "This should not happen.");
 		}
 		if (0 == c) {
@@ -161,31 +173,33 @@ bitpack_unpack_string(struct BitPacker *a_packer, char **a_string)
 }
 
 int
-bitpack_unpack_uint32(struct BitPacker *a_packer, uint32_t *a_u32, unsigned
-    a_bits)
+bitunpack_uint32(struct BitPacker *a_packer, uint32_t *a_u32, unsigned a_bits)
 {
 	uint32_t u32;
 	unsigned i;
 
 	if (0 == a_bits || 32 < a_bits) {
-		hutils_warnx("bitpack_unpack_uint32 invalid # bits = %d.",
-		    a_bits);
-		return 0;
+		hutils_errx(EXIT_FAILURE, "bitunpack_uint32 invalid # bits "
+		    "= %d != {1..32}.", a_bits);
+	}
+	if (a_packer->bit_i + a_bits > 8 * a_packer->size) {
+		hutils_errx(EXIT_FAILURE, "bitunpack_uint32 overflow.");
 	}
 	u32 = 0;
 	for (i = 0; 0 < a_bits;) {
-		unsigned num, ofs;
+		unsigned avail, ofs, shift;
 		uint8_t u8;
 
-		ofs = 7 & a_packer->bit_i;
-		num = 8 - ofs;
-		num = MIN(num, a_bits);
-		u8 = a_packer->buf[a_packer->bit_i / 8];
-		u8 = ((1 << num) - 1) & (u8 >> ofs);
+		shift = 7 & a_packer->bit_i;
+		ofs = a_packer->bit_i / 8;
+		avail = 8 - shift;
+		avail = MIN(avail, a_bits);
+		u8 = a_packer->buf[ofs];
+		u8 = ((1 << avail) - 1) & (u8 >> shift);
 		u32 |= u8 << i;
-		a_packer->bit_i += num;
-		a_bits -= num;
-		i += num;
+		a_packer->bit_i += avail;
+		a_bits -= avail;
+		i += avail;
 	}
 	*a_u32 = u32;
 	return 1;
