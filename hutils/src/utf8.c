@@ -81,6 +81,22 @@ get_code(uint8_t const *a_str, size_t a_bytes, size_t a_i, uint32_t *a_code,
 }
 
 struct UTF8 *
+utf8_concat(struct UTF8 const *a_sl, struct UTF8 const *a_sr)
+{
+	struct UTF8 *dst;
+
+	MALLOC(dst, 1);
+	dst->replacement_num = a_sl->replacement_num + a_sr->replacement_num;
+	dst->length = a_sl->length + a_sr->length;
+	dst->bytes = a_sl->bytes + a_sr->bytes;
+	MALLOC(dst->data, dst->bytes + 1);
+	memcpy(dst->data, a_sl->data, a_sl->bytes);
+	memcpy(dst->data + a_sl->bytes, a_sr->data, a_sr->bytes);
+	dst->data[dst->bytes] = '\0';
+	return dst;
+}
+
+struct UTF8 *
 utf8_create(uint8_t const *a_str, size_t a_bytes)
 {
 	struct UTF8 *utf8;

@@ -31,8 +31,8 @@ enum QuadtreeTraversal {
 
 #define QUADTREE_ENTRY(NodeType)\
 	struct {\
-		int	level;\
-		int	i, j;\
+		unsigned	level;\
+		unsigned	i, j;\
 		struct	NodeType *child[4];\
 	}
 
@@ -43,7 +43,8 @@ enum QuadtreeTraversal {
 	}
 
 #define QUADTREE_PROTOTYPE(name, TreeType, NodeType, UserType)\
-static struct NodeType *name##_node_alloc_(struct TreeType *, int, int, int);\
+static struct NodeType *name##_node_alloc_(struct TreeType *, unsigned,\
+    unsigned, unsigned);\
 static void name##_node_clear_(struct TreeType *, struct NodeType *);\
 static void name##_node_free_(struct TreeType *, struct NodeType **);\
 static void name##_node_visit_(struct TreeType *, struct NodeType *);\
@@ -57,7 +58,8 @@ struct NodeType		*alloc(struct UserType *);\
 void			free_(struct UserType *, struct NodeType **);\
 enum QuadtreeTraversal	visit(struct UserType *, struct NodeType *);\
 static struct NodeType *\
-name##_node_alloc_(struct TreeType *a_tree, int a_level, int a_i, int a_j)\
+name##_node_alloc_(struct TreeType *a_tree, unsigned a_level, unsigned a_i,\
+    unsigned a_j)\
 {\
 	struct NodeType *node;\
 \
@@ -105,7 +107,7 @@ name##_node_visit_(struct TreeType *a_tree, struct NodeType *a_node)\
 		return;\
 	}\
 	if (NULL == a_node->entry.child[0]) {\
-		int i, j, level, scale;\
+		unsigned i, j, level, scale;\
 \
 		level = a_node->entry.level;\
 		scale = 1 << level;\

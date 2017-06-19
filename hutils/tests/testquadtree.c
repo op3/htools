@@ -22,8 +22,8 @@ struct TestNode {
 	QUADTREE_ENTRY(TestNode)	tree;
 };
 struct TestData {
-	int	creation_level;
-	int	node_num;
+	unsigned	creation_level;
+	unsigned	node_num;
 };
 QUADTREE_HEAD(TestTree, TestNode, TestData);
 

@@ -113,7 +113,8 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 {
 #if defined(HCONF_mUDP_EVENT_bPOLL)
 	struct pollfd pfd[2];
-	int nfds, ret;
+	nfds_t nfds;
+	int ret;
 
 	pfd[0].fd = a_socket;
 	pfd[0].events = POLLIN;
@@ -179,14 +180,14 @@ struct UDPServer {
 	int	pfd[2];
 };
 
-static int	get_family(int) FUNC_RETURNS;
+static int	get_family(unsigned) FUNC_RETURNS;
 static int	receive_datagram(SOCKET, int, struct UDPDatagram *, struct
     UDPAddress **, double);
 
 static int g_is_setup;
 
 int
-get_family(int a_flags)
+get_family(unsigned a_flags)
 {
 #if defined(AF_INET6)
 	return UDP_IPV4 == ((UDP_IPV4 | UDP_IPV6) & a_flags) ? AF_INET :
@@ -255,7 +256,7 @@ udp_address_free(struct UDPAddress **a_address)
 }
 
 struct UDPClient *
-udp_client_create(int a_flags, char const *a_hostname, uint16_t a_port)
+udp_client_create(unsigned a_flags, char const *a_hostname, uint16_t a_port)
 {
 	struct UDPClient *client;
 	SOCKET sock;
@@ -383,7 +384,7 @@ udp_client_send(struct UDPClient const *a_client, struct UDPDatagram const
 }
 
 struct UDPServer *
-udp_server_create(int a_flags, uint16_t a_port)
+udp_server_create(unsigned a_flags, uint16_t a_port)
 {
 	struct UDPServer *server;
 	int flags, has_pfd, sock;

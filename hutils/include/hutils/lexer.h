@@ -43,8 +43,8 @@ struct Lexer {
 	LexerCallback	callback;
 	void	*callback_data;
 	enum	LexerError error;
-	unsigned	int line_no;
-	unsigned	int col_no;
+	unsigned	line_no;
+	unsigned	col_no;
 	char	buf[256];
 	size_t	ofs;
 	size_t	buf_end;

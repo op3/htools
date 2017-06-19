@@ -23,7 +23,7 @@
 
 struct UTF8 {
 	/* Number of replacements performed on source string. */
-	int	replacement_num;
+	unsigned	replacement_num;
 	size_t	length;
 	size_t	bytes;
 	uint8_t	*data;
@@ -31,6 +31,8 @@ struct UTF8 {
 
 CDECLS_BEGIN
 
+struct UTF8	*utf8_concat(struct UTF8 const *, struct UTF8 const *)
+	FUNC_NONNULL(()) FUNC_RETURNS;
 struct UTF8	*utf8_create(uint8_t const *, size_t) FUNC_NONNULL(())
 	FUNC_RETURNS;
 void		utf8_free(struct UTF8 **) FUNC_NONNULL(());

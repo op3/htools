@@ -36,20 +36,20 @@ HTEST(Packers)
 	HTRY_BOOL(bitpack_pack_float(&packer, -M_PI, 3, 9));
 	HTRY_I(13, ==, packer.bit_i);
 	HTRY_BOOL(bitpack_pack_string(&packer, "yo"));
-	HTRY_I(37, ==, packer.bit_i);
+	HTRY_I(13 + 3 * 8, ==, packer.bit_i);
 	HTRY_BOOL(bitpack_pack_uint32(&packer, 123, 7));
-	HTRY_I(44, ==, packer.bit_i);
+	HTRY_I(13 + 3 * 8 + 7, ==, packer.bit_i);
 
 	packer.bit_i = 0;
 	HTRY_BOOL(bitpack_unpack_float(&packer, &flt, 3, 9));
 	HTRY_I(13, ==, packer.bit_i);
 	HTRY_FLT(1e-3, >, fabs(flt + M_PI));
 	HTRY_BOOL(bitpack_unpack_string(&packer, &string));
-	HTRY_I(37, ==, packer.bit_i);
+	HTRY_I(13 + 3 * 8, ==, packer.bit_i);
 	HTRY_STR("yo", ==, string);
 	FREE(string);
 	HTRY_BOOL(bitpack_unpack_uint32(&packer, &u32, 7));
-	HTRY_I(44, ==, packer.bit_i);
+	HTRY_I(13 + 3 * 8 + 7, ==, packer.bit_i);
 	HTRY_U(123, ==, u32);
 }
 

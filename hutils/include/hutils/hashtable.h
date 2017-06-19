@@ -141,8 +141,7 @@ HashTableType##_erase(struct HashTableType *a_ht, struct HashTableType##Entry\
 	i = cur - a_ht->array;\
 	for (;;) {\
 		struct HashTableType##Entry *next;\
-		size_t dib;\
-		int j;\
+		size_t dib, j;\
 		j = (i + 1) & a_ht->mask;\
 		next = &a_ht->array[j];\
 		if (NULL == next->t) {\

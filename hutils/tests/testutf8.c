@@ -225,6 +225,31 @@ HTEST(ParseBad)
 	utf8_free(&utf8);
 }
 
+HTEST(Concat)
+{
+	/* Swedish character, rather common. */
+	uint8_t const c_s0[] = {0xc3, 0xa5};
+	/* Tibetan 'olympic flame' character, pretty. */
+	uint8_t const c_s1[] = {0xe0, 0xbc, 0x86};
+	struct UTF8 *u0, *u1, *u2;
+
+	u0 = utf8_create(c_s0, 2);
+	u1 = utf8_create(c_s1, 3);
+	u2 = utf8_concat(u0, u1);
+	HTRY_I(0, ==, u2->replacement_num);
+	HTRY_I(1 + 1, ==, u2->length);
+	HTRY_I(2 + 3, ==, u2->bytes);
+	HTRY_I(c_s0[0], ==, u2->data[0]);
+	HTRY_I(c_s0[1], ==, u2->data[1]);
+	HTRY_I(c_s1[0], ==, u2->data[2]);
+	HTRY_I(c_s1[1], ==, u2->data[3]);
+	HTRY_I(c_s1[2], ==, u2->data[4]);
+	HTRY_I(0, ==, u2->data[5]);
+	utf8_free(&u0);
+	utf8_free(&u1);
+	utf8_free(&u2);
+}
+
 HTEST_SUITE(UTF8)
 {
 	HTEST_ADD(Basic);
@@ -232,4 +257,5 @@ HTEST_SUITE(UTF8)
 	HTEST_ADD(Demo);
 	HTEST_ADD(ParseOk);
 	HTEST_ADD(ParseBad);
+	HTEST_ADD(Concat);
 }

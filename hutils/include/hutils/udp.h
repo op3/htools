@@ -108,14 +108,14 @@ struct UDPDatagram {
 CDECLS_BEGIN
 
 void			udp_address_free(struct UDPAddress **) FUNC_NONNULL(());
-struct UDPClient	*udp_client_create(int, char const *, uint16_t)
+struct UDPClient	*udp_client_create(unsigned, char const *, uint16_t)
 	FUNC_NONNULL(()) FUNC_RETURNS;
 void			udp_client_free(struct UDPClient **) FUNC_NONNULL(());
 int			udp_client_receive(struct UDPClient const *, struct
     UDPDatagram *, double) FUNC_NONNULL(());
 int			udp_client_send(struct UDPClient const *, struct
     UDPDatagram const *) FUNC_NONNULL(());
-struct UDPServer	*udp_server_create(int, uint16_t) FUNC_RETURNS;
+struct UDPServer	*udp_server_create(unsigned, uint16_t) FUNC_RETURNS;
 void			udp_server_free(struct UDPServer **) FUNC_NONNULL(());
 int			udp_server_receive(struct UDPServer const *, struct
     UDPAddress **, struct UDPDatagram *, double) FUNC_NONNULL(());

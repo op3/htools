@@ -40,10 +40,10 @@ bitpack_pack_float(struct BitPacker *a_packer, float a_float, unsigned
 	uint32_t mantissa, sign, uflt;
 	int exponent;
 
-	ASSERT(int, "u", 0, <, a_exponent_bits);
-	ASSERT(int, "u", 8, >=, a_exponent_bits);
-	ASSERT(int, "u", 0, <, a_mantissa_bits);
-	ASSERT(int, "u", 23, >=, a_mantissa_bits);
+	ASSERT(unsigned, "u", 0, <, a_exponent_bits);
+	ASSERT(unsigned, "u", 8, >=, a_exponent_bits);
+	ASSERT(unsigned, "u", 0, <, a_mantissa_bits);
+	ASSERT(unsigned, "u", 23, >=, a_mantissa_bits);
 	u.flt = a_float;
 	/* Check valid ranges? */
 	sign = u.u32 >> 31;
@@ -103,13 +103,12 @@ bitpack_unpack_float(struct BitPacker *a_packer, float *a_float, unsigned
 		uint32_t	u32;
 		float	flt;
 	} u;
-	uint32_t exponent, mantissa;
-	int sign;
+	uint32_t exponent, mantissa, sign;
 
-	ASSERT(int, "u", 0, <, a_exponent_bits);
-	ASSERT(int, "u", 8, >=, a_exponent_bits);
-	ASSERT(int, "u", 0, <, a_mantissa_bits);
-	ASSERT(int, "u", 23, >=, a_mantissa_bits);
+	ASSERT(unsigned, "u", 0, <, a_exponent_bits);
+	ASSERT(unsigned, "u", 8, >=, a_exponent_bits);
+	ASSERT(unsigned, "u", 0, <, a_mantissa_bits);
+	ASSERT(unsigned, "u", 23, >=, a_mantissa_bits);
 	if (!bitpack_unpack_uint32(a_packer, &u.u32, 1 + a_exponent_bits +
 	    a_mantissa_bits)) {
 		return 0;
