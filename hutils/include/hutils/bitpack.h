@@ -20,6 +20,25 @@
 #include <stdlib.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
+#include <hconf/include/hutils/bitpack.h>
+
+#if HCONF_BRANCH(BITPACK, IEEE754)
+#	if HCONFING(BITPACK)
+#		define HCONF_TEST return hconf_test_()
+static int hconf_test_(void)
+{
+	union {
+		float	flt;
+		uint32_t	u32;
+	} u;
+	u.flt = 1.0f;
+	if (0x3f800000 != u.u32) return 1;
+	u.flt = -2.0f;
+	if (0xc0000000 != u.u32) return 1;
+	return 0;
+}
+#	endif
+#endif
 
 struct BitPacker {
 	size_t	size;

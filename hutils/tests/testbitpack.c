@@ -40,10 +40,30 @@ HTEST(Packers)
 	HTRY_BOOL(bitpack_pack_uint32(&packer, 123, 7));
 	HTRY_I(13 + 3 * 8 + 7, ==, packer.bit_i);
 
+	/* Low-level bit check. */
+	packer.bit_i = 0;
+	HTRY_BOOL(bitpack_unpack_uint32(&packer, &u32, 13));
+	HTRY_I(13, ==, packer.bit_i);
+	HTRY_U(0x1924, ==, u32);
+	HTRY_BOOL(bitpack_unpack_uint32(&packer, &u32, 8));
+	HTRY_I(13 + 1 * 8, ==, packer.bit_i);
+	HTRY_U('y', ==, u32);
+	HTRY_BOOL(bitpack_unpack_uint32(&packer, &u32, 8));
+	HTRY_I(13 + 2 * 8, ==, packer.bit_i);
+	HTRY_U('o', ==, u32);
+	HTRY_BOOL(bitpack_unpack_uint32(&packer, &u32, 8));
+	HTRY_I(13 + 3 * 8, ==, packer.bit_i);
+	HTRY_U('\0', ==, u32);
+	HTRY_BOOL(bitpack_unpack_uint32(&packer, &u32, 7));
+	HTRY_I(13 + 3 * 8 + 7, ==, packer.bit_i);
+	HTRY_U(123, ==, u32);
+
+	/* Higher-level unpacker check. */
 	packer.bit_i = 0;
 	HTRY_BOOL(bitpack_unpack_float(&packer, &flt, 3, 9));
 	HTRY_I(13, ==, packer.bit_i);
-	HTRY_FLT(1e-3, >, fabs(flt + M_PI));
+	HTRY_FLT(-M_PI - 1e-3, <, flt);
+	HTRY_FLT(-M_PI + 1e-3, >, flt);
 	HTRY_BOOL(bitpack_unpack_string(&packer, &string));
 	HTRY_I(13 + 3 * 8, ==, packer.bit_i);
 	HTRY_STR("yo", ==, string);
