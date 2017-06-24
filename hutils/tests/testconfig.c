@@ -24,12 +24,15 @@ char *
 get_tmp_path()
 {
 	char const *tmpdir;
+	char *path;
 
 	tmpdir = getenv("TMPDIR");
 	if (NULL == tmpdir) {
 		tmpdir = "/tmp";
 	}
-	return STRCTV_BEGIN tmpdir, "/hutils_testconfig.cfg" STRCTV_END;
+	path = NULL;
+	STRCTV_BEGIN &path, tmpdir, "/hutils_testconfig.cfg" STRCTV_END;
+	return path;
 }
 
 HTEST(MissingFileOk)

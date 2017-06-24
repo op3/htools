@@ -20,28 +20,39 @@
 
 HTEST(Strctv)
 {
-	char *cat;
+	char *cat, *ret;
 
-	cat = STRCTV_BEGIN "This ", "is ", "a", NULL, " bunch", " of",
-	    " strings." STRCTV_END;
+	cat = NULL;
+	ret = STRCTV_BEGIN &cat, "This ", "is " STRCTV_END;
+	HTRY_STR("This is ", ==, cat);
+	HTRY_STR(ret, ==, cat);
+	ret = STRCTV_BEGIN &cat, "a", NULL, " bunch", " of", " strings."
+	    STRCTV_END;
 	HTRY_STR("This is aNULL bunch of strings.", ==, cat);
+	HTRY_STR(ret, ==, cat);
 	FREE(cat);
+}
+
+HTEST(Strbcmp)
+{
+	HTRY_I(strbcmp("abc", ""),    ==, 0);
+	HTRY_I(strbcmp("abc", "a"),   ==, 0);
+	HTRY_I(strbcmp("abc", "ab"),  ==, 0);
+	HTRY_I(strbcmp("abc", "abc"), ==, 0);
+	HTRY_I(strbcmp("abc", "abcd"), <, 0);
+	HTRY_I(strbcmp("abc", "abb"),  >, 0);
+	HTRY_I(strbcmp("abc", "abd"),  <, 0);
 }
 
 HTEST(Strecmp)
 {
-	char const s11[] = "abc";
-	char const s12[] = "aabc";
-	char const s13[] = "abcd";
-	char const s14[] = "zabb";
-	char const s15[] = "zabd";
-	char const s2[] = "abc";
-
-	HTRY_I(0, ==, strecmp(s11, s2));
-	HTRY_I(0, ==, strecmp(s12, s2));
-	HTRY_I(0, !=, strecmp(s13, s2));
-	HTRY_I(0, >, strecmp(s14, s2));
-	HTRY_I(0, <, strecmp(s15, s2));
+	HTRY_I(strecmp("abc",  ""),    ==, 0);
+	HTRY_I(strecmp("abc",  "c"),   ==, 0);
+	HTRY_I(strecmp("abc",  "bc"),  ==, 0);
+	HTRY_I(strecmp("abc",  "abc"), ==, 0);
+	HTRY_I(strecmp("abcd", "abc"),  >, 0);
+	HTRY_I(strecmp("zabb", "abc"),  <, 0);
+	HTRY_I(strecmp("zabd", "abc"),  >, 0);
 }
 
 HTEST(Strl)
@@ -75,6 +86,7 @@ HTEST(Strl)
 HTEST_SUITE(String)
 {
 	HTEST_ADD(Strctv);
+	HTEST_ADD(Strbcmp);
 	HTEST_ADD(Strecmp);
 	HTEST_ADD(Strl);
 }

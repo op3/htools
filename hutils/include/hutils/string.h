@@ -100,18 +100,13 @@ char *hutils_strsignal_(int) FUNC_RETURNS;
 #	define HCONF_TEST return NULL == strsignal(argc)
 #endif
 
-#define STRAPP(dst, dstlen, ofs, src)\
-	do {\
-		ofs += strlcpy(dst + ofs, src, dstlen - ofs);\
-		ofs = MIN(ofs, dstlen - 1);\
-	} WHILE_0
 #define STRCTV_BEGIN strctv_(
 #define STRCTV_END ,strctv_sentinel_)
 
 extern char const *strctv_sentinel_;
 
 int	strbcmp(char const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
-char	*strctv_(char const *, ...) FUNC_RETURNS;
+char	*strctv_(char **, ...) FUNC_NONNULL((1));
 int	strecmp(char const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 
 CDECLS_END

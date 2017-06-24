@@ -126,7 +126,8 @@ hutils_strsignal_(int a_signum)
 }
 #endif
 
-char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
+char const *strctv_sentinel_ = (void *)&strctv_sentinel_;
+static char const c_NULL[] = "NULL";
 
 /*
  * Compares the beginning of the big string with the pattern.
@@ -137,60 +138,79 @@ char const *strctv_sentinel_ = (char const *)&strctv_sentinel_;
 int
 strbcmp(char const *a_big, char const *a_pattern)
 {
-	size_t pattern_len;
+	char const *b;
+	char const *p;
 
-	pattern_len = strlen(a_pattern);
-	return strncmp(a_big, a_pattern, pattern_len);
+	b = a_big;
+	p = a_pattern;
+	for (;; ++b, ++p) {
+		if ('\0' == *p) {
+			return 0;
+		}
+		if ('\0' == *b) {
+			return -1;
+		}
+		if (*b < *p) {
+			return -1;
+		}
+		if (*b > *p) {
+			return 1;
+		}
+	}
 }
 
 /*
  * Concatenates variadic strings into a malloc:d string.
- *  a_s1: Variadic list of strings.
- *  Returns: Concatenated string.
+ *  a_dst: Location of potentially non-empty string, may be NULL, may be
+ *         realloc:ed.
+ *  Returns: *a_dst on success, NULL on failure.
  */
 char *
-strctv_(char const *a_s1, ...)
+strctv_(char **a_dst, ...)
 {
-	char const c_NULL[] = "NULL";
-	size_t const c_NULL_len = sizeof c_NULL - 1;
 	va_list args;
 	char const *from;
-	char *dst, *to;
-	size_t len;
+	char *dst, *ndst, *to;
+	size_t dstlen, len;
 
-	len = 0;
-	va_start(args, a_s1);
-	from = a_s1;
-	do {
+	dst = *a_dst;
+	len = dstlen = NULL == dst ? 0 : strlen(dst);
+	va_start(args, a_dst);
+	for (;;) {
+		from = va_arg(args, char const *);
+		if (strctv_sentinel_ == from) {
+			break;
+		}
 		if (NULL == from) {
-			len += c_NULL_len;
+			len += sizeof c_NULL - 1;
 		} else {
 			len += strlen(from);
 		}
-		from = va_arg(args, char const *);
-	} while (strctv_sentinel_ != from);
+	}
 	va_end(args);
-	dst = malloc(len + 1);
-	if (NULL == dst) {
+	ndst = realloc(dst, len + 1);
+	if (NULL == ndst) {
 		return NULL;
 	}
-	to = dst;
-	va_start(args, a_s1);
-	from = a_s1;
-	do {
+	to = ndst + dstlen;
+	va_start(args, a_dst);
+	for (;;) {
+		from = va_arg(args, char const *);
+		if (strctv_sentinel_ == from) {
+			break;
+		}
 		if (NULL == from) {
-			memmove(to, c_NULL, c_NULL_len);
-			to += c_NULL_len;
+			memmove(to, c_NULL, sizeof c_NULL - 1);
+			to += sizeof c_NULL - 1;
 		} else {
 			while ('\0' != *from) {
 				*to++ = *from++;
 			}
 		}
-		from = va_arg(args, char const *);
-	} while (strctv_sentinel_ != from);
+	}
 	va_end(args);
 	*to = '\0';
-	return dst;
+	return *a_dst = ndst;
 }
 
 /*
