@@ -74,7 +74,7 @@ suite_sighandler(int a_signum)
 	htest_output_suppress_();
 	longjmp(g_suite_jmp_buf, 1);
 #else
-	GCOV_FLUSH;
+	COV_FLUSH;
 	_exit(EXIT_FAILURE);
 #endif
 }
@@ -86,7 +86,7 @@ try_sighandler(int a_signum)
 #if defined(SUPPORT_JMP)
 	longjmp(g_htest_try_jmp_buf_, 1);
 #else
-	GCOV_FLUSH;
+	COV_FLUSH;
 	_exit(EXIT_FAILURE);
 #endif
 }
@@ -248,7 +248,7 @@ main(int const argc, char **const argv)
 					suite->suite(c_color_test,
 					    c_color_fail, RESET, test_index,
 					    &test_enumerator, &passed);
-					GCOV_FLUSH;
+					COV_FLUSH;
 					_exit(passed ? EXIT_SUCCESS :
 					    EXIT_FAILURE);
 				}

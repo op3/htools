@@ -22,7 +22,7 @@
 #  $(HTEST_SUITES)    = suite cache files.
 
 ifeq (gcov,$(BUILD_MODE))
- CPPFLAGS:=$(CPPFLAGS) -DHTEST_GCOV_FLUSH
+ CPPFLAGS:=$(CPPFLAGS) -DHTEST_COV_FLUSH
 endif
 ifeq (,$(HTEST_PRE))
  HTEST_PRE=true

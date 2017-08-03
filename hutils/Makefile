@@ -65,8 +65,8 @@ HTEST_PRE=$(MKDIR)
 include $(HTOOLS_PATH)/htest/htest.mk
 TEST_OBJ:=$(TEST_OBJ) $(patsubst %.c,%.o,$(BUILD_DIR)/$(HTEST_TESTS))
 
-GCOV_SRC:=$(SRC)
-include $(HTOOLS_PATH)/hgmake/gcov.mk
+COV_SRC:=$(SRC)
+include $(HTOOLS_PATH)/hgmake/cov.mk
 
 $(TARGET): $(OBJ)
 	$(QUIET)echo "AR    $@" &&\
@@ -76,11 +76,11 @@ $(TARGET): $(OBJ)
 $(TEST): $(TEST_OBJ) $(TARGET)
 	$(QUIET)echo "LD    $@" &&\
 	$(MKDIR) &&\
-	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest $(GCOV_LIBS)
+	$(LD_E) -L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest $(COV_LIBS)
 
 $(BUILD_DIR)/%.o %.o: %.c $(HCONF_CACHE)
 	$(QUIET)echo "CC    $@" &&\
 	$(MKDIR) &&\
-	$(CC_O) $(GCOV_CPPFLAGS) $(GCOV_CFLAGS)
+	$(CC_O) $(COV_CPPFLAGS) $(COV_CFLAGS)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))
