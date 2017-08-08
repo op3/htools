@@ -53,11 +53,11 @@ HTEST(OutOfBounds)
 
 	(void)dummy;
 	bitmask = bitmask_create(1);
-	HTRY_SIGNAL(bitmask_unset(bitmask, -1));
+	HTRY_SIGNAL(bitmask_unset(bitmask, (unsigned)-1));
 	HTRY_SIGNAL(bitmask_unset(bitmask, 1));
-	HTRY_SIGNAL(dummy = bitmask_get(bitmask, -1));
+	HTRY_SIGNAL(dummy = bitmask_get(bitmask, (unsigned)-1));
 	HTRY_SIGNAL(dummy = bitmask_get(bitmask, 1));
-	HTRY_SIGNAL(bitmask_set(bitmask, -1));
+	HTRY_SIGNAL(bitmask_set(bitmask, (unsigned)-1));
 	HTRY_SIGNAL(bitmask_set(bitmask, 1));
 	bitmask_unset(bitmask, 0);
 	dummy = bitmask_get(bitmask, 0);

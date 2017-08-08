@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include <hutils/memory.h>
 
-#if HCONF_BRANCH(NPRINTF, UNSAFE)
+#if HCONF_mNPRINTF_bUNSAFE
 #	include <stdarg.h>
 #	include <stdio.h>
 int
@@ -48,7 +48,7 @@ hutils_vsnprintf_(char *a_dst, size_t a_dst_size, char const *a_fmt, va_list
 }
 #endif
 
-#if HCONF_BRANCH(STRNDUP, CUSTOM)
+#if HCONF_mSTRNDUP_bCUSTOM
 char *
 hutils_strndup_(char const *a_s, size_t a_maxlen)
 {
@@ -69,7 +69,7 @@ hutils_strndup_(char const *a_s, size_t a_maxlen)
 }
 #endif
 
-#if HCONF_BRANCH(STRSIGNAL, CUSTOM)
+#if HCONF_mSTRSIGNAL_bCUSTOM
 #	include <sigcodes.h>
 
 char *

@@ -18,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tests\testarray.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\testbitmask.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,6 +73,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\testgetopt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testbitpack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testhash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testhashtable.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testmath.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testutf8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testvector.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testvector4.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

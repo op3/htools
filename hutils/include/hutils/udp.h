@@ -23,35 +23,35 @@
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
 
-#if HCONF_BRANCH(SOCKET_H, SOCKET_H)
+#if HCONF_mSOCKET_H_bSOCKET_H
 #	include <socket.h>
-#elif HCONF_BRANCH(SOCKET_H, SYS_SOCKET_H)
+#elif HCONF_mSOCKET_H_bSYS_SOCKET_H
 #	include <sys/socket.h>
-#elif HCONF_BRANCH(SOCKET_H, NONE)
+#elif HCONF_mSOCKET_H_bNONE
 #endif
 
-#if HCONF_BRANCH(IPPROTO_UDP, NETINET_IN_H)
+#if HCONF_mIPPROTO_UDP_bNETINET_IN_H
 #	include <netinet/in.h>
-#elif HCONF_BRANCH(IPPROTO_UDP, NOWARN_NETINET_IN_H)
+#elif HCONF_mIPPROTO_UDP_bNOWARN_NETINET_IN_H
 /* HCONF_CPPFLAGS=-D__NO_INCLUDE_WARN__ */
 #	include <netinet/in.h>
 #endif
-#if HCONFING(IPPROTO_UDP)
+#if HCONFING_bIPPROTO_UDP
 #	define HCONF_TEST return -1 == IPPROTO_UDP
 #endif
 
-#if HCONF_BRANCH(UDP_LOOKUP, GETADDRINFO)
+#if HCONF_mUDP_LOOKUP_bGETADDRINFO
 /* HCONF_OPT=noexec */
 #	include <netdb.h>
-#	if HCONFING(UDP_LOOKUP)
+#	if HCONFING_bUDP_LOOKUP
 #		define HCONF_TEST return !getaddrinfo(NULL, NULL, NULL, NULL)
 #	endif
-#elif HCONF_BRANCH(UDP_LOOKUP, GETHOSTBYNAME_SOCKLEN)
+#elif HCONF_mUDP_LOOKUP_bGETHOSTBYNAME_SOCKLEN
 /* HCONF_LIBS=-lnetinet */
 /* HCONF_OPT=noexec */
 #	include <netdb.h>
 #	define socklen_t int
-#	if HCONFING(UDP_LOOKUP)
+#	if HCONFING_bUDP_LOOKUP
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
 	socklen_t len;
@@ -61,9 +61,10 @@ static int hconf_test_(void) {
 #	endif
 #endif
 
-#if HCONF_BRANCH(UDP_EVENT, POLL)
+#if HCONF_mUDP_EVENT_bPOLL
 #	include <poll.h>
-#	if HCONFING(UDP_EVENT)
+#	define HUTILS_UDP_POLL poll
+#	if HCONFING_bUDP_EVENT
 #		define HCONF_TEST hconf_test_()
 static int hconf_test_() {
 	struct pollfd fds[1];
@@ -72,24 +73,27 @@ static int hconf_test_() {
 	return -1 == poll(fds, 1, 0) ? 0 : 1;
 }
 #	endif
-#elif HCONF_BRANCH(UDP_EVENT, SYS_SELECT_H)
+#elif HCONF_mUDP_EVENT_bSYS_SELECT_H
 #	include <sys/select.h>
-#	if HCONFING(UDP_EVENT)
+#	if HCONFING_bUDP_EVENT
 #		define HCONF_TEST hconf_test_()
 static void hconf_test_(void) {
 	struct timeval tv = {0, 0};
 	select(0, NULL, NULL, NULL, &tv);
 }
 #	endif
-#elif HCONF_BRANCH(UDP_EVENT, SELECT_TIME_H)
+#elif HCONF_mUDP_EVENT_bSELECT_TIME_H
 #	include <time.h>
-#	if HCONFING(UDP_EVENT)
+#	if HCONFING_bUDP_EVENT
 #		define HCONF_TEST hconf_test_()
 static void hconf_test_(void) {
 	struct timeval tv = {0, 0};
 	select(0, NULL, NULL, NULL, &tv);
 }
 #	endif
+#elif defined(_MSC_VER)
+#	define HUTILS_UDP_POLL WSAPoll
+#	define nfds_t int
 #endif
 
 enum {

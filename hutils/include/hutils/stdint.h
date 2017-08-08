@@ -21,12 +21,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#if HCONF_BRANCH(STDINT_LIMITS, STD_H)
+#if HCONF_mSTDINT_LIMITS_bSTD_H
 /* HCONF_OPT="nolink" */
-#elif HCONF_BRANCH(STDINT_LIMITS, CUSTOM)
+#elif HCONF_mSTDINT_LIMITS_bCUSTOM
 /* HCONF_OPT="nolink" */
 #	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
-#elif HCONF_BRANCH(STDINT_LIMITS, LAST_RESORT)
+#elif HCONF_mSTDINT_LIMITS_bLAST_RESORT
 /* HCONF_OPT="nolink" */
 #	undef SIZE_MAX
 #	if __WORDSIZE == 64
@@ -35,13 +35,13 @@
 #		define SIZE_MAX 4294967295UL
 #	endif
 #endif
-#if HCONFING(STDINT_LIMITS)
+#if HCONFING_bSTDINT_LIMITS
 #	define HCONF_TEST return 0 & SIZE_MAX
 #endif
 
-#if HCONF_BRANCH(STDINT_TYPES, NOTHING)
+#if HCONF_mSTDINT_TYPES_bNOTHING
 /* HCONF_OPT="nolink" */
-#elif HCONF_BRANCH(STDINT_TYPES, TYPEDEF_SYS_TYPES_H)
+#elif HCONF_mSTDINT_TYPES_bTYPEDEF_SYS_TYPES_H
 /* HCONF_OPT="nolink" */
 #	include <sys/types.h>
 typedef u_int8_t  uint8_t;
@@ -51,7 +51,7 @@ typedef u_int64_t uint64_t;
 typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
 #endif
-#if HCONFING(STDINT_TYPES)
+#if HCONFING_bSTDINT_TYPES
 #	define HCONF_TEST return 0 < hconf_test_()
 static size_t hconf_test_(void)
 {

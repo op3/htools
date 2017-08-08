@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #if defined(_MSC_VER)
+#	include <windows.h>
 #	define HTEST_COLOR_ WORD
 #else
 #	include <sys/wait.h>
@@ -169,7 +170,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 		HTRY_FAIL_HEADER_;\
 		printf("'%s'=\"%s\" "#op" '%s'=\"%s\".\n", #a, aa_, #b, bb_);\
 		HTRY_FAIL_FOOTER_;\
-	} else if (-1 == siz) {\
+	} else if ((size_t)-1 == siz) {\
 		if (!(strcmp(aa_, bb_) op 0)) {\
 			HTRY_FAIL_HEADER_;\
 			printf("'%s'=\"%s\" "#op"(%d) '%s'=\"%s\".\n", #a,\
@@ -185,7 +186,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 		}\
 	}\
 } WHILE_0
-#define HTRY_STR(a, op, b) HTRY_STRN(a, op, b, -1)
+#define HTRY_STR(a, op, b) HTRY_STRN(a, op, b, (size_t)-1)
 
 #define HTRY_VOID(expr) do {\
 	(void)a_color_fail_;\

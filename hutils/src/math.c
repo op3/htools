@@ -36,7 +36,8 @@ double2half(double a_d)
 	sign = (0x80000000 & u32) >> 31;
 	exp_ = (0x7ff00000 & u32) >> 20;
 	mantissa = 0xfffff & u32;
-	return sign << 15 | (exp_ - 1023 + 15) << 10 | mantissa >> 10;
+	return (uint16_t)(sign << 15 | (exp_ - 1023 + 15) << 10 | mantissa >>
+	    10);
 }
 
 double

@@ -22,7 +22,7 @@
 #include <hutils/macros.h>
 #include <hconf/include/hutils/dir.h>
 
-#if HCONF_BRANCH(DIR, DIRENT)
+#if HCONF_mDIR_bDIRENT
 
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199506 */
 #	include <dirent.h>
@@ -32,14 +32,14 @@
 	}\
 } WHILE_0
 
-#elif HCONF_BRANCH(DIR, DIRENT_ANCIENT)
+#elif HCONF_mDIR_bDIRENT_ANCIENT
 
 #	include <sys/types.h>
 #	include <dirent.h>
 #	define HUTILS_READDIR(dir, entry, result)\
     result = readdir_r(dir, &entry)
 
-#elif HCONF_BRANCH(DIR, DIRENT_READDIR)
+#elif HCONF_mDIR_bDIRENT_READDIR
 
 /* readdir_r deprecated and readdir made safe on modern platforms. */
 #	include <dirent.h>
@@ -49,7 +49,7 @@
 } WHILE_0
 
 #endif
-#if HCONFING(DIR)
+#if HCONFING_bDIR
 #	include <stdlib.h>
 #	define HCONF_TEST return dir_test_()
 static int dir_test_(void) {

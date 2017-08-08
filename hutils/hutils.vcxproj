@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4134324E-D7B6-4765-9BFE-D194DB5DC097}</ProjectGuid>
     <RootNamespace>hutils</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -81,7 +81,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PreBuildEvent>
-      <Command>PowerShell -File "$(SolutionDir)hgmake\hconf.ps1" "$(IntDir) " include\hutils\funcattr.h include\hutils\err.h include\hutils\stdint.h include\hutils\fmtmod.h include\hutils\macros.h include\hutils\math.h include\hutils\string.h include\hutils\getopt.h include\hutils\dir.h include\hutils\thread.h include\hutils\time.h include\hutils\udp.h</Command>
+      <Command>PowerShell -File "$(SolutionDir)hgmake\hconf.ps1" "$(IntDir) " include\hutils\bitpack.h include\hutils\funcattr.h include\hutils\err.h include\hutils\stdint.h include\hutils\fmtmod.h include\hutils\macros.h include\hutils\math.h include\hutils\string.h include\hutils\getopt.h include\hutils\dir.h include\hutils\thread.h include\hutils\time.h include\hutils\udp.h</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -126,6 +126,7 @@
   <ItemGroup>
     <ClCompile Include="src\aabb3.c" />
     <ClCompile Include="src\bitmask.c" />
+    <ClCompile Include="src\bitpack.c" />
     <ClCompile Include="src\config.c" />
     <ClCompile Include="src\dir.c" />
     <ClCompile Include="src\err.c" />
@@ -133,6 +134,7 @@
     <ClCompile Include="src\getopt.c" />
     <ClCompile Include="src\hash.c" />
     <ClCompile Include="src\lexer.c" />
+    <ClCompile Include="src\math.c" />
     <ClCompile Include="src\matrix4.c" />
     <ClCompile Include="src\random.c" />
     <ClCompile Include="src\string.c" />
@@ -141,12 +143,13 @@
     <ClCompile Include="src\thread.c" />
     <ClCompile Include="src\time.c" />
     <ClCompile Include="src\udp.c" />
+    <ClCompile Include="src\utf8.c" />
     <ClCompile Include="src\vector2.c" />
     <ClCompile Include="src\vector3.c" />
+    <ClCompile Include="src\vector4.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\hutils\aabb3.h" />
-    <ClInclude Include="include\hutils\array.h" />
     <ClInclude Include="include\hutils\assert.h" />
     <ClInclude Include="include\hutils\bitmask.h" />
     <ClInclude Include="include\hutils\cdecls.h" />

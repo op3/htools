@@ -19,7 +19,7 @@
 
 #include <hconf/src/htest.h>
 
-#if HCONF_BRANCH(HTEST, POSIX)
+#if HCONF_mHTEST_bPOSIX
 #	include <unistd.h>
 #	if HCONFING(HTEST)
 #		define HCONF_TEST return -1 == fork()

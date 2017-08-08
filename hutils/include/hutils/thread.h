@@ -21,22 +21,22 @@
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/thread.h>
 
-#if HCONF_BRANCH(THREAD, ST_OLD)
+#if HCONF_mTHREAD_bST_OLD
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
 #	define PTHREADS
-#	if HCONFING(THREAD)
+#	if HCONFING_bTHREAD
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
 	pthread_attr_t a;
 	return pthread_attr_create(&a);
 }
 #	endif
-#elif HCONF_BRANCH(THREAD, ST_NEW)
+#elif HCONF_mTHREAD_bST_NEW
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
 #	define PTHREADS
-#	if HCONFING(THREAD)
+#	if HCONFING_bTHREAD
 #		define HCONF_TEST return hconf_test_()
 static void *runner_(void *a_dummy) { return a_dummy; }
 static int hconf_test_(void) {
@@ -44,12 +44,12 @@ static int hconf_test_(void) {
 	return pthread_create(&thread, NULL, runner_, NULL);
 }
 #	endif
-#elif HCONF_BRANCH(THREAD, PTHREAD)
+#elif HCONF_mTHREAD_bPTHREAD
 /* HCONF_CFLAGS=-pthread */
 /* HCONF_LIBS=-pthread */
 #	include <pthread.h>
 #	define PTHREADS
-#	if HCONFING(THREAD)
+#	if HCONFING_bTHREAD
 #		define HCONF_TEST return hconf_test_()
 static void *runner_(void *a_dummy) { return a_dummy; }
 static int hconf_test_(void) {
@@ -71,6 +71,16 @@ struct Thread {
 	pthread_t	thread;
 };
 #elif defined(_MSC_VER)
+#	include <windows.h>
+struct CondVar {
+	CONDITION_VARIABLE	cv;
+};
+struct Mutex {
+	CRITICAL_SECTION	cs;
+};
+struct Thread {
+	HANDLE	handle;
+};
 #endif
 
 CDECLS_BEGIN

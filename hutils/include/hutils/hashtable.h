@@ -49,11 +49,11 @@ HashTableType##_find_(struct HashTableType *a_ht, struct Key const *a_key)\
 		i &= a_ht->mask;\
 		entry = &a_ht->array[i];\
 		if (NULL == entry->t) {\
-			return -1;\
+			return (size_t)-1;\
 		}\
 		d = HASHTABLE_DIB(a_ht, entry->hash, i);\
 		if (dib > d) {\
-			return -1;\
+			return (size_t)-1;\
 		}\
 		if (hash == entry->hash && equal(a_key, &entry->t->key)) {\
 			return i;\

@@ -167,7 +167,7 @@ bitunpack_string(struct BitPacker *a_packer, char **a_string)
 		if (0 == c) {
 			break;
 		}
-		*s++ = c;
+		*s++ = (uint8_t)c;
 	}
 	return 1;
 }

@@ -69,7 +69,7 @@ HTEST(AlnumVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ALNUM, ==, token.type);
@@ -138,7 +138,7 @@ HTEST(HexVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_HEX, ==, token.type);
@@ -181,7 +181,7 @@ HTEST(NumberVariations)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_NUMBER, ==, token.type);
@@ -255,7 +255,7 @@ HTEST(LiteralVariations)
 	char const *p;
 
 	p = c_text1;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 	HTRY_BOOL(!lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ERROR, ==, token.type);
 	HTRY_PTR(NULL, ==, token.str);
@@ -263,7 +263,7 @@ HTEST(LiteralVariations)
 	lexer_free(&lexer);
 
 	p = c_text2;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_LITERAL, ==, token.type);
 	HTRY_STR("text", ==, token.str);
@@ -279,7 +279,7 @@ HTEST(UglyText)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_I(LEXER_ALNUM, ==, token.type);
@@ -331,7 +331,7 @@ HTEST(Skip)
 	char const *p;
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_STR("Line1", ==, token.str);
 	free(token.str);
@@ -343,7 +343,7 @@ HTEST(Skip)
 	lexer_free(&lexer);
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 	HTRY_BOOL(lexer_skip(lexer, '\n'));
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_STR("Line2", ==, token.str);
@@ -354,7 +354,7 @@ HTEST(Skip)
 	lexer_free(&lexer);
 
 	p = c_text;
-	lexer = lexer_create(lexer_cstr_callback, &p);
+	lexer = lexer_create(lexer_cstr_callback, (void *)&p);
 	HTRY_BOOL(lexer_skip(lexer, 'e'));
 	HTRY_BOOL(lexer_token_get(lexer, &token));
 	HTRY_STR("1", ==, token.str);

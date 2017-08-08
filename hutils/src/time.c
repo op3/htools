@@ -35,6 +35,8 @@
 #	define ASCTIME_R(tm, buf) asctime_r(tm, buf, 26)
 #	define GMTIME_R(tt, tm) gmtime_r(tm, tt)
 #elif defined(_MSC_VER)
+#	include <windows.h>
+#	include <time.h>
 #	define ASCTIME_R(tm, buf) asctime_s(buf, 26, tm)
 #	define GMTIME_R(tt, tm) gmtime_s(tm, tt)
 #endif

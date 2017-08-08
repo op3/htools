@@ -174,7 +174,7 @@ HTEST(Float)
 		for (mant_bits = 1; mant_bits <= 23; ++mant_bits) {
 			int ret;
 
-			ret = bitpack_float(&packer, M_PI, exp_bits,
+			ret = bitpack_float(&packer, (float)M_PI, exp_bits,
 			    mant_bits);
 			HTRY_BOOL(ret);
 			ofs += 1 + exp_bits + mant_bits;
@@ -193,8 +193,8 @@ HTEST(Float)
 			HTRY_BOOL(ret);
 			/* Exp = 1 && mant_bits = 1 -> prec ~= +-1. */
 			prec = 2.0f / (1 << mant_bits);
-			HTRY_FLT(M_PI - prec, <, flt);
-			HTRY_FLT(M_PI + prec, >, flt);
+			HTRY_FLT((float)M_PI - prec, <, flt);
+			HTRY_FLT((float)M_PI + prec, >, flt);
 			ofs += 1 + exp_bits + mant_bits;
 			HTRY_I(ofs, ==, packer.bit_i);
 		}

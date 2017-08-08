@@ -19,10 +19,10 @@
 
 #include <hconf/include/hutils/getopt.h>
 
-#if HCONF_BRANCH(GETOPT, POSIX_SOURCE_UNISTD_H)
+#if HCONF_mGETOPT_bPOSIX_SOURCE_UNISTD_H
 /* HCONF_CPPFLAGS=-D_POSIX_SOURCE */
 #	include <unistd.h>
-#elif HCONF_BRANCH(GETOPT, CUSTOM) || defined(_MSC_VER)
+#elif HCONF_mGETOPT_bCUSTOM || defined(_MSC_VER)
 /* HCONF_SRC=src/getopt.c */
 #	include <hutils/cdecls.h>
 #	include <hutils/funcattr.h>
@@ -33,7 +33,7 @@ int	getopt(int, char *const *, char const *) FUNC_NONNULL(())
 	FUNC_RETURNS;
 CDECLS_END
 #endif
-#if HCONFING(GETOPT)
+#if HCONFING_bGETOPT
 #	define HCONF_TEST return -1 == getopt(argc, argv, "") ? 0 : 1
 #endif
 

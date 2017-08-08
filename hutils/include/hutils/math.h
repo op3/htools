@@ -22,18 +22,20 @@
 #include <hutils/stdint.h>
 #include <hconf/include/hutils/math.h>
 
-#if HCONF_BRANCH(MATH, NOTHING)
-#elif HCONF_BRANCH(MATH, LM)
+#if HCONF_mMATH_bNOTHING
+#elif HCONF_mMATH_bLM
 /* HCONF_LIBS=-lm */
-#elif HCONF_BRANCH(MATH, BSD_SOURCE_LM)
+#elif HCONF_mMATH_bBSD_SOURCE_LM
 /* HCONF_CPPFLAGS=-D_BSD_SOURCE */
 /* HCONF_LIBS=-lm */
-#elif HCONF_BRANCH(MATH, DEFAULT_SOURCE_LM)
+#elif HCONF_mMATH_bDEFAULT_SOURCE_LM
 /* HCONF_CPPFLAGS=-D_DEFAULT_SOURCE */
 /* HCONF_LIBS=-lm */
+#elif defined(_MSC_VER)
+#	define _USE_MATH_DEFINES
 #endif
 #include <math.h>
-#if HCONFING(MATH)
+#if HCONFING_bMATH
 #	define HCONF_TEST return 0.0 < sqrt(M_PI * argc) ? 0 : 1
 #endif
 

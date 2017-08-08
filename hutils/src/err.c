@@ -21,6 +21,12 @@
 #include <hutils/funcattr.h>
 #include <hutils/string.h>
 
+#if defined(_MSC_VER)
+#	define EXIT (void)a_eval; abort()
+#else
+#	define EXIT exit(a_eval)
+#endif
+
 static int	printer(char const *, ...);
 static int	stdio(char const *, va_list) FUNC_PRINTF(1, 0);
 
@@ -36,7 +42,7 @@ hutils_err(int a_eval, char const *a_fmt, ...)
 	va_start(args, a_fmt);
 	hutils_vwarnc(errno_, a_fmt, args);
 	va_end(args);
-	exit(a_eval);
+	EXIT;
 }
 
 void
@@ -47,7 +53,7 @@ hutils_errc(int a_eval, int a_code, char const *a_fmt, ...)
 	va_start(args, a_fmt);
 	hutils_vwarnc(a_code, a_fmt, args);
 	va_end(args);
-	exit(a_eval);
+	EXIT;
 }
 
 void
@@ -58,7 +64,7 @@ hutils_errx(int a_eval, char const *a_fmt, ...)
 	va_start(args, a_fmt);
 	hutils_vwarnx(a_fmt, args);
 	va_end(args);
-	exit(a_eval);
+	EXIT;
 }
 
 void
@@ -71,21 +77,21 @@ void
 hutils_verr(int a_eval, char const *a_fmt, va_list a_args)
 {
 	hutils_vwarnc(errno, a_fmt, a_args);
-	exit(a_eval);
+	EXIT;
 }
 
 void
 hutils_verrc(int a_eval, int a_code, char const *a_fmt, va_list a_args)
 {
 	hutils_vwarnc(a_code, a_fmt, a_args);
-	exit(a_eval);
+	EXIT;
 }
 
 void
 hutils_verrx(int a_eval, char const *a_fmt, va_list a_args)
 {
 	hutils_vwarnx(a_fmt, a_args);
-	exit(a_eval);
+	EXIT;
 }
 
 void

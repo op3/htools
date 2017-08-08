@@ -66,7 +66,7 @@ mygets(uint8_t *a_dst, size_t *a_bytes, FILE *a_file)
 			break;
 		}
 		if (*a_bytes > i) {
-			a_dst[i] = c;
+			a_dst[i] = (uint8_t)c;
 		}
 	}
 	*a_bytes = i;

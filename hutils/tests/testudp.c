@@ -78,6 +78,7 @@ HTEST(ServerClient)
 		struct UDPClient *client;
 
 		client = udp_client_create(UDP_IPV4, "127.0.0.1", 12345);
+		HTRY_PTR(NULL, != , client);
 		strlcpy(s, STRING, sizeof datagram.buf);
 		datagram.size = sizeof(STRING);
 		udp_client_send(client, &datagram);

@@ -21,17 +21,17 @@
 #include <hutils/funcattr.h>
 #include <hconf/include/hutils/time.h>
 
-#if HCONF_BRANCH(TIME_GET, CLOCK_GETTIME)
+#if HCONF_mTIME_GET_bCLOCK_GETTIME
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 #	define HUTILS_CLOCK_GETTIME
-#elif HCONF_BRANCH(TIME_GET, CLOCK_GETTIME_LRT)
+#elif HCONF_mTIME_GET_bCLOCK_GETTIME_LRT
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=199309 */
 /* HCONF_LIBS=-lrt */
 #	define HUTILS_CLOCK_GETTIME
-#elif HCONF_BRANCH(TIME_GET, MACH)
+#elif HCONF_mTIME_GET_bMACH
 #	define HCONF_TEST return 0 == mach_absolute_time()
 #endif
-#if HCONFING(TIME_GET) && defined(HUTILS_CLOCK_GETTIME)
+#if HCONFING_bTIME_GET && defined(HUTILS_CLOCK_GETTIME)
 #	include <time.h>
 #	define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
@@ -40,9 +40,9 @@ static int hconf_test_(void) {
 }
 #endif
 
-#if HCONF_BRANCH(TIME_SLEEP, NANOSLEEP)
+#if HCONF_mTIME_SLEEP_bNANOSLEEP
 #endif
-#if HCONFING(TIME_SLEEP)
+#if HCONFING_bTIME_SLEEP
 #	include <time.h>
 #	define HCONF_TEST hconf_test_()
 static int hconf_test_(void) {
@@ -51,9 +51,9 @@ static int hconf_test_(void) {
 }
 #endif
 
-#if HCONF_BRANCH(TIME_DRAFT9, NO)
+#if HCONF_mTIME_DRAFT9_bNO
 /* HCONF_OPT=noexec */
-#	if HCONFING(TIME_DRAFT9)
+#	if HCONFING_bTIME_DRAFT9
 #		include <time.h>
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
@@ -63,9 +63,9 @@ static int hconf_test_(void) {
 	return NULL == asctime_r(localtime(&tt), buf);
 }
 #	endif
-#elif HCONF_BRANCH(TIME_DRAFT9, YES)
+#elif HCONF_mTIME_DRAFT9_bYES
 /* HCONF_OPT=noexec */
-#	if HCONFING(TIME_DRAFT9)
+#	if HCONFING_bTIME_DRAFT9
 #		include <time.h>
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {

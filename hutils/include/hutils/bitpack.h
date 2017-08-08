@@ -17,12 +17,12 @@
 #ifndef HUTILS_BITPACK_H
 #define HUTILS_BITPACK_H
 
+#include <hconf/include/hutils/bitpack.h>
 #include <hutils/cdecls.h>
 #include <hutils/funcattr.h>
 #include <hutils/stdint.h>
-#include <hconf/include/hutils/bitpack.h>
 
-#if HCONF_BRANCH(BITPACK, IEEE754)
+#if HCONF_mBITPACK_bIEEE754
 #	if HCONFING(BITPACK)
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void)

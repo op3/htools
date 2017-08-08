@@ -80,9 +80,9 @@ HTEST(Root)
 	testtree_init(&tree, &data);
 	HTRY_I(1, ==, data.node_num);
 	HTRY_PTR(NULL, !=, tree.root);
-	HTRY_FLT(0, ==, tree.root->tree.level);
-	HTRY_FLT(0, ==, tree.root->tree.i);
-	HTRY_FLT(0, ==, tree.root->tree.j);
+	HTRY_U(0, ==, tree.root->tree.level);
+	HTRY_U(0, ==, tree.root->tree.i);
+	HTRY_U(0, ==, tree.root->tree.j);
 
 	testtree_traverse(&tree);
 	HTRY_I(1, ==, data.node_num);
@@ -110,87 +110,87 @@ HTEST(Creating)
 	HTRY_I(1 + SQR(2), ==, data.node_num);
 	node = tree.root;
 	for (i = 0; 4 > i; ++i) {
-		HTRY_FLT(1, ==, node->tree.child[i]->tree.level);
+		HTRY_U(1, ==, node->tree.child[i]->tree.level);
 	}
-	HTRY_FLT(0, ==, node->tree.child[0]->tree.i);
-	HTRY_FLT(0, ==, node->tree.child[0]->tree.j);
-	HTRY_FLT(0, ==, node->tree.child[1]->tree.i);
-	HTRY_FLT(1, ==, node->tree.child[1]->tree.j);
-	HTRY_FLT(1, ==, node->tree.child[2]->tree.i);
-	HTRY_FLT(0, ==, node->tree.child[2]->tree.j);
-	HTRY_FLT(1, ==, node->tree.child[3]->tree.i);
-	HTRY_FLT(1, ==, node->tree.child[3]->tree.j);
+	HTRY_U(0, ==, node->tree.child[0]->tree.i);
+	HTRY_U(0, ==, node->tree.child[0]->tree.j);
+	HTRY_U(0, ==, node->tree.child[1]->tree.i);
+	HTRY_U(1, ==, node->tree.child[1]->tree.j);
+	HTRY_U(1, ==, node->tree.child[2]->tree.i);
+	HTRY_U(0, ==, node->tree.child[2]->tree.j);
+	HTRY_U(1, ==, node->tree.child[3]->tree.i);
+	HTRY_U(1, ==, node->tree.child[3]->tree.j);
 
 	data.creation_level = 2;
 	testtree_traverse(&tree);
 	HTRY_I(1 + SQR(2) + SQR(4), ==, data.node_num);
 	node = tree.root;
 	for (i = 0; 4 > i; ++i) {
-		HTRY_FLT(1, ==, node->tree.child[i]->tree.level);
+		HTRY_U(1, ==, node->tree.child[i]->tree.level);
 	}
-	HTRY_FLT(0, ==, node->tree.child[0]->tree.i);
-	HTRY_FLT(0, ==, node->tree.child[0]->tree.j);
-	HTRY_FLT(0, ==, node->tree.child[1]->tree.i);
-	HTRY_FLT(1, ==, node->tree.child[1]->tree.j);
-	HTRY_FLT(1, ==, node->tree.child[2]->tree.i);
-	HTRY_FLT(0, ==, node->tree.child[2]->tree.j);
-	HTRY_FLT(1, ==, node->tree.child[3]->tree.i);
-	HTRY_FLT(1, ==, node->tree.child[3]->tree.j);
+	HTRY_U(0, ==, node->tree.child[0]->tree.i);
+	HTRY_U(0, ==, node->tree.child[0]->tree.j);
+	HTRY_U(0, ==, node->tree.child[1]->tree.i);
+	HTRY_U(1, ==, node->tree.child[1]->tree.j);
+	HTRY_U(1, ==, node->tree.child[2]->tree.i);
+	HTRY_U(0, ==, node->tree.child[2]->tree.j);
+	HTRY_U(1, ==, node->tree.child[3]->tree.i);
+	HTRY_U(1, ==, node->tree.child[3]->tree.j);
 	{
 		node = tree.root->tree.child[0];
 		for (i = 0; 4 > i; ++i) {
-			HTRY_FLT(2, ==, node->tree.child[i]->tree.level);
+			HTRY_U(2, ==, node->tree.child[i]->tree.level);
 		}
-		HTRY_FLT(0, ==, node->tree.child[0]->tree.i);
-		HTRY_FLT(0, ==, node->tree.child[0]->tree.j);
-		HTRY_FLT(0, ==, node->tree.child[1]->tree.i);
-		HTRY_FLT(1, ==, node->tree.child[1]->tree.j);
-		HTRY_FLT(1, ==, node->tree.child[2]->tree.i);
-		HTRY_FLT(0, ==, node->tree.child[2]->tree.j);
-		HTRY_FLT(1, ==, node->tree.child[3]->tree.i);
-		HTRY_FLT(1, ==, node->tree.child[3]->tree.j);
+		HTRY_U(0, ==, node->tree.child[0]->tree.i);
+		HTRY_U(0, ==, node->tree.child[0]->tree.j);
+		HTRY_U(0, ==, node->tree.child[1]->tree.i);
+		HTRY_U(1, ==, node->tree.child[1]->tree.j);
+		HTRY_U(1, ==, node->tree.child[2]->tree.i);
+		HTRY_U(0, ==, node->tree.child[2]->tree.j);
+		HTRY_U(1, ==, node->tree.child[3]->tree.i);
+		HTRY_U(1, ==, node->tree.child[3]->tree.j);
 	}
 	{
 		node = tree.root->tree.child[1];
 		for (i = 0; 4 > i; ++i) {
-			HTRY_FLT(2, ==, node->tree.child[i]->tree.level);
+			HTRY_U(2, ==, node->tree.child[i]->tree.level);
 		}
-		HTRY_FLT(0, ==, node->tree.child[0]->tree.i);
-		HTRY_FLT(2, ==, node->tree.child[0]->tree.j);
-		HTRY_FLT(0, ==, node->tree.child[1]->tree.i);
-		HTRY_FLT(3, ==, node->tree.child[1]->tree.j);
-		HTRY_FLT(1, ==, node->tree.child[2]->tree.i);
-		HTRY_FLT(2, ==, node->tree.child[2]->tree.j);
-		HTRY_FLT(1, ==, node->tree.child[3]->tree.i);
-		HTRY_FLT(3, ==, node->tree.child[3]->tree.j);
+		HTRY_U(0, ==, node->tree.child[0]->tree.i);
+		HTRY_U(2, ==, node->tree.child[0]->tree.j);
+		HTRY_U(0, ==, node->tree.child[1]->tree.i);
+		HTRY_U(3, ==, node->tree.child[1]->tree.j);
+		HTRY_U(1, ==, node->tree.child[2]->tree.i);
+		HTRY_U(2, ==, node->tree.child[2]->tree.j);
+		HTRY_U(1, ==, node->tree.child[3]->tree.i);
+		HTRY_U(3, ==, node->tree.child[3]->tree.j);
 	}
 	{
 		node = tree.root->tree.child[2];
 		for (i = 0; 4 > i; ++i) {
-			HTRY_FLT(2, ==, node->tree.child[i]->tree.level);
+			HTRY_U(2, ==, node->tree.child[i]->tree.level);
 		}
-		HTRY_FLT(2, ==, node->tree.child[0]->tree.i);
-		HTRY_FLT(0, ==, node->tree.child[0]->tree.j);
-		HTRY_FLT(2, ==, node->tree.child[1]->tree.i);
-		HTRY_FLT(1, ==, node->tree.child[1]->tree.j);
-		HTRY_FLT(3, ==, node->tree.child[2]->tree.i);
-		HTRY_FLT(0, ==, node->tree.child[2]->tree.j);
-		HTRY_FLT(3, ==, node->tree.child[3]->tree.i);
-		HTRY_FLT(1, ==, node->tree.child[3]->tree.j);
+		HTRY_U(2, ==, node->tree.child[0]->tree.i);
+		HTRY_U(0, ==, node->tree.child[0]->tree.j);
+		HTRY_U(2, ==, node->tree.child[1]->tree.i);
+		HTRY_U(1, ==, node->tree.child[1]->tree.j);
+		HTRY_U(3, ==, node->tree.child[2]->tree.i);
+		HTRY_U(0, ==, node->tree.child[2]->tree.j);
+		HTRY_U(3, ==, node->tree.child[3]->tree.i);
+		HTRY_U(1, ==, node->tree.child[3]->tree.j);
 	}
 	{
 		node = tree.root->tree.child[3];
 		for (i = 0; 4 > i; ++i) {
-			HTRY_FLT(2, ==, node->tree.child[i]->tree.level);
+			HTRY_U(2, ==, node->tree.child[i]->tree.level);
 		}
-		HTRY_FLT(2, ==, node->tree.child[0]->tree.i);
-		HTRY_FLT(2, ==, node->tree.child[0]->tree.j);
-		HTRY_FLT(2, ==, node->tree.child[1]->tree.i);
-		HTRY_FLT(3, ==, node->tree.child[1]->tree.j);
-		HTRY_FLT(3, ==, node->tree.child[2]->tree.i);
-		HTRY_FLT(2, ==, node->tree.child[2]->tree.j);
-		HTRY_FLT(3, ==, node->tree.child[3]->tree.i);
-		HTRY_FLT(3, ==, node->tree.child[3]->tree.j);
+		HTRY_U(2, ==, node->tree.child[0]->tree.i);
+		HTRY_U(2, ==, node->tree.child[0]->tree.j);
+		HTRY_U(2, ==, node->tree.child[1]->tree.i);
+		HTRY_U(3, ==, node->tree.child[1]->tree.j);
+		HTRY_U(3, ==, node->tree.child[2]->tree.i);
+		HTRY_U(2, ==, node->tree.child[2]->tree.j);
+		HTRY_U(3, ==, node->tree.child[3]->tree.i);
+		HTRY_U(3, ==, node->tree.child[3]->tree.j);
 	}
 
 	data.creation_level = 3;

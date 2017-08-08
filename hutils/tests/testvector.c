@@ -38,7 +38,7 @@ HTEST(CreateAtFree1)
 	HTRY_I(1, ==, vec.size);
 	boris_at(&vec, 0)->i = 3;
 
-	HTRY_SIGNAL(i = boris_at(&vec, -1)->i);
+	HTRY_SIGNAL(i = boris_at(&vec, (unsigned)-1)->i);
 	i = boris_at(&vec, 0)->i;
 	HTRY_I(3, ==, i);
 	HTRY_SIGNAL(i = boris_at(&vec, 1)->i);

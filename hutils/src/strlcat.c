@@ -20,7 +20,7 @@
 #include <string.h>
 #include <hutils/string.h>
 
-#if HCONF_BRANCH(STRL, CUSTOM) || defined(_MSC_VER)
+#if HCONF_mSTRL_bCUSTOM || defined(_MSC_VER)
 
 /*
  * Appends src to string dst of size dsize (unlike strncat, dsize is the

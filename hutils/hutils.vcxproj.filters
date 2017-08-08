@@ -72,11 +72,20 @@
     <ClCompile Include="src\udp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\bitpack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utf8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vector4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\hutils\array.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\hutils\bitmask.h">
       <Filter>Header Files</Filter>
     </ClInclude>

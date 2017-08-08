@@ -16,10 +16,9 @@
 
 #include <hutils/udp.h>
 #include <errno.h>
+#include <hutils/err.h>
 #if defined(HCONF_mUDP_EVENT_bSYS_SELECT_H) || \
     defined(HCONF_mUDP_EVENT_bSELECT_TIME_H)
-#	include <string.h>
-#	include <hutils/macros.h>
 #endif
 
 #if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO)
@@ -29,40 +28,34 @@
 #	include <stdarg.h>
 #	include <stdio.h>
 #	include <unistd.h>
-#	include <hutils/err.h>
 #	define INVALID_SOCKET -1
+#	define NONBLOCK_FCNTL
 #	define SOCKADDR_STORAGE sockaddr_storage
 #	define SOCKET int
 #	define SOCKET_ERROR -1
-FUNC_PRINTF(2, 0) static void
-gaif(int a_error, char const *a_fmt, ...)
-{
-	va_list args;
-
-	va_start(args, a_fmt);
-	vfprintf(stderr, a_fmt, args);
-	va_end(args);
-	fprintf(stderr, ": %s\n", gai_strerror(a_error));
-}
-static int
-set_non_blocking(SOCKET a_socket)
-{
-	return 0 == fcntl(a_socket, F_SETFL, O_NONBLOCK);
-}
 #elif defined(_MSC_VER)
 #	define GETADDRINFO
 #	include <winsock2.h>
 #	include <ws2tcpip.h>
+#	include <fcntl.h>
+#	include <io.h>
 #	include <stdio.h>
 #	define SOCKADDR_STORAGE sockaddr_storage
 #	define close closesocket
-static int
+#	define read _read
+#	define write _write
+FUNC_RETURNS static int
+pipe(int *a_fd_array)
+{
+	return _pipe(a_fd_array, 256, _O_BINARY);
+}
+FUNC_RETURNS static int
 set_non_blocking(SOCKET a_socket)
 {
 	u_long non_blocking;
 
 	non_blocking = 1;
-	return NO_ERROR == ioctlsocket(a_socket, FIONBIO, &non_blocking);
+	return SOCKET_ERROR == ioctlsocket(a_socket, FIONBIO, &non_blocking);
 }
 /*
 static void
@@ -89,12 +82,29 @@ hutils_warn(char const *a_fmt, ...)
 #	include <stdarg.h>
 #	include <stdio.h>
 #	include <unistd.h>
-#	include <hutils/err.h>
 #	define INVALID_SOCKET -1
+#	define NONBLOCK_FCNTL
 #	define SOCKADDR_STORAGE sockaddr_in
 #	define SOCKET int
 #	define SOCKET_ERROR -1
-static int
+#endif
+
+#if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO) ||\
+    defined(_MSC_VER)
+FUNC_PRINTF(2, 0) static void
+gaif(int a_error, char const *a_fmt, ...)
+{
+	va_list args;
+
+	va_start(args, a_fmt);
+	hutils_vwarnx(a_fmt, args);
+	va_end(args);
+	hutils_warnx("%s", gai_strerror(a_error));
+}
+#endif
+
+#ifdef NONBLOCK_FCNTL
+FUNC_RETURNS static int
 set_non_blocking(SOCKET a_socket)
 {
 	return 0 == fcntl(a_socket, F_SETFL, O_NONBLOCK);
@@ -111,7 +121,7 @@ set_non_blocking(SOCKET a_socket)
 static int
 event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 {
-#if defined(HCONF_mUDP_EVENT_bPOLL)
+#if defined(HCONF_mUDP_EVENT_bPOLL) || defined(_MSC_VER)
 	struct pollfd pfd[2];
 	nfds_t nfds;
 	int ret;
@@ -124,14 +134,14 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 		pfd[1].events = POLLIN;
 		nfds = 2;
 	}
-	ret = poll(pfd, nfds, a_timeout * 1e3);
+	ret = HUTILS_UDP_POLL(pfd, nfds, (int)(a_timeout * 1e3));
 	if (-1 == ret && EINTR != errno) {
 		hutils_warn("poll");
 	}
 	if (1 > ret) {
 		return 0;
 	}
-	if (-1 != a_fd_extra && POLLIN & pfd[1].revents) {
+	if (-1 != a_fd_extra && (POLLIN & pfd[1].revents)) {
 		return 2;
 	}
 	return 1;
@@ -163,7 +173,6 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 #endif
 }
 
-#include <hutils/err.h>
 #include <hutils/macros.h>
 #include <hutils/memory.h>
 #include <hutils/string.h>
@@ -369,14 +378,8 @@ int
 udp_client_send(struct UDPClient const *a_client, struct UDPDatagram const
     *a_dgram)
 {
-	union {
-		uint8_t	const *c;
-		uint8_t	*u;
-	} u;
-
-	u.c = a_dgram->buf;
-	/* TODO: SOCKET_ERROR in Windows, -1 everywhere else... */
-	if (SOCKET_ERROR == send(a_client->socket, u.u, a_dgram->size, 0)) {
+	if (SOCKET_ERROR == send(a_client->socket, (void *)a_dgram->buf,
+	    a_dgram->size, 0)) {
 		hutils_warn("send");
 		return 0;
 	}
@@ -387,7 +390,7 @@ struct UDPServer *
 udp_server_create(unsigned a_flags, uint16_t a_port)
 {
 	struct UDPServer *server;
-	int flags, has_pfd, sock;
+	int has_pfd, sock;
 
 	if (!g_is_setup) {
 		fprintf(stderr, "udp_server_create called outside "
@@ -403,22 +406,12 @@ udp_server_create(unsigned a_flags, uint16_t a_port)
 		goto udp_server_create_fail;
 	}
 	has_pfd = 1;
-	flags = fcntl(server->pfd[0], F_GETFL);
-	if (-1 == flags) {
+	if (!set_non_blocking(server->pfd[0])) {
 		hutils_warn("fcntl_get(pfd[0])");
 		goto udp_server_create_fail;
 	}
-	if (-1 == fcntl(server->pfd[0], F_SETFL, flags | O_NONBLOCK)) {
-		hutils_warn("fcntl_set(pfd[0])");
-		goto udp_server_create_fail;
-	}
-	flags = fcntl(server->pfd[1], F_GETFL);
-	if (-1 == flags) {
+	if (!set_non_blocking(server->pfd[1])) {
 		hutils_warn("fcntl_get(pfd[1])");
-		goto udp_server_create_fail;
-	}
-	if (-1 == fcntl(server->pfd[1], F_SETFL, flags | O_NONBLOCK)) {
-		hutils_warn("fcntl_set(pfd[1])");
 		goto udp_server_create_fail;
 	}
 
@@ -527,14 +520,8 @@ int
 udp_server_send(struct UDPServer const *a_server, struct UDPAddress const
     *a_addr, struct UDPDatagram const *a_dgram)
 {
-	union {
-		uint8_t	const *c;
-		uint8_t	*u;
-	} u;
-
-	u.c = a_dgram->buf;
-	if (SOCKET_ERROR == sendto(a_server->socket, u.u, a_dgram->size, 0,
-	    (struct sockaddr const *)&a_addr->addr, a_addr->len)) {
+	if (SOCKET_ERROR == sendto(a_server->socket, (void *)a_dgram->buf,
+	    a_dgram->size, 0, (void *)&a_addr->addr, a_addr->len)) {
 		hutils_warn("send");
 		return 0;
 	}

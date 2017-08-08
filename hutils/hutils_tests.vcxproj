@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{39CA285F-7053-4B07-85F2-F083C6D355B5}</ProjectGuid>
     <RootNamespace>hutils_tests</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -127,13 +127,16 @@
   <ItemGroup>
     <ClCompile Include="hutils_tests_Debug\htest\tests.c" />
     <ClCompile Include="tests\testaabb3.c" />
-    <ClCompile Include="tests\testarray.c" />
     <ClCompile Include="tests\testbitmask.c" />
+    <ClCompile Include="tests\testbitpack.c" />
     <ClCompile Include="tests\testconfig.c" />
     <ClCompile Include="tests\testdir.c" />
     <ClCompile Include="tests\testgetopt.c" />
+    <ClCompile Include="tests\testhash.c" />
+    <ClCompile Include="tests\testhashtable.c" />
     <ClCompile Include="tests\testlexer.c" />
     <ClCompile Include="tests\testmacros.c" />
+    <ClCompile Include="tests\testmath.c" />
     <ClCompile Include="tests\testmatrix4.c" />
     <ClCompile Include="tests\testmemory.c" />
     <ClCompile Include="tests\testpool.c" />
@@ -143,8 +146,11 @@
     <ClCompile Include="tests\testthread.c" />
     <ClCompile Include="tests\testtime.c" />
     <ClCompile Include="tests\testudp.c" />
+    <ClCompile Include="tests\testutf8.c" />
+    <ClCompile Include="tests\testvector.c" />
     <ClCompile Include="tests\testvector2.c" />
     <ClCompile Include="tests\testvector3.c" />
+    <ClCompile Include="tests\testvector4.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

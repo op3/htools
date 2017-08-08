@@ -18,21 +18,21 @@
 #include <string.h>
 #include <hutils/memory.h>
 
-#if HCONF_BRANCH(THREAD, ST_OLD)
+#if HCONF_mTHREAD_bST_OLD
 #	define DO_PTHREADS 1
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_create(&a)
 #	define ATTR_DESTROY(a)
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, t->attr, run, starter)
-#elif HCONF_BRANCH(THREAD, ST_NEW)
+#elif HCONF_mTHREAD_bST_NEW
 #	define DO_PTHREADS 1
 #	define PTHREAD_STACK_MIN THREAD_DEFAULT_STACK
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
 #	define ATTR_DESTROY(a) pthread_attr_destroy(&a)
 #	define THREAD_CREATE(ret, t)\
     ret = pthread_create(&t->thread, &t->attr, run, starter)
-#elif HCONF_BRANCH(THREAD, PTHREAD)
+#elif HCONF_mTHREAD_bPTHREAD
 #	define DO_PTHREADS 1
 #	include <limits.h>
 #	define ATTR_CREATE(ret, a) ret = pthread_attr_init(&a)
@@ -43,35 +43,24 @@
 #	include <process.h>
 #	include <hutils/string.h>
 
-struct CondVar {
-	CONDITION_VARIABLE	cv;
-};
-struct Mutex {
-	CRITICAL_SECTION	cs;
-};
 struct Starter {
 	void	(*func)(void *);
 	void	*data;
 };
-struct Thread {
-	HANDLE	handle;
-};
 
-static char			*dup_last_error() FUNC_RETURNS;
+static void			print_last_error(void) FUNC_RETURNS;
 static unsigned int __stdcall	run(void *);
 
-char *
-dup_last_error()
+void
+print_last_error()
 {
 	LPTSTR str;
-	char *cstr;
 
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 	    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
 	    GetLastError(), 0, (LPTSTR)&str, 0, NULL);
-	cstr = strdup(str);
+	hutils_warnx("%s", str);
 	LocalFree(str);
-	return cstr;
 }
 
 unsigned int __stdcall
@@ -92,22 +81,17 @@ thread_condvar_broadcast(struct CondVar *a_condvar)
 	return 1;
 }
 
-struct CondVar *
-thread_condvar_create()
+int
+thread_condvar_clean(struct CondVar *a_condvar)
 {
-	struct CondVar *condvar;
-
-	CALLOC(condvar, 1);
-	InitializeConditionVariable(&condvar->cv);
-	return condvar;
+	(void)a_condvar;
+	return 1;
 }
 
 int
-thread_condvar_free(struct CondVar **a_condvar)
+thread_condvar_init(struct CondVar *a_condvar)
 {
-	if (*a_condvar) {
-		FREE(*a_condvar);
-	}
+	InitializeConditionVariable(&a_condvar->cv);
 	return 1;
 }
 
@@ -121,19 +105,18 @@ thread_condvar_signal(struct CondVar *a_condvar)
 int
 thread_condvar_wait(struct CondVar *a_condvar, struct Mutex *a_mutex)
 {
-	if (!SleepConditionVariableCS(&a_condvar->cv, &a_mutex->cs, INFINITE))
-	{
+	if (0 == SleepConditionVariableCS(&a_condvar->cv, &a_mutex->cs,
+	    INFINITE)) {
 		print_last_error();
 		return 0;
 	}
 	return 1;
 }
 
-struct Thread *
-thread_create(void (*a_func)(void *), void *a_data)
+int
+thread_start(struct Thread *a_thread, void (*a_func)(void *), void *a_data)
 {
 	struct Starter *starter;
-	struct Thread *thread;
 	uintptr_t ret;
 
 	CALLOC(starter, 1);
@@ -143,57 +126,40 @@ thread_create(void (*a_func)(void *), void *a_data)
 	if (0 == ret) {
 		FREE(starter);
 		hutils_warn("_beginthreadex");
-		return NULL;
+		return 0;
 	}
-	CALLOC(thread, 1);
-	thread->handle = (HANDLE)ret;
-	return thread;
+	a_thread->handle = (HANDLE)ret;
+	return 1;
 }
 
 int
-thread_free(struct Thread **a_thread)
+thread_clean(struct Thread *a_thread)
 {
-	struct Thread *thread;
 	int ret;
 
-	thread = *a_thread;
-	if (NULL == thread) {
-		return 1;
-	}
 	ret = 1;
-	if (WAIT_FAILED == WaitForSingleObject(thread->handle, INFINITE)) {
+	if (WAIT_FAILED == WaitForSingleObject(a_thread->handle, INFINITE)) {
 		print_last_error();
 		ret = 0;
 	}
-	if (!CloseHandle(thread->handle)) {
+	if (!CloseHandle(a_thread->handle)) {
 		print_last_error();
 		ret = 0;
 	}
-	FREE(*a_thread);
 	return ret;
 }
 
-struct Mutex *
-thread_mutex_create()
+int
+thread_mutex_clean(struct Mutex *a_mutex)
 {
-	struct Mutex *mutex;
-
-	CALLOC(mutex, 1);
-	InitializeCriticalSectionAndSpinCount(&mutex->cs, 0x00000400);
-	return mutex;
+	DeleteCriticalSection(&a_mutex->cs);
+	return 1;
 }
 
 int
-thread_mutex_free(struct Mutex **a_mutex)
+thread_mutex_init(struct Mutex *a_mutex)
 {
-	struct Mutex *mutex;
-
-	mutex = *a_mutex;
-	if (NULL == mutex) {
-		return 1;
-	}
-	DeleteCriticalSection(&mutex->cs);
-	FREE(*a_mutex);
+	InitializeCriticalSectionAndSpinCount(&a_mutex->cs, 10);
 	return 1;
 }
 
@@ -350,14 +316,14 @@ thread_start(struct Thread *a_thread, void (*a_func)(void *), void *a_data)
 	starter->data = a_data;
 	ATTR_CREATE(ret, a_thread->attr);
 	if (0 != ret) {
-		goto thread_create_fail;
+		goto thread_start_fail;
 	}
 	THREAD_CREATE(ret, a_thread);
 	if (0 != ret) {
-		goto thread_create_fail;
+		goto thread_start_fail;
 	}
 	return 1;
-thread_create_fail:
+thread_start_fail:
 	hutils_warn("pthread_create");
 	FREE(starter);
 	return 0;
