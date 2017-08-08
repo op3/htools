@@ -54,13 +54,13 @@ HTEST_PRE=$(MKDIR)
 include htest.mk
 HTEST_OBJ:=$(HTEST_OBJ) $(patsubst %.c,%.o,$(BUILD_DIR)/$(HTEST_TESTS))
 
-GCOV_SRC:=$(SRC)
-include $(HTOOLS_PATH)/hgmake/gcov.mk
+COV_SRC:=$(SRC)
+include $(HTOOLS_PATH)/hgmake/cov.mk
 
 $(BUILD_DIR)/test: $(BUILD_DIR)/libhtest.a $(HTEST_OBJ)
 	$(QUIET)echo "LD    $@" &&\
 	$(MKDIR) &&\
-	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils $(GCOV_LIBS)
+	$(LD_E) -L$(HTOOLS_PATH)/hutils/$(BUILD_DIR) -lhutils $(COV_LIBS)
 
 $(BUILD_DIR)/libhtest.a: $(OBJ)
 	$(QUIET)echo "AR    $@" &&\
@@ -70,6 +70,6 @@ $(BUILD_DIR)/libhtest.a: $(OBJ)
 $(BUILD_DIR)/%.o %.o: %.c Makefile htest.mk $(HCONF_CACHE)
 	$(QUIET)echo "CC    $@" &&\
 	$(MKDIR) &&\
-	$(CC_O) $(GCOV_CPPFLAGS) $(GCOV_CFLAGS)
+	$(CC_O) $(COV_CPPFLAGS) $(COV_CFLAGS)
 
 -include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))

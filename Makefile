@@ -25,24 +25,24 @@ clean:
 	$(MAKE) -C hutils $@
 	$(MAKE) -C htest $@
 
-.PHONY: gcov gcov_files gcov_funcs gcov_anno
-gcov gcov_files gcov_funcs gcov_anno:
+.PHONY: cov cov_files cov_funcs cov_anno
+cov cov_files cov_funcs cov_anno:
 	$(MAKE) -C hutils $@
 
 .PHONY: mega
 mega:
 	$(MAKE)
 	$(MAKE) BUILD_MODE=release
-	$(MAKE) BUILD_MODE=gcov
+	$(MAKE) BUILD_MODE=cov
 	CC=clang $(MAKE)
 	CC=clang $(MAKE) BUILD_MODE=release
-	CC=clang $(MAKE) BUILD_MODE=gcov
+	CC=clang $(MAKE) BUILD_MODE=cov
 
 .PHONY: mega-clean
 mega-clean:
 	$(MAKE) clean
 	$(MAKE) BUILD_MODE=release clean
-	$(MAKE) BUILD_MODE=gcov clean
+	$(MAKE) BUILD_MODE=cov clean
 	CC=clang $(MAKE) clean
 	CC=clang $(MAKE) BUILD_MODE=release clean
-	CC=clang $(MAKE) BUILD_MODE=gcov clean
+	CC=clang $(MAKE) BUILD_MODE=cov clean

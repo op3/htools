@@ -32,11 +32,11 @@
 #include <hutils/err.h>
 #include <hutils/macros.h>
 
-#if defined(HTEST_GCOV_FLUSH)
-#	define GCOV_FLUSH __gcov_flush()
+#if defined(HTEST_COV_FLUSH)
+#	define COV_FLUSH __gcov_flush()
 void __gcov_flush(void);
 #else
-#	define GCOV_FLUSH
+#	define COV_FLUSH
 #endif
 
 struct HTestSuite {
@@ -222,7 +222,7 @@ extern jmp_buf g_htest_try_jmp_buf_;
 		} else if (0 == pid_) {\
 			htest_try_install_sighandler_();\
 			expr;\
-			GCOV_FLUSH;\
+			COV_FLUSH;\
 			_exit(EXIT_SUCCESS);\
 		}\
 		waitpid(pid_, &status_, 0);\

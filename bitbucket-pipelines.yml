@@ -6,4 +6,4 @@ pipelines:
         script:
           - make
           - make BUILD_MODE=release
-          - make BUILD_MODE=gcov
+          - make BUILD_MODE=cov

@@ -83,4 +83,4 @@ echo
 echo "Invalid:$invalid
 Missing:$missing
 Skipped:$skipped
-Passed:$pass" | less -F
+Passed:$pass"
