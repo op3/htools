@@ -15,8 +15,8 @@
  */
 
 #include <hutils/matrix4.h>
-#include <math.h>
 #include <htest/htest.h>
+#include <hutils/math.h>
 #include <hutils/vector3.h>
 
 HTEST(Identity)
@@ -117,23 +117,23 @@ HTEST(Rotation)
 	struct Vector3f u, v;
 
 	vector3f_set(&u, 1.0f, 0.0f, 0.0f);
-	matrix4f_set_rotation(&r, &u, 0.5 * M_PI);
+	matrix4f_set_rotation(&r, &u, (float)(0.5 * M_PI));
 
 	vector3f_set(&v, 1.0f, 1.0f, 1.0f);
 	matrix4f_mul_vector3f(&u, &r, &v);
-	HTRY_FLT(1e-6f, >, fabs(u.x -  1.0f));
-	HTRY_FLT(1e-6f, >, fabs(u.y - -1.0f));
-	HTRY_FLT(1e-6f, >, fabs(u.z -  1.0f));
+	HTRY_FLT(1e-6f, >, fabsf(u.x -  1.0f));
+	HTRY_FLT(1e-6f, >, fabsf(u.y - -1.0f));
+	HTRY_FLT(1e-6f, >, fabsf(u.z -  1.0f));
 
 	vector3f_set(&u, 1.0f, 1.0f, 1.0f);
 	vector3f_normalize(&u, &u);
-	matrix4f_set_rotation(&r, &u, 2 * M_PI / 3);
+	matrix4f_set_rotation(&r, &u, (float)(2 * M_PI / 3));
 
 	vector3f_set(&v, 1.0f, 0.0f, 0.0f);
 	matrix4f_mul_vector3f(&u, &r, &v);
-	HTRY_FLT(1e-6f, >, fabs(u.x - 0.0f));
-	HTRY_FLT(1e-6f, >, fabs(u.y - 1.0f));
-	HTRY_FLT(1e-6f, >, fabs(u.z - 0.0f));
+	HTRY_FLT(1e-6f, >, fabsf(u.x - 0.0f));
+	HTRY_FLT(1e-6f, >, fabsf(u.y - 1.0f));
+	HTRY_FLT(1e-6f, >, fabsf(u.z - 0.0f));
 }
 
 HTEST_SUITE(Matrix4)

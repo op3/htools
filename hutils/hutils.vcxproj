@@ -130,6 +130,7 @@
     <ClCompile Include="src\config.c" />
     <ClCompile Include="src\dir.c" />
     <ClCompile Include="src\err.c" />
+    <ClCompile Include="src\file.c" />
     <ClCompile Include="src\fs.c" />
     <ClCompile Include="src\getopt.c" />
     <ClCompile Include="src\hash.c" />
@@ -152,16 +153,19 @@
     <ClInclude Include="include\hutils\aabb3.h" />
     <ClInclude Include="include\hutils\assert.h" />
     <ClInclude Include="include\hutils\bitmask.h" />
+    <ClInclude Include="include\hutils\bitpack.h" />
     <ClInclude Include="include\hutils\cdecls.h" />
     <ClInclude Include="include\hutils\config.h" />
     <ClInclude Include="include\hutils\dir.h" />
     <ClInclude Include="include\hutils\err.h" />
+    <ClInclude Include="include\hutils\file.h" />
     <ClInclude Include="include\hutils\fmtmod.h" />
     <ClInclude Include="include\hutils\fs.h" />
     <ClInclude Include="include\hutils\funcattr.h" />
     <ClInclude Include="include\hutils\gcc.h" />
     <ClInclude Include="include\hutils\getopt.h" />
     <ClInclude Include="include\hutils\hash.h" />
+    <ClInclude Include="include\hutils\hashtable.h" />
     <ClInclude Include="include\hutils\lexer.h" />
     <ClInclude Include="include\hutils\macros.h" />
     <ClInclude Include="include\hutils\math.h" />
@@ -178,8 +182,11 @@
     <ClInclude Include="include\hutils\time.h" />
     <ClInclude Include="include\hutils\tree.h" />
     <ClInclude Include="include\hutils\udp.h" />
+    <ClInclude Include="include\hutils\utf8.h" />
+    <ClInclude Include="include\hutils\vector.h" />
     <ClInclude Include="include\hutils\vector2.h" />
     <ClInclude Include="include\hutils\vector3.h" />
+    <ClInclude Include="include\hutils\vector4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
