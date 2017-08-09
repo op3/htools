@@ -36,6 +36,8 @@ struct Matrix4f	*matrix4f_set_ortho(struct Matrix4f *, float, float, float,
     float, float, float) FUNC_NONNULL(());
 struct Matrix4f	*matrix4f_set_perspective(struct Matrix4f *, float, float,
     float, float, float, float) FUNC_NONNULL(());
+struct Matrix4f	*matrix4f_set_rotation(struct Matrix4f *, struct Vector3f
+    const *, float) FUNC_NONNULL(());
 
 CDECLS_END
 

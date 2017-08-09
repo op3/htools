@@ -16,6 +16,7 @@
 
 #include <hutils/matrix4.h>
 #include <hutils/macros.h>
+#include <hutils/math.h>
 #include <hutils/vector3.h>
 
 struct Matrix4f *
@@ -89,5 +90,39 @@ matrix4f_set_perspective(struct Matrix4f *a_m, float a_left, float a_right,
 	a_m->m[10] = (a_near + a_far) / (a_near - a_far);
 	a_m->m[11] = -1.0f;
 	a_m->m[14] = 2.0f * a_near * a_far / (a_near - a_far);
+	return a_m;
+}
+
+struct Matrix4f *
+matrix4f_set_rotation(struct Matrix4f *a_m, struct Vector3f const *a_u, float
+    a_theta)
+{
+	float c, s, t, t1, t2;
+
+	c = cos(a_theta);
+	t = 1.0f - c;
+	s = sin(a_theta);
+	a_m->m[ 0] = c + a_u->x * a_u->x * t;
+	a_m->m[ 5] = c + a_u->y * a_u->y * t;
+	a_m->m[10] = c + a_u->z * a_u->z * t;
+	t1 = a_u->x * a_u->y * t;
+	t2 = a_u->z * s;
+	a_m->m[ 1] = t1 + t2;
+	a_m->m[ 4] = t1 - t2;
+	t1 = a_u->x * a_u->z * t;
+	t2 = a_u->y * s;
+	a_m->m[ 2] = t1 - t2;
+	a_m->m[ 8] = t1 + t2;
+	t1 = a_u->y * a_u->z * t;
+	t2 = a_u->x * s;
+	a_m->m[ 6] = t1 + t2;
+	a_m->m[ 9] = t1 - t2;
+	a_m->m[ 3] = 0.0f;
+	a_m->m[ 7] = 0.0f;
+	a_m->m[11] = 0.0f;
+	a_m->m[12] = 0.0f;
+	a_m->m[13] = 0.0f;
+	a_m->m[14] = 0.0f;
+	a_m->m[15] = 1.0f;
 	return a_m;
 }
