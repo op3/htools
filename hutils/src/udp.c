@@ -19,6 +19,7 @@
 #include <hutils/err.h>
 #if defined(HCONF_mUDP_EVENT_bSYS_SELECT_H) || \
     defined(HCONF_mUDP_EVENT_bSELECT_TIME_H)
+#	include <hutils/macros.h>
 #endif
 
 #if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO)
@@ -173,7 +174,6 @@ event_wait(SOCKET a_socket, int a_fd_extra, double a_timeout)
 #endif
 }
 
-#include <hutils/macros.h>
 #include <hutils/memory.h>
 #include <hutils/string.h>
 
