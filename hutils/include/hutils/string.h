@@ -38,7 +38,7 @@ int hutils_snprintf_(char *, size_t, char const *, ...) FUNC_PRINTF(3, 4);
 int hutils_vsnprintf_(char *, size_t, char const *, va_list) FUNC_PRINTF(3,
     0);
 #endif
-#if HCONFING_bNPRINTF
+#if HCONFING_mNPRINTF
 #	define HCONF_TEST return 0 == nprintf_test_(argc, "")
 static int nprintf_test_(int i, ...) {
 	va_list args;
@@ -56,7 +56,7 @@ static int nprintf_test_(int i, ...) {
 #elif defined(_MSC_VER)
 #	define strdup _strdup
 #endif
-#if HCONFING_bSTRDUP
+#if HCONFING_mSTRDUP
 #	define HCONF_TEST return NULL == strdup(argv[0])
 #endif
 
@@ -67,7 +67,7 @@ static int nprintf_test_(int i, ...) {
 size_t strlcat(char *, char const *, size_t);
 size_t strlcpy(char *, char const *, size_t);
 #endif
-#if HCONFING_bSTRL
+#if HCONFING_mSTRL
 #	define HCONF_TEST return strl_test_(argv[0])
 static int strl_test_(char const *str) {
 	char s[2];
@@ -82,7 +82,7 @@ static int strl_test_(char const *str) {
 #	define strndup hutils_strndup_
 char *hutils_strndup_(char const *, size_t) FUNC_RETURNS;
 #endif
-#if HCONFING_bSTRNDUP
+#if HCONFING_mSTRNDUP
 #	define HCONF_TEST return NULL == strndup(argv[0], 1)
 #endif
 
@@ -95,7 +95,7 @@ char *strsignal(int) FUNC_RETURNS;
 #	define strsignal hutils_strsignal_
 char *hutils_strsignal_(int) FUNC_RETURNS;
 #endif
-#if HCONFING_bSTRSIGNAL
+#if HCONFING_mSTRSIGNAL
 #	include <signal.h>
 #	define HCONF_TEST return NULL == strsignal(argc)
 #endif

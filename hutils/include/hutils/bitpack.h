@@ -23,7 +23,7 @@
 #include <hutils/stdint.h>
 
 #if HCONF_mBITPACK_bIEEE754
-#	if HCONFING(BITPACK)
+#	if HCONFING_mBITPACK
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void)
 {

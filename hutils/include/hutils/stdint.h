@@ -35,7 +35,7 @@
 #		define SIZE_MAX 4294967295UL
 #	endif
 #endif
-#if HCONFING_bSTDINT_LIMITS
+#if HCONFING_mSTDINT_LIMITS
 #	define HCONF_TEST return 0 & SIZE_MAX
 #endif
 
@@ -51,7 +51,7 @@ typedef u_int64_t uint64_t;
 typedef int32_t   intptr_t;
 typedef uint32_t  uintptr_t;
 #endif
-#if HCONFING_bSTDINT_TYPES
+#if HCONFING_mSTDINT_TYPES
 #	define HCONF_TEST return 0 < hconf_test_()
 static size_t hconf_test_(void)
 {

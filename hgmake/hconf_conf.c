@@ -176,7 +176,7 @@ get_branch(char const *a_str, char **a_module, char **a_branch)
 
 	*a_module = NULL;
 	*a_branch = NULL;
-	/* # (el)if HCONF_BRANCH ( MODULE , BRANCH ) */
+	/* # (el)if HCONF_mMODULE_bBRANCH */
 	for (p = a_str; isspace(*p); ++p)
 		;
 	if ('#' != *p) {
@@ -196,27 +196,18 @@ get_branch(char const *a_str, char **a_module, char **a_branch)
 	}
 	for (++p; isspace(*p); ++p)
 		;
-	if (0 != STRBCMP(p, "HCONF_BRANCH")) {
+	if (0 != STRBCMP(p, "HCONF_m")) {
 		return;
 	}
-	for (p += 12; isspace(*p); ++p)
-		;
-	if ('(' != *p) {
-		return;
-	}
-	for (++p; isspace(*p); ++p)
-		;
+	p += 7;
 	module_start = p;
-	for (; '_' == *p || isalnum(*p); ++p)
+	for (; '\0' != *p && ('_' != p[0] || 'b' != p[1]); ++p)
 		;
-	module_end = p;
-	for (; isspace(*p); ++p)
-		;
-	if (',' != *p) {
+	if ('\0' == *p) {
 		return;
 	}
-	for (++p; isspace(*p); ++p)
-		;
+	module_end = p;
+	p += 2;
 	branch_start = p;
 	for (; '_' == *p || isalnum(*p); ++p)
 		;
@@ -454,10 +445,6 @@ write_files(int a_write_final)
 	}
 	fprintf(f, "#ifndef HCONF_%s\n", g_filename_upper);
 	fprintf(f, "#define HCONF_%s\n", g_filename_upper);
-	fprintf(f, "#ifndef HCONF_BRANCH\n");
-	fprintf(f, "#	define HCONF_BRANCH(m, b) HCONF_m##m##_b##b\n");
-	fprintf(f, "#	define HCONFING(m) HCONFING_m##m\n");
-	fprintf(f, "#endif\n");
 	TAILQ_FOREACH(module, &g_module_list, next) {
 		fprintf(f, "#define HCONF_m%s_b%s 1\n", module->name,
 		    module->branch->name);

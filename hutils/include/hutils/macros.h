@@ -36,7 +36,7 @@
 		if (cond)\
 		__pragma(warning(pop))
 #endif
-#if HCONFING_bCONST_EXPR
+#if HCONFING_mCONST_EXPR
 #	define HCONF_TEST do {} WHILE_0
 #endif
 

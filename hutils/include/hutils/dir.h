@@ -49,7 +49,7 @@
 } WHILE_0
 
 #endif
-#if HCONFING_bDIR
+#if HCONFING_mDIR
 #	include <stdlib.h>
 #	define HCONF_TEST return dir_test_()
 static int dir_test_(void) {

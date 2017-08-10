@@ -33,7 +33,7 @@ int	getopt(int, char *const *, char const *) FUNC_NONNULL(())
 	FUNC_RETURNS;
 CDECLS_END
 #endif
-#if HCONFING_bGETOPT
+#if HCONFING_mGETOPT
 #	define HCONF_TEST return -1 == getopt(argc, argv, "") ? 0 : 1
 #endif
 

@@ -39,7 +39,7 @@
 #	define PRIz "lu"
 #	define PRIzx "lx"
 #endif
-#if HCONFING_bFMTMOD_SIZET
+#if HCONFING_mFMTMOD_SIZET
 #	define HCONF_TEST return hconf_test_(argc)
 static int hconf_test_(size_t i) {
 	return printf("%"PRIz" %"PRIzx, i, i);
@@ -55,7 +55,7 @@ static int hconf_test_(size_t i) {
 #	define PRIp "lu"
 #	define PRIpx "lx"
 #endif
-#if HCONFING_bFMTMOD_UINTPTRT
+#if HCONFING_mFMTMOD_UINTPTRT
 #	define HCONF_TEST return hconf_test_(argc)
 static int hconf_test_(uintptr_t i) {
 	return printf("%"PRIp" %"PRIpx, i, i);

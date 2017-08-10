@@ -35,8 +35,8 @@
 #	define _USE_MATH_DEFINES
 #endif
 #include <math.h>
-#if HCONFING_bMATH
-#	define HCONF_TEST return 0.0 < sqrt(M_PI * argc) ? 0 : 1
+#if HCONFING_mMATH
+#	define HCONF_TEST return 2.0 > sinf(M_PI * argc) ? 0 : 1
 #endif
 
 CDECLS_BEGIN

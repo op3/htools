@@ -21,7 +21,7 @@
 
 #if HCONF_mHTEST_bPOSIX
 #	include <unistd.h>
-#	if HCONFING(HTEST)
+#	if HCONFING_mHTEST
 #		define HCONF_TEST return -1 == fork()
 #	endif
 #elif defined(_MSC_VER)

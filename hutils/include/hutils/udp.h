@@ -36,14 +36,14 @@
 /* HCONF_CPPFLAGS=-D__NO_INCLUDE_WARN__ */
 #	include <netinet/in.h>
 #endif
-#if HCONFING_bIPPROTO_UDP
+#if HCONFING_mIPPROTO_UDP
 #	define HCONF_TEST return -1 == IPPROTO_UDP
 #endif
 
 #if HCONF_mUDP_LOOKUP_bGETADDRINFO
 /* HCONF_OPT=noexec */
 #	include <netdb.h>
-#	if HCONFING_bUDP_LOOKUP
+#	if HCONFING_mUDP_LOOKUP
 #		define HCONF_TEST return !getaddrinfo(NULL, NULL, NULL, NULL)
 #	endif
 #elif HCONF_mUDP_LOOKUP_bGETHOSTBYNAME_SOCKLEN
@@ -51,7 +51,7 @@
 /* HCONF_OPT=noexec */
 #	include <netdb.h>
 #	define socklen_t int
-#	if HCONFING_bUDP_LOOKUP
+#	if HCONFING_mUDP_LOOKUP
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
 	socklen_t len;
@@ -64,7 +64,7 @@ static int hconf_test_(void) {
 #if HCONF_mUDP_EVENT_bPOLL
 #	include <poll.h>
 #	define HUTILS_UDP_POLL poll
-#	if HCONFING_bUDP_EVENT
+#	if HCONFING_mUDP_EVENT
 #		define HCONF_TEST hconf_test_()
 static int hconf_test_() {
 	struct pollfd fds[1];
@@ -75,7 +75,7 @@ static int hconf_test_() {
 #	endif
 #elif HCONF_mUDP_EVENT_bSYS_SELECT_H
 #	include <sys/select.h>
-#	if HCONFING_bUDP_EVENT
+#	if HCONFING_mUDP_EVENT
 #		define HCONF_TEST hconf_test_()
 static void hconf_test_(void) {
 	struct timeval tv = {0, 0};
@@ -84,7 +84,7 @@ static void hconf_test_(void) {
 #	endif
 #elif HCONF_mUDP_EVENT_bSELECT_TIME_H
 #	include <time.h>
-#	if HCONFING_bUDP_EVENT
+#	if HCONFING_mUDP_EVENT
 #		define HCONF_TEST hconf_test_()
 static void hconf_test_(void) {
 	struct timeval tv = {0, 0};

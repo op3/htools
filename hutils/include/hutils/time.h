@@ -31,7 +31,7 @@
 #elif HCONF_mTIME_GET_bMACH
 #	define HCONF_TEST return 0 == mach_absolute_time()
 #endif
-#if HCONFING_bTIME_GET && defined(HUTILS_CLOCK_GETTIME)
+#if HCONFING_mTIME_GET && defined(HUTILS_CLOCK_GETTIME)
 #	include <time.h>
 #	define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
@@ -42,7 +42,7 @@ static int hconf_test_(void) {
 
 #if HCONF_mTIME_SLEEP_bNANOSLEEP
 #endif
-#if HCONFING_bTIME_SLEEP
+#if HCONFING_mTIME_SLEEP
 #	include <time.h>
 #	define HCONF_TEST hconf_test_()
 static int hconf_test_(void) {
@@ -53,7 +53,7 @@ static int hconf_test_(void) {
 
 #if HCONF_mTIME_DRAFT9_bNO
 /* HCONF_OPT=noexec */
-#	if HCONFING_bTIME_DRAFT9
+#	if HCONFING_mTIME_DRAFT9
 #		include <time.h>
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
@@ -65,7 +65,7 @@ static int hconf_test_(void) {
 #	endif
 #elif HCONF_mTIME_DRAFT9_bYES
 /* HCONF_OPT=noexec */
-#	if HCONFING_bTIME_DRAFT9
+#	if HCONFING_mTIME_DRAFT9
 #		include <time.h>
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {

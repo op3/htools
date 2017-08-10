@@ -19,43 +19,43 @@
 
 #include <hconf/include/hutils/gcc.h>
 
-#if HCONF_BRANCH(CCACHE, YES)
+#if HCONF_mCCACHE_bYES
 /* HCONF_CC="ccache $CC" */
 /* HCONF_OPT=nolink */
-#elif HCONF_BRANCH(CCACHE, NO)
+#elif HCONF_mCCACHE_bNO
 /* HCONF_CC="$CC" */
 /* HCONF_OPT=nolink */
 #endif
 
-#if HCONF_BRANCH(WEXTRA, WEXTRA)
+#if HCONF_mWEXTRA_bWEXTRA
 /* HCONF_CFLAGS=-Wextra */
 /* HCONF_OPT=nolink */
-#elif HCONF_BRANCH(WEXTRA, W)
+#elif HCONF_mWEXTRA_bW
 /* HCONF_CFLAGS=-W */
 /* HCONF_OPT=nolink */
 #endif
 
-#if HCONF_BRANCH(WSTRICT_ALIASING, YES)
+#if HCONF_mWSTRICT_ALIASING_bYES
 /* HCONF_CFLAGS="-fstrict-aliasing -Wstrict-aliasing" */
 /* HCONF_OPT=nolink */
-#elif HCONF_BRANCH(WSTRICT_ALIASING, NO)
+#elif HCONF_mWSTRICT_ALIASING_bNO
 /* HCONF_OPT=nolink */
 #endif
 
-#if HCONF_BRANCH(WSTRICT_OVERFLOW, YES)
+#if HCONF_mWSTRICT_OVERFLOW_bYES
 /* HCONF_CFLAGS=-Wstrict-overflow */
 /* HCONF_OPT=nolink */
-#elif HCONF_BRANCH(WSTRICT_OVERFLOW, NO)
+#elif HCONF_mWSTRICT_OVERFLOW_bNO
 /* HCONF_OPT=nolink */
 #endif
 
-#if HCONF_BRANCH(FORTIFY_SOURCE, D1)
+#if HCONF_mFORTIFY_SOURCE_bD1
 /* HCONF_CFLAGS=-D_FORTIFY_SOURCE=1 */
 /* HCONF_OPT=nolink */
-#elif HCONF_BRANCH(FORTIFY_SOURCE, UD1)
+#elif HCONF_mFORTIFY_SOURCE_bUD1
 /* HCONF_CFLAGS=-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1 */
 /* HCONF_OPT=nolink */
-#elif HCONF_BRANCH(FORTIFY_SOURCE, NO)
+#elif HCONF_mFORTIFY_SOURCE_bNO
 /* HCONF_OPT=nolink */
 #endif
 

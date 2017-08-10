@@ -173,8 +173,8 @@ struct HTestSuite g_htest_suite_list_[] = {
 	} else if ((size_t)-1 == siz) {\
 		if (!(strcmp(aa_, bb_) op 0)) {\
 			HTRY_FAIL_HEADER_;\
-			printf("'%s'=\"%s\" "#op"(%d) '%s'=\"%s\".\n", #a,\
-			    aa_, siz, #b, bb_); \
+			printf("'%s'=\"%s\" "#op"(%u) '%s'=\"%s\".\n", #a,\
+			    aa_, (unsigned)siz, #b, bb_); \
 			HTRY_FAIL_FOOTER_; \
 		}\
 	} else {\

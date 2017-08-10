@@ -50,7 +50,7 @@ void hconf_test_(void) FUNC_NORETURN;
 /* HCONF_OPT=nolink */
 #	define FUNC_PRINTF(fmt, args)
 #endif
-#if HCONFING_bFUNC_PRINTF
+#if HCONFING_mFUNC_PRINTF
 void hconf_test_(int, char const *, ...) FUNC_PRINTF(2, 3);
 #endif
 
@@ -61,7 +61,7 @@ void hconf_test_(int, char const *, ...) FUNC_PRINTF(2, 3);
 /* HCONF_OPT=nolink */
 #	define FUNC_PURE
 #endif
-#if HCONFING_bFUNC_PURE
+#if HCONFING_mFUNC_PURE
 void hconf_test_(void) FUNC_PURE;
 #endif
 
@@ -72,7 +72,7 @@ void hconf_test_(void) FUNC_PURE;
 /* HCONF_OPT=nolink */
 #	define FUNC_RETURNS
 #endif
-#if HCONFING_bFUNC_RETURNS
+#if HCONFING_mFUNC_RETURNS
 int hconf_test_(void) FUNC_RETURNS;
 #endif
 
@@ -83,7 +83,7 @@ int hconf_test_(void) FUNC_RETURNS;
 /* HCONF_OPT=nolink */
 #	define FUNC_UNUSED
 #endif
-#if HCONFING_bFUNC_UNUSED
+#if HCONFING_mFUNC_UNUSED
 int hconf_test_(void) FUNC_UNUSED;
 #endif
 

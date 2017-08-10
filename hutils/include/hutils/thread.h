@@ -25,7 +25,7 @@
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
 #	define PTHREADS
-#	if HCONFING_bTHREAD
+#	if HCONFING_mTHREAD
 #		define HCONF_TEST return hconf_test_()
 static int hconf_test_(void) {
 	pthread_attr_t a;
@@ -36,7 +36,7 @@ static int hconf_test_(void) {
 /* HCONF_LDFLAGS=-mthreads */
 #	include <pthread.h>
 #	define PTHREADS
-#	if HCONFING_bTHREAD
+#	if HCONFING_mTHREAD
 #		define HCONF_TEST return hconf_test_()
 static void *runner_(void *a_dummy) { return a_dummy; }
 static int hconf_test_(void) {
@@ -49,7 +49,7 @@ static int hconf_test_(void) {
 /* HCONF_LIBS=-pthread */
 #	include <pthread.h>
 #	define PTHREADS
-#	if HCONFING_bTHREAD
+#	if HCONFING_mTHREAD
 #		define HCONF_TEST return hconf_test_()
 static void *runner_(void *a_dummy) { return a_dummy; }
 static int hconf_test_(void) {
