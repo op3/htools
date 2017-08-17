@@ -18,6 +18,8 @@
 #define HUTILS_GCC_H
 
 #include <hconf/include/hutils/gcc.h>
+/* FORTIFY_SOURCE only throws certain errors, when features.h is included */
+#include <stdint.h>
 
 #if HCONF_mCCACHE_bYES
 /* HCONF_CC="ccache $CC" */
