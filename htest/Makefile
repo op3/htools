@@ -15,12 +15,17 @@
 HTOOLS_PATH=..
 
 include $(HTOOLS_PATH)/hgmake/build_dir.mk
-CPPFLAGS+=-I$(BUILD_DIR) -I. -Iinclude -I$(HTOOLS_PATH)/hutils/include \
-	-I$(HTOOLS_PATH)/hutils/$(BUILD_DIR)
+CPPFLAGS+=-I$(BUILD_DIR)\
+	  -I.\
+	  -Iinclude\
+	  -I$(HTOOLS_PATH)/hutils/include\
+	  -I$(HTOOLS_PATH)/hutils/$(BUILD_DIR)
 include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
 	CPPFLAGS+=-DNDEBUG
 	CFLAGS+=-O3
+else ifeq (fpic,$(BUILD_MODE))
+	CFLAGS+=-fPIC
 else
 	CFLAGS+=-ggdb
 endif

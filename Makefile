@@ -34,15 +34,19 @@ mega:
 	$(MAKE)
 	$(MAKE) BUILD_MODE=release
 	$(MAKE) BUILD_MODE=cov
+	$(MAKE) BUILD_MODE=fpic
 	CC=clang $(MAKE)
 	CC=clang $(MAKE) BUILD_MODE=release
 	CC=clang $(MAKE) BUILD_MODE=cov
+	CC=clang $(MAKE) BUILD_MODE=fpic
 
 .PHONY: mega-clean
 mega-clean:
 	$(MAKE) clean
 	$(MAKE) BUILD_MODE=release clean
 	$(MAKE) BUILD_MODE=cov clean
+	$(MAKE) BUILD_MODE=fpic clean
 	CC=clang $(MAKE) clean
 	CC=clang $(MAKE) BUILD_MODE=release clean
 	CC=clang $(MAKE) BUILD_MODE=cov clean
+	CC=clang $(MAKE) BUILD_MODE=fpic clean

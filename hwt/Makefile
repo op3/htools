@@ -14,13 +14,21 @@
 
 include ../hgmake/build_dir.mk
 
-CPPFLAGS:=$(CPPFLAGS) -I$(BUILD_DIR) -I. -Iinclude -I../hutils/$(BUILD_DIR) -I../hutils/include -I../htest/include
+CPPFLAGS:=$(CPPFLAGS)\
+	-I$(BUILD_DIR)\
+	-I.\
+	-Iinclude\
+	-I../hutils/$(BUILD_DIR)\
+	-I../hutils/include\
+	-I../htest/include
 include ../hgmake/strict_cflags.mk
 LDFLAGS:=$(LDFLAGS) -L../htest/$(BUILD_DIR)
 LIBS:=$(LIBS) -lhtest
 
 ifeq (release,$(BUILD_MODE))
 	CFLAGS:=$(CFLAGS) -O3
+else ifeq (fpic,$(BUILD_MODE))
+	CFLAGS:=$(CFLAGS) -fPIC
 else
 	CFLAGS:=$(CFLAGS) -ggdb
 endif

@@ -7,3 +7,4 @@ pipelines:
           - make
           - make BUILD_MODE=release
           - make BUILD_MODE=cov
+          - make BUILD_MODE=fpic
