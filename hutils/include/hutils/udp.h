@@ -104,9 +104,14 @@ enum {
 struct UDPAddress;
 struct UDPClient;
 struct UDPServer;
+/*
+ * Putting the buf last means you may override the buffer size if the network
+ * can handle it. Put dgram.bytes = 0 if you want sizeof(buf), otherwise it's
+ * used as the size of the buf.
+ */
 struct UDPDatagram {
+	size_t	bytes;
 	uint8_t	buf[512];
-	size_t	size;
 };
 
 CDECLS_BEGIN

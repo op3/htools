@@ -80,22 +80,22 @@ HTEST(ServerClient)
 		client = udp_client_create(UDP_IPV4, "127.0.0.1", 12345);
 		HTRY_PTR(NULL, != , client);
 		strlcpy(s, STRING, sizeof datagram.buf);
-		datagram.size = sizeof(STRING);
+		datagram.bytes = sizeof(STRING);
 		udp_client_send(client, &datagram);
 		udp_client_free(&client);
 	}
 
-	ZERO(datagram);
+	datagram.bytes = 0;
 	udp_server_receive(server, &address, &datagram, 0.1);
 	HTRY_PTR(NULL, !=, address);
-	HTRY_I(sizeof STRING, ==, datagram.size);
+	HTRY_I(sizeof STRING, ==, datagram.bytes);
 	HTRY_STR(STRING, ==, s);
 	udp_address_free(&address);
 
-	ZERO(datagram);
+	datagram.bytes = 0;
 	udp_server_receive(server, &address, &datagram, 0.1);
 	HTRY_PTR(NULL, ==, address);
-	HTRY_I(0, ==, datagram.size);
+	HTRY_I(0, ==, datagram.bytes);
 
 	udp_server_free(&server);
 }
@@ -110,9 +110,10 @@ HTEST(ServerWriting)
 	server = udp_server_create(UDP_IPV4, 12345);
 	value = 2;
 	udp_server_write(server, &value, sizeof value);
+	datagram.bytes = 0;
 	HTRY_BOOL(udp_server_receive(server, &address, &datagram, 1.0));
 	HTRY_PTR(NULL, ==, address);
-	HTRY_I(1, ==, datagram.size);
+	HTRY_I(1, ==, datagram.bytes);
 	HTRY_I(2, ==, datagram.buf[0]);
 	udp_server_free(&server);
 }

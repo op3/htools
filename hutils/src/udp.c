@@ -211,6 +211,7 @@ get_family(unsigned a_flags)
 }
 
 /*
+ * 'a_dgram.size' says how big the buffer is, 0 means to take sizeof(buf).
  * Return:
  *  1) Error -> return 0.
  *  2) Timeout -> return 1, size = 0.
@@ -221,25 +222,30 @@ receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
     struct UDPAddress **a_addr, double a_timeout)
 {
 	struct UDPAddress addr;
+	size_t size;
 	int ret;
 
 	if (NULL != a_addr) {
 		*a_addr = NULL;
 	}
-	a_dgram->size = 0;
+	if (0 == a_dgram->bytes) {
+		size = sizeof a_dgram->buf;
+	} else {
+		size = a_dgram->bytes;
+		a_dgram->bytes = 0;
+	}
 	ret = event_wait(a_socket, a_fd_extra, a_timeout);
 	if (0 == ret) {
 		return 1;
 	}
 	if (2 == ret) {
-		a_dgram->size = read(a_fd_extra, a_dgram->buf,
-		    LENGTH(a_dgram->buf));
+		a_dgram->bytes = read(a_fd_extra, a_dgram->buf, size);
 		return 1;
 	}
 	addr.len = sizeof addr.addr;
 	ZERO(addr.addr);
-	ret = recvfrom(a_socket, (char *)a_dgram->buf, LENGTH(a_dgram->buf),
-	    0, (struct sockaddr *)&addr.addr, &addr.len);
+	ret = recvfrom(a_socket, (char *)a_dgram->buf, size, 0, (struct
+	    sockaddr *)&addr.addr, &addr.len);
 	if (SOCKET_ERROR == ret) {
 		if (EAGAIN == errno || EWOULDBLOCK == errno) {
 			return 1;
@@ -247,7 +253,7 @@ receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
 		hutils_warn("recvfrom");
 		return 0;
 	}
-	a_dgram->size = ret;
+	a_dgram->bytes = ret;
 	if (0 != ret && NULL != a_addr) {
 		struct UDPAddress *paddr;
 
@@ -379,7 +385,7 @@ udp_client_send(struct UDPClient const *a_client, struct UDPDatagram const
     *a_dgram)
 {
 	if (SOCKET_ERROR == send(a_client->socket, (void *)a_dgram->buf,
-	    a_dgram->size, 0)) {
+	    a_dgram->bytes, 0)) {
 		hutils_warn("send");
 		return 0;
 	}
@@ -521,7 +527,7 @@ udp_server_send(struct UDPServer const *a_server, struct UDPAddress const
     *a_addr, struct UDPDatagram const *a_dgram)
 {
 	if (SOCKET_ERROR == sendto(a_server->socket, (void *)a_dgram->buf,
-	    a_dgram->size, 0, (void *)&a_addr->addr, a_addr->len)) {
+	    a_dgram->bytes, 0, (void *)&a_addr->addr, a_addr->len)) {
 		hutils_warn("send");
 		return 0;
 	}
