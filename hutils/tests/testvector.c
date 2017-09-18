@@ -26,7 +26,8 @@ struct Int {
 };
 VECTOR_HEAD(IntVector, Int);
 
-VECTOR_IMPLEMENT(boris, IntVector, Int, CHUNK);
+VECTOR_PROTOTYPE(static, boris, IntVector, Int);
+VECTOR_IMPLEMENT(static, boris, IntVector, Int, CHUNK);
 
 HTEST(CreateAtFree1)
 {
