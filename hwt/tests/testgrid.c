@@ -16,6 +16,8 @@
 
 #include <hwt/grid.h>
 #include <htest/htest.h>
+#include <hwt/base.h>
+#include <hwt/event.h>
 #include <hwt/hwt.h>
 #include <tests/mockwidget.h>
 
@@ -26,17 +28,9 @@ struct Child {
 
 static void	pull_min(struct HWTSize *, void *);
 static void	push_rect(struct HWTRect const *, void *);
-static void	dtor(void);
 
 static struct HWT *g_hwt;
 static struct HWTWidget *g_widget;
-
-void
-dtor()
-{
-	hwt_widget_free(g_hwt, &g_widget);
-	hwt_free(&g_hwt);
-}
 
 void
 pull_min(struct HWTSize *a_min, void *a_data)
@@ -60,8 +54,8 @@ HTEST(PositiveDimensions)
 {
 	struct HWTWidget *grid;
 
-	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(g_hwt, -1, 1), dtor);
-	HTRY_SIGNAL_DTOR(grid = hwt_grid_create(g_hwt, 1, -1), dtor);
+	HTRY_SIGNAL(grid = hwt_grid_create(g_hwt, -1, 1));
+	HTRY_SIGNAL(grid = hwt_grid_create(g_hwt, 1, -1));
 	grid = hwt_grid_create(g_hwt, 1, 1);
 	hwt_widget_free(g_hwt, &grid);
 }
@@ -71,10 +65,10 @@ HTEST(Children)
 	struct HWTWidget *grid;
 
 	grid = hwt_grid_create(g_hwt, 1, 1);
-	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, -1, 0, &g_widget), dtor);
-	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, 1, 0, &g_widget), dtor);
-	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, 0, -1, &g_widget), dtor);
-	HTRY_SIGNAL_DTOR(hwt_grid_set_child(grid, 0, 1, &g_widget), dtor);
+	HTRY_SIGNAL(hwt_grid_set_child(grid, -1, 0, &g_widget));
+	HTRY_SIGNAL(hwt_grid_set_child(grid, 1, 0, &g_widget));
+	HTRY_SIGNAL(hwt_grid_set_child(grid, 0, -1, &g_widget));
+	HTRY_SIGNAL(hwt_grid_set_child(grid, 0, 1, &g_widget));
 	hwt_grid_set_child(grid, 0, 0, &g_widget);
 	hwt_widget_free(g_hwt, &grid);
 }

@@ -15,8 +15,8 @@
  */
 
 #include <hwt/hwt.h>
-#include <sys/queue.h>
 #include <stdio.h>
+#include <hutils/queue.h>
 #include <hwt/widget.h>
 #include <src/builtin.h>
 
@@ -89,8 +89,8 @@ hwt_send_event(struct HWT *a_hwt, struct HWTEvent const *a_event)
 	} else {
 		enum HWTEventFlow flow;
 
-		(void)flow;
 		flow = hwt_widget_respond(a_hwt, a_hwt->root, a_event);
+		(void)flow;
 	}
 }
 
@@ -202,7 +202,7 @@ hwt_widget_register_(struct HWT *a_hwt, size_t a_size, struct
 {
 	struct HWTWidgetType *type;
 
-	CALLOC(type, 1);
+	MALLOC(type, 1);
 	type->size = a_size;
 	COPY(type->callback, *a_callback);
 	TAILQ_INSERT_TAIL(&a_hwt->type_list, type, next);

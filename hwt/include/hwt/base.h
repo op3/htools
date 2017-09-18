@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HWT_COMMON_H
-#define HWT_COMMON_H
+#ifndef HWT_BASE_H
+#define HWT_BASE_H
 
 struct HWTRect {
 	float	x;

@@ -47,7 +47,7 @@ endif
 CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE_CCD) $@ $(filter %.c,$<) $$cppflags > $(@:.o=.d) &&
 CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(HCONF_CFLAGS)
 CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(filter-out -ansi% -pedantic% -W%,$(HCONF_CFLAGS))
-LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(HCONF_LIBS) $(LIBS_POST)
+LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(HCONF_LIBS)
 MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 
 # "true" used to not be confused by e.g. "-" in GNU make recipes.

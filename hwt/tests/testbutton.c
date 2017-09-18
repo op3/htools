@@ -16,6 +16,8 @@
 
 #include <hwt/button.h>
 #include <htest/htest.h>
+#include <hwt/base.h>
+#include <hwt/event.h>
 #include <hwt/hwt.h>
 #include <tests/mockwidget.h>
 
@@ -50,9 +52,8 @@ HTEST(ChildFreed)
 
 	button = hwt_button_create(g_hwt);
 
+	ZERO(cb);
 	cb.destroy = destroy;
-	cb.pull_min = NULL;
-	cb.push_rect = NULL;
 	cb.data = &was_destroyed;
 	mock = mockwidget_create(g_hwt, &cb);
 
@@ -73,8 +74,7 @@ HTEST(ChildRect)
 	button = hwt_button_create(g_hwt);
 	hwt_set_root(g_hwt, button);
 
-	cb.destroy = NULL;
-	cb.pull_min = NULL;
+	ZERO(cb);
 	cb.push_rect = push_rect;
 	cb.data = &rect;
 	mock = mockwidget_create(g_hwt, &cb);

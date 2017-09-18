@@ -16,6 +16,8 @@
 
 #include <hwt/panel.h>
 #include <htest/htest.h>
+#include <hwt/base.h>
+#include <hwt/event.h>
 #include <hwt/hwt.h>
 #include <tests/mockwidget.h>
 

@@ -20,13 +20,13 @@
 
 static void	destroy(void *);
 
-static int g_was_destroyed;
-
 void
 destroy(void *a_data)
 {
-	(void)a_data;
-	g_was_destroyed = 1;
+	int *was_destroyed;
+
+	was_destroyed = a_data;
+	*was_destroyed = 1;
 }
 
 HTEST(CreateAndFree)
@@ -35,7 +35,6 @@ HTEST(CreateAndFree)
 
 	hwt = hwt_create(NULL);
 	HTRY_PTR(NULL, !=, hwt);
-
 	hwt_free(&hwt);
 	HTRY_PTR(NULL, ==, hwt);
 }
@@ -45,27 +44,30 @@ HTEST(RootLinking)
 	struct MockWidgetCallback cb;
 	struct HWT *hwt;
 	struct HWTWidget *mock;
+	int was_destroyed;
 
 	ZERO(cb);
 	cb.destroy = destroy;
+	cb.data = &was_destroyed;
 
 	hwt = hwt_create(NULL);
 	mockwidget_setup(hwt);
 	mock = mockwidget_create(hwt, &cb);
-	g_was_destroyed = 0;
+	was_destroyed = 0;
 	hwt_set_root(hwt, mock);
-	HTRY_I(0, ==, g_was_destroyed);
+	HTRY_I(0, ==, was_destroyed);
 	HTRY_VOID(hwt_free(&hwt));
-	HTRY_I(1, ==, g_was_destroyed);
+	HTRY_I(1, ==, was_destroyed);
 
 	hwt = hwt_create(NULL);
 	mockwidget_setup(hwt);
 	mock = mockwidget_create(hwt, &cb);
-	g_was_destroyed = 0;
+	was_destroyed = 0;
 	hwt_set_root(hwt, mock);
-	HTRY_I(0, ==, g_was_destroyed);
+	HTRY_I(0, ==, was_destroyed);
 	hwt_widget_free(hwt, &mock);
-	HTRY_I(1, ==, g_was_destroyed);
+	HTRY_I(1, ==, was_destroyed);
+	HTRY_PTR(NULL, ==, mock);
 	HTRY_VOID(hwt_free(&hwt));
 }
 

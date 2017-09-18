@@ -22,8 +22,6 @@ CPPFLAGS:=$(CPPFLAGS)\
 	-I../hutils/include\
 	-I../htest/include
 include ../hgmake/strict_cflags.mk
-LDFLAGS:=$(LDFLAGS) -L../htest/$(BUILD_DIR)
-LIBS:=$(LIBS) -lhtest
 
 ifeq (release,$(BUILD_MODE))
 	CFLAGS:=$(CFLAGS) -O3
@@ -34,14 +32,17 @@ else
 endif
 
 TARGET:=$(BUILD_DIR)/libhwt.a
-SRC:=$(wildcard src/*.c)
-OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-
 TEST:=$(BUILD_DIR)/test
+
+SRC:=$(wildcard src/*.c)
 HTEST_SRC:=$(wildcard tests/*.c)
-HTEST_PRE=$(MKDIR_VERB)
-HTEST_SUITE_SRC=$<
-HTEST_SUITE_DST=$@
+
+OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
+TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC))
+
+CPPFLAGS:=$(CPPFLAGS)
+CFLAGS:=$(CFLAGS)
+LDFLAGS:=$(LDFLAGS)
 
 .PHONY: all
 all: $(TARGET)
@@ -54,28 +55,33 @@ test: $(TEST)
 splint:
 	splint -nullret +posixstrictlib $(CPPFLAGS) $(SRC)
 
-HCONF_PROJECTS:=../hutils
-include ../hgmake/hconf.mk
-include ../htest/htest.mk
-
-$(TARGET): $(OBJ)
-	$(MKDIR)
-	$(AR_A)
-
-$(TEST): $(HTEST_OBJ) $(TARGET)
-	$(MKDIR)
-	$(LD_E)
-
-$(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
-	$(MKDIR)
-	$(CC_O)
-
-%.o: %.c Makefile $(HCONF_CACHE)
-	$(MKDIR)
-	$(CC_O)
-
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
 
--include $(patsubst %.o,%.d,$(OBJ) $(HTEST_OBJ))
+HCONF_PROJECTS:=../hutils
+include ../hgmake/hconf.mk
+
+HTEST_DEP:=$(HCONF_CACHE)
+HTEST_PRE=$(MKDIR)
+include ../htest/htest.mk
+TEST_OBJ:=$(TEST_OBJ) $(patsubst %.c,%.o,$(BUILD_DIR)/$(HTEST_TESTS))
+
+$(TARGET): $(OBJ)
+	$(QUIET)echo "AR    $@" &&\
+	$(MKDIR) &&\
+	ar rcs $@ $^
+
+$(TEST): $(TEST_OBJ) $(TARGET)
+	$(QUIET)echo "LD    $@" &&\
+	$(MKDIR) &&\
+	$(LD_E)\
+		-L../hutils/$(BUILD_DIR) -lhutils \
+		-L$(HTOOLS_PATH)/htest/$(BUILD_DIR) -lhtest $(COV_LIBS)
+
+$(BUILD_DIR)/%.o: %.c Makefile $(HCONF_CACHE)
+	$(QUIET)echo "CC    $@" &&\
+	$(MKDIR) &&\
+	$(CC_O) $(COV_CPPFLAGS) $(COV_CFLAGS)
+
+-include $(patsubst %.o,%.d,$(OBJ) $(TEST_OBJ))

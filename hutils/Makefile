@@ -40,7 +40,6 @@ TEST_OBJ:=$(patsubst %.c,$(BUILD_DIR)/%.o,$(HTEST_SRC))
 CPPFLAGS:=$(CPPFLAGS)
 CFLAGS:=$(CFLAGS)
 LDFLAGS:=$(LDFLAGS)
-LIBS:=$(LIBS)
 
 .PHONY: all
 all: $(TARGET)

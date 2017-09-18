@@ -34,7 +34,7 @@ HTEST(CreateAtFree1)
 	struct Int *j;
 	int i;
 
-	boris_create(&vec, 1);
+	boris_init(&vec, 1);
 	HTRY_I(1, ==, vec.size);
 	boris_at(&vec, 0)->i = 3;
 
@@ -47,7 +47,7 @@ HTEST(CreateAtFree1)
 		HTRY_I(3, ==, j->i);
 	}
 
-	boris_free(&vec);
+	boris_clean(&vec);
 }
 
 HTEST(PushPopBackMany)
@@ -56,7 +56,7 @@ HTEST(PushPopBackMany)
 	struct Int *j;
 	size_t i;
 
-	boris_create(&vec, 0);
+	boris_init(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
 		boris_push_back(&vec)->i = 100 + i;
@@ -74,7 +74,7 @@ HTEST(PushPopBackMany)
 		HTRY_I(N - 1 - i, ==, vec.size);
 	}
 
-	boris_free(&vec);
+	boris_clean(&vec);
 }
 
 HTEST(PushPopFrontMany)
@@ -83,7 +83,7 @@ HTEST(PushPopFrontMany)
 	struct Int *j;
 	size_t i;
 
-	boris_create(&vec, 0);
+	boris_init(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
 		boris_push_front(&vec)->i = 100 + i;
@@ -102,7 +102,7 @@ HTEST(PushPopFrontMany)
 	}
 	HTRY_I(0, ==, vec.size);
 
-	boris_free(&vec);
+	boris_clean(&vec);
 }
 
 HTEST(Insert)
@@ -113,7 +113,7 @@ HTEST(Insert)
 	struct Int *j;
 	size_t i;
 
-	boris_create(&vec, 0);
+	boris_init(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
 		int idx;
@@ -129,7 +129,7 @@ HTEST(Insert)
 		HTRY_I(i, ==, count[i]);
 	}
 
-	boris_free(&vec);
+	boris_clean(&vec);
 }
 
 HTEST(Erase)
@@ -139,7 +139,7 @@ HTEST(Erase)
 	int count[N];
 	size_t i;
 
-	boris_create(&vec, 0);
+	boris_init(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
 		boris_push_back(&vec)->i = i;
@@ -162,7 +162,7 @@ HTEST(Erase)
 		HTRY_I(2, ==, count[i]);
 	}
 
-	boris_free(&vec);
+	boris_clean(&vec);
 }
 
 HTEST(Resize)
@@ -170,7 +170,7 @@ HTEST(Resize)
 	struct IntVector vec;
 	size_t i;
 
-	boris_create(&vec, 0);
+	boris_init(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
 		boris_push_back(&vec)->i = i;
@@ -188,7 +188,7 @@ HTEST(Resize)
 		}
 	}
 
-	boris_free(&vec);
+	boris_clean(&vec);
 }
 
 HTEST_SUITE(Vector)
