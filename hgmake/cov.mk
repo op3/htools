@@ -20,9 +20,11 @@ ifeq (cov,$(BUILD_MODE))
 ifneq (,$(filter clang%,$(CC)))
  COV_CFLAGS=-fprofile-instr-generate -fcoverage-mapping
  COV_LIBS=
-else ifneq (,$(or $(filter cc,$(CC)),$(filter %gcc,$(CC))))
- COV_CFLAGS=--coverage
- COV_LIBS=--coverage
+else
+ ifneq (,$(or $(filter cc,$(CC)),$(filter %gcc,$(CC))))
+  COV_CFLAGS=--coverage
+  COV_LIBS=--coverage
+ endif
 endif
 
 .PHONY: cov

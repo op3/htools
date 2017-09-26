@@ -31,12 +31,17 @@
 #elif HCONF_mMATH_bDEFAULT_SOURCE_LM
 /* HCONF_CPPFLAGS=-D_DEFAULT_SOURCE */
 /* HCONF_LIBS=-lm */
+#elif HCONF_mMATH_bNOFLOATFUNC
+#	define SINF_ (float)sin
 #elif defined(_MSC_VER)
 #	define _USE_MATH_DEFINES
 #endif
 #include <math.h>
 #if HCONFING_mMATH
-#	define HCONF_TEST return 2.0 > sinf(M_PI * argc) ? 0 : 1
+#	ifndef SINF_
+#		define SINF_ sinf
+#	endif
+#	define HCONF_TEST return 2.0 > SINF_(M_PI * argc) ? 0 : 1
 #endif
 
 CDECLS_BEGIN

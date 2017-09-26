@@ -21,7 +21,7 @@ A collection of tools and snippets to make building with GNU make
 least painful approach.
 
 build_dir.mk     - Creates a reasonable build directory path if not set.
-gcov.mk          - Gcov summary tools.
+cov.mk           - gcov/lcov summary tools.
 hconf.mk         - Hconf tools, for in-make build configuration.
 strict_cflags.mk - Wonderful CFLAGS for good source code.
 
