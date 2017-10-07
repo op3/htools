@@ -19,13 +19,14 @@
 
 struct Int {
 	int	i;
-	POOL_ENTRY(PoolInt, Int)	entry;
 };
-
 POOL_HEAD(PoolInt, Int, 10);
+POOL_HEAD(PoolIntBig, Int, 10000);
 
 POOL_PROTOTYPE(PoolInt, Int);
-POOL_IMPLEMENT(PoolInt, Int, entry);
+POOL_IMPLEMENT(PoolInt, Int);
+POOL_PROTOTYPE(PoolIntBig, Int);
+POOL_IMPLEMENT(PoolIntBig, Int);
 
 HTEST(AllocAndFree100)
 {
@@ -34,21 +35,45 @@ HTEST(AllocAndFree100)
 	size_t i;
 
 	PoolInt_init(&pool_int);
-	HTRY_BOOL(TAILQ_EMPTY(&pool_int));
-	for (i = 0; LENGTH(p) > i; ++i) {
+	HTRY_BOOL(TAILQ_EMPTY(&pool_int.freed_list));
+	HTRY_BOOL(TAILQ_EMPTY(&pool_int.page_list));
+	for (i = 0; LENGTH(p) - 1 > i; ++i) {
 		p[i] = PoolInt_alloc(&pool_int);
 		p[i]->i = i;
 	}
-	HTRY_BOOL(!TAILQ_EMPTY(&pool_int));
-	for (i = 0; LENGTH(p) > i; ++i) {
+	HTRY_BOOL(TAILQ_EMPTY(&pool_int.freed_list));
+	HTRY_BOOL(!TAILQ_EMPTY(&pool_int.page_list));
+	PoolInt_free(&pool_int, &p[0]);
+	HTRY_BOOL(!TAILQ_EMPTY(&pool_int.freed_list));
+	HTRY_BOOL(!TAILQ_EMPTY(&pool_int.page_list));
+	for (i = 1; LENGTH(p) - 1 > i; ++i) {
 		HTRY_I(p[i]->i, ==, i);
 		PoolInt_free(&pool_int, &p[i]);
 	}
-	HTRY_BOOL(TAILQ_EMPTY(&pool_int));
+	HTRY_BOOL(TAILQ_EMPTY(&pool_int.freed_list));
+	HTRY_BOOL(TAILQ_EMPTY(&pool_int.page_list));
 	PoolInt_shutdown(&pool_int);
+}
+
+HTEST(AllocAndFreeMulti)
+{
+	struct PoolIntBig pool_int;
+	unsigned j;
+
+	HTRY_VOID();
+	for (j = 0; j < 10; ++j) {
+		size_t i;
+
+		PoolIntBig_init(&pool_int);
+		for (i = 0; 100000 > i; ++i) {
+			PoolIntBig_alloc(&pool_int)->i = i;
+		}
+		PoolIntBig_shutdown(&pool_int);
+	}
 }
 
 HTEST_SUITE(Pool)
 {
 	HTEST_ADD(AllocAndFree100);
+	HTEST_ADD(AllocAndFreeMulti);
 }
