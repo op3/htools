@@ -48,7 +48,7 @@ hutils_vsnprintf_(char *a_dst, size_t a_dst_size, char const *a_fmt, va_list
 }
 #endif
 
-#if HCONF_mSTRNDUP_bCUSTOM
+#if HCONF_mSTRNDUP_bCUSTOM || defined(_MSC_VER)
 char *
 hutils_strndup_(char const *a_s, size_t a_maxlen)
 {
@@ -230,4 +230,31 @@ strecmp(char const *a_big, char const *a_pattern)
 		return -1;
 	}
 	return strcmp(a_big + big_len - pattern_len, a_pattern);
+}
+
+char *
+strtkn(char **a_stringp, char const *a_delim)
+{
+	char *p, *ret;
+	size_t ofs;
+
+	p = *a_stringp;
+	if (NULL == p) {
+		return NULL;
+	}
+	ofs = strspn(p, a_delim);
+	if ('\0' == p[ofs]) {
+		*a_stringp = NULL;
+		return NULL;
+	}
+	p += ofs;
+	ret = p;
+	p += strcspn(p, a_delim);
+	if ('\0' == *p) {
+		*a_stringp = NULL;
+	} else {
+		*p = '\0';
+		*a_stringp = p + 1;
+	}
+	return ret;
 }

@@ -17,6 +17,9 @@
 #include <hutils/dir.h>
 #include <hutils/macros.h>
 #include <hutils/memory.h>
+#include <hutils/string.h>
+
+static void	getnames(char const *, char **, char **, char const *);
 
 #if defined(_MSC_VER)
 #	include <windows.h>
@@ -95,9 +98,7 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 void
 dir_getnames(char const *a_path, char **a_dir, char **a_base)
 {
-	(void)a_path;
-	*a_dir = NULL;
-	*a_base = NULL;
+	getnames(a_path, a_dir, a_base, "/\\");
 }
 
 #else
@@ -172,12 +173,24 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 void
 dir_getnames(char const *a_path, char **a_dir, char **a_base)
 {
+	getnames(a_path, a_dir, a_base, "/");
+}
+
+#endif
+
+void
+getnames(char const *a_path, char **a_dir, char **a_base, char const *a_delim)
+{
 	char const *p, *slash;
 
 	slash = NULL;
 	for (p = a_path; '\0' != *p; ++p) {
-		if ('/' == *p) {
-			slash = p;
+		char const *d;
+
+		for (d = a_delim; '\0' != *d; ++d) {
+			if (*d == *p) {
+				slash = p;
+			}
 		}
 	}
 	if (NULL != a_dir) {
@@ -219,5 +232,3 @@ dir_substext(char const *a_path, char const *a_ext)
 	strcpy(s + siz1 + 1, a_ext);
 	return s;
 }
-
-#endif

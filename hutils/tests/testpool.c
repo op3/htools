@@ -60,7 +60,7 @@ HTEST(AllocAndFreeMulti)
 	struct PoolIntBig pool_int;
 	unsigned j;
 
-	HTRY_VOID();
+	HTRY_VOID(j = 0);
 	for (j = 0; j < 10; ++j) {
 		size_t i;
 
