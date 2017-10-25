@@ -52,7 +52,8 @@ struct PoolType {\
 
 #define POOL_PROTOTYPE(PoolType, Type) \
 static struct Type	*PoolType##_alloc(struct PoolType *) FUNC_RETURNS;\
-static void		PoolType##_free(struct PoolType *, struct Type **);\
+static void		PoolType##_free(struct PoolType *, struct Type **)\
+	FUNC_UNUSED;\
 static void		PoolType##_init(struct PoolType *);\
 static void		PoolType##_shutdown(struct PoolType *)
 
