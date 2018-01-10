@@ -35,6 +35,9 @@ HTEST(Zzzzz)
 	time_sleep(1e-3);
 	t_1 = time_getd();
 	HTRY_DBL(1e-1, >, fabs(1e-3 - (t_1 - t_0)));
+
+	HTRY_SIGNAL(time_sleep(-1));
+	HTRY_VOID(time_sleep(0));
 }
 
 HTEST_SUITE(Time)

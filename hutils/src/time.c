@@ -15,6 +15,7 @@
  */
 
 #include <hutils/time.h>
+#include <assert.h>
 #include <hutils/memory.h>
 
 #if defined(HUTILS_CLOCK_GETTIME)
@@ -139,14 +140,17 @@ time_gets()
 int
 time_sleep(double a_s)
 {
+	assert(0.0 <= a_s);
 #if defined(HCONF_mTIME_SLEEP_bNANOSLEEP)
-	struct timespec ts;
+	{
+		struct timespec ts;
 
-	ts.tv_sec = 0;
-	ts.tv_nsec = 1e9 * a_s;
-	if (0 != nanosleep(&ts, NULL)) {
-		hutils_warn("nanosleep");
-		return 0;
+		ts.tv_sec = a_s;
+		ts.tv_nsec = 1e9 * (a_s - (unsigned)a_s);
+		if (0 != nanosleep(&ts, NULL)) {
+			hutils_warn("nanosleep");
+			return 0;
+		}
 	}
 #elif defined(_MSC_VER)
 	Sleep((DWORD)(1e3 * a_s));
