@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,7 @@
 
 #include <hutils/dir.h>
 #include <htest/htest.h>
+#include <hutils/memory.h>
 
 HTEST(InvalidDir)
 {
@@ -56,8 +57,63 @@ HTEST(ListTests)
 	HTRY_PTR(NULL, ==, dir);
 }
 
+HTEST(Names)
+{
+	char *dir, *base, *ext;
+
+	dir_getnames("dir/file.txt", &dir, NULL);
+	HTRY_STR("dir", ==, dir); FREE(dir);
+
+	dir_getnames("dir/file.txt", NULL, &base);
+	HTRY_STR("file.txt", ==, base); FREE(base);
+
+	dir_getnames("dir/file.txt", &dir, &base);
+	HTRY_STR("dir", ==, dir); FREE(dir);
+	HTRY_STR("file.txt", ==, base); FREE(base);
+
+	dir_getnames("", &dir, &base);
+	HTRY_STR(".", ==, dir); FREE(dir);
+	HTRY_STR("", ==, base); FREE(base);
+
+	dir_getnames("dir/", &dir, &base);
+	HTRY_STR("dir", ==, dir); FREE(dir);
+	HTRY_STR("", ==, base); FREE(base);
+
+	dir_getnames("file.txt", &dir, &base);
+	HTRY_STR(".", ==, dir); FREE(dir);
+	HTRY_STR("file.txt", ==, base); FREE(base);
+
+	dir_getnames("/file.txt", &dir, &base);
+	HTRY_STR("", ==, dir); FREE(dir);
+	HTRY_STR("file.txt", ==, base); FREE(base);
+
+	dir_getnames("/dir/file.txt", &dir, &base);
+	HTRY_STR("/dir", ==, dir); FREE(dir);
+	HTRY_STR("file.txt", ==, base); FREE(base);
+
+	dir_getnames("/ugly.dir/file.txt", &dir, &base);
+	HTRY_STR("/ugly.dir", ==, dir); FREE(dir);
+	HTRY_STR("file.txt", ==, base); FREE(base);
+
+	ext = dir_substext("dir", "coo");
+	HTRY_STR("dir", ==, ext); FREE(ext);
+
+	ext = dir_substext("file.txt", "coo");
+	HTRY_STR("file.coo", ==, ext); FREE(ext);
+
+	ext = dir_substext("dir/file.txt", "coo");
+	HTRY_STR("dir/file.coo", ==, ext); FREE(ext);
+
+	ext = dir_substext("ugly.dir/file.txt", "coo");
+	HTRY_STR("ugly.dir/file.coo", ==, ext); FREE(ext);
+
+	ext = dir_substext("ugly.dir/file", "coo");
+	HTRY_STR("ugly.dir/file", ==, ext); FREE(ext);
+}
+
 HTEST_SUITE(Dir)
 {
 	HTEST_ADD(InvalidDir);
 	HTEST_ADD(ListTests);
+	HTEST_ADD(Names);
 }

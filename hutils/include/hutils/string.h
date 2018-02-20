@@ -77,7 +77,7 @@ static int strl_test_(char const *str) {
 
 #if HCONF_mSTRNDUP_bPOSIX_200809
 /* HCONF_CPPFLAGS=-D_POSIX_C_SOURCE=200809 */
-#elif HCONF_mSTRNDUP_bCUSTOM
+#elif HCONF_mSTRNDUP_bCUSTOM || defined(_MSC_VER)
 /* HCONF_SRC=src/string.c */
 #	define strndup hutils_strndup_
 char *hutils_strndup_(char const *, size_t) FUNC_RETURNS;
@@ -108,6 +108,7 @@ extern char const *strctv_sentinel_;
 int	strbcmp(char const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 char	*strctv_(char **, ...) FUNC_NONNULL((1));
 int	strecmp(char const *, char const *) FUNC_NONNULL(()) FUNC_RETURNS;
+char	*strtkn(char **, char const *) FUNC_RETURNS;
 
 CDECLS_END
 

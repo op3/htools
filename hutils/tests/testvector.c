@@ -19,7 +19,7 @@
 #include <hutils/random.h>
 
 #define CHUNK 10
-#define N 1000
+#define N 100
 
 struct Int {
 	int	i;
@@ -36,7 +36,9 @@ HTEST(CreateAtFree1)
 	int i;
 
 	boris_init(&vec, 1);
+	HTRY_I(0, ==, vec.ofs);
 	HTRY_I(1, ==, vec.size);
+	HTRY_I(1, ==, vec.capacity);
 	boris_at(&vec, 0)->i = 3;
 
 	HTRY_SIGNAL(i = boris_at(&vec, (unsigned)-1)->i);
@@ -60,9 +62,10 @@ HTEST(PushPopBackMany)
 	boris_init(&vec, 0);
 
 	for (i = 0; N > i; ++i) {
+		HTRY_I(i, ==, vec.size);
 		boris_push_back(&vec)->i = 100 + i;
+		HTRY_I(i + 1, ==, vec.size);
 	}
-	HTRY_I(N, ==, vec.size);
 	i = 0;
 	VECTOR_FOREACH(j, &vec) {
 		HTRY_I(100 + i, ==, j->i);
@@ -74,6 +77,8 @@ HTEST(PushPopBackMany)
 		boris_pop_back(&vec);
 		HTRY_I(N - 1 - i, ==, vec.size);
 	}
+	HTRY_I(0, ==, vec.ofs);
+	HTRY_I(CHUNK, ==, vec.capacity);
 
 	boris_clean(&vec);
 }

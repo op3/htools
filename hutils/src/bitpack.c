@@ -164,10 +164,10 @@ bitunpack_string(struct BitPacker *a_packer, char **a_string)
 		if (!bitunpack_uint32(a_packer, &c, 8)) {
 			hutils_errx(EXIT_FAILURE, "This should not happen.");
 		}
+		*s++ = (uint8_t)c;
 		if (0 == c) {
 			break;
 		}
-		*s++ = (uint8_t)c;
 	}
 	return 1;
 }

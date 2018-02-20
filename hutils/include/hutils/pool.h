@@ -14,6 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Dynamic pool allocator.
+ * Constant allocation will walk through objects and pages linearly, freed
+ * objects are put in a free list. Freed objects in the last page will be put
+ * at the tail of the free list, careful design of the using code can then
+ * allow for dynamic freeing of pages.
+ */
+
 #ifndef HUTILS_POOL_H
 #define HUTILS_POOL_H
 
@@ -21,86 +29,102 @@
 #include <hutils/memory.h>
 #include <hutils/queue.h>
 
-#define POOL_ENTRY(PoolType, Type) struct {\
-	struct	Pool##PoolType##Page_ *page;\
-	TAILQ_ENTRY(Type)	next;\
-}
 #define POOL_HEAD(PoolType, Type, num) \
-TAILQ_HEAD(Pool##PoolType##List_, Type);\
-struct Pool##PoolType##Page_ {\
-	struct	Type node_array[num];\
-	struct	Pool##PoolType##List_	node_list;\
-	size_t	used_num;\
-	TAILQ_ENTRY(Pool##PoolType##Page_)	next;\
+struct PoolType##Node_ {\
+	union {\
+		struct	Type type;\
+		TAILQ_ENTRY(PoolType##Node_)	freed;\
+	} u;\
+	struct	PoolType##Page_ *page;\
 };\
-TAILQ_HEAD(PoolType, Pool##PoolType##Page_)
+TAILQ_HEAD(PoolType##List_, PoolType##Node_);\
+struct PoolType##Page_ {\
+	struct	PoolType##Node_ node_array[num];\
+	size_t	ofs;\
+	size_t	used_num;\
+	TAILQ_ENTRY(PoolType##Page_)	page_list;\
+};\
+TAILQ_HEAD(PoolType##PageList_, PoolType##Page_);\
+struct PoolType {\
+	struct	PoolType##PageList_ page_list;\
+	struct	PoolType##List_ freed_list;\
+}
 
 #define POOL_PROTOTYPE(PoolType, Type) \
-static struct Type	*PoolType##_alloc(struct PoolType *);\
-static void		PoolType##_free(struct PoolType *, struct Type **);\
+static struct Type	*PoolType##_alloc(struct PoolType *) FUNC_RETURNS;\
+static void		PoolType##_free(struct PoolType *, struct Type **)\
+	FUNC_UNUSED;\
 static void		PoolType##_init(struct PoolType *);\
 static void		PoolType##_shutdown(struct PoolType *)
 
-#define POOL_IMPLEMENT(PoolType, Type, entry) \
+#define POOL_IMPLEMENT(PoolType, Type) \
 static struct Type *\
 PoolType##_alloc(struct PoolType *a_pool)\
 {\
-	struct Pool##PoolType##Page_ *page;\
-	struct Type *node;\
-\
-	TAILQ_FOREACH(page, a_pool, next) {\
-		if (!TAILQ_EMPTY(&page->node_list)) {\
-			break;\
+	struct PoolType##Node_ *node;\
+	struct PoolType##Page_ *page;\
+	if (!TAILQ_EMPTY(&a_pool->freed_list)) {\
+		node = TAILQ_FIRST(&a_pool->freed_list);\
+		TAILQ_REMOVE(&a_pool->freed_list, node, u.freed);\
+		page = node->page;\
+	} else {\
+		page = TAILQ_LAST(&a_pool->page_list, PoolType##PageList_);\
+		if (TAILQ_END(&a_pool->page_list) == page ||\
+		    LENGTH(page->node_array) == page->ofs) {\
+			page = malloc(sizeof *page);\
+			page->ofs = 0;\
+			page->used_num = 0;\
+			TAILQ_INSERT_TAIL(&a_pool->page_list, page,\
+			    page_list);\
 		}\
+		node = &page->node_array[page->ofs];\
+		++page->ofs;\
+		node->page = page;\
 	}\
-	if (TAILQ_END(a_pool) == page) {\
-		size_t i;\
-\
-		page = malloc(sizeof *page);\
-		TAILQ_INIT(&page->node_list);\
-		for (i = 0; LENGTH(page->node_array) > i; ++i) {\
-			page->node_array[i].entry.page = page;\
-			TAILQ_INSERT_TAIL(&page->node_list,\
-			    &page->node_array[i], entry.next);\
-		}\
-		page->used_num = 0;\
-		TAILQ_INSERT_TAIL(a_pool, page, next);\
-	}\
-	node = TAILQ_FIRST(&page->node_list);\
-	TAILQ_REMOVE(&page->node_list, node, entry.next);\
 	++page->used_num;\
-	return node;\
+	ASSERT(void *, "p", &node->u.type, ==, node);\
+	return &node->u.type;\
 }\
-static void \
-PoolType##_free(struct PoolType *a_pool, struct Type **a_node)\
+FUNC_UNUSED static void \
+PoolType##_free(struct PoolType *a_pool, struct Type **a_type)\
 {\
-	struct Type *node;\
-	struct Pool##PoolType##Page_ *page;\
-\
-	node = *a_node;\
-	page = node->entry.page;\
+	struct PoolType##Node_ *node;\
+	struct PoolType##Page_ *page;\
+	node = (void *)*a_type;\
+	page = node->page;\
 	ASSERT(void *, "p", (void *)&page->node_array, <=, (void *)node);\
-	ASSERT(void *, "p", (void *)node, <, (void *)&page->node_list);\
-	TAILQ_INSERT_TAIL(&page->node_list, node, entry.next);\
+	ASSERT(void *, "p", (void *)node, <=, (void *)\
+	    &page->node_array[LENGTH(page->node_array) - 1]);\
+	if (TAILQ_END(&a_pool->page_list) == TAILQ_NEXT(page, page_list)) {\
+		TAILQ_INSERT_TAIL(&a_pool->freed_list, node, u.freed);\
+	} else {\
+		TAILQ_INSERT_HEAD(&a_pool->freed_list, node, u.freed);\
+	}\
 	--page->used_num;\
 	if (0 == page->used_num) {\
-		TAILQ_REMOVE(a_pool, page, next);\
+		size_t i;\
+		for (i = 0; page->ofs > i; ++i) {\
+			TAILQ_REMOVE(&a_pool->freed_list,\
+			    &page->node_array[i], u.freed);\
+		}\
+		TAILQ_REMOVE(&a_pool->page_list, page, page_list);\
+		FREE(page);\
 	}\
-	*a_node = NULL;\
+	*a_type = NULL;\
 }\
 static void \
 PoolType##_init(struct PoolType *a_pool)\
 {\
-	TAILQ_INIT(a_pool);\
+	TAILQ_INIT(&a_pool->page_list);\
+	TAILQ_INIT(&a_pool->freed_list);\
 }\
 static void \
 PoolType##_shutdown(struct PoolType *a_pool)\
 {\
-	while (!TAILQ_EMPTY(a_pool)) {\
-		struct Pool##PoolType##Page_ *page;\
-\
-		page = TAILQ_FIRST(a_pool);\
-		TAILQ_REMOVE(a_pool, page, next);\
+	while (!TAILQ_EMPTY(&a_pool->page_list)) {\
+		struct PoolType##Page_ *page;\
+		page = TAILQ_FIRST(&a_pool->page_list);\
+		TAILQ_REMOVE(&a_pool->page_list, page, page_list);\
 		FREE(page);\
 	}\
 }\

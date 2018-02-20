@@ -121,9 +121,9 @@ HTEST(Rotation)
 
 	vector3f_set(&v, 1.0f, 1.0f, 1.0f);
 	matrix4f_mul_vector3f(&u, &r, &v);
-	HTRY_FLT(1e-6f, >, fabsf(u.x -  1.0f));
-	HTRY_FLT(1e-6f, >, fabsf(u.y - -1.0f));
-	HTRY_FLT(1e-6f, >, fabsf(u.z -  1.0f));
+	HTRY_DBL(1e-6, >, fabs(u.x -  1.0f));
+	HTRY_DBL(1e-6, >, fabs(u.y - -1.0f));
+	HTRY_DBL(1e-6, >, fabs(u.z -  1.0f));
 
 	vector3f_set(&u, 1.0f, 1.0f, 1.0f);
 	vector3f_normalize(&u, &u);
@@ -131,9 +131,9 @@ HTEST(Rotation)
 
 	vector3f_set(&v, 1.0f, 0.0f, 0.0f);
 	matrix4f_mul_vector3f(&u, &r, &v);
-	HTRY_FLT(1e-6f, >, fabsf(u.x - 0.0f));
-	HTRY_FLT(1e-6f, >, fabsf(u.y - 1.0f));
-	HTRY_FLT(1e-6f, >, fabsf(u.z - 0.0f));
+	HTRY_DBL(1e-6, >, fabs(u.x - 0.0f));
+	HTRY_DBL(1e-6, >, fabs(u.y - 1.0f));
+	HTRY_DBL(1e-6, >, fabs(u.z - 0.0f));
 }
 
 HTEST_SUITE(Matrix4)

@@ -59,36 +59,27 @@
     &(vec)->data[(vec)->ofs + (vec)->size] > var; ++var)
 
 #define VECTOR_PROTOTYPE(link_, name, VectorType, Type)\
-link_ void				name##_reserve_(struct VectorType *,\
-    size_t);\
-link_ void				name##_try_grow_(struct VectorType\
-    *);\
-link_ void				name##_try_shrink_(struct VectorType\
-    *);\
-FUNC_UNUSED link_ struct Type		*name##_at(struct VectorType *,\
-    size_t);\
-FUNC_UNUSED link_ struct Type const	*name##_atc(struct VectorType const\
-    *, size_t);\
-FUNC_UNUSED link_ struct Type		*name##_back(struct VectorType *);\
-FUNC_UNUSED link_ void			name##_init(struct VectorType *,\
-    size_t);\
-FUNC_UNUSED link_ void			name##_erase(struct VectorType *,\
-    size_t);\
-FUNC_UNUSED link_ void			name##_clean(struct VectorType *);\
-FUNC_UNUSED link_ struct Type		*name##_front(struct VectorType *);\
-FUNC_UNUSED link_ struct Type		*name##_insert(struct VectorType *,\
-    size_t);\
-FUNC_UNUSED link_ void			name##_pop_back(struct VectorType *);\
-FUNC_UNUSED link_ void			name##_pop_front(struct VectorType\
-    *);\
-FUNC_UNUSED link_ struct Type		*name##_push_back(struct VectorType\
-    *);\
-FUNC_UNUSED link_ struct Type		*name##_push_front(struct VectorType\
-    *);\
-FUNC_UNUSED link_ void			name##_reserve(struct VectorType *,\
-    size_t);\
-FUNC_UNUSED link_ void			name##_resize(struct VectorType *,\
-    size_t)
+link_ void		name##_reserve_(struct VectorType *, size_t);\
+link_ void		name##_try_grow_(struct VectorType *);\
+link_ void		name##_try_shrink_(struct VectorType *);\
+link_ struct Type	*name##_at(struct VectorType *, size_t) FUNC_UNUSED;\
+link_ struct Type const	*name##_atc(struct VectorType const *, size_t)\
+	FUNC_UNUSED;\
+link_ struct Type	*name##_back(struct VectorType *) FUNC_UNUSED;\
+link_ void		name##_init(struct VectorType *, size_t) FUNC_UNUSED;\
+link_ void		name##_erase(struct VectorType *, size_t)\
+	FUNC_UNUSED;\
+link_ void		name##_clean(struct VectorType *) FUNC_UNUSED;\
+link_ struct Type	*name##_front(struct VectorType *) FUNC_UNUSED;\
+link_ struct Type	*name##_insert(struct VectorType *, size_t)\
+	FUNC_UNUSED;\
+link_ void		name##_pop_back(struct VectorType *) FUNC_UNUSED;\
+link_ void		name##_pop_front(struct VectorType *) FUNC_UNUSED;\
+link_ struct Type	*name##_push_back(struct VectorType *) FUNC_UNUSED;\
+link_ struct Type	*name##_push_front(struct VectorType *) FUNC_UNUSED;\
+link_ void		name##_reserve(struct VectorType *, size_t)\
+	FUNC_UNUSED;\
+link_ void		name##_resize(struct VectorType *, size_t) FUNC_UNUSED
 
 /* TODO: Optimize rules for front and back margins, add hysteresis? */
 

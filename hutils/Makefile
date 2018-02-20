@@ -22,10 +22,12 @@ include $(HTOOLS_PATH)/hgmake/strict_cflags.mk
 ifeq (release,$(BUILD_MODE))
 	CPPFLAGS+=-DNDEBUG
 	CFLAGS+=-O3
-else ifeq (fpic,$(BUILD_MODE))
-	CFLAGS+=-fPIC
 else
-	CFLAGS+=-ggdb
+	ifeq (fpic,$(BUILD_MODE))
+		CFLAGS+=-fPIC
+	else
+		CFLAGS+=-ggdb
+	endif
 endif
 
 TARGET:=$(BUILD_DIR)/libhutils.a

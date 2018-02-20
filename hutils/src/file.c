@@ -15,6 +15,7 @@
  */
 
 #include <hutils/file.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <hutils/err.h>
 #include <hutils/fmtmod.h>

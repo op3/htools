@@ -17,6 +17,9 @@
 #include <hutils/dir.h>
 #include <hutils/macros.h>
 #include <hutils/memory.h>
+#include <hutils/string.h>
+
+static void	getnames(char const *, char **, char **, char const *);
 
 #if defined(_MSC_VER)
 #	include <windows.h>
@@ -92,6 +95,12 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 	return 1;
 }
 
+void
+dir_getnames(char const *a_path, char **a_dir, char **a_base)
+{
+	getnames(a_path, a_dir, a_base, "/\\");
+}
+
 #else
 
 #	include <dirent.h>
@@ -161,4 +170,65 @@ dir_get(struct Dir *a_dir, struct DirEntry *a_entry)
 	return 1;
 }
 
+void
+dir_getnames(char const *a_path, char **a_dir, char **a_base)
+{
+	getnames(a_path, a_dir, a_base, "/");
+}
+
 #endif
+
+void
+getnames(char const *a_path, char **a_dir, char **a_base, char const *a_delim)
+{
+	char const *p, *slash;
+
+	slash = NULL;
+	for (p = a_path; '\0' != *p; ++p) {
+		char const *d;
+
+		for (d = a_delim; '\0' != *d; ++d) {
+			if (*d == *p) {
+				slash = p;
+			}
+		}
+	}
+	if (NULL != a_dir) {
+		if (NULL == slash) {
+			*a_dir = strdup(".");
+		} else {
+			*a_dir = strndup(a_path, slash - a_path);
+		}
+	}
+	if (NULL != a_base) {
+		*a_base = strdup(NULL == slash ? a_path : slash + 1);
+	}
+}
+
+char *
+dir_substext(char const *a_path, char const *a_ext)
+{
+	char const *p, *dot, *slash;
+	char *s;
+	size_t siz1, siz2;
+
+	dot = NULL;
+	slash = NULL;
+	for (p = a_path; '\0' != *p; ++p) {
+		if ('/' == *p) {
+			slash = p;
+		} else if ('.' == *p) {
+			dot = p;
+		}
+	}
+	if (NULL == dot || slash > dot) {
+		return strdup(a_path);
+	}
+	siz1 = dot - a_path;
+	siz2 = strlen(a_ext);
+	s = malloc(siz1 + 1 + siz2 + 1);
+	memcpy(s, a_path, siz1);
+	s[siz1] = '.';
+	strcpy(s + siz1 + 1, a_ext);
+	return s;
+}

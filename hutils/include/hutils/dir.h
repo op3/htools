@@ -73,6 +73,10 @@ struct Dir	*dir_open(char const *) FUNC_NONNULL(()) FUNC_RETURNS;
 void		dir_close(struct Dir **) FUNC_NONNULL(());
 int		dir_get(struct Dir *, struct DirEntry *) FUNC_NONNULL(())
 	FUNC_RETURNS;
+void		dir_getnames(char const *, char **, char **)
+	FUNC_NONNULL((1));
+char		*dir_substext(char const *, char const *) FUNC_NONNULL(())
+	FUNC_RETURNS;
 
 CDECLS_END
 

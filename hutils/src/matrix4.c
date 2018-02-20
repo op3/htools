@@ -99,9 +99,14 @@ matrix4f_set_rotation(struct Matrix4f *a_m, struct Vector3f const *a_u, float
 {
 	float c, s, t, t1, t2;
 
+#if HCONF_mMATH_bNOFLOATFUNC
+	c = (float)cos(a_theta);
+	s = (float)sin(a_theta);
+#else
 	c = cosf(a_theta);
-	t = 1.0f - c;
 	s = sinf(a_theta);
+#endif
+	t = 1.0f - c;
 	a_m->m[ 0] = c + a_u->x * a_u->x * t;
 	a_m->m[ 5] = c + a_u->y * a_u->y * t;
 	a_m->m[10] = c + a_u->z * a_u->z * t;
