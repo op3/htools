@@ -291,6 +291,7 @@ udp_address_create(unsigned a_flags, char const *a_hostname, uint16_t a_port)
 			return NULL;
 		}
 		memcpy(&addr->addr, result->ai_addr, result->ai_addrlen);
+		addr->len = result->ai_addrlen;
 		freeaddrinfo(result);
 	}
 #else
@@ -307,6 +308,7 @@ udp_address_create(unsigned a_flags, char const *a_hostname, uint16_t a_port)
 		in = (void *)&addr->addr;
 		memcpy(&in->sin_addr.s_addr, host->h_addr, host->h_length);
 		in->sin_port = htons(a_port);
+		addr->len = host->h_length;
 	}
 #endif
 	return addr;
@@ -337,6 +339,7 @@ udp_address_gets(struct UDPAddress const *a_address)
 		return str;
 	} else {
 		assert(0 && "Invalid address family.");
+		return NULL;
 	}
 }
 
@@ -355,6 +358,7 @@ udp_address_getu32(struct UDPAddress const *a_address)
 		return *(uint32_t const *)&addr->sin6_addr;
 	} else {
 		assert(0 && "Invalid address family.");
+		return NULL;
 	}
 }
 
