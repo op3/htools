@@ -63,7 +63,8 @@ HCONF_PROJECTS_FILES:=$(addsuffix /$(HCONF_CACHE),$(HCONF_PROJECTS))
 CPPFLAGS:=$(CPPFLAGS) $(patsubst %,-I%/$(BUILD_DIR),$(HCONF_PROJECTS))
 
 $(HCONF_CACHE): $(HCONF_DEP) $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE_CCD)
-	$(QUIET)$(MKDIR) &&\
+	$(QUIET)echo "HCCHE $@";\
+	$(MKDIR) &&\
 	export CC=$(CC) &&\
 	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE_CCD)`;echo $(CFLAGS);echo $(LDFLAGS);echo $(LIBS);) > $@.tmp;\
 	if [ "$(HCONF_PROJECTS_FILES)" ]; then\

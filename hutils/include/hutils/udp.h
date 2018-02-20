@@ -116,7 +116,14 @@ struct UDPDatagram {
 
 CDECLS_BEGIN
 
-void			udp_address_free(struct UDPAddress **) FUNC_NONNULL(());
+struct UDPAddress	*udp_address_create(unsigned, char const *, uint16_t)
+	FUNC_NONNULL(());
+void			udp_address_free(struct UDPAddress **)
+	FUNC_NONNULL(());
+char			*udp_address_gets(struct UDPAddress const *)
+	FUNC_NONNULL(());
+uint32_t		udp_address_getu32(struct UDPAddress const *)
+	FUNC_NONNULL(());
 struct UDPClient	*udp_client_create(unsigned, char const *, uint16_t)
 	FUNC_NONNULL(()) FUNC_RETURNS;
 void			udp_client_free(struct UDPClient **) FUNC_NONNULL(());
@@ -127,7 +134,7 @@ int			udp_client_send(struct UDPClient const *, struct
 struct UDPServer	*udp_server_create(unsigned, uint16_t) FUNC_RETURNS;
 void			udp_server_free(struct UDPServer **) FUNC_NONNULL(());
 int			udp_server_receive(struct UDPServer const *, struct
-    UDPAddress **, struct UDPDatagram *, double) FUNC_NONNULL(());
+    UDPAddress **, struct UDPDatagram *, double) FUNC_NONNULL((1, 3));
 int			udp_server_send(struct UDPServer const *, struct
     UDPAddress const *, struct UDPDatagram const *) FUNC_NONNULL(());
 int			udp_server_write(struct UDPServer const *, void const

@@ -16,6 +16,7 @@
 
 #include <hutils/udp.h>
 #include <errno.h>
+#include <hutils/assert.h>
 #include <hutils/err.h>
 #if defined(HCONF_mUDP_EVENT_bSYS_SELECT_H) || \
     defined(HCONF_mUDP_EVENT_bSELECT_TIME_H)
@@ -24,6 +25,7 @@
 
 #if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO)
 #	define GETADDRINFO
+#	include <arpa/inet.h>
 #	include <fcntl.h>
 #	include <time.h>
 #	include <stdarg.h>
@@ -216,6 +218,7 @@ get_family(unsigned a_flags)
  *  1) Error -> return 0.
  *  2) Timeout -> return 1, size = 0.
  *  3) Data -> return 1, size != 0.
+ * "a_addr" is only allocated in case 3.
  */
 int
 receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
@@ -264,10 +267,95 @@ receive_datagram(SOCKET a_socket, int a_fd_extra, struct UDPDatagram *a_dgram,
 	return 1;
 }
 
+struct UDPAddress *
+udp_address_create(unsigned a_flags, char const *a_hostname, uint16_t a_port)
+{
+	struct UDPAddress *addr;
+
+	MALLOC(addr, 1);
+#if defined(GETADDRINFO)
+	{
+		struct addrinfo addri;
+		char port_str[10];
+		struct addrinfo *result;
+		int ret;
+
+		ZERO(addri);
+		addri.ai_family = get_family(a_flags);
+		addri.ai_socktype = SOCK_DGRAM;
+		addri.ai_protocol = IPPROTO_UDP;
+		snprintf(port_str, sizeof port_str, "%d", a_port);
+		ret = getaddrinfo(a_hostname, port_str, &addri, &result);
+		if (0 != ret) {
+			gaif(ret, "%s:%s", a_hostname, port_str);
+			return NULL;
+		}
+		memcpy(&addr->addr, result->ai_addr, result->ai_addrlen);
+		freeaddrinfo(result);
+	}
+#else
+	{
+		struct hostent *host;
+		struct sockaddr_in *in;
+
+		host = gethostbyname((char *)a_hostname);
+		if (NULL == host) {
+			fprintf(stderr, "gethostbyname(%s): %s.\n",
+			    a_hostname, strerror(h_errno));
+			return NULL;
+		}
+		in = (void *)&addr->addr;
+		memcpy(&in->sin_addr.s_addr, host->h_addr, host->h_length);
+		in->sin_port = htons(a_port);
+	}
+#endif
+	return addr;
+}
+
 void
 udp_address_free(struct UDPAddress **a_address)
 {
 	FREE(*a_address);
+}
+
+char *
+udp_address_gets(struct UDPAddress const *a_address)
+{
+	if (AF_INET == a_address->addr.ss_family) {
+		struct sockaddr_in const *addr;
+
+		addr = (void const *)&a_address->addr;
+		return strdup(inet_ntoa(addr->sin_addr));
+	} else if (AF_INET6 == a_address->addr.ss_family) {
+		struct sockaddr_in6 const *addr;
+		char *str;
+
+		addr = (void const *)&a_address->addr;
+		str = malloc(INET6_ADDRSTRLEN + 1);
+		inet_ntop(a_address->addr.ss_family, &addr->sin6_addr, str,
+		    INET6_ADDRSTRLEN);
+		return str;
+	} else {
+		assert(0 && "Invalid address family.");
+	}
+}
+
+uint32_t
+udp_address_getu32(struct UDPAddress const *a_address)
+{
+	if (AF_INET == a_address->addr.ss_family) {
+		struct sockaddr_in const *addr;
+
+		addr = (void const *)&a_address->addr;
+		return addr->sin_addr.s_addr;
+	} else if (AF_INET6 == a_address->addr.ss_family) {
+		struct sockaddr_in6 const *addr;
+
+		addr = (void const *)&a_address->addr;
+		return *(uint32_t const *)&addr->sin6_addr;
+	} else {
+		assert(0 && "Invalid address family.");
+	}
 }
 
 struct UDPClient *
