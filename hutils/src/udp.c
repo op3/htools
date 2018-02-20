@@ -358,7 +358,7 @@ udp_address_getu32(struct UDPAddress const *a_address)
 		return *(uint32_t const *)&addr->sin6_addr;
 	} else {
 		assert(0 && "Invalid address family.");
-		return NULL;
+		return 0;
 	}
 }
 
