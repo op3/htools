@@ -46,9 +46,9 @@ static uint32_t	hash_int(struct KeyInt const *) FUNC_RETURNS;
 static uint32_t	hash_string(struct KeyString const *) FUNC_RETURNS;
 
 HASHTABLE_IMPLEMENT(HTInt, Int, KeyInt, key, 10, hash_int, equal_int,
-    free, ht);
+    free);
 HASHTABLE_IMPLEMENT(HTString, String, KeyString, key, 10, hash_string,
-    equal_string, free, ht);
+    equal_string, free);
 
 int
 equal_int(struct KeyInt const *a_i0, struct KeyInt const *a_i1)

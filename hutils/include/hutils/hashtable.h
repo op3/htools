@@ -35,7 +35,7 @@ struct HashTableType {\
 #define HASHTABLE_DIB(a_ht, hash, i) (i - (hash & a_ht->mask)) & a_ht->mask
 
 #define HASHTABLE_IMPLEMENT(HashTableType, Type, Key, key, start_size,\
-    hash_, equal, free_, field)\
+    hash_, equal, free_)\
 static size_t \
 HashTableType##_find_(struct HashTableType *a_ht, struct Key const *a_key)\
 {\
