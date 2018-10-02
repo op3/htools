@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -60,6 +60,9 @@ static HTEST_COLOR_ const c_color_suite = GREEN;
 static HTEST_COLOR_ const c_color_test = BLUE;
 static HTEST_COLOR_ const c_color_fail = RED;
 
+char const *g_htry_void_file_;
+unsigned g_htry_void_line_;
+
 extern struct HTestSuite g_htest_suite_list_[];
 
 void
@@ -69,7 +72,11 @@ suite_sighandler(int a_signum)
 	htest_set_color_(c_color_fail);
 	printf("  Fail:");
 	htest_set_color_(RESET);
-	printf("Caught signal \"%s\".\n", strsignal(a_signum));
+	if (NULL != g_htry_void_file_) {
+		printf("%s:%u:", g_htry_void_file_, g_htry_void_line_);
+		g_htry_void_file_ = NULL;
+	}
+	printf(" Caught signal \"%s\".\n", strsignal(a_signum));
 #if defined(SUPPORT_JMP)
 	htest_output_suppress_();
 	longjmp(g_suite_jmp_buf, 1);
@@ -175,7 +182,7 @@ int
 main(int const argc, char **const argv)
 {
 	struct HTestSuite *suite;
-	int test_num, test_pass_num;
+	unsigned test_num, test_pass_num;
 	int opt;
 
 	g_do_colors = 0;
@@ -216,8 +223,8 @@ main(int const argc, char **const argv)
 	test_num = 0;
 	test_pass_num = 0;
 	for (suite = g_htest_suite_list_; NULL != suite->header; ++suite) {
-		int test_enumerator;
-		int test_index;
+		unsigned test_enumerator;
+		unsigned test_index;
 
 		suite->header(c_color_suite, RESET);
 
@@ -303,7 +310,7 @@ main(int const argc, char **const argv)
 	close(g_old_stdout);
 	close(g_old_stderr);
 
-	printf("Passed %d/%d (%.1f%%) tests.\n", test_pass_num, test_num,
+	printf("Passed %u/%u (%.1f%%) tests.\n", test_pass_num, test_num,
 	    100.0f * test_pass_num / test_num);
 	exit(test_pass_num == test_num ? EXIT_SUCCESS : EXIT_FAILURE);
 }

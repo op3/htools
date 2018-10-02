@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -350,12 +350,12 @@ udp_address_getu32(struct UDPAddress const *a_address)
 		struct sockaddr_in const *addr;
 
 		addr = (void const *)&a_address->addr;
-		return addr->sin_addr.s_addr;
+		return ntohl(addr->sin_addr.s_addr);
 	} else if (AF_INET6 == a_address->addr.ss_family) {
 		struct sockaddr_in6 const *addr;
 
 		addr = (void const *)&a_address->addr;
-		return *(uint32_t const *)&addr->sin6_addr;
+		return ntohl(*(uint32_t const *)&addr->sin6_addr);
 	} else {
 		assert(0 && "Invalid address family.");
 		return 0;
