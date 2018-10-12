@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,8 +41,8 @@ void __gcov_flush(void);
 
 struct HTestSuite {
 	void	(*header)(HTEST_COLOR_, HTEST_COLOR_);
-	void	(*suite)(HTEST_COLOR_, HTEST_COLOR_, HTEST_COLOR_, int, int *,
-	    int *);
+	void	(*suite)(HTEST_COLOR_, HTEST_COLOR_, HTEST_COLOR_, unsigned,
+	    unsigned *, int *);
 };
 
 /* Test. */
@@ -53,7 +53,7 @@ htest_test_header_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_\
     a_color_reset_)\
 {\
 	htest_set_color_(a_color_header_);\
-	printf(" Test("__FILE__":%d:"#name")", __LINE__);\
+	printf(" Test("__FILE__":%u:"#name")", __LINE__);\
 	htest_set_color_(a_color_reset_);\
 	printf("\n");\
 }\
@@ -65,8 +65,8 @@ htest_test_##name##_(HTEST_COLOR_ a_color_fail_, HTEST_COLOR_ a_color_reset_,\
 
 #define HTEST_SUITE_PROTO(name)\
 void htest_suite_header_##name##_(HTEST_COLOR_, HTEST_COLOR_);\
-void htest_suite_##name##_(HTEST_COLOR_, HTEST_COLOR_, HTEST_COLOR_, int,\
-    int *, int *)
+void htest_suite_##name##_(HTEST_COLOR_, HTEST_COLOR_, HTEST_COLOR_,\
+    unsigned, unsigned *, int *)
 #define HTEST_SUITE(name)\
 HTEST_SUITE_PROTO(name);\
 void \
@@ -74,14 +74,14 @@ htest_suite_header_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_\
     a_color_reset_)\
 {\
 	htest_set_color_(a_color_header_);\
-	printf("Suite("__FILE__":%d:"#name")", __LINE__);\
+	printf("Suite("__FILE__":%u:"#name")", __LINE__);\
 	htest_set_color_(a_color_reset_);\
 	printf("\n");\
 }\
 void \
-htest_suite_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_ a_color_fail_,\
-    HTEST_COLOR_ a_color_reset_, int a_test_index_, int *a_test_enumerator_,\
-    int *a_passed_)
+htest_suite_##name##_(HTEST_COLOR_ a_color_header_, HTEST_COLOR_ \
+    a_color_fail_, HTEST_COLOR_ a_color_reset_, unsigned a_test_index_,\
+    unsigned *a_test_enumerator_, int *a_passed_)
 #define HTEST_ADD(name) do {\
 	++*a_test_enumerator_;\
 	if (*a_test_enumerator_ == a_test_index_) {\
@@ -110,7 +110,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 	htest_set_color_(a_color_fail_);\
 	printf("  Fail:");\
 	htest_set_color_(a_color_reset_);\
-	printf(__FILE__":%d: ", __LINE__);\
+	printf(__FILE__":%u: ", __LINE__);\
 } WHILE_0
 #define HTRY_FAIL_FOOTER_ do {\
 	htest_output_suppress_();\
@@ -188,12 +188,6 @@ struct HTestSuite g_htest_suite_list_[] = {
 } WHILE_0
 #define HTRY_STR(a, op, b) HTRY_STRN(a, op, b, (size_t)-1)
 
-#define HTRY_VOID(expr) do {\
-	(void)a_color_fail_;\
-	(void)a_color_reset_;\
-	(void)a_passed_;\
-	expr;\
-} WHILE_0
 #if defined(_MSC_VER)
 #	include <setjmp.h>
 #	define HTRY_SIGNAL(expr) do {\
@@ -202,7 +196,7 @@ struct HTestSuite g_htest_suite_list_[] = {
 		if (0 == setjmp(g_htest_try_jmp_buf_)) {\
 			expr;\
 			HTRY_FAIL_HEADER_;\
-			printf("Expected signal.\n");\
+			printf("Missing signal.\n");\
 			HTRY_FAIL_FOOTER_;\
 		}\
 		htest_suite_install_sighandler_();\
@@ -228,12 +222,22 @@ extern jmp_buf g_htest_try_jmp_buf_;
 		waitpid(pid_, &status_, 0);\
 		if (EXIT_SUCCESS == status_) {\
 			HTRY_FAIL_HEADER_;\
-			printf("Expected signal.\n");\
+			printf("Missing signal.\n");\
 			HTRY_FAIL_FOOTER_;\
 		}\
 	}\
 } WHILE_0
 #endif
+#define HTRY_VOID(expr) do {\
+	(void)a_color_fail_;\
+	(void)a_color_reset_;\
+	(void)a_passed_;\
+	g_htry_void_file_ = __FILE__;\
+	g_htry_void_line_ = __LINE__;\
+	expr;\
+} WHILE_0
+extern char const *g_htry_void_file_;
+extern unsigned g_htry_void_line_;
 
 CDECLS_BEGIN
 
