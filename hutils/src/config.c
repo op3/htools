@@ -260,8 +260,13 @@ void
 config_sets(struct Config *a_config, char const *a_str)
 {
 	FREE(a_config->str);
-	a_config->d = strtod(a_str, NULL);
-	a_config->i32 = strtol(a_str, NULL, 10);
+	if ('0' == a_str[0] && 'x' == a_str[1]) {
+		a_config->i32 = strtol(a_str + 2, NULL, 16);
+		a_config->d = a_config->i32;
+	} else {
+		a_config->d = strtod(a_str, NULL);
+		a_config->i32 = strtol(a_str, NULL, 10);
+	}
 	a_config->str = strdup(a_str);
 }
 

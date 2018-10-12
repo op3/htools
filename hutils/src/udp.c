@@ -15,6 +15,7 @@
  */
 
 #include <hutils/udp.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <hutils/assert.h>
 #include <hutils/err.h>
@@ -25,7 +26,6 @@
 
 #if defined(HCONF_mUDP_LOOKUP_bGETADDRINFO)
 #	define GETADDRINFO
-#	include <arpa/inet.h>
 #	include <fcntl.h>
 #	include <time.h>
 #	include <stdarg.h>
@@ -299,6 +299,11 @@ udp_address_create(unsigned a_flags, char const *a_hostname, uint16_t a_port)
 		struct hostent *host;
 		struct sockaddr_in *in;
 
+		if (UDP_IPV4 != a_flags) {
+			fprintf(stderr, "Platform only supports IPv4, "
+			    "something else requested.\n");
+			return NULL;
+		}
 		host = gethostbyname((char *)a_hostname);
 		if (NULL == host) {
 			fprintf(stderr, "gethostbyname(%s): %s.\n",
@@ -323,20 +328,22 @@ udp_address_free(struct UDPAddress **a_address)
 char *
 udp_address_gets(struct UDPAddress const *a_address)
 {
-	if (AF_INET == a_address->addr.ss_family) {
-		struct sockaddr_in const *addr;
+	struct sockaddr_in const *addr;
 
-		addr = (void const *)&a_address->addr;
+	addr = (void const *)&a_address->addr;
+	if (AF_INET == addr->sin_family) {
 		return strdup(inet_ntoa(addr->sin_addr));
-	} else if (AF_INET6 == a_address->addr.ss_family) {
-		struct sockaddr_in6 const *addr;
+#if defined(AF_INET6)
+	} else if (AF_INET6 == addr->sin_family) {
+		struct sockaddr_in6 const *addr6;
 		char *str;
 
-		addr = (void const *)&a_address->addr;
+		addr6 = (void const *)&a_address->addr;
 		str = malloc(INET6_ADDRSTRLEN + 1);
-		inet_ntop(a_address->addr.ss_family, &addr->sin6_addr, str,
+		inet_ntop(addr->sin_family, &addr6->sin6_addr, str,
 		    INET6_ADDRSTRLEN);
 		return str;
+#endif
 	} else {
 		assert(0 && "Invalid address family.");
 		return NULL;
@@ -346,16 +353,18 @@ udp_address_gets(struct UDPAddress const *a_address)
 uint32_t
 udp_address_getu32(struct UDPAddress const *a_address)
 {
-	if (AF_INET == a_address->addr.ss_family) {
-		struct sockaddr_in const *addr;
+	struct sockaddr_in const *addr;
 
-		addr = (void const *)&a_address->addr;
+	addr = (void const *)&a_address->addr;
+	if (AF_INET == addr->sin_family) {
 		return addr->sin_addr.s_addr;
+#if defined(AF_INET6)
 	} else if (AF_INET6 == a_address->addr.ss_family) {
-		struct sockaddr_in6 const *addr;
+		struct sockaddr_in6 const *addr6;
 
-		addr = (void const *)&a_address->addr;
-		return *(uint32_t const *)&addr->sin6_addr;
+		addr6 = (void const *)&a_address->addr;
+		return *(uint32_t const *)&addr6->sin6_addr;
+#endif
 	} else {
 		assert(0 && "Invalid address family.");
 		return 0;

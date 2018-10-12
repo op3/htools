@@ -175,12 +175,15 @@ HTEST(MixedValues)
 
 	coll = config_collection_load_from_memory(c_cfgp0, strlen(c_cfgp0));
 	HTRY_PTR(NULL, !=, coll);
+	config_collection_free(&coll);
 
 	coll = config_collection_load_from_memory(c_cfgp1, strlen(c_cfgp1));
 	HTRY_PTR(NULL, !=, coll);
+	config_collection_free(&coll);
 
 	coll = config_collection_load_from_memory(c_cfgp2, strlen(c_cfgp2));
 	HTRY_PTR(NULL, !=, coll);
+	config_collection_free(&coll);
 
 	coll = config_collection_load_from_memory(c_cfgf0, strlen(c_cfgf0));
 	HTRY_PTR(NULL, ==, coll);
@@ -196,8 +199,6 @@ HTEST(MixedValues)
 
 	coll = config_collection_load_from_memory(c_cfgf4, strlen(c_cfgf4));
 	HTRY_PTR(NULL, ==, coll);
-
-	config_collection_free(&coll);
 }
 
 HTEST(ValueConversion)
@@ -233,6 +234,11 @@ HTEST(ValueConversion)
 	HTRY_I(0, ==, config_geti32(config));
 	HTRY_DBL(0.0, ==, config_getd(config));
 	HTRY_STR("a1.1", ==, config_gets(config));
+
+	config = config_section_getd(section, "f", 0.0);
+	HTRY_I(0xa, ==, config_geti32(config));
+	HTRY_DBL(10.0, ==, config_getd(config));
+	HTRY_STR("0xa", ==, config_gets(config));
 
 	config_collection_free(&coll);
 }
