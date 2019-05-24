@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2019 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,13 +31,6 @@
 #include <string.h>
 #include <hutils/err.h>
 #include <hutils/macros.h>
-
-#if defined(HTEST_COV_FLUSH)
-#	define COV_FLUSH __gcov_flush()
-void __gcov_flush(void);
-#else
-#	define COV_FLUSH
-#endif
 
 struct HTestSuite {
 	void	(*header)(HTEST_COLOR_, HTEST_COLOR_);
@@ -216,7 +209,7 @@ extern jmp_buf g_htest_try_jmp_buf_;
 		} else if (0 == pid_) {\
 			htest_try_install_sighandler_();\
 			expr;\
-			COV_FLUSH;\
+			htest_cov_flush_();\
 			_exit(EXIT_SUCCESS);\
 		}\
 		waitpid(pid_, &status_, 0);\
@@ -241,6 +234,7 @@ extern unsigned g_htry_void_line_;
 
 CDECLS_BEGIN
 
+void	htest_cov_flush_(void);
 int	htest_do_recover(void) FUNC_RETURNS;
 void	htest_output_restore_(void);
 void	htest_output_suppress_(void);

@@ -1,4 +1,5 @@
-# Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2016-2017, 2019
+# Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -34,10 +35,12 @@ mega:
 	$(MAKE)
 	$(MAKE) BUILD_MODE=release
 	$(MAKE) BUILD_MODE=cov
+	$(MAKE) BUILD_MODE=cov cov_anno
 	$(MAKE) BUILD_MODE=fpic
 	CC=clang $(MAKE)
 	CC=clang $(MAKE) BUILD_MODE=release
 	CC=clang $(MAKE) BUILD_MODE=cov
+	CC=clang $(MAKE) BUILD_MODE=cov cov_anno
 	CC=clang $(MAKE) BUILD_MODE=fpic
 
 .PHONY: mega-clean

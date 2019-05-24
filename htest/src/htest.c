@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2019 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -66,6 +66,14 @@ unsigned g_htry_void_line_;
 extern struct HTestSuite g_htest_suite_list_[];
 
 void
+htest_cov_flush_()
+{
+#ifdef HTEST_DO_COV_FLUSH
+	HTEST_COV_FLUSH_;
+#endif
+}
+
+void
 suite_sighandler(int a_signum)
 {
 	htest_output_restore_();
@@ -81,7 +89,7 @@ suite_sighandler(int a_signum)
 	htest_output_suppress_();
 	longjmp(g_suite_jmp_buf, 1);
 #else
-	COV_FLUSH;
+	htest_cov_flush_();
 	_exit(EXIT_FAILURE);
 #endif
 }
@@ -93,7 +101,7 @@ try_sighandler(int a_signum)
 #if defined(SUPPORT_JMP)
 	longjmp(g_htest_try_jmp_buf_, 1);
 #else
-	COV_FLUSH;
+	htest_cov_flush_();
 	_exit(EXIT_FAILURE);
 #endif
 }
@@ -255,7 +263,7 @@ main(int const argc, char **const argv)
 					suite->suite(c_color_test,
 					    c_color_fail, RESET, test_index,
 					    &test_enumerator, &passed);
-					COV_FLUSH;
+					htest_cov_flush_();
 					_exit(passed ? EXIT_SUCCESS :
 					    EXIT_FAILURE);
 				}

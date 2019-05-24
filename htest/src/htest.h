@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017, 2019
+ * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,5 +28,17 @@
 #elif defined(_MSC_VER)
 #	include <io.h>
 #endif
+
+#if HCONF_mHTEST_bGNU_COV_FLUSH
+#	define HTEST_COV_FLUSH_ __gcov_flush()
+void	__gcov_flush(void);
+#elif HCONF_mHTEST_bLLVM_COV_FLUSH
+#	define HTEST_COV_FLUSH_ __llvm_gcov_flush()
+void	__llvm_gcov_flush(void);
+#else
+#	define HTEST_COV_FLUSH_
+#endif
+
+void	htest_cov_flush_(void);
 
 #endif

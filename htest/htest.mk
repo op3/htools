@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2014-2019 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,7 @@
 #  $(HTEST_SUITES)    = suite cache files.
 
 ifeq (cov,$(BUILD_MODE))
- CPPFLAGS:=$(CPPFLAGS) -DHTEST_COV_FLUSH
+ CPPFLAGS:=$(CPPFLAGS) -DHTEST_DO_COV_FLUSH
 endif
 ifeq (,$(HTEST_PRE))
  HTEST_PRE=true

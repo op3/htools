@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2017-2019 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -14,18 +14,19 @@
 
 # Accepted only when BUILD_MODE=cov
 # COV_SRC=files to consider for cov summaries.
-# Currently gcov and lcov supported.
+# Currently gcov and llvm-cov supported.
 
 ifeq (cov,$(BUILD_MODE))
-ifneq (,$(filter clang%,$(CC)))
- COV_CFLAGS=-fprofile-instr-generate -fcoverage-mapping
- COV_LIBS=
-else
- ifneq (,$(or $(filter cc,$(CC)),$(filter %gcc,$(CC))))
+ ifneq (,$(filter clang%,$(CC)))
+  COVIFIER:=llvm-cov
+#  COV_CFLAGS=-fprofile-instr-generate -fcoverage-mapping
+  COV_CFLAGS=--coverage
+  COV_LIBS=--coverage -lLLVMInstrumentation
+ else ifneq (,$(or $(filter cc,$(CC)),$(filter %gcc,$(CC))))
+  COVIFIER:=gcov
   COV_CFLAGS=--coverage
   COV_LIBS=--coverage
  endif
-endif
 
 .PHONY: cov
 cov:
@@ -34,7 +35,7 @@ cov:
 	lines_ok_total=0;\
 	for i in $(COV_SRC); do\
 		dir=`dirname $$i`;\
-		numbers=`gcov -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | grep -A1 $$i | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
+		numbers=`$(COVIFIER) -n $$i -o $(BUILD_DIR)/$$dir 2> /dev/null | grep -A1 $$i | sed -n 's/[A-Za-z: ]*\([0-9.]*\).*of/\1/p'`;\
 		[ "x" = "x$$numbers" ] && continue;\
 		percentage=`echo $$numbers | awk '{print $$1}'`;\
 		lines=`echo $$numbers | awk '{print $$2}'`;\
@@ -50,7 +51,7 @@ cov_files:
 	$(QUIET)echo Dumping gcov file-level info...;\
 	for i in $(COV_SRC); do\
 		echo $$i;\
-		gcov -n $$i -o $(BUILD_DIR)/`dirname $$i`;\
+		$(COVIFIER) -n $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done
 
 .PHONY: cov_funcs
@@ -58,14 +59,14 @@ cov_funcs:
 	$(QUIET)echo Dumping gcov function-level info...;\
 	for i in $(COV_SRC); do\
 		echo $$i;\
-		gcov -fn $$i -o $(BUILD_DIR)/`dirname $$i`;\
+		$(COVIFIER) -fn $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done
 
 .PHONY: cov_anno
 cov_anno:
 	$(QUIET)echo Generating gcov annotated files...;\
 	for i in $(COV_SRC); do\
-		gcov -lp $$i -o $(BUILD_DIR)/`dirname $$i`;\
+		$(COVIFIER) -lp $$i -o $(BUILD_DIR)/`dirname $$i`;\
 	done;\
 	[ -d $(BUILD_DIR)/gcov ] || mkdir -p $(BUILD_DIR)/gcov;\
 	mv *.gcov $(BUILD_DIR)/gcov
