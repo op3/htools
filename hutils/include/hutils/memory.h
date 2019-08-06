@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2014-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2017, 2019
+ * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +19,7 @@
 #define HUTILS_MEMORY_H
 
 #include <stdlib.h>
+#include <hutils/assert.h>
 #include <hutils/err.h>
 #include <hutils/fmtmod.h>
 #include <hutils/macros.h>
@@ -31,8 +33,9 @@
 	} WHILE_0
 #define FREE(ptr)\
 	do {\
-		free(ptr);\
+		void *p_ = ptr;\
 		ptr = NULL;\
+		free(p_);\
 	} WHILE_0
 #define MALLOC(ptr, num) ptr = malloc(num * sizeof *ptr)
 
