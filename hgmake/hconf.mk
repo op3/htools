@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+# Copyright (c) 2015-2019 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -47,7 +47,7 @@ endif
 CPP_D=cppflags="$(HCONF_CPPFLAGS)" && sh $(HCONF_CACHE_CCD) $@ $(filter %.c,$<) $$cppflags > $(@:.o=.d) &&
 CC_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(HCONF_CFLAGS)
 CC_PRINCESS_O=$(CPP_D)$(HCONF_CC) -c -o $@ $(filter %.c,$<) $$cppflags $(filter-out -ansi% -pedantic% -W%,$(HCONF_CFLAGS))
-LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(HCONF_LIBS)
+LD_E=$(HCONF_CC) -o $@ $(filter %.o %.a,$+) $(HCONF_LDFLAGS) $(LIBS) $(HCONF_LIBS)
 MKDIR=[ -d $(@D) ] || mkdir -p $(@D)
 
 # "true" used to not be confused by e.g. "-" in GNU make recipes.
@@ -66,7 +66,7 @@ $(HCONF_CACHE): $(HCONF_DEP) $(HCONF_PROJECTS_FILES) $(HCONF_SRC) $(HCONF_CACHE_
 	$(QUIET)echo "HCCHE $@";\
 	$(MKDIR) &&\
 	export CC=$(CC) &&\
-	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE_CCD)`;echo $(CFLAGS);echo $(LDFLAGS);echo $(LIBS);) > $@.tmp;\
+	(echo;echo $(CPPFLAGS) `sed -n 2p $(HCONF_CACHE_CCD)`;echo $(CFLAGS);echo $(LDFLAGS);echo;) > $@.tmp;\
 	if [ "$(HCONF_PROJECTS_FILES)" ]; then\
 		$(HCONF_MERGE) $@.tmp $(HCONF_PROJECTS_FILES) > $@.tmp2;\
 		mv $@.tmp2 $@.tmp;\

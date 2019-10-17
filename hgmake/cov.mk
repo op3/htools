@@ -22,10 +22,12 @@ ifeq (cov,$(BUILD_MODE))
 #  COV_CFLAGS=-fprofile-instr-generate -fcoverage-mapping
   COV_CFLAGS=--coverage
   COV_LIBS=--coverage -lLLVMInstrumentation
- else ifneq (,$(or $(filter cc,$(CC)),$(filter %gcc,$(CC))))
-  COVIFIER:=gcov
-  COV_CFLAGS=--coverage
-  COV_LIBS=--coverage
+ else
+  ifneq (,$(or $(filter cc,$(CC)),$(filter %gcc,$(CC))))
+   COVIFIER:=gcov
+   COV_CFLAGS=--coverage
+   COV_LIBS=--coverage
+  endif
  endif
 
 .PHONY: cov

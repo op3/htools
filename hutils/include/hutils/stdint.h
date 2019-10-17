@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017, 2019
+ * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,16 +24,21 @@
 
 #if HCONF_mSTDINT_LIMITS_bSTD_H
 /* HCONF_OPT="nolink" */
-#elif HCONF_mSTDINT_LIMITS_bCUSTOM
-/* HCONF_OPT="nolink" */
-#	define SIZE_MAX (0xff | (1 << (8 * (sizeof(size_t) - 1))) << 4)
 #elif HCONF_mSTDINT_LIMITS_bLAST_RESORT
 /* HCONF_OPT="nolink" */
 #	undef SIZE_MAX
+#	undef INT32_MAX
+#	undef UINT32_MAX
+#	undef INT64_MAX
+#	undef UINT64_MAX
+#	define INT32_MAX 2147483647L
+#	define UINT32_MAX 4294967295UL
+#	define INT64_MAX 9223372036854775807LL
+#	define UINT64_MAX 18446744073709551615ULL
 #	if __WORDSIZE == 64
-#		define SIZE_MAX 18446744073709551615UL
+#		define SIZE_MAX UINT64_MAX
 #	else
-#		define SIZE_MAX 4294967295UL
+#		define SIZE_MAX UINT32_MAX
 #	endif
 #endif
 #if HCONFING_mSTDINT_LIMITS

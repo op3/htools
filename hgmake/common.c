@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016-2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2016-2017, 2019
+ * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -147,6 +148,7 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 	/* Pop flags from files into flag lists. */
 	for (idx = 0; a_argc > idx; ++idx) {
 		FILE *file;
+		struct FlagList flag_list_libs;
 		char const *filename;
 
 		filename = a_argv[idx];
@@ -154,6 +156,11 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 		if (NULL == file) {
 			err_(EXIT_FAILURE, "fopen(%s, rb)", filename);
 		}
+		/*
+		 * New -l flags must be added in front of older -l, but in the
+		 * same order as given, so keep a temp list.
+		 */
+		TAILQ_INIT(&flag_list_libs);
 		for (i = 0;; ++i) {
 			char line[65536];
 			char *p;
@@ -214,9 +221,10 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 					}
 					value_end = p;
 				}
-				flag = add_flag(&flag_list[i], name_start,
-				    name_end - name_start, value_start,
-				    value_end - value_start);
+				flag = add_flag(VAR_LIBS == i ?
+				    &flag_list_libs : &flag_list[i],
+				    name_start, name_end - name_start,
+				    value_start, value_end - value_start);
 				if (VAR_CPPFLAGS == i) {
 					TAILQ_INSERT_TAIL(&original_list,
 					    flag, original_next);
@@ -228,6 +236,13 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 		if (VAR_OUTPUT_NUM != i) {
 			errx_(EXIT_FAILURE, "%s: Corrupt hconf.",
 			    filename);
+		}
+		while (!TAILQ_EMPTY(&flag_list_libs)) {
+			struct Flag *flag;
+
+			flag = TAILQ_LAST(&flag_list_libs, FlagList);
+			TAILQ_REMOVE(&flag_list_libs, flag, next);
+			TAILQ_INSERT_HEAD(&flag_list[VAR_LIBS], flag, next);
 		}
 	}
 
@@ -322,21 +337,38 @@ merge(struct Bucket *a_bucket, int a_argc, char const *const *a_argv)
 	}
 
 	/*
-	 * CFLAGS, LDFLAGS, and LIBS: Remove dups, keeping the last.
+	 * CFLAGS: Remove dups, keeping the last.
 	 * "-I1", "-I2 -I1" -> "-I2 -I1"
-	 * "-la -lc", "-la -lb", "-la" -> "-lc -lb -la"
+	 *  Some code needs -I2 before -I1, so prefer that.
+	 * LDFLAGS, and LIBS: Remove dups, keeping the first.
+	 * "-la -lc", "-la -lb" -> "-la -lc -lb"
+	 *  -la depends no either -lc or -lb, prefer that order.
 	 */
 	for (i = VAR_CFLAGS; VAR_LIBS >= i; ++i) {
 		struct Flag *flag;
 
-		for (flag = LAST; END != flag; flag = PREV(flag)) {
-			struct Flag *prev, *pprev;
+		if (VAR_CFLAGS == i) {
+			for (flag = LAST; END != flag; flag = PREV(flag)) {
+				struct Flag *p, *prev;
 
-			for (prev = PREV(flag); END != prev; prev = pprev) {
-				pprev = PREV(prev);
-				if (0 == strcmp(flag->str, prev->str)) {
-					REMOVE(prev);
-					FREE(prev);
+				for (p = PREV(flag); END != p; p = prev) {
+					prev = PREV(p);
+					if (0 == strcmp(flag->str, p->str)) {
+						REMOVE(p);
+						FREE(p);
+					}
+				}
+			}
+		} else {
+			for (flag = FIRST; END != flag; flag = NEXT(flag)) {
+				struct Flag *p, *next;
+
+				for (p = NEXT(flag); END != p; p = next) {
+					next = NEXT(p);
+					if (0 == strcmp(flag->str, p->str)) {
+						REMOVE(p);
+						FREE(p);
+					}
 				}
 			}
 		}
