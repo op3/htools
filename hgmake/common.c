@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, 2019
+ * Copyright (c) 2016-2017, 2019-2020
  * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -71,9 +71,15 @@ cat_str(char **a_dst, char const *a_src)
 		len = srclen + 1;
 		dst = malloc(len);
 	} else {
+		void *dst_new;
+
 		dstlen = strlen(dst);
 		len = dstlen + srclen + 1;
-		dst = realloc(dst, len);
+		dst_new = realloc(dst, len);
+		if (NULL == dst_new) {
+			free(dst);
+		}
+		dst = dst_new;
 	}
 	if (NULL == dst) {
 		err_(EXIT_FAILURE, "*alloc(%d)", len);

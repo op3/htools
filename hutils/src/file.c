@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2017 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2017, 2020
+ * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,8 +26,8 @@ void *
 file_load(char const *a_path, size_t a_max_size)
 {
 	struct stat st;
-	FILE *file;
-	char *buf;
+	FILE *file = NULL;
+	char *buf = NULL;
 
 	if (0 != stat(a_path, &st)) {
 		hutils_warn("stat(%s)", a_path);
@@ -45,14 +46,17 @@ file_load(char const *a_path, size_t a_max_size)
 	buf = malloc(st.st_size + 1);
 	if (NULL == buf) {
 		hutils_warn("malloc(%lu)", (unsigned long)st.st_size);
-		return NULL;
+		goto file_load_fail;
 	}
 	if (fread(buf, 1, st.st_size, file) != (size_t)st.st_size) {
 		hutils_warn("fread(%s)", a_path);
-		fclose(file);
-		return NULL;
+		goto file_load_fail;
 	}
 	fclose(file);
 	buf[st.st_size] = '\0';
 	return buf;
+file_load_fail:
+	free(buf);
+	fclose(file);
+	return NULL;
 }

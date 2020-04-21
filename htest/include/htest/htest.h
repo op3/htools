@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2014-2020 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -157,11 +157,11 @@ struct HTestSuite g_htest_suite_list_[] = {
 	char const *bb_ = b;\
 	if (NULL == aa_) {\
 		HTRY_FAIL_HEADER_;\
-		printf("'%s'=\"%s\" "#op" '%s'=\"%s\".\n", #a, aa_, #b, bb_);\
+		printf("'%s'=NULL "#op" '%s'=\"%s\".\n", #a, #b, bb_);\
 		HTRY_FAIL_FOOTER_;\
 	} else if (NULL == bb_) {\
 		HTRY_FAIL_HEADER_;\
-		printf("'%s'=\"%s\" "#op" '%s'=\"%s\".\n", #a, aa_, #b, bb_);\
+		printf("'%s'=\"%s\" "#op" '%s'=NULL.\n", #a, aa_, #b);\
 		HTRY_FAIL_FOOTER_;\
 	} else if ((size_t)-1 == siz) {\
 		if (!(strcmp(aa_, bb_) op 0)) {\

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2015-2018 Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
+ * Copyright (c) 2015-2018, 2020
+ * Hans Toshihide Törnqvist <hans.tornqvist@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,9 +24,15 @@
 #include <hutils/string.h>
 #include <hutils/time.h>
 
+enum ConfigType {
+	CONFIG_TYPE_D,
+	CONFIG_TYPE_I32,
+	CONFIG_TYPE_STR
+};
 TAILQ_HEAD(ConfigList, Config);
 struct Config {
 	char	*name;
+	enum	ConfigType type;
 	double	d;
 	int32_t	i32;
 	char	*str;
@@ -153,12 +160,19 @@ config_collection_write(struct ConfigCollection const *a_coll, char const
 
 		fprintf(file, "[%s]\n", section->name);
 		TAILQ_FOREACH(config, &section->config_list, next) {
-			if (config->str) {
+			switch (config->type) {
+			case CONFIG_TYPE_D:
+				fprintf(file, "%s=%f\n", config->name,
+				    config->d);
+				break;
+			case CONFIG_TYPE_I32:
+				fprintf(file, "%s=%d\n", config->name,
+				    config->i32);
+				break;
+			case CONFIG_TYPE_STR:
 				fprintf(file, "%s=\"%s\"\n", config->name,
 				    config->str);
-			} else {
-				fprintf(file, "%s=%s\n", config->name,
-				    config->str);
+				break;
 			}
 		}
 	}
@@ -232,6 +246,7 @@ config_setd(struct Config *a_config, double a_d)
 	int len, ret;
 
 	FREE(a_config->str);
+	a_config->type = CONFIG_TYPE_D;
 	a_config->d = a_d;
 	a_config->i32 = (int32_t)a_d;
 	len = 24;
@@ -247,6 +262,7 @@ config_seti32(struct Config *a_config, int32_t a_i32)
 	int len, ret;
 
 	FREE(a_config->str);
+	a_config->type = CONFIG_TYPE_I32;
 	a_config->d = a_i32;
 	a_config->i32 = a_i32;
 	len = 16;
@@ -260,6 +276,7 @@ void
 config_sets(struct Config *a_config, char const *a_str)
 {
 	FREE(a_config->str);
+	a_config->type = CONFIG_TYPE_STR;
 	if ('0' == a_str[0] && 'x' == a_str[1]) {
 		a_config->i32 = strtol(a_str + 2, NULL, 16);
 		a_config->d = a_config->i32;
@@ -394,6 +411,9 @@ load(struct Lexer *a_lexer)
 			FREE(name);
 			config_sets(config, token.str);
 			FREE(token.str);
+			if (LEXER_NUMBER == token.type) {
+				config->type = CONFIG_TYPE_D;
+			}
 		} else {
 			LOAD_ERROR("Missing section or config name");
 		}
